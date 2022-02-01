@@ -187,6 +187,8 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 		super.instantiateAfterLoading();
 		if (this.getParOther() == null )
 			this.setDefaultParOther();
+		if (this.getParReplay() == null )
+			this.setDefaultParReplay();
 		return true;
 	}
 	

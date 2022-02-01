@@ -7,6 +7,7 @@ import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.Arena;
 import games.StateObservation;
 import params.ParOther;
+import params.ParRB;
 import tools.ScoreTuple;
 import tools.Types;
 
@@ -32,7 +33,9 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	protected long m_numTrnMoves = 0L;			// moves (calls to getNextAction2) done during training
 	private long durationTrainingMs = 0L;		// total time in ms used for training
 	private long durationEvaluationMs = 0L;		// total time in ms used for evaluation (during training)
-	protected ParOther m_oPar = new ParOther();
+	protected ParOther m_oPar;
+	protected ParRB m_rbPar;					// needed only by trainable agents, but we put it here to have the code
+												// only once
 	public static String EGV_EXCEPTION_TEXT = "Agents derived from AgentBase have to implement this method: estimateGameValueTuple";
 
 	/**
@@ -61,12 +64,14 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 		m_name = name;
 		m_oPar = new ParOther();
 		m_oPar.setAgentState(this.m_agentState);
+		m_rbPar = new ParRB();
 	}
 
 	public AgentBase(String name, ParOther oPar) {
 		m_name = name;
 		m_oPar = new ParOther(oPar);
 		m_oPar.setAgentState(this.m_agentState);
+		m_rbPar = new ParRB();
 	}
 
 	/**
@@ -92,23 +97,6 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	public ScoreTuple getScoreTuple(StateObservation sob, ScoreTuple prevTuple) {
 		throw new RuntimeException("Agents derived from AgentBase have to implement this method: getScoreTuple");
 	}
-
-//	/**
-//	 * Return the estimated game value for {@link StateObservation} sob. The
-//	 * default behavior is to return {@link #getScore(StateObservation)}.
-//	 * <p>
-//	 *
-//	 * This method is deprecated, use estimateGameValueTuple instead.
-//	 *
-//	 * @param sob
-//	 *            the state observation object
-//	 * @return {@link #getScore(StateObservation)}, that is whatever the derived
-//	 *         class implements for {@link #getScore(StateObservation)}.
-//	 */
-//	@Deprecated
-//	public double estimateGameValue(StateObservation sob) {
-//		return this.estimateGameValueTuple(sob, null).scTup[sob.getPlayer()];
-//	};
 
 	/**
 	 * Return the agent's estimate of {@code sob}'s final game value (final
@@ -320,20 +308,37 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 		m_oPar.setStopEval(otherPar.getStopEval());
 	}
 
+	@Override
 	public void setParOther(ParOther op) {
-    	m_oPar.setFrom(op);
+		m_oPar.setFrom(op);
+	}
+	/**
+	 * Set defaults for m_oPar (needed in {@link Arena#loadAgent} when
+	 * loading older agents, where m_oPar=null in the saved version).
+	 */
+	public void setDefaultParOther() {
+		m_oPar = new ParOther();
+	}
+
+	@Override
+	public void setParReplay(ParRB prb) {
+		m_rbPar.setFrom(prb);
+	}
+	/**
+	 * Set defaults for m_rbPar (needed in {@link Arena#loadAgent} when
+	 * loading older agents, where m_rbPar=null in the saved version).
+	 */
+	public void setDefaultParReplay() {
+		m_rbPar = new ParRB();
 	}
 
     @Override
 	public ParOther getParOther() {
 		return m_oPar;
 	}
-	/**
-	 * Set defaults for m_oPar (needed in {@link Arena#loadAgent} when
-	 * loading older agents, where m_oPar=null in the saved version).
-	 */
- 	public void setDefaultParOther() {
-		m_oPar = new ParOther();
+	@Override
+	public ParRB getParReplay() {
+		return m_rbPar;
 	}
 
 	/**

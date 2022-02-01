@@ -813,7 +813,10 @@ public class LoadSaveGBG {
 			// If this is the case, replace the null value with a default ParOther.
 			if (pa.getParOther() == null) {
 				((AgentBase) pa).setDefaultParOther();
-			}						
+			}
+			if (pa.getParReplay() == null) {
+				((AgentBase) pa).setDefaultParReplay();
+			}
 
 //			disposeProgressDialog(dlg);
 //			arenaGame.setProgress(null);

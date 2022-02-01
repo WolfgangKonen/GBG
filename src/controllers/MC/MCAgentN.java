@@ -51,7 +51,7 @@ public class MCAgentN extends AgentBase implements PlayAgent {
     private static final long  serialVersionUID = 12L;
 
     public MCAgentN(ParMC mcParams){
-        this("MC", mcParams, new ParOther());    	
+        this("MC-N", mcParams, new ParOther());
     }
     
     public MCAgentN(String name, ParMC mcParams, ParOther oPar)

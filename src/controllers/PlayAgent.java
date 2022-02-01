@@ -7,6 +7,7 @@ import agentIO.LoadSaveGBG;
 import games.Arena;
 import games.Evaluator;
 import games.GameBoard;
+import params.ParRB;
 import tools.ScoreTuple;
 import tools.Types;
 
@@ -224,7 +225,8 @@ public interface PlayAgent {
 	void setGameNum(int num);
 	
 	ParOther getParOther();
-	
+	ParRB getParReplay();
+
 	/**
 	 * @return During training: Call {@link Evaluator} after this number of training games
 	 */
@@ -233,6 +235,7 @@ public interface PlayAgent {
 	void setStopEval(int num);
 	void setWrapperParams(ParOther otherPar);
 	void setParOther(ParOther op);
+	void setParReplay(ParRB prb);
 
 	AgentState getAgentState();
 	void setAgentState(AgentState aState);

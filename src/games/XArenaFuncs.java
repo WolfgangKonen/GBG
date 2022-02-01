@@ -464,6 +464,8 @@ public class XArenaFuncs {
 				// and caused the bug that a Wrapper nPly set for a trained agent was not saved to disk.
 				// Now it will be saved:
 				pa.setWrapperParams(m_xab.oPar[n]);
+
+				pa.setParReplay(m_xab.rbPar[n]);
 			}
 		}
 		if (pa == null)

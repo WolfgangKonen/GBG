@@ -302,7 +302,7 @@ public class Evaluator2048 extends Evaluator {
 
         String agentSettings = "";
 
-        if(m_PlayAgent.getName().equals("MC")) {
+        if(m_PlayAgent.getName().equals("MC-N")) {
             MCAgentN mcAgent = (MCAgentN)m_PlayAgent;
             agentSettings = "\nROLLOUTDEPTH: " + mcAgent.getParMC().getRolloutDepth() +
                     "\nITERATIONS: " + mcAgent.getParMC().getNumIter() +
