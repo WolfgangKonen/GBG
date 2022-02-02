@@ -861,13 +861,13 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 		for (int n=0; n<numPlayers; n++) {
 			if (n!=curPlayer) {
 				if (sLast[n]!=null ) {
-					// Add the finaladaptation to the replaybuffer from the perspective of all other players
+					// Add the final adaptation to the replay buffer from the perspective of all other players
 					replayBuffer.addTransition(n,ns,sLast[n],rLast,R,1);
 					//learnFromReplayBuffer();
 				}
 			} else {
 				if (FINALADAPT_PART2 && !this.epiLengthStop) {
-					// Add the finaladaptation to the replaybuffer from the perspective of curplayer
+					// Add the final adaptation to the replay buffer from the perspective of curplayer
 					replayBuffer.addTransition(curPlayer,ns,ns.getAfterState(),rLast,R,2);
 				}
 			}
@@ -892,8 +892,10 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 
 
 	private void learnFromReplayBuffer(){
-		// Awaiting the replaybuffer to be full prior learning attempt
-		if(replayBuffer.getMaxBufferIndex() != replayBuffer.getCapacity()) return;
+		// Awaiting the replay buffer to be full prior learning attempt
+		//if(replayBuffer.getMaxBufferIndex() != replayBuffer.getCapacity()) return;
+		// Awaiting the replay buffer to contain at least #batchSize transitions
+		if(replayBuffer.getMaxBufferIndex() < replayBuffer.getBatchSize()) return;
 		ITransition[] transitions = replayBuffer.getBatch();
 		for(ITransition t : transitions){
 			int player = t.getPlayer();

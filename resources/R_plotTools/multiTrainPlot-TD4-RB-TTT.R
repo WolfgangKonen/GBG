@@ -79,7 +79,7 @@ if (MAPWINRATE) {
 
 
 # The errorbars may overlap, so use position_dodge to move them horizontally
-#pd <- position_dodge(3/wfac) # move them 3000 to the left and right
+pd <- position_dodge(3/wfac) # move them 3000 to the left and right
 
 #browser()
 if (USEGAMESK) {
