@@ -28,7 +28,7 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	 */
 	private int m_MaxGameNum;
 	private String m_name;
-	private AgentState m_agentState = AgentState.RAW;
+	private AgentState m_agentState = AgentState.RAW;	// deprecated, use m_oPar.agentState
 	private int epochMax = 0;
 	protected long m_numTrnMoves = 0L;			// moves (calls to getNextAction2) done during training
 	private long durationTrainingMs = 0L;		// total time in ms used for training
@@ -61,17 +61,18 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	}
 
 	public AgentBase(String name) {
-		m_name = name;
-		m_oPar = new ParOther();
-		m_oPar.setAgentState(this.m_agentState);
-		m_rbPar = new ParRB();
+		this(name, new ParOther(), new ParRB());
 	}
 
 	public AgentBase(String name, ParOther oPar) {
+		this(name, oPar, new ParRB());
+	}
+
+	public AgentBase(String name, ParOther oPar, ParRB rbPar) {
 		m_name = name;
 		m_oPar = new ParOther(oPar);
 		m_oPar.setAgentState(this.m_agentState);
-		m_rbPar = new ParRB();
+		m_rbPar = new ParRB(rbPar);
 	}
 
 	/**
@@ -121,7 +122,7 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	}
 
 	public AgentState getAgentState() {
-		return m_agentState;
+		return m_oPar.getAgentState();
 	}
 
 	public void setAgentState(AgentState aState) {
@@ -227,7 +228,18 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 
     @Override
 	public boolean instantiateAfterLoading() {
-		m_oPar.setAgentState(this.m_agentState);
+		// older agents may have only m_agentState set:
+		if (this.m_agentState!=null && m_oPar.getAgentState()==null)
+			m_oPar.setAgentState(this.m_agentState);
+
+		// older agents may not have the wrapper depth parameter, so it is 0. Set it in this case to -1:
+		if (this.getParOther().getWrapperMCTS_depth()==0) this.getParOther().setWrapperMCTS_depth(-1);
+		// older agents may not have the wrapper p_UCT parameter, so it is 0. Set it in this case to 1.0:
+		if (this.getParOther().getWrapperMCTS_PUCT()==0) this.getParOther().setWrapperMCTS_PUCT(1.0);
+		// older agents may not have the agent state, so it is null. Set it to TRAINED:
+		if (this.getParOther().getAgentState()==null) this.getParOther().setAgentState(AgentState.TRAINED);
+
+
 		return true; 	// dummy stub, see LoadSaveTD.saveTDAgent
 	}
 	

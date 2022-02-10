@@ -122,15 +122,15 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	 */
 	public TDNTuple4Agt(String name, ParTD tdPar, ParNT ntPar, ParOther oPar, ParRB rbPar,
 						int[][] nTuples, XNTupleFuncs xnf, int maxGameNum) {
-		super(name);
+		super(name,oPar,rbPar);
 		this.numPlayers = xnf.getNumPlayers();
 		this.sLast = new StateObservation[numPlayers];
 		this.randLast = new boolean[numPlayers];
 		initNet(ntPar,tdPar,oPar, nTuples, xnf, maxGameNum);
-		if(rbPar.getUseRB()){
+		if (rbPar.getUseRB()){
 			replayBuffer = new BaseBuffer(rbPar);
 			ConfigReplayBuffer.USE_REPLAYBUFFER = true;
-		}else {
+		} else {
 			replayBuffer = null;
 			ConfigReplayBuffer.USE_REPLAYBUFFER = false;
 
@@ -174,15 +174,11 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	 * @see LoadSaveGBG#transformObjectToPlayAgent
 	 */
 	public boolean instantiateAfterLoading() {
+		super.instantiateAfterLoading();
 		this.m_Net.xnf.instantiateAfterLoading();
 		for (int i=0; i<m_Net.xnf.getPositionValuesVector().length; i++)
 			assert (m_Net.getNTuples()[0].getPosVals(i)==m_Net.xnf.getPositionValuesVector()[i]) : "Error getPosVals("+i+")";
 		assert (this.getParTD().getHorizonCut()!=0.0) : "Error: horizonCut==0";
-
-		// older agents may not have the wrapper depth parameter, so it is 0. Set it in this case to -1:
-		if (this.getParOther().getWrapperMCTS_depth()==0) this.getParOther().setWrapperMCTS_depth(-1);
-		// older agents may not have the wrapper p_UCT parameter, so it is 0. Set it in this case to 1.0:
-		if (this.getParOther().getWrapperMCTS_PUCT()==0) this.getParOther().setWrapperMCTS_PUCT(1.0);
 
 		// set certain elements in td.m_Net (withSigmoid, useSymmetry) from tdPar and ntPar
 		// (they would stay otherwise at their default values, would not 
@@ -780,11 +776,6 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 			m_numTrnMoves++;		// number of train moves (including random moves)
 			// choose action a_t, using epsilon-greedy policy based on V
 			a_t = getNextAction2(s_t.partialState(), true, true);
-			// Adding transitions
-			// only for debug:
-//			if (a_t.isRandomAction() && s_t.getPlayer()==1) {
-//				int dummy = 1;
-//			}
 
 			// take action a_t and observe reward & next state
 			ns = new NextState4(this,s_t,a_t);
@@ -835,9 +826,10 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 
 		//System.out.println("episode: "+getGameNum()+", moveNum="+m_counter);
 		incrementGameNum();
-		if (this.getGameNum() % 500 == 0) {
-			System.out.println("gameNum: "+this.getGameNum());
-		}
+		// this is now in XArenaFuncs.trainAgent:
+//		if (this.getGameNum() % 500 == 0) {
+//			System.out.println("gameNum: "+this.getGameNum());
+//		}
 		return false;
 	} // trainAgent
 

@@ -15,8 +15,8 @@ import tools.Types.ACTIONS;
  * reward, stored action and value info, ...).
  * <p>
  * This default behavior in {@link ObserverBase} - which may be overridden in derived classes -
- * is for deterministic, 2-player games, where reward and game score are the same. (If one of 
- * the {@code getReward}-functions in {@link ObserverBase} is called with 
+ * is for deterministic, 2-player, perfect-information (see {@link PartialPerfect}) games, where reward and game
+ * score are the same. (If one of the {@code getReward}-functions in {@link ObserverBase} is called with
  * 		{@code boolean rewardIsGameScore==false}, 
  * a warning is issued.)
  * 

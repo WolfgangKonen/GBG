@@ -1,3 +1,8 @@
+#
+# **** These are results for Replay Buffer on TTT from Feb 2022 ****
+#
+# **** see <GBG>\myDocs\UnderstandReplayBuffer.docx
+# 
 library(ggplot2)
 library(grid)
 source("summarySE.R")
@@ -16,10 +21,12 @@ path <- "../../agents/TicTacToe/csv/";
 
 filenames=c(
               "multiTrain-TDNT4.csv"
-            , "multiTrain-TDNT4-RB.csv"  
+            #, "multiTrain-TDNT4-RB-1000c100b-05k.csv"  # RB with capacity 1000, batch size 100
+            , "multiTrain-TDNT4-RB-2000c700b-05k.csv"  # RB with capacity 2000, batch size 700
            )
-# other pars: alpha=1.0 .. 0.5, eps=0.1 ... 0.0, ChooseStart01=F
-# lambda=0.0, learnFromRM=true, NORM=F, sigmoid=tanh. One 9-tuple.
+# other pars: alpha=0.2, eps=0.2 ... 0.0, ChooseStart01=F, LearnFromRM=T, 5000 train episodes,
+# lambda=0.0, NORM=F, sigmoid=tanh. TCL-id, one 9-tuple, UseSymmetry=T.
+# Win rates are when playing in all roles against Max-N, best win rate is 0.5.
 
   
 dfBoth = data.frame()

@@ -7,6 +7,7 @@ import controllers.PlayAgent;
 import controllers.PlayAgtVector;
 import games.*;
 import games.Othello.Edax.Edax2;
+import games.RubiksCube.StateObserverCube;
 import params.ParEdax;
 import params.ParOther;
 import tools.Measure;
@@ -128,6 +129,10 @@ public class MCompeteSweep {
      * Why do we separate training and competition in different batch runs? - Training can be done on all kind of JVMs
      * (including Unix machines), but competition against Edax can only be done on Windows-based JVMs, because Edax
      * in GBG comes (currently) only in the form of a Windows program ({@code .exe}).
+     * <p>
+     * <strong>NEW</strong>: If {@code batchSizeArr == null} then do {@code nruns} training runs with agent {@code pa}.<br>
+     * If {@code != null} then sweep replay buffer's parameter {@code batchSize} over all values given in {@code batchSizeArr}
+     * and do {@code nruns} training runs for each value.
      *
      * @param pa		    loaded agent (may be stub) from which all training params are inherited
      * @param agtFile       agent filename, we use its {@code agtBase} (part w/o ".agt.zip") to form the new filenames
@@ -135,13 +140,14 @@ public class MCompeteSweep {
      * @param nruns	        number of training runs
      * @param arenaTrain    Arena object with train rights
      * @param gb		    the game board, needed for start state selection
+     * @param batchSizeArr	either null or the RB batch size values to sweep over
      * @return the last trained agent
      */
     public PlayAgent multiTrainSweepOthello(
             PlayAgent pa, String agtFile, int maxGameNum, int nruns,
-            Arena arenaTrain, GameBoard gb)
+            Arena arenaTrain, GameBoard gb, int[] batchSizeArr)
     {
-        String userTitle1 = "time", userTitle2 = "user2";
+        String userTitle1 = "time";
         DecimalFormat frm = new DecimalFormat("00");
         double userValue1=0.0, userValue2=0.0;
         long startTime;
@@ -155,21 +161,35 @@ public class MCompeteSweep {
         tools.Utils.checkAndCreateFolder(strDir+"/multiTrain");
         String agtBase = agtFile.split("\\.")[0];
 
-        for (int i=0; i<nruns; i++) {
+        int[] sweepArr = (batchSizeArr==null) ? new int[]{0} : batchSizeArr;
+        String userTitle2 = (batchSizeArr==null) ? "user2" : "RB_batch";
 
-            startTime = System.currentTimeMillis();
+        for (int s : sweepArr) {
+            if (s==0) {
+                arenaTrain.m_xab.rbPar[0].setUseRB(false);
+            } else {
+                arenaTrain.m_xab.rbPar[0].setUseRB(true);
+                arenaTrain.m_xab.rbPar[0].setBatchSize(s);
+            }
+            userValue2 = s;
 
-            // train pa, adjust doTrainEvaluation, and add elements to mtList (evaluation results during train) + save it
-            pa = sTrainer.doSingleTraining(0, i, pa, arenaTrain, arenaTrain.m_xab, gb, maxGameNum, userValue1, userValue2);
-            arenaTrain.saveAgent(pa, strDir + "/multiTrain/" + agtBase + "_" + frm.format(i) + ".agt.zip");
+            for (int i=0; i<nruns; i++) {
 
-            // print the full list mtList after finishing training run i
-            // (we use "../" because we do not want to store in subdir "csv/" as printMultiTrainList usually does  )
-            String trainCsvName = "../multiTrain/" + agtBase + ".csv";
-            MTrain.printMultiTrainList(trainCsvName, sTrainer.mtList, pa, arenaTrain, userTitle1, userTitle2);
+                startTime = System.currentTimeMillis();
 
-            deltaTime = (double) (System.currentTimeMillis() - startTime) / 1000.0;
-            elapsedTime += deltaTime;
+                // train pa, adjust doTrainEvaluation, and add elements to mtList (evaluation results during train) + save it
+                pa = sTrainer.doSingleTraining(0, i, pa, arenaTrain, arenaTrain.m_xab, gb, maxGameNum, userValue1, userValue2);
+                arenaTrain.saveAgent(pa, strDir + "/multiTrain/" + agtBase + "_" + frm.format(i) + ".agt.zip");
+
+                // print the full list mtList after finishing training run i
+                // (we use "../" because we do not want to store in subdir "csv/" as printMultiTrainList usually does  )
+                String trainCsvName = "../multiTrain/" + agtBase + ".csv";
+                MTrain.printMultiTrainList(trainCsvName, sTrainer.mtList, pa, arenaTrain, userTitle1, userTitle2);
+
+                deltaTime = (double) (System.currentTimeMillis() - startTime) / 1000.0;
+                elapsedTime += deltaTime;
+            }
+
         }
 
         System.out.println("[multiTrainSweepOthello] "+elapsedTime+" sec.");
@@ -365,12 +385,17 @@ public class MCompeteSweep {
             gb.initialize();
             while (pa.getGameNum()<pa.getMaxGameNum())
             {
-                StateObservation so = gb.getDefaultStartState();
+                StateObservation so = (pa.getParOther().getChooseStart01())
+                                    ? gb.chooseStartState(pa) : gb.getDefaultStartState();
 
                 pa.trainAgent(so);
 
                 gameNum = pa.getGameNum();
-                if (gameNum%numEval==0 ) { //|| gameNum==1) {
+                int liveSignal = 500;
+                if (gameNum % liveSignal == 0) {
+                    System.out.println("gameNum: "+gameNum);
+                }
+                if (gameNum % numEval==0 ) { //|| gameNum==1) {
                     elapsedMs = (System.currentTimeMillis() - startTime);
                     pa.incrementDurationTrainingMs(elapsedMs);
                     elapsedTime = (double)elapsedMs/1000.0;

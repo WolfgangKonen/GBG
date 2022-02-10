@@ -295,7 +295,8 @@ public class GBGBatch extends SetupGBG {
 	} // batch3
 
 	/**
-	 * Perform multi-training with incAmount sweep (RubiksCube only).
+	 * Perform multi-training with incAmount sweep.
+	 * Only relevant for RubiksCube in case bReplayBuf==true, see DAVI3Agent.
 	 * The incAmount values to sweep are coded in
 	 * array {@code incAmountArr} in this method. <br> Write results to file {@code csvName}.
 	 * @param trainNum		how many agents to train for each lambda
@@ -338,22 +339,29 @@ public class GBGBatch extends SetupGBG {
 	 * Perform Othello multi-training. In each run, agent {@code pa} is constructed anew (to get different random tuples)
 	 * and then trained.
 	 * <p>
+	 * If {@code batchSizeArr} (in source code) is non-null, sweep additionally replay buffer's parameter {@code batchSize}
+	 * over all values given in {@code batchSizeArr}.
+	 * <p>
 	 * Write results to directory {@code agents/Othello/multiTrain}.
-	 * @param nruns		number of training runs
+	 * @param nruns			number of training runs
 	 * @param filePath		agent filename
-	 * @param gb			game board object, needed by multiCompeteSweep for start state selection
+	 * @param gb			game board object, needed for start state selection
 	 *
-	 * @see MCompeteSweep#multiTrainSweepOthello(PlayAgent, String, int, int, Arena, GameBoard)  MCompeteMWrap.multiTrainSweepOthello
+	 * @see MCompeteSweep#multiTrainSweepOthello(PlayAgent, String, int, int, Arena, GameBoard, int[])  MCompeteMWrap.multiTrainSweepOthello
 	 */
 	public void batch5(int nruns, String agtFile, String filePath,
 					   GameBoard gb) {
 
-		int maxTrainGameNum=-1;		// number of episodes in each training. If -1, take maxGameNum from loaded agent
+		int maxTrainGameNum=100000;  //-1;		// number of episodes in each training. If -1, take maxGameNum from loaded agent
+
+		//int[] batchSizeArr = null;
+		int[] batchSizeArr = {0,100,200,400};
+
 
 		// load an agent to fill xab with the appropriate parameter settings
 		boolean res = arenaTrain.loadAgent(0, filePath);
 		if (!res) {
-			System.err.println("\n[GBGBatch.batch6] Aborted (no agent found).");
+			System.err.println("\n[GBGBatch.batch5] Aborted (no agent found).");
 			return;
 		}
 		PlayAgent pa = arenaTrain.m_xfun.m_PlayAgents[0];
@@ -361,7 +369,7 @@ public class GBGBatch extends SetupGBG {
 		long startTime = System.currentTimeMillis();
 
 		MCompeteSweep mcmw = new MCompeteSweep();
-		mcmw.multiTrainSweepOthello(pa,agtFile,maxTrainGameNum,nruns,arenaTrain,gb);
+		mcmw.multiTrainSweepOthello(pa,agtFile,maxTrainGameNum,nruns,arenaTrain,gb,batchSizeArr);
 
 		double elapsedTime = (System.currentTimeMillis() - startTime)/1000.0;
 		System.out.println("[GBGBatch.batch5] multiTrainSweep finished in "+elapsedTime+" sec. ");

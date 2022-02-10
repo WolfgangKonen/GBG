@@ -64,6 +64,7 @@ agents/Othello/multiTrain-10agents/*
 agents/Othello/multiTrain-10agents-2/*
 agents/Othello/TCL3-*noFA*.agt.zip
 agents/Othello/TCL3-fixed6_250k-lam05_P4_H001-diff1-FAm.agt.zip
+agents/Othello/TCL4-100_7_100k-RB15000c1000b.agt.zip
 # (the only Othello agent we have in repos is TCL3-fixed6_250k-lam05_P4_H001-FAm.agt.zip)
 agents/RubiksCube/tooBigForGit
 # (no RubiksCube agents in repos, they are still experimental)

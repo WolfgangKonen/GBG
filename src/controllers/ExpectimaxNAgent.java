@@ -83,11 +83,15 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 	
 	public ExpectimaxNAgent(String name, ParMaxN mpar, ParOther opar)
 	{
-		this(name);
+		super(name,opar);
+		super.setMaxGameNum(1000);
+		super.setGameNum(0);
+		rand = new Random(System.currentTimeMillis());
 		m_mpar = mpar;
-		m_oPar = opar;		// AgentBase::m_oPar
 		m_depth = mpar.getMaxNDepth();
+		hm = new HashMap<String, ScoreTuple>();
 		m_useHashMap = mpar.getMaxNUseHashmap();
+		setAgentState(AgentState.TRAINED);		// do again to set oPar's agent state to TRAINED
 	}
 	
 	public ExpectimaxNAgent(String name, int nply)
@@ -109,7 +113,7 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 	public void fillParamTabsAfterLoading(int n, Arena m_arena) { 
 		m_arena.m_xab.setMaxNDepthFrom(n, this.getDepth() );
 		m_arena.m_xab.setMaxNParFrom(n,this.m_mpar);
-//		m_arena.m_xab.setOParFrom(n, this.getParOther() );		// do or don't?
+		m_arena.m_xab.setOParFrom(n, this.getParOther() );
 	}
 
 	private ScoreTuple retrieveFromHashMap(boolean m_useHashMap, String stringRep) {

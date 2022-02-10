@@ -402,7 +402,7 @@ abstract public class Arena implements Runnable {
 					}
 				}
 				gb.enableInteraction(true);
-			} else {
+			} else {  	// no action_req
 				try {
 					Thread.sleep(100);
 					// wait until an action in GameBoard gb occurs (see

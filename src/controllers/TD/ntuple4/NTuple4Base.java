@@ -15,6 +15,8 @@ import games.Arena;
 import games.StateObsWithBoardVector;
 import games.StateObservation;
 import params.ParNT;
+import params.ParOther;
+import params.ParRB;
 import params.ParTD;
 
 /**
@@ -103,16 +105,25 @@ abstract public class NTuple4Base extends AgentBase implements NTuple4Agt, Seria
 		super(name);
 	}
 
+	public NTuple4Base(String name, ParOther oPar, ParRB rbPar) {
+		super(name,oPar,rbPar);
+	}
+
+	public boolean instantiateAfterLoading() {
+		super.instantiateAfterLoading();
+		return true;
+	}
+
 	/**
 	 * After loading an agent from disk fill the param tabs of {@link Arena} according to the
 	 * settings of this agent
-	 * 
+	 *
 	 * @param n         fill the {@code n}th parameter tab
 	 * @param m_arena	member {@code m_xab} has the param tabs
-	 * 
+	 *
 	 * @see Arena#loadAgent
 	 */
-	public void fillParamTabsAfterLoading(int n, Arena m_arena) { 
+	public void fillParamTabsAfterLoading(int n, Arena m_arena) {
 		m_arena.m_xab.setTdParFrom(n, this.getParTD() );
 		m_arena.m_xab.setNtParFrom(n, this.getParNT() );
 		m_arena.m_xab.setOParFrom(n, this.getParOther() );
