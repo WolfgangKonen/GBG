@@ -4,6 +4,7 @@ import games.Yavalath.ConfigYavalath;
 import games.Yavalath.StateObserverYavalath;
 import other.context.Context;
 import other.move.Move;
+import tools.Types;
 
 import java.util.List;
 
@@ -30,8 +31,9 @@ public class StateObserverYavalathTranslationLayer extends StateObserverYavalath
             }
             // x.to() returns the position of the stone we place, translate that into a action value
             int actionInt = conversion.getGBGIndexFromLudii(x.to());
-            int j = actionInt% ConfigYavalath.getMaxRowLength();
-            int i = (actionInt-j)/ConfigYavalath.getMaxRowLength();
+            int tileValue = ConfigYavalath.getTileValueFromAction(new Types.ACTIONS(actionInt));
+            int j = tileValue% ConfigYavalath.getMaxRowLength();
+            int i = (tileValue-j)/ConfigYavalath.getMaxRowLength();
             // x.mover() returns who made the move, use that to adjust the state observer board accordingly
             board[i][j].setPlayer(conversion.getGBGPlayerFromLudii(x.mover()));
         }
