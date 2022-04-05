@@ -355,7 +355,8 @@ public class GBGBatch extends SetupGBG {
 		int maxTrainGameNum=100000;  //-1;		// number of episodes in each training. If -1, take maxGameNum from loaded agent
 
 		//int[] batchSizeArr = null;
-		int[] batchSizeArr = {0,100,200,400};
+		//int[] batchSizeArr = {0,100,200,400};
+		int[] batchSizeArr = {50,400};
 
 
 		// load an agent to fill xab with the appropriate parameter settings

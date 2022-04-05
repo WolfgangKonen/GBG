@@ -7,7 +7,6 @@ import controllers.PlayAgent;
 import controllers.PlayAgtVector;
 import games.*;
 import games.Othello.Edax.Edax2;
-import games.RubiksCube.StateObserverCube;
 import params.ParEdax;
 import params.ParOther;
 import tools.Measure;
@@ -134,7 +133,7 @@ public class MCompeteSweep {
      * If {@code != null} then sweep replay buffer's parameter {@code batchSize} over all values given in {@code batchSizeArr}
      * and do {@code nruns} training runs for each value.
      *
-     * @param pa		    loaded agent (may be stub) from which all training params are inherited
+     * @param pa		    loaded agent (maybe stub) from which all training params are inherited
      * @param agtFile       agent filename, we use its {@code agtBase} (part w/o ".agt.zip") to form the new filenames
      * @param maxGameNum    number of training episodes in each run
      * @param nruns	        number of training runs
@@ -182,7 +181,7 @@ public class MCompeteSweep {
                 arenaTrain.saveAgent(pa, strDir + "/multiTrain/" + agtBase + "_" + frm.format(i) + ".agt.zip");
 
                 // print the full list mtList after finishing training run i
-                // (we use "../" because we do not want to store in subdir "csv/" as printMultiTrainList usually does  )
+                // (we use "../" because we do not want to store in subdir "csv/" as printMultiTrainList usually does)
                 String trainCsvName = "../multiTrain/" + agtBase + ".csv";
                 MTrain.printMultiTrainList(trainCsvName, sTrainer.mtList, pa, arenaTrain, userTitle1, userTitle2);
 
@@ -256,7 +255,7 @@ public class MCompeteSweep {
 
     private class SingleCompetitor {
 
-        protected ArrayList<MCompeteMWrap> mcList = new ArrayList<>();
+        protected ArrayList<MCompeteMWrap> mcList;
         protected double elapsedTime = 0.0;
 
         public SingleCompetitor() {

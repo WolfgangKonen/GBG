@@ -351,8 +351,8 @@ abstract public class Arena implements Runnable {
 				if (!so.isGameOver()&&so.isRoundOver()) so.initRound();
 				if (DBG_HEX && (so instanceof StateObserverHex)) {
 					StateObserverHex soh = (StateObserverHex) so;
-					// int Index = this.getHexIndex(soh.getBoard());
-					// System.out.println("Index: "+Index);
+					int Index = this.getHexIndex(soh.getBoard());
+					System.out.println("Index: "+Index);
 					System.out.println("[" + soh.stringDescr() + "]");
 				}
 				boolean DBG_SIM=false;
@@ -369,10 +369,7 @@ abstract public class Arena implements Runnable {
 						so.storeBestActionInfo(actBest);
 
 					gb.updateBoard(so, true, true);
-//					if (so.isRoundOver()) {
-//						so.initRound();
-//						assert !so.isRoundOver() : "Error: initRound() did not reset round-over-flag";
-//					}
+
 					if (so instanceof StateObserverSG && actBest.getVTable()!=null) {
 						DecimalFormat form = new DecimalFormat("0.0000");
 						double[] optimHit = {4.888888889,4.666666667,4.333333333,3.888888889,
@@ -502,7 +499,7 @@ abstract public class Arena implements Runnable {
 
 		so = selectPlayStartState(showValue);
 
-		boolean silent = (so instanceof StateObserver2048) ? true : false;
+		boolean silent = (so instanceof StateObserver2048);
 		assert qaVector.length == so.getNumPlayers() : "Number of agents does not match so.getNumPlayers()!";
 		startSO = so.copy();
 		pstats = new PStats(1, so.getMoveCounter(), so.getPlayer(), -1, gameScore, nEmpty, cumEmpty, highestTile);
@@ -572,7 +569,7 @@ abstract public class Arena implements Runnable {
 							nEmpty = so2048.getNumEmptyTiles();
 							cumEmpty += nEmpty;
 							highestTile = so2048.getHighestTileValue();
-							gameScore = so2048.getGameScore(so2048.getPlayer()) * so2048.MAXSCORE;
+							gameScore = so2048.getGameScore(so2048.getPlayer()) * StateObserver2048.MAXSCORE;
 						} else {
 							gameScore = so.getGameScore(so.getPlayer());
 						}
@@ -662,7 +659,7 @@ abstract public class Arena implements Runnable {
 	 *
 	 * @param qaVector	the agent vector
 	 * @param so		the start state
-	 * @return
+	 * @return a String list with play messages
 	 */
 	public ArrayList<String> playInnerGame(PlayAgent[] qaVector,StateObservation so) {
 		final int numPlayers = gb.getStateObs().getNumPlayers();

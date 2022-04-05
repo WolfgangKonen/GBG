@@ -126,7 +126,7 @@ public class RandomAgent extends AgentBase implements PlayAgent {
 	@Override
 	public ScoreTuple getScoreTuple(StateObservation so, ScoreTuple prevTuple) {
 		ScoreTuple st = new ScoreTuple(so.getNumPlayers());
-		for (int i=0; i<st.scTup.length; i++) st.scTup[i]=this.getScore(so);
+		for (int i=0; i<st.scTup.length; i++) st.scTup[i]=rand.nextDouble();
     	return st;
 	}
 

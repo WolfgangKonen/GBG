@@ -22,7 +22,7 @@ import java.util.Random;
 /**
  * The Expectimax-N agent implements the Expectimax-N algorithm via interface {@link PlayAgent}. 
  * Expectimax-N  is the generalization {@link MaxNAgent} to nondeterministic games. It works on  
- * {@link ScoreTuple}, an N-tuple of game scores (one score for each player 0,1,...,N-1).
+ * {@link ScoreTuple}, an N-tuple of game scores (one score for each player 0, 1,..., N-1).
  * It traverses the game tree up to a prescribed depth (default: 10, see {@link ParMaxN}).
  * <p>
  * {@link ExpectimaxNAgent} is for <b>non-deterministic</b> games. For deterministic games see 
@@ -56,15 +56,15 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 
 	//	protected boolean m_rgs=true;  // use now AgentBase::m_oPar.getRewardIsGameScore()
 	private boolean m_useHashMap=true;	// new 2021-10-18
-	private HashMap<String,ScoreTuple> hm;
+	private final HashMap<String,ScoreTuple> hm;
 	protected int countTerminal;		// # of terminal node visits in getNextAction2
 	protected int countMaxDepth;		// # of premature returns due to maxDepth in getNextAction2
-	private boolean DBG_EWN = false;
-	private int DBG_EWN_DEPTH = 2;
+	private final boolean DBG_EWN = false;
+	private final int DBG_EWN_DEPTH = 2;
 
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
-	 * compatible with an older one (older .agt.zip will become unreadable or you have
+	 * compatible with an older one (older .agt.zip will become unreadable, or you have
 	 * to provide a special version transformation)
 	 */
 	@Serial
@@ -77,7 +77,7 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 		super.setGameNum(0);
         rand = new Random(System.currentTimeMillis());
         m_mpar = new ParMaxN();
-		hm = new HashMap<String, ScoreTuple>();
+		hm = new HashMap<>();
 		setAgentState(AgentState.TRAINED);
 	}
 	
@@ -89,7 +89,7 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 		rand = new Random(System.currentTimeMillis());
 		m_mpar = mpar;
 		m_depth = mpar.getMaxNDepth();
-		hm = new HashMap<String, ScoreTuple>();
+		hm = new HashMap<>();
 		m_useHashMap = mpar.getMaxNUseHashmap();
 		setAgentState(AgentState.TRAINED);		// do again to set oPar's agent state to TRAINED
 	}
@@ -331,7 +331,7 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 						currScoreTuple =  NewSO.getRewardTuple(rgs);
 					} else {
 						countMaxDepth++;
-						// setAvailableActions not needed anymore (and leads for EWN to a wrong isNextActionDeterministic==false):
+						// setAvailableActions not needed any more (and leads for EWN to a wrong isNextActionDeterministic==false):
 //						NewSO.setAvailableActions();		// The former problematic MC-N, which could not handle an
 						// incoming NewSO with next-action-nondeterministic, does now handle it
 						currScoreTuple = estimateGameValueTuple(NewSO, null);
@@ -339,7 +339,7 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 				}
 				//if (!silent && depth<0) printAfterstate(soND,acts.get(i),currScoreTuple,depth);
 
-				// always *maximize* P's element in the tuple currScoreTuple,
+				// *maximize* always P's element in the tuple currScoreTuple,
 				// where P is the player to move in state soND:
 				scBest.combine(currScoreTuple, cOpMax, player, 0.0);
 
@@ -669,13 +669,14 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
     	System.out.println("---     Move: "+NewSO.stringDescr()+"   "+scTuple.toString()+", depth="+depth);
     }	 
 
-    private void printBestAfterstate(StateObsNondeterministic soND,ACTIONS actBest,
-    		double pMaxScore, int depth)
-    {
-		StateObsNondeterministic NewSO = soND.copy();
-    	NewSO.advanceDeterministic(actBest);
-    	System.out.println("---Best Move: "+NewSO.stringDescr()+"   "+pMaxScore+", depth="+depth);
-    }	
+    // --- never used ---
+//    private void printBestAfterstate(StateObsNondeterministic soND,ACTIONS actBest,
+//    		double pMaxScore, int depth)
+//    {
+//		StateObsNondeterministic NewSO = soND.copy();
+//    	NewSO.advanceDeterministic(actBest);
+//    	System.out.println("---Best Move: "+NewSO.stringDescr()+"   "+pMaxScore+", depth="+depth);
+//    }
 
     private void printNondet(StateObsNondeterministic NewSO,
     		ScoreTuple scTuple, double currProbab, int depth)

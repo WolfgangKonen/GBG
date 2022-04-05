@@ -12,10 +12,8 @@ import tools.Types;
 import tools.Types.ACTIONS;
 import controllers.ExpectimaxNAgent;
 
-import java.security.SecureRandom;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static tools.Types.WINNER.*;
@@ -24,22 +22,21 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
 
     public static final long serialVersionUID = 12L;
     private static final double REWARD_NEGATIVE = -1, REWARD_POSITIVE = 1;
-    private static Random random = new SecureRandom(); // using secure random and not reinitializing the random that often, should not cause this bug.
-    private int numPlayers; // /WK/ really needed? will be always =ConfigEWN.NUM_PLAYERS
+    private final int numPlayers; // /WK/ really needed? will be always =ConfigEWN.NUM_PLAYERS
     //private int count;                            // /WK/ seems never used
     private int player;
-    private int size;
+    private final int size;
     //private int turn = 0 ;                        // /WK/ seems never used
     private boolean isNextActionDeterministic;
     private ACTIONS nextNondeterministicAction;     // the dice value minus 1
-    private Token[][] gameState;
+    private final Token[][] gameState;
     //private ACTIONS rolledDice;                   // /WK/ seems never used
-    private ArrayList<Player> players;
+    private final ArrayList<Player> players;
     private ArrayList<ACTIONS> availableActions;
-    private ArrayList<ACTIONS> availableRandomActions;
+    private final ArrayList<ACTIONS> availableRandomActions;
     private int playerWin;      // Representing the winning player for faster evaluation
     private int playerLooses;   // Representing the loosing player for faster evaluation
-    private ScoreTuple m_scoreTuple;
+    private final ScoreTuple m_scoreTuple;
 
 
     public StateObserverEWN(){
@@ -87,7 +84,7 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
         this.playerLooses = other.getPlayerLooses();
         this.playerWin = other.getPlayerWin();
         this.m_scoreTuple = new ScoreTuple(other.m_scoreTuple);
-        this.availableActions = new ArrayList<ACTIONS>();
+        this.availableActions = new ArrayList<>();
         this.availableRandomActions = other.getAvailableRandoms();
         this.gameState = new Token[size][size];
         //this.count = other.count;
@@ -180,7 +177,6 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
     private int[] shuffle(int[] array){
         int index;
         for(int i = array.length-1; i > 0; i--){
-            //index = random.nextInt(i+1);
             index = ThreadLocalRandom.current().nextInt(i+1);
             if(index != i){
                 array[index] ^= array[i];
@@ -272,7 +268,6 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
         if(isNextActionDeterministic){
             throw new RuntimeException("ACTION IS DETERMINISTIC must be NON");
         }
-        //int actIndex = random.nextInt(availableRandomActions.size());
         int actIndex = ThreadLocalRandom.current().nextInt(availableRandomActions.size());
         advanceNondeterministic(availableRandomActions.get(actIndex));  // this sets also isNextActionDeterministic
         if(this.availableActions.size() == 0){

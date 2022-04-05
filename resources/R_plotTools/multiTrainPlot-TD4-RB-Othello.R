@@ -9,7 +9,7 @@ library(ggplot2)
 library(grid)
 source("summarySE.R")
 
-PLOTALLLINES=T    # if =T: make a plot for each filename, with one line for each run
+PLOTALLLINES=F    # if =T: make a plot for each filename, with one line for each run
 USEGAMESK=T       # if =T: use x-axis variable 'gamesK' instead of 'gameNum'  
 MAPWINRATE=T      # if =T: map y-axis to win rate (range [0,1]); if =F: range [-1,1] 
 EVALBENCH=T       # if =T: show win rate vs. BenchPlayer, =F: vs. HeurPlayer
@@ -24,7 +24,8 @@ path <- "../../agents/Othello/multiTrain-RB/";
 
 filenames=c(
               "TCL4-100_7_100k-RB10000c0100b.csv"       # RB with capacity 10000, batch size 100
-           )
+            , "TCL4-100_7_100k-RB10000c0050b.csv"       # RB with capacity 10000, batch size  50
+)
 # other pars: alpha=0.2, eps=0.2 ... 0.1, ChooseStart01=T, LearnFromRM=T, 100000 train episodes,
 # lambda=0.5, horCut=0.1, NORM=F, sigmoid=tanh. TCL-EXP, 100 7-tuples, UseSymmetry=T.
 # Win rates are when playing in all roles against BenchPlayer (EVALBENCH=T) or against

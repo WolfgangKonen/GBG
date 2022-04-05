@@ -84,7 +84,8 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 
 	/**
 	 * On the long run, {@link PlayAgent#getScore(StateObservation)} should become deprecated (in favor of
-	 * getScoreTuple). But for the moment, we leave a default implementation in AgentBase, which should
+	 * {@link PlayAgent#getScoreTuple(StateObservation, ScoreTuple) getScoreTuple}).
+	 * But for the moment, we leave a default implementation in AgentBase, which should
 	 * however be overridden by derived classes. The base implementation just throws an exception.
 	 *
 	 * @param sob

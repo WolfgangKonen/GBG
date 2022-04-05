@@ -65,6 +65,10 @@ public interface PlayAgent {
 	
 	/**
 	 * Return the agent's estimate of the final score for that game state.
+	 * <p>
+	 * On the long run, {@link PlayAgent#getScore(StateObservation)} should become deprecated (in favor of
+	 * {@link PlayAgent#getScoreTuple(StateObservation, ScoreTuple) getScoreTuple}).
+	 *
 	 * @param sob			the current game state;
 	 * @return				the agent's estimate of the final score for that state. 
 	 * 						For 2-player games this is usually the probability 
