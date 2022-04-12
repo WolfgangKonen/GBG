@@ -400,7 +400,7 @@ public class GBGBatch extends SetupGBG {
 
 	/**
 	 * Perform Othello multi-competition with MCTSWrapperAgent wrapped around agent in agtFile against
-	 * Edax with different depth levels.
+	 * Edax with different depth levels. Both agents perform in both roles (1st and 2nd).
 	 * <p>
 	 * Write results to file {@code csvName}.
 	 * @param iterMCTS		how many iterations in MCTSWrapperAgent.

@@ -4,6 +4,7 @@ import controllers.PlayAgent;
 import game.Game;
 import games.Arena;
 import games.Hex.HexConfig;
+import games.Yavalath.ConfigYavalath;
 import ludiiInterface.general.GBGAsLudiiAI;
 import org.junit.Test;
 import other.AI;
@@ -14,6 +15,7 @@ import other.move.Move;
 import other.trial.Trial;
 import starters.GBGBatch;
 import starters.SetupGBG;
+import tools.Utils;
 import utils.LudiiAI;
 
 import java.io.FileOutputStream;
@@ -147,15 +149,73 @@ public class LudiiCustomTest extends GBGBatch {
         }
     }
 
+    @Test
+    public void customYavalathGame() {
+        PlayAgent pa;
+        int winsPlayer1 = 0, winsPlayer2 =0, ties = 0;
+
+        selectedGame = "Yavalath";
+        scaPar=new String[]{"2", "5", "False"};
+        agtFile = "MCTStest.agt.zip";
+        arenaTrain = SetupGBG.setupSelectedGame(selectedGame,scaPar,"",false,true);
+        pa = arenaTrain.loadAgent(agtFile);
+        System.out.println(pa.getName()+"\n"+pa.stringDescr());
+
+        List<String> options;
+        //options = Arrays.asList("Board Size/"+ConfigYavalath.getBoardSize()+"x"+ConfigYavalath.getBoardSize());
+        PLAYER_2 = new GBGAsLudiiAI(); //(ConfigYavalath.getBoardSize(),2);
+        ludiiGame = GameLoader.loadGameFromName("Yavalath.lud");
+
+        final other.context.Context context = new Context(ludiiGame, new Trial(ludiiGame));
+
+        final List<AI> ais = new ArrayList<>();
+        ais.add(null); //Need to add a null entry, because Ludii starts player numbering on 1
+        ais.add(PLAYER_1);
+        ais.add(PLAYER_2);
+
+        for (int gameCounter = 0; gameCounter < GAMESNUMBER; gameCounter++) {
+            ludiiGame.start(context);
+
+            //Initialize the AIs
+            ais.get(1).initAI(ludiiGame,1);
+            ((GBGAsLudiiAI)ais.get(2)).initAI(ludiiGame,2,pa);
+
+            final Model model = context.model();
+
+            while (!context.trial().over()){
+                model.startNewStep(context,ais,1.0);
+            }
+            if(context.trial().status().winner() == 0){
+                System.out.println("Tie.");
+                ties++;
+
+            }else {
+                System.out.println("Winner Game " + ": " + ais.get(context.trial().status().winner()).friendlyName());
+                if(context.trial().status().winner() == 1){
+                    winsPlayer1++;
+                }else winsPlayer2++;
+            }
+
+            if(LOGS){
+                String logFullFilePath = getLogPath(arenaTrain);
+                logGame(context,logFullFilePath, ais);
+            }
+            System.out.println("Wins Player 1 ("+ ais.get(1).friendlyName() + "): " + winsPlayer1);
+            System.out.println("Wins Player 2 ("+ ais.get(2).friendlyName() + "): " + winsPlayer2);
+            System.out.println("Ties: " + ties);
+        }
+    }
+
     private String getLogPath(Arena arena) {
         String logFullFilePath;
-        String logMainDir="logs\\";
+        String logMainDir="logs";
         String logFile="logs.ludiilog";
         String logDirectory = logMainDir + "\\" + selectedGame;
         String subDir = arena.getGameBoard().getSubDir();
         if(subDir != null && !subDir.equals("")) {
             logDirectory = logMainDir + "\\" + selectedGame + "\\" + subDir;
         }
+        Utils.checkAndCreateFolder(logDirectory);       // needed to create subDir if it does not exist yet
         logFullFilePath = logDirectory + "\\" + logFile;
         return logFullFilePath;
     }

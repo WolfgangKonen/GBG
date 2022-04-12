@@ -71,7 +71,7 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	public AgentBase(String name, ParOther oPar, ParRB rbPar) {
 		m_name = name;
 		m_oPar = new ParOther(oPar);
-		m_oPar.setAgentState(this.m_agentState);
+		//m_oPar.setAgentState(this.m_agentState);   // /WK/2022-04-12/ very questionable, m_agentState is deprecated!
 		m_rbPar = new ParRB(rbPar);
 	}
 

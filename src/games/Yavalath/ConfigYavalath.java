@@ -13,7 +13,7 @@ public class ConfigYavalath {
     static int PLAYERS = 2;
 
     //Line length to win the game
-    final static int LENGTH_TO_WIN = 4;
+    final static int LENGTH_TO_WIN = 4;         // /WK/ never used
 
     public final static int INVALID_FIELD = -2;
     public final static int EMPTY = -1;
@@ -33,7 +33,7 @@ public class ConfigYavalath {
     public final static int GAME_PIECE_RADIUS = TILE_SIZE/4;
 
     /**
-     * Maps the values from tiles and actions to each other. While actions are numbered continuously,
+     * Maps the values from tiles and actions to each other. While actions are numbered consecutively,
      * there are gaps in the tile values produced by the board representation with invalid cells.
      * Example for the size 5 board
      * <pre>
@@ -52,6 +52,7 @@ public class ConfigYavalath {
      * </pre>
      */
     public static BiMap<Integer,Integer> actionMapping = HashBiMap.create();
+    // This map is filled by createActionMap()
 
     /**
      * Converts the value of a tile into a corresponding action.
@@ -103,6 +104,9 @@ public class ConfigYavalath {
         return MAX_ROW_LENGTH;
     }
 
+    /**
+     * @return the edge length of the board
+     */
     public static int getBoardSize(){
         return BOARD_SIZE;
     }

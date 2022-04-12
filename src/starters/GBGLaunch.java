@@ -268,7 +268,9 @@ public class GBGLaunch extends SetupGBG {
 						if (selectedGame!=null) {
 							if (selectedGame.equals("Nim")) {
 								String heapSize = (String)choiceScaPar1.getSelectedItem();
-								assert heapSize!=null : "heapSize is null!";
+								//assert heapSize!=null : "heapSize is null!";
+								// /WK/ commented assertion out, it would fire right after the selection of game "Nim",
+								// where choiceScaPar1 is still empty
 								int iHeapSize = Integer.parseInt(heapSize);
 								choiceScaPar2.removeAllItems();
 								if (iHeapSize==3) {

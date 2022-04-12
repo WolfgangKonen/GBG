@@ -61,7 +61,7 @@ public class XNTupleFuncsYavalath extends XNTupleBase implements XNTupleFuncs, S
 
     /**
      * The board vector is an {@code int[]} vector where each entry corresponds to one
-     * cell of the board. In the case of TicTacToe the mapping is
+     * cell of the board. In the case of Yavalath the mapping is
      * <pre>
      *                      00  01  02  03  04
      *                    05  06  07  08  09  10
@@ -74,7 +74,7 @@ public class XNTupleFuncsYavalath extends XNTupleBase implements XNTupleFuncs, S
      *                      56  57  58  59  60
      * </pre>
      * @return a vector of length {@link #getNumCells()}, holding for each board cell its
-     * position value with 0=empty, 1="X", 2="O".
+     * position value with 0=empty, 1="X", 2="O" (and 3="B" in the 3-player variant).
      */
     @Override
     public BoardVector getBoardVector(StateObservation so) {

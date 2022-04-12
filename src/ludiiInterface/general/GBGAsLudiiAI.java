@@ -70,10 +70,10 @@ public class GBGAsLudiiAI extends AI {
     }
 
     /**
-     * Assumes the gameID to be set. Then loads the agent that is supposed to play
-     * either via a direct path or by opening a file dialog to choose from.
+     * Loads the agent that is supposed to play from param {@code pa}
      * @param game
      * @param playerID
+     * @param pa
      */
     public void initAI(final Game game, final int playerID, PlayAgent pa){
         this.playerID = playerID;
@@ -81,7 +81,8 @@ public class GBGAsLudiiAI extends AI {
     }
 
     /**
-     * Selects an action based on the game being played. If no game is selected returns a random move from the (possible) moves list.
+     * Selects an action based on the game being played. If the game is not part of the switch cases, it issues a warning
+     * and returns a random move from the (possible) moves list.
      * The Ludii limitations maxSeconds, maxIterations and maxDepth are ignored as of now.
      * @return The move the agent wants to make.
      */
@@ -102,6 +103,7 @@ public class GBGAsLudiiAI extends AI {
             }
             default -> {
                 // Default to random move
+                System.err.println("[GBGAsLudiiAI.selectAction] Returning a random move, since game is not part of interface!");
                 int numMoves = game.moves(context).moves().size();
                 Random r = new Random();
                 return game.moves(context).moves().get(r.nextInt(numMoves-1));

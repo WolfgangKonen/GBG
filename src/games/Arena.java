@@ -1534,6 +1534,7 @@ abstract public class Arena implements Runnable {
 						setStatusMessage("Done.");
 					} else {
 						m_xfun.m_PlayAgents[0].setAgentState(PlayAgent.AgentState.TRAINED);
+						m_xab.setOParFrom(0,m_xfun.m_PlayAgents[0].getParOther());  // /WK/ Bug fix 2022-04-12
 						setStatusMessage("MultiTrain finished: "+ m_xfun.getLastMsg());
 					}
 					double elapsed_time = (System.currentTimeMillis() - start_time)/1000.0;
