@@ -24,7 +24,10 @@ public class ExpectimaxNWrapper extends ExpectimaxNAgent implements Serializable
 		this.m_oPar.setWrapperNPly(nply);
 		this.wrapped_pa = pa;
 	}
-	
+
+	@Override
+	public boolean isWrapper() { return true; }
+
 	/**
 	 * When the recursion tree has reached its maximal depth m_depth, then return
 	 * an estimate of the game score (tuple for all players).  

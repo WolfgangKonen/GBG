@@ -7,6 +7,7 @@ import controllers.PlayAgent;
 import controllers.PlayAgtVector;
 import games.*;
 import games.Othello.Edax.Edax2;
+import games.RubiksCube.StateObserverCube;
 import params.ParEdax;
 import params.ParOther;
 import tools.Measure;
@@ -162,6 +163,8 @@ public class MCompeteSweep {
 
         int[] sweepArr = (batchSizeArr==null) ? new int[]{0} : batchSizeArr;
         String userTitle2 = (batchSizeArr==null) ? "user2" : "RB_batch";
+        String trainCsvName = "../multiTrain/" + agtBase + ".csv";
+        String fCsvName="";
 
         for (int s : sweepArr) {
             if (s==0) {
@@ -178,19 +181,19 @@ public class MCompeteSweep {
 
                 // train pa, adjust doTrainEvaluation, and add elements to mtList (evaluation results during train) + save it
                 pa = sTrainer.doSingleTraining(0, i, pa, arenaTrain, arenaTrain.m_xab, gb, maxGameNum, userValue1, userValue2);
+                arenaTrain.m_xab.setOParFrom(0,pa.getParOther());  // /WK/ Bug fix 2022-04-12
                 arenaTrain.saveAgent(pa, strDir + "/multiTrain/" + agtBase + "_" + frm.format(i) + ".agt.zip");
 
                 // print the full list mtList after finishing training run i
                 // (we use "../" because we do not want to store in subdir "csv/" as printMultiTrainList usually does)
-                String trainCsvName = "../multiTrain/" + agtBase + ".csv";
-                MTrain.printMultiTrainList(trainCsvName, sTrainer.mtList, pa, arenaTrain, userTitle1, userTitle2);
+                fCsvName=MTrain.printMultiTrainList(trainCsvName, sTrainer.mtList, pa, arenaTrain, userTitle1, userTitle2);
 
                 deltaTime = (double) (System.currentTimeMillis() - startTime) / 1000.0;
                 elapsedTime += deltaTime;
             }
 
         }
-
+        if (fCsvName!=null) System.out.println("[multiTrainSweepOthello] Results saved to "+fCsvName+".");
         System.out.println("[multiTrainSweepOthello] "+elapsedTime+" sec.");
         return pa;
     } // multiTrainSweepOthello
@@ -356,6 +359,7 @@ public class MCompeteSweep {
             try {
                 String sAgent = xab.getSelectedAgent(n);
                 pa = arenaTrain.m_xfun.constructAgent(n,sAgent, xab);
+                pa = arenaTrain.m_xfun.wrapAgent(pa, pa.getParOther(), null, gb.getDefaultStartState());
                 if (pa==null) throw new RuntimeException("Could not construct AgentX = " + sAgent);
             }  catch(RuntimeException e)
             {
@@ -390,7 +394,8 @@ public class MCompeteSweep {
                 pa.trainAgent(so);
 
                 gameNum = pa.getGameNum();
-                int liveSignal = 500;
+                int liveSignal = (so instanceof StateObserverCube) ? 10000 :
+                                 (!pa.isWrapper()) ? 500 : 50;
                 if (gameNum % liveSignal == 0) {
                     System.out.println("gameNum: "+gameNum);
                 }

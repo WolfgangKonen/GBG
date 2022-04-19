@@ -4,12 +4,15 @@ import TournamentSystem.TSTimeStorage;
 import controllers.AgentBase;
 import controllers.MCTSExpWrapper.stateApproximation2.Approximator2;
 import controllers.MCTSWrapper.passStates.GameStateIncludingPass;
+import controllers.PlayAgent;
 import controllers.PlayAgtVector;
+import controllers.TD.ntuple2.NTupleAgt;
 import games.StateObservation;
 import params.ParOther;
 import tools.ScoreTuple;
 import tools.Types;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Map;
@@ -18,7 +21,7 @@ import java.util.Map;
  * PlayAgent that performs a Monte Carlo Tree Search Expectimax (MCTSE) to calculate the next action to be selected.
  * This agent wraps an approximator, which is used to evaluate game states in MCTSE simulations.
  */
-public final class MctseWrapperAgent extends AgentBase {
+public final class MctseWrapperAgent extends AgentBase implements PlayAgent, Serializable {
     private final int iterations;
     private final Mctse mcts;
     private final Approximator2 approximator;
@@ -175,4 +178,25 @@ public final class MctseWrapperAgent extends AgentBase {
         return rootNode;
     }
 
+    @Override
+    public PlayAgent getWrappedPlayAgent() {
+        return approximator.getWrappedPlayAgent();
+    }
+
+    @Override
+    public boolean isWrapper() { return true; }
+
+    /**
+     * Train this agent for one episode, starting from state {@code so}.
+     * Train the inner (wrapped) agent, but use the outer agent (the wrapper) for selecting the next action.
+     *
+     * @param so    the start state of the episode
+     * @return	true, if agent raised a stop condition (deprecated)
+     */
+    @Override
+    public boolean trainAgent(StateObservation so) {
+        resetAgent();	// do not re-use last MCTS
+        return getWrappedPlayAgent().trainAgent(so,this);
+
+    }
 }

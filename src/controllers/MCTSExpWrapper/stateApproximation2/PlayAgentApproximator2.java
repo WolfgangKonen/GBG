@@ -93,4 +93,8 @@ public final class PlayAgentApproximator2 implements Approximator2 {
     //      and step reward as indicated in the now commented lines
 
     public String getName() { return agent.getName(); }
+
+    public PlayAgent getWrappedPlayAgent() {
+        return agent;
+    }
 }

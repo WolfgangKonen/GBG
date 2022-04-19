@@ -7,6 +7,7 @@ import controllers.MC.MCAgentN;
 import controllers.MCTS.MCTSAgentT;
 import controllers.MCTSWrapper.ConfigWrapper;
 import controllers.PlayAgent;
+import game.rules.play.moves.nonDecision.effect.Apply;
 import games.Hex.HexTile;
 import games.Hex.StateObserverHex;
 import games.Sim.StateObserverSim;
@@ -1186,6 +1187,7 @@ abstract public class Arena implements Runnable {
 		}
 
 		PlayAgent td = this.m_xfun.m_PlayAgents[index];
+		if (td.isWrapper()) td = td.getWrappedPlayAgent();		// /WK/ hook for MCTSWrapperAgent, which is not serializable
 		AgentBase.validSaveAgent(td,index,numPlayers);
 		td.setParOther(m_xab.oPar[index]);		// copy parameter settings from oPar tab
 		if (td.getAgentState()== PlayAgent.AgentState.INIT) {
@@ -1213,6 +1215,12 @@ abstract public class Arena implements Runnable {
 	// only used from MCompeteSweep
 	public boolean saveAgent(PlayAgent pa, String savePath) {
 		String str;
+		if (pa.isWrapper()) {
+			PlayAgent wpa;
+			wpa = pa.getWrappedPlayAgent();		// /WK/ hook for MCTSWrapperAgent, which is not serializable
+			wpa.setAgentState(pa.getAgentState());
+			pa = wpa;
+		}
 		try {
 			this.tdAgentIO.saveGBGAgent(pa,savePath);
 			str = "Saved Agent!";

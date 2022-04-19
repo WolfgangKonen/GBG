@@ -6,13 +6,17 @@ import controllers.MCTSWrapper.passStates.ApplicableAction;
 import controllers.MCTSWrapper.passStates.GameStateIncludingPass;
 import controllers.MCTSWrapper.passStates.PassAction;
 import controllers.MCTSWrapper.stateApproximation.Approximator;
+import controllers.PlayAgent;
 import controllers.PlayAgtVector;
+import games.GameBoard;
 import games.ObserverBase;
 import games.StateObservation;
+import games.XArenaButtons;
 import params.ParOther;
 import tools.ScoreTuple;
 import tools.Types;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Map;
@@ -21,7 +25,7 @@ import java.util.Map;
  * PlayAgent that performs a Monte Carlo Tree Search (MCTS) to calculate the next action to be selected.
  * This agent wraps an approximator, which is used to evaluate game states in MCTS simulations.
  */
-public final class MCTSWrapperAgent extends AgentBase {
+public final class MCTSWrapperAgent extends AgentBase implements PlayAgent, Serializable {
     private final int iterations;
     private final MCTS mcts;
     private final Approximator approximator;
@@ -258,8 +262,29 @@ public final class MCTSWrapperAgent extends AgentBase {
     @Override
     public String getName() {
         String cs = super.getName();
-        cs = cs + "["+approximator.getName()+","+this.iterations+"]";
+        cs = cs + "["/*+approximator.getName()+","*/+this.iterations+"]";
         return cs;
     }
 
+    @Override
+    public PlayAgent getWrappedPlayAgent() {
+        return approximator.getWrappedPlayAgent();
+    }
+
+    @Override
+    public boolean isWrapper() { return true; }
+
+    /**
+     * Train this agent for one episode, starting from state {@code so}.
+     * Train the inner (wrapped) agent, but use the outer agent (the wrapper) for selecting the next action.
+     *
+     * @param so    the start state of the episode
+     * @return	true, if agent raised a stop condition (deprecated)
+     */
+    @Override
+    public boolean trainAgent(StateObservation so) {
+        resetAgent();	// do not re-use last MCTS
+        return getWrappedPlayAgent().trainAgent(so,this);
+
+    }
 }

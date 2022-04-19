@@ -57,7 +57,7 @@ public class MaxN2Wrapper extends AgentBase implements PlayAgent, Serializable {
 		m_depth = nPly;
 		this.wrapped_pa = pa;
 	}
-	
+
 	/**
 	 * Get the best next action and return it
 	 * @param so_in			current game state (not changed on return)
@@ -334,10 +334,6 @@ public class MaxN2Wrapper extends AgentBase implements PlayAgent, Serializable {
 	public ScoreTuple getScoreTuple(StateObservation sob, ScoreTuple prevTuple) {
 		return getBestAction(sob, false, true, 0, null).getScoreTuple();
 	}
-	
-	public PlayAgent getWrappedPlayAgent() {
-		return wrapped_pa;
-	}
 
 	@Override
 	public String stringDescr() {
@@ -359,11 +355,34 @@ public class MaxN2Wrapper extends AgentBase implements PlayAgent, Serializable {
 		return cs;
 	}
 
-	
-	public String getFullName() {
-		String cs = wrapped_pa.getName();
-		cs = cs + "[nPly="+m_depth+"]";
-		return cs;
+
+	// --- never used ---
+//	public String getFullName() {
+//		String cs = wrapped_pa.getName();
+//		cs = cs + "[nPly="+m_depth+"]";
+//		return cs;
+//	}
+
+	@Override
+	public PlayAgent getWrappedPlayAgent() {
+		return wrapped_pa;
+	}
+
+	@Override
+	public boolean isWrapper() { return true; }
+
+	/**
+	 * Train this agent for one episode, starting from state {@code so}.
+	 * Train the inner (wrapped) agent, but use the outer agent (the wrapper) for selecting the next action.
+	 *
+	 * @param so    the start state of the episode
+	 * @return	true, if agent raised a stop condition (deprecated)
+	 */
+	@Override
+	public boolean trainAgent(StateObservation so) {
+		resetAgent();
+		return getWrappedPlayAgent().trainAgent(so,this);
+
 	}
 
 }

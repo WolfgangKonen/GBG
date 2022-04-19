@@ -117,8 +117,9 @@ public class MTrain {
 	 * @param ar		needed for game name and {@code subdir}
 	 * @param userTitle1	title of 1st user column
 	 * @param userTitle2	title of 2nd user column
+	 * @return the filename
 	 */
-	public static void printMultiTrainList(String csvName, ArrayList<MTrain> mtList, PlayAgent pa, Arena ar,
+	public static String printMultiTrainList(String csvName, ArrayList<MTrain> mtList, PlayAgent pa, Arena ar,
 			String userTitle1, String userTitle2){
 		PrintWriter mtWriter = null;
 		String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+ar.getGameName();
@@ -159,8 +160,10 @@ public class MTrain {
 			}
 
 		    mtWriter.close();
+			return strDir+"/"+csvName;
 		} else {
 			System.out.print("*** Warning *** Could not write "+strDir+"/"+csvName+".");
+			return null;
 		}
 	}
 

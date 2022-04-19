@@ -29,4 +29,6 @@ public interface Approximator2 {
     double getScore(final StateObservation sob);
 
     String getName();
+
+    PlayAgent getWrappedPlayAgent();
 }

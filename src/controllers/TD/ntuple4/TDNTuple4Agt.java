@@ -741,15 +741,30 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	}
 
 	/**
-	 * Train the agent for one complete game episode <b>using self-play</b>. <p>
-	 * Side effects: Increment m_GameNum by +1. Change the agent's internal
-	 * parameters (weights and so on).
+	 * Train the agent for one complete game episode <b>using self-play</b>.
+	 * <p>
+	 * Side effects: Increment gameNum by +1.
+	 * Change the agent's internal parameters (weights and so on).
 	 * @param so		the state from which the episode is played (usually the
 	 * 					return value of {@link GameBoard#chooseStartState(PlayAgent)} to get
 	 * 					some exploration of different game paths)
 	 * @return			true, if agent raised a stop condition (only CMAPlayer)
 	 */
 	public boolean trainAgent(StateObservation so) {
+		return trainAgent(so,this);
+	}
+
+	/**
+	 * Train the agent for one complete game episode <b>using self-play</b>. <p>
+	 * Side effects: Increment m_GameNum and {@code acting_pa}'s gameNum by +1.
+	 * Change the agent's internal parameters (weights and so on).
+	 * @param so		the state from which the episode is played (usually the
+	 * 					return value of {@link GameBoard#chooseStartState(PlayAgent)} to get
+	 * 					some exploration of different game paths)
+	 * @param acting_pa the agent to be called when an action is requested ({@code getNextAction2})
+	 * @return			true, if agent raised a stop condition (only CMAPlayer - deprecated)
+	 */
+	public boolean trainAgent(StateObservation so, PlayAgent acting_pa) {
 		Types.ACTIONS_VT a_t;
 		int curPlayer;
 		NextState4 ns;
@@ -775,7 +790,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 		do {
 			m_numTrnMoves++;		// number of train moves (including random moves)
 			// choose action a_t, using epsilon-greedy policy based on V
-			a_t = getNextAction2(s_t.partialState(), true, true);
+			a_t = acting_pa.getNextAction2(s_t.partialState(), true, true);
 
 			// take action a_t and observe reward & next state
 			ns = new NextState4(this,s_t,a_t);
@@ -826,10 +841,8 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 
 		//System.out.println("episode: "+getGameNum()+", moveNum="+m_counter);
 		incrementGameNum();
-		// this is now in XArenaFuncs.trainAgent:
-//		if (this.getGameNum() % 500 == 0) {
-//			System.out.println("gameNum: "+this.getGameNum());
-//		}
+		acting_pa.setGameNum(this.getGameNum());
+
 		return false;
 	} // trainAgent
 

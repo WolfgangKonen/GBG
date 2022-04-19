@@ -62,7 +62,7 @@ public class ExpectimaxN2Wrapper extends AgentBase implements PlayAgent, Seriali
 		this(name);
 		m_depth = nply;
 	}
-		
+
 	/**
 	 * After loading an agent from disk fill the param tabs of {@link Arena} according to the
 	 * settings of this agent
@@ -306,10 +306,6 @@ public class ExpectimaxN2Wrapper extends AgentBase implements PlayAgent, Seriali
 //		return wrapped_pa.getScoreTuple(sob, prevTuple);		// /WK/ 2021-09-10: old and flawed
 	}
 
-	public PlayAgent getWrappedPlayAgent() {
-		return wrapped_pa;
-	}
-
 	@Override
 	public String stringDescr() {
 		String cs = wrapped_pa.getClass().getSimpleName();
@@ -318,13 +314,6 @@ public class ExpectimaxN2Wrapper extends AgentBase implements PlayAgent, Seriali
 	}
 
 	// getName: use method ObserverBase::getName()
-
-	// --- never used ---
-//	public String getFullName() {
-//		String cs = wrapped_pa.getClass().getSimpleName();
-//		cs = cs + "[nPly="+m_depth+"]";
-//		return cs;
-//	}
 
 	public int getDepth() {
 		return m_depth;
@@ -359,6 +348,28 @@ public class ExpectimaxN2Wrapper extends AgentBase implements PlayAgent, Seriali
     {
     	System.out.println("---   Random: "+NewSO.stringDescr()+"   "+scTuple.toString()+
     			", p="+currProbab+", depth="+depth);
-    }	 
+    }
+
+	@Override
+	public PlayAgent getWrappedPlayAgent() {
+		return wrapped_pa;
+	}
+
+	@Override
+	public boolean isWrapper() { return true; }
+
+	/**
+	 * Train this agent for one episode, starting from state {@code so}.
+	 * Train the inner (wrapped) agent, but use the outer agent (the wrapper) for selecting the next action.
+	 *
+	 * @param so    the start state of the episode
+	 * @return	true, if agent raised a stop condition (deprecated)
+	 */
+	@Override
+	public boolean trainAgent(StateObservation so) {
+		resetAgent();
+		return getWrappedPlayAgent().trainAgent(so,this);
+
+	}
 
 }

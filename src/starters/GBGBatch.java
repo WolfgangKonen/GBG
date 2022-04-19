@@ -60,7 +60,7 @@ public class GBGBatch extends SetupGBG {
 	 *              {@link #batch2(int, int, String, XArenaButtons, GameBoard, String) batch2} (multiTrainAlphaSweep) or
 	 *              {@link #batch3(int, int, String, XArenaButtons, GameBoard, String) batch3} (multiTrainLambdaSweep) or
 	 *              {@link #batch4(int, int, String, XArenaButtons, GameBoard, String) batch4} (multiTrainIncAmountSweep) or
-	 *              {@link #batch5(int, String, String, GameBoard) batch5} (multiTrainSweep) or
+	 *              {@link #batch5(int, int, String, String, XArenaButtons, GameBoard) batch5} (multiTrainSweep) or
 	 *              {@link #batch6(int, String, GameBoard, String) batch6} (multiCompeteSweep) or
 	 *              {@link #batch7(int, String, GameBoard, String) batch7} (multiCompete).
 	 *              The last three options 5,6,7 are only for game Othello.
@@ -149,7 +149,7 @@ public class GBGBatch extends SetupGBG {
 			case "2" -> t_Batch.batch2(nruns, maxGameNum, filePath, arenaTrain.m_xab, arenaTrain.getGameBoard(), csvName);
 			case "3" -> t_Batch.batch3(nruns, maxGameNum, filePath, arenaTrain.m_xab, arenaTrain.getGameBoard(), csvName);
 			case "4" -> t_Batch.batch4(nruns, maxGameNum, filePath, arenaTrain.m_xab, arenaTrain.getGameBoard(), csvName);
-			case "5" -> t_Batch.batch5(nruns, agtFile, filePath, arenaTrain.getGameBoard());
+			case "5" -> t_Batch.batch5(nruns, maxGameNum, agtFile, filePath, arenaTrain.m_xab, arenaTrain.getGameBoard());
 			case "6" -> t_Batch.batch6(nruns, agtFile, arenaTrain.getGameBoard(), csvName);
 			case "7" -> t_Batch.batch7(nruns, agtFile, arenaTrain.getGameBoard(), csvName);
 			default -> {
@@ -344,19 +344,21 @@ public class GBGBatch extends SetupGBG {
 	 * <p>
 	 * Write results to directory {@code agents/Othello/multiTrain}.
 	 * @param nruns			number of training runs
-	 * @param filePath		agent filename
+	 * @param maxGameNum	maximum number of training games. If -1, take maxGameNum from loaded agent
+	 * @param agtFile		agent filename
+	 * @param filePath		full file path to agent
+	 * @param xab			arena buttons object, to assess parameters
 	 * @param gb			game board object, needed for start state selection
 	 *
 	 * @see MCompeteSweep#multiTrainSweepOthello(PlayAgent, String, int, int, Arena, GameBoard, int[])  MCompeteMWrap.multiTrainSweepOthello
 	 */
-	public void batch5(int nruns, String agtFile, String filePath,
-					   GameBoard gb) {
+	public void batch5(int nruns, int maxGameNum, String agtFile, String filePath,
+					   XArenaButtons xab, GameBoard gb) {
 
-		int maxTrainGameNum=100000;  //-1;		// number of episodes in each training. If -1, take maxGameNum from loaded agent
-
-		//int[] batchSizeArr = null;
+		//batchSizeArr:	either null or the RB batch size values to sweep over
+		int[] batchSizeArr = null;
 		//int[] batchSizeArr = {0,100,200,400};
-		int[] batchSizeArr = {50,400};
+		//int[] batchSizeArr = {50,400};
 
 
 		// load an agent to fill xab with the appropriate parameter settings
@@ -366,11 +368,13 @@ public class GBGBatch extends SetupGBG {
 			return;
 		}
 		PlayAgent pa = arenaTrain.m_xfun.m_PlayAgents[0];
+		PlayAgent qa = arenaTrain.m_xfun.wrapAgent(pa, pa.getParOther(), null, gb.getDefaultStartState());
+		pa.setWrapperParams(xab.oPar[0]);
 
 		long startTime = System.currentTimeMillis();
 
 		MCompeteSweep mcmw = new MCompeteSweep();
-		mcmw.multiTrainSweepOthello(pa,agtFile,maxTrainGameNum,nruns,arenaTrain,gb,batchSizeArr);
+		mcmw.multiTrainSweepOthello(qa,agtFile,maxGameNum,nruns,arenaTrain,gb,batchSizeArr);
 
 		double elapsedTime = (System.currentTimeMillis() - startTime)/1000.0;
 		System.out.println("[GBGBatch.batch5] multiTrainSweep finished in "+elapsedTime+" sec. ");

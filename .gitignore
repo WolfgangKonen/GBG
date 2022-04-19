@@ -60,6 +60,7 @@ agents/ConnectFour/mtLambda.agt.zip
 agents/Nim3P/N03-S05-ExtraYes/multiTest*.agt.zip
 agents/Othello/AAREADME.txt
 agents/Othello/multiTrain/*
+agents/Othello/multiTrain-tmp/*
 agents/Othello/multiTrain-RB/*
 agents/Othello/multiTrain-10agents/*
 agents/Othello/multiTrain-10agents-2/*

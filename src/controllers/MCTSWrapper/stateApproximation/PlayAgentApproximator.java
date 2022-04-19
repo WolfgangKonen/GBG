@@ -5,13 +5,14 @@ import controllers.MCTSWrapper.utils.Tuple;
 import controllers.PlayAgent;
 import games.StateObservation;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 /**
  * A component that approximates the value v and the
  * vector of move probabilities <b>p</b> of a state as predicted by a wrapped {@link PlayAgent}.
  */
-public final class PlayAgentApproximator implements Approximator {
+public final class PlayAgentApproximator implements Approximator, Serializable {
     private final PlayAgent agent;
 
     public PlayAgentApproximator(final PlayAgent agent) {
@@ -84,4 +85,10 @@ public final class PlayAgentApproximator implements Approximator {
     //      and step reward as indicated in the now commented lines
 
     public String getName() { return agent.getName(); }
+
+    public PlayAgent getWrappedPlayAgent() {
+        return agent;
+    }
+
+
 }

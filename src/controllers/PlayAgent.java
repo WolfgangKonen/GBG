@@ -135,7 +135,19 @@ public interface PlayAgent {
 	 * @return			true, if agent raised a stop condition (only CMAPlayer - deprecated)	 
 	 */
 	boolean trainAgent(StateObservation so /*, int epiLength, boolean learnFromRM*/);
-	
+
+	/**
+	 * Train the agent for one complete game episode. <p>
+	 * Side effects: Increment m_GameNum and {@code acting_pa}'s gameNum by +1.
+	 * Change the agent's internal parameters (weights and so on).
+	 * @param so		the state from which the episode is played (usually the
+	 * 					return value of {@link GameBoard#chooseStartState(PlayAgent)} to get
+	 * 					some exploration of different game paths)
+	 * @param acting_pa the agent to be called when an action is requested ({@code getNextAction2})
+	 * @return			true, if agent raised a stop condition (only CMAPlayer - deprecated)
+	 */
+	boolean trainAgent(StateObservation so, PlayAgent acting_pa);
+
 	String printTrainStatus();
 	
 	/**
@@ -255,6 +267,8 @@ public interface PlayAgent {
 	void setName(String name);
 
 	boolean isStochastic();
+	boolean isWrapper();
+	PlayAgent getWrappedPlayAgent();
 	void setStochastic(boolean hasStochasticPolicy);
 
 }

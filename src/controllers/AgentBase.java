@@ -155,7 +155,16 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	public long getDurationEvaluationMs() {
 		return this.durationEvaluationMs;
 	}
-	
+
+	@Override
+	public boolean isWrapper() { return false; }
+
+	/**
+	 * @return {@code this} for unwrapped agents (that is, agents not overriding this method)
+	 */
+	@Override
+	public PlayAgent getWrappedPlayAgent() { return this; }
+
 	/**
 	 * @see #trainAgent(StateObservation)
 	 */
@@ -180,6 +189,9 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	 */
     @Override
 	public boolean trainAgent(StateObservation so) {
+    	return trainAgent(so,this);
+	}
+	public boolean trainAgent(StateObservation so, PlayAgent acting_pa) {
 		Types.ACTIONS  a_t;
 		StateObservation s_t = so.copy();
 		boolean m_finished=false;
@@ -228,7 +240,7 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	}
 
     @Override
-	public boolean instantiateAfterLoading() {
+	public boolean instantiateAfterLoading() {		// needed by LoadSaveTD.saveTDAgent
 		// older agents may have only m_agentState set:
 		if (this.m_agentState!=null && m_oPar.getAgentState()==null)
 			m_oPar.setAgentState(this.m_agentState);
@@ -241,7 +253,7 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 		if (this.getParOther().getAgentState()==null) this.getParOther().setAgentState(AgentState.TRAINED);
 
 
-		return true; 	// dummy stub, see LoadSaveTD.saveTDAgent
+		return true;
 	}
 	
     @Override
@@ -280,12 +292,14 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 
     @Override
 	public long getNumLrnActions() {
-		return m_numTrnMoves; // dummy stub for agents which are not trainable
+		if (isWrapper()) return getWrappedPlayAgent().getNumLrnActions();
+		return m_numTrnMoves; // dummy stub for agents which are no wrapper and do not override this method
 	}
 
     @Override
 	public long getNumTrnMoves() {
-		return m_numTrnMoves;
+		if (isWrapper()) return getWrappedPlayAgent().getNumTrnMoves();
+		return m_numTrnMoves; // dummy stub for agents which are no wrapper and do not override this method
 	}
 
     @Override
@@ -294,8 +308,7 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	}
 
 	/**
-	 * @return During training: Call the Evaluator after this number of training
-	 *         games
+	 * @return During training: Call the Evaluator after this number of training games
 	 */
     @Override
 	public int getNumEval() {
@@ -325,6 +338,7 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	public void setParOther(ParOther op) {
 		m_oPar.setFrom(op);
 	}
+
 	/**
 	 * Set defaults for m_oPar (needed in {@link Arena#loadAgent} when
 	 * loading older agents, where m_oPar=null in the saved version).
