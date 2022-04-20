@@ -36,7 +36,7 @@ public class EvaluatorYavalath extends Evaluator {
 
     private void initEvaluator() {
         ParMaxN params = new ParMaxN();
-        int maxNDepth = 1;
+        int maxNDepth = 2;
         params.setMaxNDepth(maxNDepth);
 
         ParMCTS paramsMCTS = new ParMCTS();
@@ -76,11 +76,11 @@ public class EvaluatorYavalath extends Evaluator {
                 m_msg = "No evaluation done ";
                 lastResult = 0.0;
                 return false;
-            case 0: return evaluateAgainstOpponent(m_PlayAgent, randomAgent, false, 5) > 0.0;
-            case 1: return evaluateAgainstOpponent(m_PlayAgent, maxNAgent, false, 5) > 0.0;
-            case 2: return evaluateAgainstOpponent(m_PlayAgent, mctsAgentT,false,5) > 0.0;
-            case 3: return evaluateAgainstOpponent(m_PlayAgent,maxNAgent,true,5) >0.0;
-            case 4: return evaluateAgainstOpponent(m_PlayAgent, mctsAgentT,true, 5) > 0.0;
+            case 0: return evaluateAgainstOpponent(m_PlayAgent, randomAgent, false, 10) > 0.0;
+            case 1: return evaluateAgainstOpponent(m_PlayAgent, maxNAgent, false, 10) > 0.0;
+            case 2: return evaluateAgainstOpponent(m_PlayAgent, mctsAgentT,false,10) > 0.0;
+            case 3: return evaluateAgainstOpponent(m_PlayAgent,maxNAgent,true,1) >0.0;
+            case 4: return evaluateAgainstOpponent(m_PlayAgent, mctsAgentT,true, 1) > 0.0;
             default: return false;
         }
 
