@@ -1,7 +1,10 @@
 package games;
 
+import controllers.AgentBase;
+import controllers.PlayAgent;
 import tools.Types;
 
+import javax.swing.*;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -15,10 +18,11 @@ import java.util.*;
  */
 public class LogManager {
     public boolean loggingEnabled = false;  //enables or disables logging
-    public boolean advancedLogging = true; //if advancedLogging is enabled every new logEntry is saved to a temporary file
+    public boolean advancedLogging = true; //if advancedLogging is enabled, every new logEntry is saved to a temporary file
                                            //the log is not lost when a crash occurs
                                            //call generateLogSessionContainerFromFile(path of temp folder) to combine all temporary files and generate the log
     public boolean verbose = true;
+    public boolean inspectV = true;
 
     public String filePath = "logs";
     public String tempPath = "logs\\temp";
@@ -33,8 +37,7 @@ public class LogManager {
      * and "src\games\Logs\temp" as default tempPath
      */
     public LogManager() {
-		tools.Utils.checkAndCreateFolder(filePath);
-		tools.Utils.checkAndCreateFolder(tempPath);
+        initLogManager();
     }
 
     /**
@@ -48,11 +51,13 @@ public class LogManager {
         this.filePath = filePath;
         this.tempPath = tempPath;
 
-		tools.Utils.checkAndCreateFolder(filePath);
-		tools.Utils.checkAndCreateFolder(tempPath);
+        initLogManager();
     }
 
-
+    private void initLogManager() {
+        tools.Utils.checkAndCreateFolder(filePath);
+        tools.Utils.checkAndCreateFolder(tempPath);
+    }
     /**
      * Adds a new log entry
      *
@@ -299,6 +304,9 @@ public class LogManager {
         return subDir;
     }
 
+    public boolean getInspectV() {
+        return inspectV;
+    }
 }
 
 /**

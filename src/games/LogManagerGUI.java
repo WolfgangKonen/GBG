@@ -1,6 +1,9 @@
 package games;
 
+import controllers.AgentBase;
+import controllers.PlayAgent;
 import games.RubiksCube.StateObserverCube;
+import tools.Types;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -21,6 +24,7 @@ import java.io.ObjectInputStream;
 public class LogManagerGUI {
     private final LogManager logManager;
     private final GameBoard gameBoard;
+    private PlayAgent paX;  // for InspectV mode
 
     private final boolean verbose = true;
 
@@ -31,6 +35,7 @@ public class LogManagerGUI {
     private JCheckBoxMenuItem jCBMILoggingEnabled;
     private JCheckBoxMenuItem jCBMIAdvancedLogging;
     private JCheckBoxMenuItem jCBMIVerbose;
+    private JCheckBoxMenuItem jCBMIInspectV;
     private final JMenuItem jMICompile = new JMenuItem("Compile temporary Gamelog");
     private final JMenuItem jMIClear = new JMenuItem("Delete all temporary Gamelogs");
     private final JMenu jMLoad = new JMenu("Load");
@@ -54,10 +59,31 @@ public class LogManagerGUI {
      */
     public LogManagerGUI(LogManager logManager, GameBoard gameBoard) {
         this.logManager = logManager;
-        this.gameBoard = gameBoard; 
+        this.gameBoard = gameBoard;
+
+        if (logManager.getInspectV()) {
+            fetch_paX();
+        }
+
         initialize();
+
     }
 
+    private void fetch_paX() {
+        XArenaFuncs m_xfun = gameBoard.getArena().m_xfun;
+        XArenaButtons m_xab = gameBoard.getArena().m_xab;
+        PlayAgent[] paVector, qaVector;
+
+        try {
+            paVector = m_xfun.fetchAgents(m_xab);
+            AgentBase.validTrainedAgents(paVector, gameBoard.getStateObs().getNumPlayers());
+            qaVector = m_xfun.wrapAgents(paVector, m_xab, gameBoard.getStateObs());
+            paX = qaVector[0];
+        } catch (RuntimeException e) {
+            gameBoard.getArena().showMessage(e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+    }
     /**
      * creates a Menu Bar, Buttons...
      */
@@ -95,6 +121,10 @@ public class LogManagerGUI {
         jCBMIVerbose.addActionListener((e) ->
                 logManager.verbose = jCBMIVerbose.isSelected());
 
+        jCBMIInspectV= new JCheckBoxMenuItem("InspectV with Agent X", logManager.inspectV);
+        jCBMIInspectV.addActionListener((e) ->
+                logManager.inspectV = jCBMIInspectV.isSelected());
+
         jMICompile.addActionListener((e) ->
         {
             //compiles a temp log to .gamelog
@@ -130,8 +160,9 @@ public class LogManagerGUI {
         });
 
         jMOptions.add(jCBMILoggingEnabled);
-        jMOptions.add(jCBMIAdvancedLogging);
-        jMOptions.add(jCBMIVerbose);
+        //jMOptions.add(jCBMIAdvancedLogging);  // we stay always with initial logManager.advancedLogging=true
+        //jMOptions.add(jCBMIVerbose);          // we stay always with initial logManager.verbose=true
+        jMOptions.add(jCBMIInspectV);
         jMOptions.add(jMICompile);
         jMOptions.add(jMIClear);
 
@@ -186,6 +217,8 @@ public class LogManagerGUI {
                     gameBoard.clearBoard(true,true);
                     loadBoard(0);
 
+                    fetch_paX();        // re-fetch agent X (in case it or its parameters have changed)
+
                     counter = 0;
                     jTFNextAction.setEnabled(true);
                     jLNumberActions.setText("/ " + (currentLog.stateObservations.size()));
@@ -211,18 +244,11 @@ public class LogManagerGUI {
         jBJump.setForeground(Color.black);
         jBJump.setBackground(Color.orange);
         jBJump.addActionListener((e) ->
-        {
-            //jump to a position in currentLog
-            try {
-                int position = Integer.parseInt(jTFNextAction.getText()) - 1;
-                if (position < currentLog.stateObservations.size() && position >= 0) {
-                    loadBoard(position);
-                } else {
-                    jTFNextAction.setText("" + (counter + 1));
-                }
-            } catch (NumberFormatException ignore) {
-            }
-        });
+                jumpPosition()
+        );
+        jTFNextAction.addActionListener((e) ->
+                jumpPosition()
+        );
 
         jBPreviousAction.setEnabled(false);
         jBPreviousAction.setForeground(Color.black);
@@ -280,7 +306,16 @@ public class LogManagerGUI {
         if(currentLog.stateObservations.size() > position && position >= 0) {
             counter = position;
     		boolean showValue = gameBoard.getArena().m_xab.getShowValueOnGameBoard();
-            gameBoard.updateBoard(currentLog.stateObservations.get(position), true, showValue);
+    		StateObservation currentState = currentLog.stateObservations.get(position);
+    		if (logManager.getInspectV() && paX != null) {
+    		    currentState.setAvailableActions();
+    		    if (currentState.getNumAvailableActions()>0) {
+                    paX.resetAgent();
+                    Types.ACTIONS_VT paact = paX.getNextAction2(currentState,false,true);
+                    currentState.storeBestActionInfo(paact);
+                }
+            }
+            gameBoard.updateBoard(currentState, true, showValue);
             jTFNextAction.setText("" + (position + 1));
 
             if(currentLog.stateObservations.size() > position + 1) {
@@ -300,6 +335,21 @@ public class LogManagerGUI {
                 jBPreviousAction.setEnabled(false);
                 jBPreviousAction.setText("no previous action");
             }
+        }
+    }
+
+    /**
+     *  jump to the position in currentLog specified by {@link #jTFNextAction}
+     */
+    private void jumpPosition() {
+        try {
+            int position = Integer.parseInt(jTFNextAction.getText()) - 1;
+            if (position < currentLog.stateObservations.size() && position >= 0) {
+                loadBoard(position);
+            } else {
+                jTFNextAction.setText("" + (counter + 1));
+            }
+        } catch (NumberFormatException ignore) {
         }
     }
 

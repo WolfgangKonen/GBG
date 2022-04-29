@@ -46,6 +46,8 @@ public class MCompeteSweep {
      * This file has the columns: <br>
      * {@code run, competeNum, dEdax, iterMWrap, EPS, p_MWrap, c_puct, winrate, time, userValue2}. <br>
      * The contents may be visualized with one of the R-scripts found in {@code resources\R_plotTools}.
+     * <p>
+     * NOTE: This method can only be run under Windows, since edax.exe is a Windows executable.
      *
      * @param pa		    agent to wrap
      * @param iterMWrap	    number of MCTS wrapper iterations
@@ -83,6 +85,8 @@ public class MCompeteSweep {
      * This file has the columns: <br>
      * {@code agtFile, run, competeNum, dEdax, iterMWrap, EPS, p_MWrap, c_puct, winrate, time, userValue2}. <br>
      * The contents may be visualized with R-scripts found in {@code resources\R_plotTools}.
+     * <p>
+     * NOTE: This method can only be run under Windows, since edax.exe is a Windows executable.
      *
      * @param iterMWrap	    number of MCTS wrapper iterations
      * @param agtDir        the directory where to search for agent files
@@ -162,9 +166,10 @@ public class MCompeteSweep {
         String agtBase = agtFile.split("\\.")[0];
 
         int[] sweepArr = (batchSizeArr==null) ? new int[]{0} : batchSizeArr;
+        String fCsvName="";
         String userTitle2 = (batchSizeArr==null) ? "user2" : "RB_batch";
         String trainCsvName = "../multiTrain/" + agtBase + ".csv";
-        String fCsvName="";
+        // (we use "../" because we do not want to store in subdir "csv/" as printMultiTrainList usually does)
 
         for (int s : sweepArr) {
             if (s==0) {
@@ -179,13 +184,24 @@ public class MCompeteSweep {
 
                 startTime = System.currentTimeMillis();
 
-                // train pa, adjust doTrainEvaluation, and add elements to mtList (evaluation results during train) + save it
+                // train pa, adjust doTrainEvaluation, and add elements to mtList (evaluation results during train)
                 pa = sTrainer.doSingleTraining(0, i, pa, arenaTrain, arenaTrain.m_xab, gb, maxGameNum, userValue1, userValue2);
                 arenaTrain.m_xab.setOParFrom(0,pa.getParOther());  // /WK/ Bug fix 2022-04-12
-                arenaTrain.saveAgent(pa, strDir + "/multiTrain/" + agtBase + "_" + frm.format(i) + ".agt.zip");
+
+                // save pa in a yet unused filename. This for multiple concurrent jobs which should not write to a
+                // filename already written by another job. For single-threaded jobs (and no similar files present in
+                // dir multiTrain/), k=0 will be used.
+                int k=-1;
+                String agtPath;
+                File file;
+                do {
+                    k++;
+                    agtPath = strDir + "/multiTrain/" + agtBase + "_" + frm.format(i+k) + ".agt.zip";
+                    file = new File(agtPath);
+                } while (file.exists());
+                arenaTrain.saveAgent(pa,agtPath);
 
                 // print the full list mtList after finishing training run i
-                // (we use "../" because we do not want to store in subdir "csv/" as printMultiTrainList usually does)
                 fCsvName=MTrain.printMultiTrainList(trainCsvName, sTrainer.mtList, pa, arenaTrain, userTitle1, userTitle2);
 
                 deltaTime = (double) (System.currentTimeMillis() - startTime) / 1000.0;
@@ -201,13 +217,15 @@ public class MCompeteSweep {
     /**
      * Perform Othello multi-training-and-competition with MCTSWrapperAgent wrapped around agent {@code pa} vs. Edax2 with
      * different depth levels. In each run, agent {@code pa} is trained anew. (We need param {@code pa} only to load it
-     * and to infer from this all the training params.) The Edax depth values to sweep are coded
-     * in array {@code depthArr} in this method. The wrapped agent plays both roles (parameter {@code p_MWrap = 0,1}).
+     * and to infer from this all the training params.) The Edax depth values to sweep are coded in array {@code depthArr}
+     * in this method. The wrapped agent plays both roles (parameter {@code p_MWrap = 0,1}).
      * <p>
      * Side effect: writes results of multi-competition to <b>{@code agents/<gameDir>/csv/<csvName>}</b>.
      * This file has the columns: <br>
      * {@code agtFile, run, competeNum, dEdax, iterMWrap, EPS, p_MWrap, c_puct, winrate, time, userValue2}. <br>
      * The contents may be visualized with R-scripts found in {@code resources\R_plotTools}.
+     * <p>
+     * NOTE: This method can only be run under Windows, since edax.exe is a Windows executable.
      *
      * @param pa		    agent to wrap
      * @param agtFile       agent filename, we use its {@code agtBase} (part w/o ".agt.zip") to form the new filenames
@@ -241,7 +259,19 @@ public class MCompeteSweep {
 
             // train pa, adjust doTrainEvaluation, and add elements to mtList (evaluation results during train) + save it
             pa = sTrainer.doSingleTraining(0, i, pa, arenaTrain, arenaTrain.m_xab, gb, maxGameNum, userValue1, userValue2);
-            arenaTrain.saveAgent(pa,strDir+"/multiTrain/"+agtBase+"_"+frm.format(i)+".agt.zip");
+
+            // save pa in a yet unused filename. This for multiple concurrent jobs which should not write to a
+            // filename already written by another job. For single-threaded jobs (and no similar files present in
+            // dir multiTrain/), k=0 will be used.
+            int k=-1;
+            String agtPath;
+            File file;
+            do {
+                k++;
+                agtPath = strDir + "/multiTrain/" + agtBase + "_" + frm.format(i+k) + ".agt.zip";
+                file = new File(agtPath);
+            } while (file.exists());
+            arenaTrain.saveAgent(pa,agtPath);
 
             // print the full list mtList after finishing training run i
             // (we use "../" because we do not want to store in subdir "csv/" as printMultiTrainList usually does)

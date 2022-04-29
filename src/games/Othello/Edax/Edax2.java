@@ -53,7 +53,8 @@ public class Edax2 extends AgentBase implements PlayAgent, Serializable
 		commandLineInteractor = new CommandLineInteractor("agents\\Othello\\Edax", "edax.exe", ".*[eE]dax plays ([A-z][0-8]).*", 1);
 		commandLineInteractor.sendCommand("mode 3"); // no automatic moves
 		commandLineInteractor.sendCommand("level "+edaxPar.getDepth()); 		//  set search depth 
-		commandLineInteractor.sendCommand("move-time "+edaxPar.getMoveTime()); //  set time per move		
+		commandLineInteractor.sendCommand("move-time "+edaxPar.getMoveTime()); //  set time per move
+		//commandLineInteractor.sendCommand("book-usage off");
 	}
 	
 	/**

@@ -1,17 +1,15 @@
 #
-# **** These are Nov'2021 results with TDNTuple4Agt on Othello. 
-#      TCL-wrap: 20 wrapped agents   
-#         multiTrain/TCL4-100_7_250k-lam05_P4_nPly2-FAm_A_0*.agt.zip with *=0,1,...,9
-#      with MCTSWrapper and 10.000 iterations in each move
-#      TCL-base: the same 20 agents, but no wrapper
-#      MCTS-i10k: MCTS with 10.000 iterations, but no TCL
+# **** These are April'2022 results with MCTS-wrapped TDNTuple4Agt on Othello. 
+#      In contrast to former runs we have MCTS in the training loop.
+#      To keep runtimes managable, we run only 12.000 training episodes for each agent:
+#         W-0:      no MCTS iterations during training
+#         W-100:   100 MCTS iterations during training
+#      When evaluating against Edax, we use always 10.000 MCTS iterations
 # ****
 #
 # This script shows that TCL-wrap is clearly better than either TCL-base or MCTS-i10k.
 # 
 # TCL-wrap results are obtained with EPS=+1e-8.
-# 
-# April'22: removed errorbars
 # 
 library(ggplot2)
 library(grid)
@@ -25,26 +23,29 @@ path <- "~/GitHub/GBG/agents/Othello/csv/";
 Ylimits=c(0.0,1.0); 
 Xlimits=factor(1:9); 
 
-filenames=c(#"multiTrainOthello-10Agents.csv" 
-            #"multiTrainOthello-10Agents-2.csv"
-            "multiTrainOthello-20Agents.csv"
+filenames=c(
+            "multiCompeteOthello-W100.csv",
+            "multiCompeteOthello-W0-12k.csv",
+            "multiCompeteOthello-W1000-12k.csv"
             # generated with >GBGBatch Othello 6 ...
 )
-pdffile=#"MCTSWrap-TCL10.pdf"
-        #"MCTSWrap-TCL10-2.pdf"
-        "MCTSWrap-TCL20.R1.pdf"
+agroup = c("W100","W0","W1000")   #"W10000","W1000",
+pdffile="MCTSWrap-W100-12k.pdf"
         
   
 dfAll = data.frame()
 for (k in 1:length(filenames)) {
   filename <- paste0(path,filenames[k])
   df <- read.csv(file=filename, skip=2, dec=".",sep=";")
+  df <- cbind(df,agentGroup=rep(agroup[k],nrow(df)))
   dfAll <- rbind(dfAll,df)
 }
-dfAll = cbind(dfAll,agentGroup=rep("TCL-base",nrow(dfAll)))
-dfAll$agentGroup = as.character(dfAll$agentGroup)
-dfAll[dfAll$iterMWrap==10000,c("agentGroup")] <- "TCL-wrap"
-dfAll[dfAll$agtFile=="MCTS-10k",c("agentGroup")] <- "MCTS-10k"
+#dfAll = cbind(dfAll,agentGroup=rep("TCL-base",nrow(dfAll)))
+#dfAll$agentGroup = as.character(dfAll$agentGroup)
+#dfAll[dfAll$iterMWrap==10000,c("agentGroup")] <- "TCL-wrap"
+#dfAll[dfAll$agtFile=="MCTS-10k",c("agentGroup")] <- "MCTS-10k"
+dfAll <- dfAll[dfAll$iterMWrap==10000,]
+dfAll <- dfAll[dfAll$agtFile!="MCTS-10k",]
 
 
 
@@ -64,7 +65,7 @@ tgc <- tgc[tgc$EPS==1e-8,]
 
 q <- ggplot(tgc,aes(x=dEdax,y=winrate,colour=agentGroup,shape=agentGroup)) #,linetype=agentGroup))
 #q <- q+geom_errorbar(aes(ymin=winrate-se, ymax=winrate+se), width=errWidth) #, position=pd)
-#q <- q+labs(title="MCTSWrap(TCL) vs. Edax")
+q <- q+labs(title="same training episodes (12000)")
 #q <- q+geom_line(position=pd,size=1.0) + geom_point(position=pd,size=2.0) 
 q <- q+geom_line(size=1.0) + geom_point(size=3.0)
 q <- q+scale_x_discrete(limits=Xlimits) 

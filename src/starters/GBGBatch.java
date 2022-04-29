@@ -75,7 +75,7 @@ public class GBGBatch extends SetupGBG {
 	 *          [3] (optional) {@code nruns}: how many agents to train (default -1). In case of batch6 or batch7, this argument
 	 *              contains {@code iterMCTS}.   <br>
 	 *          [4] (optional) {@code maxGameNum}: maximum number of training episodes (default -1: take the parameter stored
-	 *              in the loaded agent file.) <br>
+	 *              in the loaded agent file.) Irrelevant in case of batch6 or batch7. <br>
 	 *          [5] (optional) {@code csvFile}: filename for CSV results (defaults: "multiTrain.csv" or
 	 *          	"multiTrainAlphaSweep.csv" or "multiTrainLambdaSweep.csv" or "multiTrainIncAmountSweep.csv",
 	 *          	see {@link #csvNameDef}) <br>
@@ -336,7 +336,7 @@ public class GBGBatch extends SetupGBG {
 	} // batch4
 
 	/**
-	 * Perform Othello multi-training. In each run, agent {@code pa} is constructed anew (to get different random tuples)
+	 * Perform <strong>Othello</strong> multi-training. In each run, agent {@code pa} is constructed anew (to get different random tuples)
 	 * and then trained.
 	 * <p>
 	 * If {@code batchSizeArr} (in source code) is non-null, sweep additionally replay buffer's parameter {@code batchSize}

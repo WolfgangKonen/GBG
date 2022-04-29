@@ -214,6 +214,9 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
 	 * Set them in member ACTIONS[] actions.
 	 */
 	public void setAvailableActions() {
+		if (availableActions==null) {	// safety check, needed when called from LogManagerGUI
+			availableActions = new ArrayList();
+		}
 		availableActions.clear();
 		if (m_Table[0][0]==0)  availableActions.add(Types.ACTIONS.fromInt(0));
 		if (m_Table[0][1]==0)  availableActions.add(Types.ACTIONS.fromInt(1));
