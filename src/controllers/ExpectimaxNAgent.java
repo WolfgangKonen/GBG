@@ -38,7 +38,7 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 {
 	/**
 	 * If {@code PARTIAL_IN_RECURSION==true}, form a partial state before starting the recursion in
-	 * {@link #getScore(StateObservation)} and {@link #getScoreTuple(StateObservation, ScoreTuple)} (recommended)
+	 * {@link #getScoreTuple(StateObservation, ScoreTuple)}
 	 * <p>
 	 * If {@code PARTIAL_IN_RECURSION==false}, do not form partial states before starting the recursion.
 	 */
@@ -580,27 +580,27 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 
 	}
 
-	/**
-	 * Return the agent's score for that after state.
-	 * @param sob			the current game state;
-	 * @return				the probability that the player to move wins from that 
-	 * 						state. If game is over: the score for the player who 
-	 * 						*would* move (if the game were not over).
-	 * Each player wants to maximize its score	 
-	 */
-	@Override
-	public double getScore(StateObservation sob) {
-		assert sob instanceof StateObsNondeterministic : "Error, sob must be of class StateObsNondeterministic";
-		StateObsNondeterministic soND_p, soND = (StateObsNondeterministic) sob;
-		if (!soND.isImperfectInformationGame()) {
-			return getEAScoreTuple(soND, true, 0).scTup[sob.getPlayer()];
-		} else {
-			soND_p = PARTIAL_IN_RECURSION ? soND.partialState() : soND;
-			return getEAScoreTuple_partial(new DuoStateND(soND_p,soND_p), true, 0,ViewType.ROOT)
-					.element2()
-					.scTup[sob.getPlayer()];
-		}
-	}
+//	/**
+//	 * Return the agent's score for that after state.
+//	 * @param sob			the current game state;
+//	 * @return				the probability that the player to move wins from that
+//	 * 						state. If game is over: the score for the player who
+//	 * 						*would* move (if the game were not over).
+//	 * Each player wants to maximize its score
+//	 */
+//	@Override
+//	public double getScore(StateObservation sob) {
+//		assert sob instanceof StateObsNondeterministic : "Error, sob must be of class StateObsNondeterministic";
+//		StateObsNondeterministic soND_p, soND = (StateObsNondeterministic) sob;
+//		if (!soND.isImperfectInformationGame()) {
+//			return getEAScoreTuple(soND, true, 0).scTup[sob.getPlayer()];
+//		} else {
+//			soND_p = PARTIAL_IN_RECURSION ? soND.partialState() : soND;
+//			return getEAScoreTuple_partial(new DuoStateND(soND_p,soND_p), true, 0,ViewType.ROOT)
+//					.element2()
+//					.scTup[sob.getPlayer()];
+//		}
+//	}
 	@Override
 	public ScoreTuple getScoreTuple(StateObservation sob, ScoreTuple prevTuple) {
 		assert sob instanceof StateObsNondeterministic : "Error, sob must be of class StateObsNondeterministic";

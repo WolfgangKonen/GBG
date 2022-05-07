@@ -240,11 +240,11 @@ public final class MCTSWrapperAgent extends AgentBase implements PlayAgent, Seri
             .toArray();
     }
 
-    @Override
-    public double getScore(final StateObservation sob) {
-        return approximator.getScore(sob);
-    }
-    // /WK/ getScore is needed to make the interface happy, it is probably never really used
+//    @Override
+//    public double getScore(final StateObservation sob) {
+//        return approximator.getScore(sob);
+//    }
+//    // /WK/ getScore is needed to make the interface happy, it is probably never really used
 
     @Override
     public String stringDescr() {

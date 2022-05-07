@@ -317,7 +317,7 @@ abstract public class Arena implements Runnable {
 			return;
 		}
 
-		String sMsg = "Inspecting the value function of "+ agentX +" (X) ...";
+		String sMsg = "Inspecting the value function of "+ paX.stringDescr2() +" (X) ...";
 		setStatusMessage(sMsg);
 		System.out.println("[InspectGame] " + sMsg);
 		
@@ -332,6 +332,9 @@ abstract public class Arena implements Runnable {
 
 		boolean stored_USELASTMCTS = ConfigWrapper.USELASTMCTS;
 		ConfigWrapper.USELASTMCTS = false;
+		// We need to disable USELASTMCTS in InspectV, otherwise we get AssertionError "Oops, action mismatch!"
+		// We restore it later, when finishing InspectV
+
 		so = gb.getStateObs();  // just to initialize it
 
 		while (taskState == Task.INSPECTV) {

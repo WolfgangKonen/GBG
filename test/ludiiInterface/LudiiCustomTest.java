@@ -19,8 +19,10 @@ import tools.Utils;
 import utils.LudiiAI;
 
 import java.io.FileOutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 public class LudiiCustomTest extends GBGBatch {
@@ -36,6 +38,16 @@ public class LudiiCustomTest extends GBGBatch {
     static AI PLAYER_2;
     static Game ludiiGame;
 
+    /**
+     * Play {@link #GAMESNUMBER} Othello episodes {@link #PLAYER_1}( {@code = }{@link LudiiAI}) vs.
+     * {@link #PLAYER_2}( {@code = }{@link GBGAsLudiiAI}), where the GBG agent is loaded from {@code agtFile}
+     * as specified in source code.
+     * <p>
+     * If {@link #LOGS}{@code = true}, then append
+     * <pre>
+     *    timestamp | Winner : Moves: ...  </pre>
+     * as one-liner to log file {@code logs/<gameName>[/<subdir]/logs.ludiilog}.
+     */
     @Test
     public void customOthelloGame() {
         PlayAgent pa;
@@ -91,6 +103,16 @@ public class LudiiCustomTest extends GBGBatch {
         }
     }
 
+    /**
+     * Play {@link #GAMESNUMBER} Hex episodes {@link #PLAYER_1}( {@code = }{@link LudiiAI}) vs.
+     * {@link #PLAYER_2}( {@code = }{@link GBGAsLudiiAI}), where the GBG agent is loaded from {@code agtFile}
+     * as specified in source code.
+     * <p>
+     * If {@link #LOGS}{@code = true}, then append
+     * <pre>
+     *    timestamp | Winner : Moves: ...  </pre>
+     * as one-liner to log file {@code logs/<gameName>[/<subdir]/logs.ludiilog}.
+     */
     @Test
     public void customHexGame() {
         PlayAgent pa;
@@ -126,7 +148,7 @@ public class LudiiCustomTest extends GBGBatch {
             final Model model = context.model();
 
             while (!context.trial().over()){
-                model.startNewStep(context,ais,1.0);
+                model.startNewStep(context,ais,MAX_SECONDS);
             }
             if(context.trial().status().winner() == 0){
                 System.out.println("Tie.");
@@ -149,6 +171,16 @@ public class LudiiCustomTest extends GBGBatch {
         }
     }
 
+    /**
+     * Play {@link #GAMESNUMBER} Yavalath episodes {@link #PLAYER_1}( {@code = }{@link LudiiAI}) vs.
+     * {@link #PLAYER_2}( {@code = }{@link GBGAsLudiiAI}), where the GBG agent is loaded from {@code agtFile}
+     * as specified in source code.
+     * <p>
+     * If {@link #LOGS}{@code = true}, then append
+     * <pre>
+     *    timestamp | Winner : Moves: ...  </pre>
+     * as one-liner to log file {@code logs/<gameName>[/<subdir]/logs.ludiilog}.
+     */
     @Test
     public void customYavalathGame() {
         PlayAgent pa;
@@ -183,7 +215,7 @@ public class LudiiCustomTest extends GBGBatch {
             final Model model = context.model();
 
             while (!context.trial().over()){
-                model.startNewStep(context,ais,1.0);
+                model.startNewStep(context,ais,MAX_SECONDS);
             }
             if(context.trial().status().winner() == 0){
                 System.out.println("Tie.");
@@ -208,8 +240,8 @@ public class LudiiCustomTest extends GBGBatch {
 
     private String getLogPath(Arena arena) {
         String logFullFilePath;
-        String logMainDir="logs";
         String logFile="logs.ludiilog";
+        String logMainDir="logs";
         String logDirectory = logMainDir + "\\" + selectedGame;
         String subDir = arena.getGameBoard().getSubDir();
         if(subDir != null && !subDir.equals("")) {
@@ -220,8 +252,20 @@ public class LudiiCustomTest extends GBGBatch {
         return logFullFilePath;
     }
 
+    /**
+     * generates String containing the current timestamp
+     *
+     * @return the timestamp
+     */
+    private static String getCurrentTimeStamp() {
+        SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");//-SSS
+        Date now = new Date();
+        return sdfDate.format(now);
+    }
+
     private static void logGame(Context context, String logfilePath, List<AI> ais){
         StringBuilder logMessage = new StringBuilder();
+        logMessage.append(getCurrentTimeStamp()+" | ");
 
         if(context.trial().status().winner() == 0){
             logMessage.append("Tie: ");

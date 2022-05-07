@@ -1,6 +1,5 @@
 package controllers.TD.ntuple4;
 
-import java.io.ObjectInputFilter;
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -13,12 +12,8 @@ import controllers.ReplayBuffer.ConfigReplayBuffer;
 import controllers.ReplayBuffer.Transition.ITransition;
 import controllers.TD.ntuple2.NTuple2;
 import controllers.TD.ntuple2.TDNTuple3Agt;
-import game.functions.ints.state.Next;
-import game.functions.ints.state.State;
 import games.BlackJack.BasicStrategyBlackJackAgent;
 import games.BlackJack.StateObserverBlackJack;
-import graphics.svg.element.BaseElement;
-import jdk.swing.interop.SwingInterOpUtils;
 import params.ParNT;
 import params.ParOther;
 import params.ParRB;
@@ -386,31 +381,31 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	}
 
 
-	/**
-	 * Return the agent's estimate of the score for that afterstate {@code so}.
-	 * For 2-player games like TTT, the score is V(), the probability that the player to move
-	 * wins from that after state. V(s_t|p_t) learns this probability for every t.
-	 * V(s_t|p_t) is the quantity to be maximized by getNextAction2.
-	 * For 1-player games like 2048 it is the estimated (total or future) reward.
-	 * <p>
-	 * NOTE: For {@link TDNTuple4Agt} and N &gt; 1, this method should be never called, since the score
-	 * of {@code so} from perspective of player {@code so.getPlayer()} is never trained. What is trained 
-	 * is the score of {@code so} from perspective of the player preceding {@code so.getPlayer()}, see
-	 * {@link #getScore(StateObservation, StateObservation)}.
-	 * <p> 
-	 * This method is only implemented here to satisfy {@link PlayAgent}'s interface. If called,
-	 * it throws an exception.
-	 *
-	 * @param so		   the (after-)state for which the value is desired
-	 * @return V(s_t|p_t), the agent's estimate of the future score for that after state (its value)
-	 */
-	@Deprecated
-	public double getScore(StateObservation so) {
-		throw new RuntimeException("getScore(so) is not valid for TDNTuple4Agt --> use getScore(so,PreSO) instead");
-//		int[] bvec = m_Net.xnf.getBoardVector(so);
-//		double score = m_Net.getScoreI(bvec,so.getPlayer());
-//		return score;
-	}
+//	/**
+//	 * Return the agent's estimate of the score for that afterstate {@code so}.
+//	 * For 2-player games like TTT, the score is V(), the probability that the player to move
+//	 * wins from that after state. V(s_t|p_t) learns this probability for every t.
+//	 * V(s_t|p_t) is the quantity to be maximized by getNextAction2.
+//	 * For 1-player games like 2048 it is the estimated (total or future) reward.
+//	 * <p>
+//	 * NOTE: For {@link TDNTuple4Agt} and N &gt; 1, this method should be never called, since the score
+//	 * of {@code so} from perspective of player {@code so.getPlayer()} is never trained. What is trained
+//	 * is the score of {@code so} from perspective of the player preceding {@code so.getPlayer()}, see
+//	 * {@link #getScore(StateObservation, StateObservation)}.
+//	 * <p>
+//	 * This method is only implemented here to satisfy {@link PlayAgent}'s interface. If called,
+//	 * it throws an exception.
+//	 *
+//	 * @param so		   the (after-)state for which the value is desired
+//	 * @return V(s_t|p_t), the agent's estimate of the future score for that after state (its value)
+//	 */
+//	@Deprecated
+//	public double getScore(StateObservation so) {
+//		throw new RuntimeException("getScore(so) is not valid for TDNTuple4Agt --> use getScore(so,PreSO) instead");
+////		int[] bvec = m_Net.xnf.getBoardVector(so);
+////		double score = m_Net.getScoreI(bvec,so.getPlayer());
+////		return score;
+//	}
 
 	/**
 	 * Return the agent's estimate of the score for that afterstate {@code so}. 
@@ -458,10 +453,10 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 //		// --> should we do these calls in here, to be on the safe side??
 //		return so.getStoredBestScoreTuple();	// WARNING: might return an all-zeros ScoreTuple
 
-		return oldGetScoreTuple(so,prevTuple);
+		return _getScoreTuple(so,prevTuple);
 	}
 
-	private ScoreTuple oldGetScoreTuple(StateObservation so, ScoreTuple prevTuple) {
+	private ScoreTuple _getScoreTuple(StateObservation so, ScoreTuple prevTuple) {
 
 		// --- the old version before 2021-09-10 ---
 		ScoreTuple sc = new ScoreTuple(so);

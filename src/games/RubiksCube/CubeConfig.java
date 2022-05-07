@@ -101,9 +101,9 @@ public class CubeConfig {
 	 * <li> <b>false</b>: doublets are not allowed in the twist sequence. As a consequence, the twist sequence in this 
 	 * 		case is likely to require at least p (or p-1) twists to be solved.
 	 * </ul>
-	 * Detail: In case {@link #twistType}=={@link TwistType}<b>{@code .ALLTWISTS}</b>, the forbidden doublets are 
+	 * Detail: In case {@link #twistType}=={@link TwistType}<b>{@code .HTM}</b>, the forbidden doublets are
 	 * 		U*U*, L*L*, F*F* with *=1,2,3. <br>
-	 * 		In case {@link #twistType}=={@link TwistType}<b>{@code .QUARTERTWISTS}</b>, the forbidden doublets are 
+	 * 		In case {@link #twistType}=={@link TwistType}<b>{@code .QTM}</b>, the forbidden doublets are
 	 * 		U1U3, U3U1, L1L3, L3L1, F1F3, F3F1.
 	 */
 	final static boolean TWIST_DOUBLETS = false;

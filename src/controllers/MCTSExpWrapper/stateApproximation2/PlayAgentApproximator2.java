@@ -80,17 +80,17 @@ public final class PlayAgentApproximator2 implements Approximator2 {
         ).toArray();
     }
 
-    /**
-     * @return The approximator's estimate of the final score for that game state.
-     */
-    public double getScore(final StateObservation sob) {
-        return agent.getScore(sob);
-//        int P = sob.getPlayer();        // suggestion WK - but probably not needed yet
-//        return sob.isGameOver() ? sob.getRewardTuple(true).scTup[P]
-//                                : agent.getScore(sob) + sob.getStepRewardTuple().scTup[P];
-    }
-    // /WK/ If the method were really used (currently it is not), it would be perhaps necessary to include the reward
-    //      and step reward as indicated in the now commented lines
+//    /**
+//     * @return The approximator's estimate of the final score for that game state.
+//     */
+//    public double getScore(final StateObservation sob) {
+//        return agent.getScore(sob);
+////        int P = sob.getPlayer();        // suggestion WK - but probably not needed yet
+////        return sob.isGameOver() ? sob.getRewardTuple(true).scTup[P]
+////                                : agent.getScore(sob) + sob.getStepRewardTuple().scTup[P];
+//    }
+//    // /WK/ If the method were really used (currently it is not), it would be perhaps necessary to include the reward
+//    //      and step reward as indicated in the now commented lines
 
     public String getName() { return agent.getName(); }
 

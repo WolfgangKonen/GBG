@@ -171,11 +171,11 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
 		return false;		
 	} 
 
-	@Override
-	public double getScore(StateObservation so) {
-        assert (so instanceof StateObserverCube) : "Not a StateObserverCube object";
-		return daviValue((StateObserverCube) so);
-	}
+//	@Override
+//	public double getScore(StateObservation so) {
+//        assert (so instanceof StateObserverCube) : "Not a StateObserverCube object";
+//		return daviValue((StateObserverCube) so);
+//	}
 
 	@Override
 	public ScoreTuple getScoreTuple(StateObservation so, ScoreTuple prevTuple) {

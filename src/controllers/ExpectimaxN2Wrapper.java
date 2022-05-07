@@ -267,21 +267,21 @@ public class ExpectimaxN2Wrapper extends AgentBase implements PlayAgent, Seriali
 		return act_vt.getScoreTuple();		// return ScoreTuple for best action
 	}
 
-	/**
-	 * Return the agent's score for that after state.
-	 * @param sob			the current game state;
-	 * @return				the probability that the player to move wins from that 
-	 * 						state. If game is over: the score for the player who 
-	 * 						*would* move (if the game were not over).
-	 * Each player wants to maximize its score	 
-	 */
-	@Override
-	public double getScore(StateObservation sob) {
-		assert sob instanceof StateObsNondeterministic : "Error, sob must be of class StateObservationNondet";
-		StateObsNondeterministic soND = (StateObsNondeterministic) sob;
-		
-		return getAllScores(soND,sob,true,0).scTup[sob.getPlayer()];
-	}
+//	/**
+//	 * Return the agent's score for that after state.
+//	 * @param sob			the current game state;
+//	 * @return				the probability that the player to move wins from that
+//	 * 						state. If game is over: the score for the player who
+//	 * 						*would* move (if the game were not over).
+//	 * Each player wants to maximize its score
+//	 */
+//	@Override
+//	public double getScore(StateObservation sob) {
+//		assert sob instanceof StateObsNondeterministic : "Error, sob must be of class StateObservationNondet";
+//		StateObsNondeterministic soND = (StateObsNondeterministic) sob;
+//
+//		return getAllScores(soND,sob,true,0).scTup[sob.getPlayer()];
+//	}
 	@Override
 	public ScoreTuple getScoreTuple(StateObservation sob, ScoreTuple prevTuple) {
 		assert sob instanceof StateObsNondeterministic : "Error, sob must be of class StateObservationNondet";

@@ -113,10 +113,10 @@ public class RandomAgent extends AgentBase implements PlayAgent {
 	}
 
 
-	@Override
-	public double getScore(StateObservation sob) {
-		return rand.nextDouble();
-	}
+//	@Override
+//	public double getScore(StateObservation sob) {
+//		return rand.nextDouble();
+//	}
 
 	/**
 	 * Return a tuple with the agent's estimate of {@code sob}'s final game value (final reward)

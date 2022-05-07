@@ -84,11 +84,11 @@ public class FeatureTTT extends TicTDBase implements Feature, Serializable {
     	return inpSize[featmode];
     }
     
-	@Override
-	public double getScore(StateObservation sob) {
-		// Auto-generated method stub (just needed because AgentBase,
-		// the superclass of TicTDBase, requires it)
-		return 0;
-	}
+//	@Override
+//	public double getScore(StateObservation sob) {
+//		// Auto-generated method stub (just needed because AgentBase,
+//		// the superclass of TicTDBase, requires it)
+//		return 0;
+//	}
 
 }

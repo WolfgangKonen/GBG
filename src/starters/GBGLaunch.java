@@ -361,11 +361,11 @@ public class GBGLaunch extends SetupGBG {
 			//setScaPar2List(new int[]{});
 			setScaPar0List(new String[]{"2x2x2","3x3x3"});
 			setScaPar1List(new String[]{"CSTATE","CPLUS","STICKER","STICKER2"});
-			setScaPar2List(new String[]{"ALL","QUARTER"});
+			setScaPar2List(new String[]{"HTM","QTM"});
 			//choiceScaPar0.addItem("3x3x3");
 			choiceScaPar0.setSelectedItem("3x3x3");			//
 			choiceScaPar1.setSelectedItem("STICKER2");		// the initial (recommended) values
-			choiceScaPar2.setSelectedItem("ALL");			//
+			choiceScaPar2.setSelectedItem("QTM");			//
 			break;
 		case "EWN":
 			scaPar0_L.setText("Settings:");

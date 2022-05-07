@@ -113,7 +113,7 @@ public class ArenaCube extends Arena   {
     }
 
     /**
-     * set the twist type (ALLTWISTS or QUARTERTWISTS) for Rubik's Cube
+     * set the twist type (HTM = half-turn metric or QTM = quarter-turn metric) for Rubik's Cube
      */
     public static void setTwistType(String tCube) {
 		switch (tCube) {

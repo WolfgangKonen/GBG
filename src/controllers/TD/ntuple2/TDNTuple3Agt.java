@@ -381,31 +381,31 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	}
 
 		
-	/**
-	 * Return the agent's estimate of the score for that afterstate {@code so}.
-	 * For 2-player games like TTT, the score is V(), the probability that the player to move
-	 * wins from that after state. V(s_t|p_t) learns this probability for every t.
-	 * V(s_t|p_t) is the quantity to be maximized by getNextAction2.
-	 * For 1-player games like 2048 it is the estimated (total or future) reward.
-	 * <p>
-	 * NOTE: For {@link TDNTuple3Agt} and N &gt; 1, this method should be never called, since the score
-	 * of {@code so} from perspective of player {@code so.getPlayer()} is never trained. What is trained 
-	 * is the score of {@code so} from perspective of the player preceding {@code so.getPlayer()}, see
-	 * {@link #getScore(StateObservation, StateObservation)}.
-	 * <p> 
-	 * This method is only implemented here to satisfy {@link PlayAgent}'s interface. If called,
-	 * it throws an exception.
-	 * 
-	 * @param so		   the (after-)state for which the value is desired
-	 * @return V(s_t|p_t), the agent's estimate of the future score for that after state (its value)
-	 */
-	@Deprecated
-	public double getScore(StateObservation so) {
-		throw new RuntimeException("getScore(so) is not valid for TDNTuple3Agt --> use getScore(so,PreSO) instead");
-//		int[] bvec = m_Net.xnf.getBoardVector(so);
-//		double score = m_Net.getScoreI(bvec,so.getPlayer());
-//		return score;
-	}
+//	/**
+//	 * Return the agent's estimate of the score for that afterstate {@code so}.
+//	 * For 2-player games like TTT, the score is V(), the probability that the player to move
+//	 * wins from that after state. V(s_t|p_t) learns this probability for every t.
+//	 * V(s_t|p_t) is the quantity to be maximized by getNextAction2.
+//	 * For 1-player games like 2048 it is the estimated (total or future) reward.
+//	 * <p>
+//	 * NOTE: For {@link TDNTuple3Agt} and N &gt; 1, this method should be never called, since the score
+//	 * of {@code so} from perspective of player {@code so.getPlayer()} is never trained. What is trained
+//	 * is the score of {@code so} from perspective of the player preceding {@code so.getPlayer()}, see
+//	 * {@link #getScore(StateObservation, StateObservation)}.
+//	 * <p>
+//	 * This method is only implemented here to satisfy {@link PlayAgent}'s interface. If called,
+//	 * it throws an exception.
+//	 *
+//	 * @param so		   the (after-)state for which the value is desired
+//	 * @return V(s_t|p_t), the agent's estimate of the future score for that after state (its value)
+//	 */
+//	@Deprecated
+//	public double getScore(StateObservation so) {
+//		throw new RuntimeException("getScore(so) is not valid for TDNTuple3Agt --> use getScore(so,PreSO) instead");
+////		int[] bvec = m_Net.xnf.getBoardVector(so);
+////		double score = m_Net.getScoreI(bvec,so.getPlayer());
+////		return score;
+//	}
 
 	/**
 	 * Return the agent's estimate of the score for that afterstate {@code so}. 

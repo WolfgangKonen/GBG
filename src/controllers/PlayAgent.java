@@ -63,21 +63,21 @@ public interface PlayAgent {
 	 */
 	Types.ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean silent);
 	
-	/**
-	 * Return the agent's estimate of the final score for that game state.
-	 * <p>
-	 * On the long run, {@link PlayAgent#getScore(StateObservation)} should become deprecated (in favor of
-	 * {@link PlayAgent#getScoreTuple(StateObservation, ScoreTuple) getScoreTuple}).
-	 *
-	 * @param sob			the current game state;
-	 * @return				the agent's estimate of the final score for that state. 
-	 * 						For 2-player games this is usually the probability 
-	 * 						that the player to move wins from that state.
-	 * 						If game is over: the score for the player who *would*
-	 * 						move (if the game were not over).<p>
-	 * Each player wants to maximize *its* score.	 
-	 */
-	double getScore(StateObservation sob);
+//	/**
+//	 * Return the agent's estimate of the final score for that game state.
+//	 * <p>
+//	 * On the long run, {@link PlayAgent#getScore(StateObservation) getScore(sob)} should become deprecated (in favor of
+//	 * {@link PlayAgent#getScoreTuple(StateObservation, ScoreTuple) getScoreTuple(sob, prevTuple)}).
+//	 *
+//	 * @param sob			the current game state;
+//	 * @return				the agent's estimate of the final score for that state.
+//	 * 						For 2-player games this is usually the probability
+//	 * 						that the player to move wins from that state.
+//	 * 						If game is over: the score for the player who *would*
+//	 * 						move (if the game were not over).<p>
+//	 * Each player wants to maximize *its* score.
+//	 */
+//	double getScore(StateObservation sob);
 
 	/**
 	 * Return the agent's estimate of {@code sob}'s score-to-come  (future reward) <b>for all players</b>.

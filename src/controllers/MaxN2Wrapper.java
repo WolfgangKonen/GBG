@@ -318,18 +318,18 @@ public class MaxN2Wrapper extends AgentBase implements PlayAgent, Serializable {
 			// (because getNextAction2's ScoreTuple does not include score-so-far, but a final game state does)
 	}
 	
-	/**
-	 * Return the agent's score for that after state.
-	 * @param sob			the current game state;
-	 * @return				the probability that the player to move wins from that 
-	 * 						state. If game is over: the score for the player who 
-	 * 						*would* move (if the game were not over).
-	 * Each player wants to maximize its score	 
-	 */
-	@Override
-	public double getScore(StateObservation sob) {
-		return getBestAction(sob, false, true, 0, null).getScoreTuple().scTup[sob.getPlayer()];
-	}
+//	/**
+//	 * Return the agent's score for that after state.
+//	 * @param sob			the current game state;
+//	 * @return				the probability that the player to move wins from that
+//	 * 						state. If game is over: the score for the player who
+//	 * 						*would* move (if the game were not over).
+//	 * Each player wants to maximize its score
+//	 */
+//	@Override
+//	public double getScore(StateObservation sob) {
+//		return getBestAction(sob, false, true, 0, null).getScoreTuple().scTup[sob.getPlayer()];
+//	}
 	@Override
 	public ScoreTuple getScoreTuple(StateObservation sob, ScoreTuple prevTuple) {
 		return getBestAction(sob, false, true, 0, null).getScoreTuple();

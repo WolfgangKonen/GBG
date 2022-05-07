@@ -1,5 +1,6 @@
 package games.Othello.Edax;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -8,27 +9,24 @@ import controllers.AgentBase;
 import controllers.PlayAgent;
 import games.Arena;
 import games.StateObservation;
-import games.XArenaMenu;
 import games.Othello.StateObserverOthello;
 import params.ParEdax;
-import params.ParOther;
 import tools.ScoreTuple;
-import tools.Types;
 import tools.Types.ACTIONS;
 import tools.Types.ACTIONS_VT;
 
 /**
  * 
  * Edax2 replaces the former agent Edax. 
- * It has a simpler interface and it has no need for initialization
+ * It has a simpler interface, and it has no need for initialization
  *
  */
 public class Edax2 extends AgentBase implements PlayAgent, Serializable
 {
+	@Serial
 	private static final long serialVersionUID = 13L;
-	private String lastEdaxMove;
-	
-	private ParEdax edaxPar;
+
+	private final ParEdax edaxPar;
 	
 	transient private CommandLineInteractor commandLineInteractor;
 	
@@ -58,7 +56,7 @@ public class Edax2 extends AgentBase implements PlayAgent, Serializable
 	}
 	
 	/**
-	 * If agents need a special treatment after being loaded from disk (e. g. instantiation
+	 * If agents need a special treatment after being loaded from disk (e.g. instantiation
 	 * of transient members), put the relevant code in here.
 	 * 
 	 * @see LoadSaveGBG#transformObjectToPlayAgent
@@ -100,9 +98,9 @@ public class Edax2 extends AgentBase implements PlayAgent, Serializable
 		ArrayList<ACTIONS> availActions = so.getAvailableActions();
 		
 //		commandLineInteractor.sendCommand("init"); 
-		commandLineInteractor.sendCommand("setboard "+so.toEdaxString()); 
-		lastEdaxMove = commandLineInteractor.sendAndAwait("go");  // force Edax to play now			
-		
+		commandLineInteractor.sendCommand("setboard "+so.toEdaxString());
+		String lastEdaxMove = commandLineInteractor.sendAndAwait("go");  // force Edax to play now
+
 		int actInteger = EdaxMoveConverter.converteEdaxToInt(lastEdaxMove);
 		double[] vTable = new double[availActions.size()];
 		for (int i=0; i<availActions.size(); i++) {
@@ -124,16 +122,15 @@ public class Edax2 extends AgentBase implements PlayAgent, Serializable
     @Override
 	public String stringDescr() {
 		String cs = getClass().getSimpleName();
-		String str = cs + ": depth:" + edaxPar.getDepth()
-						+ ", moveTime:" + edaxPar.getMoveTime();
-		return str;
+		return  cs + ": depth:" + edaxPar.getDepth()
+				   + ", moveTime:" + edaxPar.getMoveTime();
 	}
 		
-	@Override
-	public double getScore(StateObservation sob) {
-		// Edax has no estimates for score values, so we return 0 ...
-		return 0;
-	}
+//	@Override
+//	public double getScore(StateObservation sob) {
+//		// Edax has no estimates for score values, so we return 0 ...
+//		return 0;
+//	}
 
 	@Override
 	public ScoreTuple getScoreTuple(StateObservation sob, ScoreTuple prevTuple) {

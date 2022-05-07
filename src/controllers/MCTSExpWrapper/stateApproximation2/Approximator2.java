@@ -23,10 +23,10 @@ public interface Approximator2 {
 
     Types.ACTIONS_VT getNextAction(StateObservation stateObservation);
 
-    /**
-     * @return The approximator's estimate of the final score for that game state.
-     */
-    double getScore(final StateObservation sob);
+//    /**
+//     * @return The approximator's estimate of the final score for that game state.
+//     */
+//    double getScore(final StateObservation sob);
 
     String getName();
 

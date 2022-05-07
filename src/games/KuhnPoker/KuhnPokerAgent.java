@@ -195,9 +195,9 @@ public class KuhnPokerAgent extends AgentBase implements PlayAgent {
     }
 
 
-    @Override
-    public double getScore(StateObservation sob) {
-        return rand.nextDouble();
-    }
+//    @Override
+//    public double getScore(StateObservation sob) {
+//        return rand.nextDouble();
+//    }
 
 }

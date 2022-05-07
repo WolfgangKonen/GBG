@@ -2,12 +2,15 @@
 # **** These are April'2022 results with MCTS-wrapped TDNTuple4Agt on Othello. 
 #      In contrast to former runs we have MCTS in the training loop.
 #      To keep runtimes managable, we run only 12.000 training episodes for each agent:
-#         W-0:      no MCTS iterations during training
-#         W-100:   100 MCTS iterations during training
+#         W-0:       no MCTS iterations during training
+#         W-100:    100 MCTS iterations during training
+#         W-1000:  1000 MCTS iterations during training
+#         W-10000:10000 MCTS iterations during training
 #      When evaluating against Edax, we use always 10.000 MCTS iterations
 # ****
 #
-# This script shows that TCL-wrap is clearly better than either TCL-base or MCTS-i10k.
+# This script shows that MCTS-in-the-training-loop does not reach in 12.000 episodes results
+# comparable to MCTS-not-in-training-loop, but 250.000 episodes
 # 
 # TCL-wrap results are obtained with EPS=+1e-8.
 # 
@@ -24,12 +27,13 @@ Ylimits=c(0.0,1.0);
 Xlimits=factor(1:9); 
 
 filenames=c(
-            "multiCompeteOthello-W100.csv",
             "multiCompeteOthello-W0-12k.csv",
-            "multiCompeteOthello-W1000-12k.csv"
+            "multiCompeteOthello-W100.csv",
+            "multiCompeteOthello-W1000-12k.csv",
+            "multiCompeteOthello-W10000-12k.csv"
             # generated with >GBGBatch Othello 6 ...
 )
-agroup = c("W100","W0","W1000")   #"W10000","W1000",
+agroup = c("W0","W100","W1000","W10000")   #"W10000","W1000",
 pdffile="MCTSWrap-W100-12k.pdf"
         
   
