@@ -71,7 +71,6 @@ agents/Othello/TCL4-100_7_100k-RB*.agt.zip
 agents/Othello/WrappeMCTS-100-OLD.agt.zip
 agents/RubiksCube/tooBigForGit
 # (no RubiksCube agents in repos, they are still experimental)
-agents/RubiksCube/2x2x2_CSTATE_AT/*.zip
 agents/RubiksCube/2x2x2_STICKER_AT/*test.agt.zip
 agents/RubiksCube/2x2x2_STICKER2_AT/*lam05.agt.zip
 agents/RubiksCube/2x2x2_STICKER2_QT/*lam05.agt.zip
