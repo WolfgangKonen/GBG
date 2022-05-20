@@ -11,8 +11,8 @@ library(scales)       # for 'labels=percent' in ggplot
 source("summarySE.R")
 
 PLOTALLLINES=F  # if =T: make a plot for each filename, with one line for each run
-EE=20           # 20 or 50: eval epiLength
-TWISTTYPE="QTM" # QTM or HTM
+EE=50           # 20 or 50: eval epiLength
+TWISTTYPE="HTM" # QTM or HTM
 
 filenames=c()
 for (CUBEW in c(2,3)) {        # cube width, either 2 or 3
@@ -30,8 +30,8 @@ for (CUBEW in c(2,3)) {        # cube width, either 2 or 3
     path <- paste("../../agents/RubiksCube/",cubewww,"_STICKER2_QT/csv/",sep=""); 
     fname <- switch(CUBEW
                     ," "
-                    #,paste0("mRubiks2x2-MWrap[TCL4-p16]-QTM-p1-16-EE",EE,".csv")  # CUBEW=2, QTM
-                    ,paste0("mRubiks2x2-MWrap[TCL4-p16-lam05]-QTM-p1-16-EE",EE,".csv")# CUBEW=2, QTM
+                    ,paste0("mRubiks2x2-MWrap[TCL4-p16]-QTM-p1-16-EE",EE,".csv")  # CUBEW=2, QTM
+                    #,paste0("mRubiks2x2-MWrap[TCL4-p16-lam05]-QTM-p1-16-EE",EE,".csv")# CUBEW=2, QTM
                     ,paste0("mRubiks3x3-MWrap[TCL4-p13]-QTM-p1-13-EE",EE,".csv")   # CUBEW=3, QTM
     )
   } 
@@ -117,9 +117,9 @@ q <- q+geom_errorbar(aes(ymin=winrate-se, ymax=winrate+se), width=errWidth) #, p
 q <- q+geom_line(size=1.0) + geom_point(size=3.0)
 q <- q+scale_y_continuous(limits=Ylimits, labels=percent) 
 q <- q+ylab(evalStr)
-q <- q+scale_x_continuous(limits=c(1,16), breaks=c(1,3,5,7,9,11,13,15)) 
+q <- q+scale_x_continuous(limits=c(1,ifelse(TWISTTYPE=="HTM",13,16)), breaks=c(1,3,5,7,9,11,13,15)) 
 q <- q+xlab("scrambling twists") +
-     annotate("text",x=14.0,y=0.05,label=TWISTTYPE, size=5)
+     annotate("text",x=ifelse(TWISTTYPE=="HTM",11,14),y=0.05,label=TWISTTYPE, size=5)
 q <- q+guides(colour = guide_legend(reverse = FALSE))
 q <- q+guides(linetype = guide_legend(reverse = FALSE))
 q <- q+theme(axis.title = element_text(size = rel(1.5)))    # bigger axis labels 

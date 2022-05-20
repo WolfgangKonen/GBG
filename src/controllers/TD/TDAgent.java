@@ -462,26 +462,39 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 
 	/**
 	 * Train the Agent for one complete game episode. <p>
-	 * Side effects: Increment m_GameNum by +1. Change the agent's internal  
+	 * <p>
+	 * Side effects: Increment m_GameNum by +1. Change the agent's internal
 	 * parameters (weights and so on).
 	 * @param so		the state from which the episode is played (usually the
 	 * 					return value of {@link GameBoard#chooseStartState(PlayAgent)} to get
 	 * 					some exploration of different game paths)
-// --- epiLength, learnFromRM are now available via the AgentBase's member ParOther m_oPar: ---
-//	 * @param epiLength	maximum number of moves in an episode. If reached, stop training 
-//	 * 					prematurely.  
-//	 * @param learnFromRM if true, learn from random moves during training
-	 * @return			true, if agent raised a stop condition (only CMAPlayer)	 
+	 * @return			true, if agent raised a stop condition (only CMAPlayer)
 	 */
-	public boolean trainAgent(StateObservation so) 
-	{
+	public boolean trainAgent(StateObservation so) { return trainAgent(so,this); }
+
+	/**
+	 * Train the agent for one complete game episode <b>using self-play</b>.
+	 * <p>
+	 * Side effects: Increment m_GameNum and {@code acting_pa}'s gameNum by +1.
+	 * Change the agent's internal parameters (weights and so on).
+	 * <p>
+	 * This method is used by the wrappers: They call it with {@code this} being the wrapped agent (it has the internal
+	 * parameters) and {@code acting_pa} being the wrapper.
+	 *
+	 * @param so		the state from which the episode is played (usually the
+	 * 					return value of {@link GameBoard#chooseStartState(PlayAgent)} to get
+	 * 					some exploration of different game paths)
+	 * @param acting_pa the agent to be called when an action is requested ({@code getNextAction2})
+	 * @return			true, if agent raised a stop condition (only CMAPlayer - deprecated)
+	 */
+	public boolean trainAgent(StateObservation so, PlayAgent acting_pa) {
 		if(so.getNumPlayers() > 2)
-			return trainAgent3player(so);
+			return trainAgent3player(so,acting_pa);
 		else
-			return trainAgent2player(so);
+			return trainAgent2player(so,acting_pa);
 	}
 	
-	private boolean trainAgent2player(StateObservation so)
+	private boolean trainAgent2player(StateObservation so, PlayAgent acting_pa)
 	{
 		double reward;
 		boolean randomMove;
@@ -509,7 +522,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 		}
 		int counter=0;		// count the number of moves
 		while (true) {
-			actBest = this.getNextAction2(so.partialState(), true, true);
+			actBest = acting_pa.getNextAction2(so.partialState(), true, true);
 			randomMove = actBest.isRandomAction();
 			oldSO = so.copy();
 			so.advance(actBest);
@@ -616,10 +629,11 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 		m_epsilon = m_epsilon - m_EpsilonChangeDelta; 		// linear decrease of m_epsilon 
 
 		incrementGameNum();
+		acting_pa.setGameNum(this.getGameNum());
 		return false;
 	}
 	
-	private boolean trainAgent3player(StateObservation so)
+	private boolean trainAgent3player(StateObservation so, PlayAgent acting_pa)
 	{
 		boolean randomMove;
 		boolean wghtChange;
@@ -646,7 +660,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 					firstRound = false;
 			}
 			
-			actBest = this.getNextAction2(so.partialState(), true, true);
+			actBest = acting_pa.getNextAction2(so.partialState(), true, true);
 			randomMove = actBest.isRandomAction();
 			so.advance(actBest);
 			so.storeBestActionInfo(actBest);	// /WK/ was missing before 2021-09-10. Now stored ScoreTuple is up-to-date.
@@ -713,6 +727,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 		m_epsilon = m_epsilon - m_EpsilonChangeDelta; 		// linear decrease of m_epsilon 
 
 		incrementGameNum();
+		acting_pa.setGameNum(this.getGameNum());
 		return false;
 	}
 	

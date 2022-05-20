@@ -753,6 +753,10 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	 * Train the agent for one complete game episode <b>using self-play</b>. <p>
 	 * Side effects: Increment m_GameNum and {@code acting_pa}'s gameNum by +1.
 	 * Change the agent's internal parameters (weights and so on).
+	 * <p>
+	 * This method is used by the wrappers: They call it with {@code this} being the wrapped agent (it has the internal
+	 * parameters) and {@code acting_pa} being the wrapper.
+	 *
 	 * @param so		the state from which the episode is played (usually the
 	 * 					return value of {@link GameBoard#chooseStartState(PlayAgent)} to get
 	 * 					some exploration of different game paths)

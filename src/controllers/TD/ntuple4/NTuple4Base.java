@@ -59,12 +59,13 @@ abstract public class NTuple4Base extends AgentBase implements NTuple4Agt, Seria
 	
 	// Value function of the agent.
 	protected NTuple4ValueFunc m_Net;
-	
+
 	/**
 	 * Members {@link #m_tdPar}, {@link #m_ntPar}, {@link AgentBase#m_oPar} are needed for 
 	 * saving and loading the agent (to restore the agent with all its parameter settings)
 	 */
 	protected ParTD m_tdPar;
+
 	protected ParNT m_ntPar;
 	
 	protected boolean PRINTTABLES = false;	// /WK/ control the printout of tableA, tableN, epsilon
@@ -279,11 +280,16 @@ abstract public class NTuple4Base extends AgentBase implements NTuple4Agt, Seria
 	public ParTD getParTD() {
 		return m_tdPar;
 	}
-	public ParNT getParNT() {
-		return m_ntPar;
-	}
+	public ParNT getParNT() { return m_ntPar; }
 	// getParOther() is in AgentBase
-	
+
+	public void setParTD(ParTD m_tdPar) {
+		this.m_tdPar = new ParTD(m_tdPar);
+	}
+	public void setParNT(ParNT m_ntPar) {
+		this.m_ntPar = new ParNT(m_ntPar);
+	}
+
 	public boolean getAFTERSTATE() {
 		return m_ntPar.getAFTERSTATE();
 	}

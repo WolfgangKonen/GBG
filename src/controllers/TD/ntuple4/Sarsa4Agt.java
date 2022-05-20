@@ -89,12 +89,10 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 	transient private ScoreTuple rLast;
 	
 	private int numOutputs;
-	private int actionIndexMin;
-	private int actionIndexMax;
-	
+
 	private final boolean RANDINITWEIGHTS = false;// If true, init weights of value function randomly
 
-	private boolean m_DEBG = false;
+	private final boolean m_DEBG = false;
 	// debug printout in collectReward:
 	public static boolean DBG_REWARD=false;
 	
@@ -125,7 +123,7 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 	 * @param ntPar			n-tuples and temporal coherence parameter
 	 * @param nTuples		the set of n-tuples
 	 * @param xnf			contains game-specific n-tuple functions
-	 * @param allAvailActions	neede to infer the number of outputs of the n-tuple network
+	 * @param allAvailActions	needed to infer the number of outputs of the n-tuple network
 	 * @param maxGameNum	maximum number of training games
 	 */
 	public Sarsa4Agt(String name, ParTD tdPar, ParNT ntPar, ParOther oPar,
@@ -142,21 +140,21 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 
 	/** 
 	 * Infer members actionIndexMin, actionIndexMax, numOutputs from allAvailActions
-	 * @param allAvailActions
+	 * @param allAvailActions   the list of all actions, needed to infer the number of outputs of the n-tuple network
 	 */
 	private void processAvailActions(ArrayList<ACTIONS> allAvailActions) {
 		ListIterator<ACTIONS> iter = allAvailActions.listIterator();
-		this.actionIndexMin = Integer.MAX_VALUE;
-		this.actionIndexMax = Integer.MIN_VALUE;
+		int actionIndexMin = Integer.MAX_VALUE;
+		int actionIndexMax = Integer.MIN_VALUE;
 		while (iter.hasNext()) {
 			int key = iter.next().toInt();
-			if (key<actionIndexMin) actionIndexMin=key;
-			if (key>actionIndexMax) actionIndexMax=key;
+			if (key< actionIndexMin) actionIndexMin =key;
+			if (key> actionIndexMax) actionIndexMax =key;
 		}
-		this.numOutputs = (actionIndexMax+1);
+		this.numOutputs = (actionIndexMax +1);
 		
 		if (actionIndexMin < 0) {
-			System.err.println("*** Warning: actionIndexMin="+actionIndexMin+" is < 0 ***");
+			System.err.println("*** Warning: actionIndexMin="+ actionIndexMin +" is < 0 ***");
 			System.err.println("This does not work for SarsaAgt and all member funcs of NTuple2ValueFunc.");
 		}
 		
@@ -227,7 +225,7 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 	 * 
 	 * @param so			current game state (is returned unchanged)
 	 * @param random		allow random action selection with probability m_epsilon
-	 * @param silent
+	 * @param silent		operate silently
 	 * @return actBest		the best action. If several actions have the same
 	 * 						score, break ties by selecting one of them at random. 
 	 * <p>						
@@ -242,7 +240,7 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 		double bestQValue;
         double qValue;			// the quantity to be maximized
 		StateObservation NewSO;
-        ACTIONS actBest = null;
+        ACTIONS actBest;
         ACTIONS_VT actBestVT;
     	bestQValue = -Double.MAX_VALUE;
 		double[] VTable;		
@@ -328,24 +326,6 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 		return actBestVT;
 	}	
 	
-
-		
-//	/**
-//	 * Return the agent's estimate of the score for that after state
-//	 * For 2-player games like TTT, the score is V(), the probability that
-//	 * X (Player +1) wins from that after state. V(s_t|p_t) learns this probability for every t.
-//	 * p_t*V(s_t) is the quantity to be maximized by getNextAction2.
-//	 * For 1-player games like 2048 it is the estimated (total or future) reward.
-//	 *
-//	 * @param so			the state for which the value is desired
-//	 * @return the agent's estimate of the future score for that after state
-//	 */
-//	public double getScore(StateObservation so) {
-//		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(so,m_Net.xnf);
-//		double score = m_Net.getScoreI(curSOWB,so.getPlayer());
-//		return score;
-//	}
-
 	/**
 	 * Return the agent's estimate of {@code sob}'s final game value (final reward) <b>for all players</b>. 
 	 * Is called by the n-ply wrappers ({@link MaxN2Wrapper}, {@link ExpectimaxNWrapper}).
@@ -437,7 +417,6 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 			if (m_DEBG) {
 	    		if (s_next.isGameOver()) {
 	            	qLastNew = m_Net.getQFunc(curSOWB,nextPlayer,aLast[nextPlayer]);
-	            	int dummy=1;
 	    		}
 	    		String s1 = sLast[nextPlayer].stringDescr();
 	    		String s2 = s_next.stringDescr();
@@ -452,7 +431,6 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 	    		}
 	    		if (s_next.stringDescr().equals("XooX-o-XX")) {
 	    			System.out.println(this.getGameNum()+" target="+target);
-	    			int dummy=1;
 	    		}
 			}
 
@@ -491,7 +469,6 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 	    			if (m_DEBG) {
 		        		if (s_next.isGameOver()) {
 		                	qLastNew = m_Net.getQFunc(curSOWB,n,aLast[n]);
-		                	int dummy=1;
 		        		}
 		        		String s1 = sLast[n].stringDescr();
 		        		String s2 = s_next.stringDescr();
@@ -520,7 +497,24 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 	 * 					some exploration of different game paths)
 	 * @return			true, if agent raised a stop condition (only CMAPlayer)	 
 	 */
-	public boolean trainAgent(StateObservation so) {
+	public boolean trainAgent(StateObservation so) { return trainAgent(so,this);
+	}
+
+	/**
+	 * Train the agent for one complete game episode <b>using self-play</b>. <p>
+	 * Side effects: Increment m_GameNum and {@code acting_pa}'s gameNum by +1.
+	 * Change the agent's internal parameters (weights and so on).
+	 * <p>
+	 * This method is used by the wrappers: They call it with {@code this} being the wrapped agent (it has the internal
+	 * parameters) and {@code acting_pa} being the wrapper.
+	 *
+	 * @param so		the state from which the episode is played (usually the
+	 * 					return value of {@link GameBoard#chooseStartState(PlayAgent)} to get
+	 * 					some exploration of different game paths)
+	 * @param acting_pa the agent to be called when an action is requested ({@code getNextAction2})
+	 * @return			true, if agent raised a stop condition (only CMAPlayer - deprecated)
+	 */
+	public boolean trainAgent(StateObservation so, PlayAgent acting_pa) {
 		ACTIONS_VT a_next;
 		int   nextPlayer=so.getPlayer();
 		NextState4 ns;
@@ -532,8 +526,8 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 		if (epiLength==-1) epiLength = Integer.MAX_VALUE;
 				
 		StateObservation s_t = so.copy();
-		a_next = getNextAction2(s_t.partialState(), true, true);
-		ACTIONS a_t = (ACTIONS) a_next;
+		a_next = acting_pa.getNextAction2(s_t.partialState(), true, true);
+		ACTIONS a_t = a_next;
 		for (int n=0; n<numPlayers; n++) {
 			sLast[n] = (n==nextPlayer ? s_t : null);	// nextPlayer is X=so.getPlayer()
 			aLast[n] = (n==nextPlayer ? a_t : null);	// sLast[X]=so is the state on which X has to act 
@@ -575,6 +569,7 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 		}
 		
 		incrementGameNum();
+		acting_pa.setGameNum(this.getGameNum());
 
 		return false;
 		
@@ -585,23 +580,21 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 	public String stringDescr() {
 		m_Net.setHorizon();
 		String cs = getClass().getSimpleName();
-		String str = cs + ": USESYMMETRY:" + (m_ntPar.getUSESYMMETRY()?"true":"false")
+		return       cs + ": USESYMMETRY:" + (m_ntPar.getUSESYMMETRY()?"true":"false")
 						+ ", NORMALIZE:" + (m_tdPar.getNormalize()?"true":"false")
 						+ ", sigmoid:"+(m_Net.hasSigmoid()? "tanh":"none")
 						+ ", lambda:" + m_Net.getLambda()
 						+ ", horizon:" + m_Net.getHorizon()
 						+ ", AFTERSTATE:" + (m_ntPar.getAFTERSTATE()?"true":"false")
 						+ ", learnFromRM: " + (m_oPar.getLearnFromRM()?"true":"false");
-		return str;
 	}
 		
     @Override
 	public String stringDescr2() {
 		String cs = getClass().getSimpleName();
-		String str = cs + ": alpha_init->final:" + m_tdPar.getAlpha() + "->" + m_tdPar.getAlphaFinal()
+		return       cs + ": alpha_init->final:" + m_tdPar.getAlpha() + "->" + m_tdPar.getAlphaFinal()
 						+ ", epsilon_init->final:" + m_tdPar.getEpsilon() + "->" + m_tdPar.getEpsilonFinal()
 						+ ", gamma: " + m_tdPar.getGamma();
-		return str;
 	}
 		
 	// Callback function from constructor NextState(NTupleAgt,StateObservation,ACTIONS). 

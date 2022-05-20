@@ -268,11 +268,17 @@ abstract public class NTupleBase extends AgentBase implements NTupleAgt, Seriali
 	public ParTD getParTD() {
 		return m_tdPar;
 	}
-	public ParNT getParNT() {
-		return m_ntPar;
-	}
+	public ParNT getParNT() { return m_ntPar; }
 	// getParOther() is in AgentBase
-	
+
+	public void setParTD(ParTD m_tdPar) {
+		this.m_tdPar = new ParTD(m_tdPar);
+	}
+	public void setParNT(ParNT m_ntPar) {
+		this.m_ntPar = new ParNT(m_ntPar);
+	}
+
+
 	public boolean getAFTERSTATE() {
 		return m_ntPar.getAFTERSTATE();
 	}

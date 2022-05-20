@@ -5,6 +5,7 @@ import java.io.Serializable;
 
 import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.Arena;
+import games.GameBoard;
 import games.StateObservation;
 import params.ParOther;
 import params.ParRB;
@@ -38,11 +39,7 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 												// only once
 	public static String EGV_EXCEPTION_TEXT = "Agents derived from AgentBase have to implement this method: estimateGameValueTuple";
 
-	/**
-	 * TODO: Add explanation for stochastic policies
-	 */
-
-	private boolean stochasticPolicy = false;
+//	private boolean stochasticPolicy = false;
 
 	/**
 	 * change the version ID for serialization only if a newer version is no
@@ -71,7 +68,6 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	public AgentBase(String name, ParOther oPar, ParRB rbPar) {
 		m_name = name;
 		m_oPar = new ParOther(oPar);
-		//m_oPar.setAgentState(this.m_agentState);   // /WK/2022-04-12/ very questionable, m_agentState is deprecated!
 		m_rbPar = new ParRB(rbPar);
 	}
 
@@ -127,7 +123,6 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	}
 
 	public void setAgentState(AgentState aState) {
-		m_agentState = aState;
 		m_oPar.setAgentState(aState);
 	}
 	public void resetAgent() {  }
@@ -187,10 +182,29 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	 * @param so		the state from which the episode is played 
 	 * @return			true, if agent raised a stop condition (only CMAPlayer)
 	 */
-    @Override
+	@Override
 	public boolean trainAgent(StateObservation so) {
     	return trainAgent(so,this);
 	}
+
+	/**
+	 * 'Train' the agent for one complete game episode. This base training is valid for <b>all</b> agents
+	 * except {@link HumanPlayer}), whether they are truly adaptable or not. Its purpose is
+	 * to measure <b>moves/second</b> and/or to evaluate an agent multiple times during self-play.
+	 * It is no real training, since the agent itself is not modified.
+	 * <p>
+	 * Side effects: Increment m_GameNum and {@code acting_pa}'s gameNum by +1.
+	 * <p>
+	 * This method is used by the wrappers: They call it with {@code this} being the wrapped agent (it has the internal
+	 * parameters) and {@code acting_pa} being the wrapper.
+	 *
+	 * @param so		the state from which the episode is played (usually the
+	 * 					return value of {@link GameBoard#chooseStartState(PlayAgent)} to get
+	 * 					some exploration of different game paths)
+	 * @param acting_pa the agent to be called when an action is requested ({@code getNextAction2})
+	 * @return			true, if agent raised a stop condition (only CMAPlayer - deprecated)
+	 */
+	@Override
 	public boolean trainAgent(StateObservation so, PlayAgent acting_pa) {
 		Types.ACTIONS  a_t;
 		StateObservation s_t = so.copy();
@@ -203,7 +217,7 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	        m_numTrnMoves++;		// number of train moves
 			moveCounter++;
 	        
-			a_t = getNextAction2(s_t.partialState(), true, true);	// choose action a_t (agent-specific behavior)
+			a_t = acting_pa.getNextAction2(s_t.partialState(), true, true);	// choose action a_t (agent-specific behavior)
 			s_t.advance(a_t);		// advance the state (game-specific behavior)
 
 			if(s_t.isRoundOver()&&!s_t.isGameOver()&&s_t.isRoundBasedGame())
@@ -213,6 +227,7 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 		} while(!m_finished);
 
 		incrementGameNum();
+		acting_pa.setGameNum(this.getGameNum());
 		if (this.getGameNum() % 100 == 0) {
 			System.err.println("[AgentBase.trainAgent] WARNING: only dummy training (for time measurements)");
 		}
@@ -335,8 +350,11 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	}
 
 	@Override
-	public void setParOther(ParOther op) {
-		m_oPar.setFrom(op);
+	public void setParOther(ParOther op) { m_oPar.setFrom(op); 	}
+
+	@Override
+	public void setParReplay(ParRB prb) {
+		m_rbPar.setFrom(prb);
 	}
 
 	/**
@@ -347,10 +365,6 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 		m_oPar = new ParOther();
 	}
 
-	@Override
-	public void setParReplay(ParRB prb) {
-		m_rbPar.setFrom(prb);
-	}
 	/**
 	 * Set defaults for m_rbPar (needed in {@link Arena#loadAgent} when
 	 * loading older agents, where m_rbPar=null in the saved version).
@@ -434,13 +448,14 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 		return getClass().getName() + ":";
 	}
 
-	@Override
-	public boolean isStochastic() {
-		return stochasticPolicy;
-	}
-
-	@Override
-	public void setStochastic(boolean hasStochasticPolicy) {
-		stochasticPolicy = hasStochasticPolicy;
-	}
+	// --- never used ---
+//	@Override
+//	public boolean isStochastic() {
+//		return stochasticPolicy;
+//	}
+//
+//	@Override
+//	public void setStochastic(boolean hasStochasticPolicy) {
+//		stochasticPolicy = hasStochasticPolicy;
+//	}
 }

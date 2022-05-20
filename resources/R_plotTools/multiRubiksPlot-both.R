@@ -1,5 +1,5 @@
 #
-# **** These are new results with MCTSWrapper[TCL4-EXP] from Jan 2021 ****
+# **** These are new results with MCTSWrapper[TCL4-EXP] and QTM from Jan 2021 ****
 #
 # **** see MCTSWrapperResults-2021-01-16.docx, Sec. 'Rubik's Cube'.
 # 
