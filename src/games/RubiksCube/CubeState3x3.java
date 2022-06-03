@@ -86,6 +86,31 @@ public class CubeState3x3 extends CubeState {
         System.out.println("invF: "+t_cs);
     }
 
+    protected CubeState apply_sloc(CubeState trafo, boolean doAssert) {
+        throw new RuntimeException("apply_sloc not yet implemented for 3x3x3");
+    }
+    protected CubeState apply_sloc_slow(CubeState trafo, boolean doAssert) {
+        throw new RuntimeException("apply_sloc_slow not yet implemented for 3x3x3");
+    }
+
+    /**
+     * Apply color transformation {@code cT} to {@code this}: Each face color {@code fcol[i]} gets the new color
+     * {@code cT.ccol[fcol[i]]}. <br>
+     * {@code this} has to be of type COLOR_P or COLOR_R.
+     * @param cT color transformation
+     * @return the transformed {@code this}
+     */
+    public CubeState applyCT(ColorTrafo cT,boolean doAssert) {
+        assert(this.type==Type.COLOR_P || this.type==Type.COLOR_R) : "Wrong type "+this.type+" in apply(cT) !";
+        int[] tmp = this.fcol.clone();
+        for (int i=0; i<fcol.length; i++) this.fcol[i] = cT.getCCol(tmp[i]);
+        return this;
+    }
+
+    public CubeStateMap applyCT(ColorTrafoMap ctMap,boolean doAssert) {
+        throw new RuntimeException("applyCT(ColorTrafoMap) not yet implemented for 3x3x3!");
+    }
+
     /**
      * Locate the cubie with the colors of {@link CubieTriple} {@code tri} in {@code this}.
      * {@code this} has to be of type COLOR_P or COLOR_R.<br>
@@ -106,7 +131,7 @@ public class CubeState3x3 extends CubeState {
         int i;
         // fcol(invT[i]) is the color which cubie face i gets after transformation:
         int[] invT = { 6, 7, 0, 1, 2, 3, 4, 5, 44,45,46,47,40,41,42,43, 10,11,12,13,14,15, 8, 9,
-                26,27,28,29,30,31,24,25, 20,21,22,23,16,17,18,19, 38,39,32,33,34,35,36,37};
+                      26,27,28,29,30,31,24,25, 20,21,22,23,16,17,18,19, 38,39,32,33,34,35,36,37};
         int[] tmp = this.fcol.clone();
         for (i=0; i<invT.length; i++) this.fcol[i] = tmp[invT[i]];
         return this;
@@ -119,7 +144,7 @@ public class CubeState3x3 extends CubeState {
         int i;
         // fcol(invT[i]) is the color which cubie face i gets after transformation:
         int[] invT = {36,37,38,39,32,33,34,35,  2, 3, 4, 5, 6, 7, 0, 1, 22,23,16,17,18,19,20,21,
-                12,13,14,15, 8, 9,10,11, 30,31,24,25,26,27,28,29, 42,43,44,45,46,47,40,41};
+                      12,13,14,15, 8, 9,10,11, 30,31,24,25,26,27,28,29, 42,43,44,45,46,47,40,41};
         int[] tmp = this.fcol.clone();
         for (i=0; i<invT.length; i++) this.fcol[i] = tmp[invT[i]];
         return this;
@@ -247,7 +272,7 @@ public class CubeState3x3 extends CubeState {
     //			return t_cs.lTr().lTr().lTr().FTw().lTr();   	// U(x) = l(F(l^3(x)))
     // use the following line once on a default TRAFO_R CubeState t_cs to generate int[] invL above:
     //			return t_cs.uTr().FTw().uTr().uTr().uTr();   	// L(x) = u^3(F(u(x)))
-    // (see CubeState3x3.show_invF_invL_invU(), which may be called once by ArenaTrainCube.makeGameBoard
+    // (see CubeState3x3.show_invF_invL_invU(), which is called once by ArenaCube.makeGameBoard if SHOW_INV==true)
 
     /**
      * generate the <b>inverse</b> transformations {@link #invF}, {@link #invL} and {@link #invU}.

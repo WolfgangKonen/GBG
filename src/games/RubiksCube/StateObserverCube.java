@@ -29,21 +29,44 @@ import tools.Types.ACTIONS;
  * @see CubeConfig
  */
 public class StateObserverCube extends ObserverBase implements StateObservation {
+	/**
+	 * the inner cube state
+	 */
 	private final CubeState m_state;
 	/**
-	 * the action which led to m_state (iActUnknown (9 or 18) if unknown)
+	 * the action which led to {@link #m_state} (if unknown: {@link #iActUnknown} = 9 (2x2x2) or 18 (3x3x3)). The actions
+	 * are numbered as follows: <br>
+	 * <b>2x2x2 cube:</b>
+	 * <br><pre>
+	 *   key    { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9}
+	 *   action {U1,U2,U3,L1,L2,L3,F1,F2,F3,unknown}
+	 * </pre><br>
+	 * <b>3x3x3 cube:</b>
+	 * <br><pre>
+	 *   key    { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18}
+	 *   action {U1,U2,U3,L1,L2,L3,F1,F2,F3,D1,D2,D3,R1,R2,R3,B1,B2,B3,unknown}
+	 * </pre>
 	 */
 	protected ACTIONS m_action;
+	/**
+	 * the index for an unknown {@link #m_action}
+	 */
+	public static final int iActUnknown = (CubeConfig.cubeType== CubeConfig.CubeType.POCKET) ? 9 : 18;
 
+	/**
+	 * the possible QTM actions (twists)
+	 */
 	private static final int[] quarterActs = (CubeConfig.cubeType== CubeConfig.CubeType.POCKET) ?
-			new int[]{0, 2, 3, 5, 6, 8} :  						//  {U1,U3,L1,L3,F1,F3}
-			new int[]{0, 2, 3, 5, 6, 8, 9, 11, 12, 14, 15, 17};	//  {U1,U3,L1,L3,F1,F3,D1,D3,R1,R3,B1,B3}
+			new int[]{0, 2, 3, 5, 6, 8} :  							//  {U1,U3,L1,L3,F1,F3}
+			new int[]{0, 2, 3, 5, 6, 8, 9, 11, 12, 14, 15, 17};		//  {U1,U3,L1,L3,F1,F3,D1,D3,R1,R3,B1,B3}
+	/**
+	 * the possible HTM actions (twists)
+	 */
 	private static final int[] halfTurnActs = (CubeConfig.cubeType== CubeConfig.CubeType.POCKET) ?
-			new int[]{0,1,2,3,4,5,6,7,8} :  					//  {U1,U2,U3,L1,L2,L3,F1,F2,F3}
+			new int[]{0,1,2,3,4,5,6,7,8} :  						//  {U1,U2,U3,L1,L2,L3,F1,F2,F3}
 			new int[]{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17};	//  {U1,U2,U3,L1,L2,L3,F1,F2,F3,D1,D2,D3,R1,R2,R3,B1,B2,B3}
 	private static final int[] allActs = (CubeConfig.twistType== CubeConfig.TwistType.QTM) ? quarterActs : halfTurnActs;
-	public static final int iActUnknown = (CubeConfig.cubeType== CubeConfig.CubeType.POCKET) ? 9 : 18;
-	public static final int numAllActions = allActs.length;
+	//public static final int numAllActions = allActs.length;
 
 	private static final Random rand = new Random(System.currentTimeMillis());
 	private static final CubeStateFactory csFactory = new CubeStateFactory();
@@ -154,8 +177,8 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	
 	public boolean isLegalAction(ACTIONS act) {
 		int hit=0;
-		for (int i=0; i<allActs.length; i++)
-			if (act.toInt()==allActs[i]) hit=1;
+		for (int allAct : allActs)
+			if (act.toInt() == allAct) hit = 1;
 		return (hit==1);
 	}
 
@@ -268,8 +291,8 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 
 		//check validity of action
 		int hit=0;
-		for (int i=0; i<allActs.length; i++)
-			if (iAction==allActs[i]) hit=1;
+		for (int allAct : allActs)
+			if (iAction == allAct) hit = 1;
 		assert (hit==1)	: "iAction="+iAction+" is not in set of available actions";
 
 		int j=iAction%3;
@@ -401,7 +424,7 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 			// make p twists and hope that we land in
 			// distance set D[p] (which is often not true for p>5)
 			for (int k=0; k<p; k++)  {
-				index = rand.nextInt(so.allActs.length);
+				index = rand.nextInt(StateObserverCube.allActs.length);
 				so.advance(Types.ACTIONS.fromInt(allActs[index]));
 			}
 		}

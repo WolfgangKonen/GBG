@@ -109,14 +109,15 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 
 	/**
 	 * Given a board vector from {@link #getBoardVector(StateObservation)} and given that the
-	 * game has s symmetries, return an array which holds s symmetric board vectors: <ul>
+	 * game has s symmetries, return an array which holds n &le; s symmetric board vectors: <ul>
 	 * <li> the first row {@code boardArray[0]} is the board vector itself
 	 * <li> the other rows are the board vectors when transforming {@code boardVector}
-	 * 		according to the s-1 other symmetries.
+	 * 		according to the n-1 other symmetries.
 	 * </ul>
-	 * In the case of the cube we have s=24 color symmetries (6 places 1st color * 4 places 2nd color)
+	 * In the case of the cube we have at most s=24 color symmetries (6 places 1st color * 4 places 2nd color)
 	 *
 	 * @param curSOWB a state with its board vector
+	 * @param n number of symmetry vectors to return (n=0 meaning 'all')
 	 * @return a vector of board vectors
 	 */
 	@Override
@@ -131,7 +132,8 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 		// calculate all color-symmetric states for cS1, collect
 		// in 'set' only the truly different CubeStates
 		CubeStateMap mapColSymm = hmCols.applyColSymm(cS1,hmRots);
-		if (doAssert) assert(mapColSymm.countYgrHomeStates()==mapColSymm.size()) :
+		if (doAssert && CubeConfig.cubeType== CubeConfig.CubeType.POCKET)
+			assert(mapColSymm.countYgrHomeStates()==mapColSymm.size()) :
 				"not all color-symmetric states have ygr 'home'!";
 		for (Map.Entry<Integer, CubeState> entry : mapColSymm.entrySet()) {
 			set.add(entry.getValue());
@@ -149,14 +151,15 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 
 	/**
 	 * Given a board vector from {@link #getBoardVector(StateObservation)} and given that the
-	 * game has s symmetries, return an array which holds s symmetric board vectors: <ul>
+	 * game has s symmetries, return an array which holds n &le; s symmetric board vectors: <ul>
 	 * <li> the first row {@code boardArray[0]} is the board vector itself
 	 * <li> the other rows are the board vectors when transforming {@code boardVector}
 	 * 		according to the s-1 other symmetries.
 	 * </ul>
-	 * In the case of the cube we have s=24 color symmetries (6 places 1st color * 4 places 2nd color)
+	 * In the case of the cube we have at most s=24 color symmetries (6 places 1st color * 4 places 2nd color)
 	 *
 	 * @param boardVector the board vector
+	 * @param n number of symmetry vectors to return (n=0 meaning 'all')
 	 * @return boardArray
 	 */
 	@Override
@@ -172,7 +175,8 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 		// calculate all color-symmetric states for cS1, collect
 		// in 'set' only the truly different CubeStates
 		CubeStateMap mapColSymm = hmCols.applyColSymm(cS1,hmRots);
-		if (doAssert) assert(mapColSymm.countYgrHomeStates()==mapColSymm.size()) :
+		if (doAssert && CubeConfig.cubeType== CubeConfig.CubeType.POCKET)
+			assert(mapColSymm.countYgrHomeStates()==mapColSymm.size()) :
 				"not all color-symmetric states have ygr 'home'!";
 		for (Map.Entry<Integer, CubeState> entry : mapColSymm.entrySet()) {
 			set.add(entry.getValue());

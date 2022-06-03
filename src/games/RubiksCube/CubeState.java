@@ -1,5 +1,6 @@
 package games.RubiksCube;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.HashSet;
@@ -90,7 +91,8 @@ abstract public class CubeState implements Serializable {
 	/**
 	 * {@code fcol} is the face color array with 24 (<b>COLOR_P</b>) or 48 (<b>COLOR_R</b>) elements. <br> 
 	 * {@code fcol[i]} holds the face color for cubie face (sticker) with number {@code i} (<b>COLOR_*</b>).<br>
-	 * {@code fcol[i]} holds the parent location for cubie face (sticker) with number {@code i} (<b>TRAFO_*</b>).
+	 * {@code fcol[i]} holds the parent location for cubie face (sticker) with number {@code i} (<b>TRAFO_*</b>).<br>
+	 * The color is one out of {0,1,2,3,4,5} for colors {w,b,o,y,g,r}.
 	 */
 	public int[] fcol; 
 	
@@ -110,9 +112,10 @@ abstract public class CubeState implements Serializable {
 	
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
-	 * compatible with an older one (older .agt.zip will become unreadable or you have
+	 * compatible with an older one (older .agt.zip will become unreadable, or you have
 	 * to provide a special version transformation)
 	 */
+	@Serial
 	private static final long  serialVersionUID = 12L;
 
 	/**
@@ -144,32 +147,32 @@ abstract public class CubeState implements Serializable {
 	 */
 	public CubeState(Type type) {
 		this.type = type;
-		switch(type) {
-		case COLOR_P:
-			assert (CubeConfig.cubeType== CubeConfig.CubeType.POCKET);
-			this.fcol = new int[] {0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5};
-			break;
-		case COLOR_R:
-			assert (CubeConfig.cubeType== CubeConfig.CubeType.RUBIKS);
-			this.fcol = new int[] {0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,
-								   3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,5,5,5,5,5,5,5,5};
-			break;
-		case TRAFO_P:
-			assert (CubeConfig.cubeType== CubeConfig.CubeType.POCKET);
-			// fcol[i] holds the parent of location i under the trafo represented by this CubeState object.
-			// Initially this trafo is the id transformation for the pocket cube.
-			this.fcol = new int[24];
-			for (int i=0; i<fcol.length; i++) this.fcol[i] = i;
-			break;
-		case TRAFO_R:
-			assert (CubeConfig.cubeType== CubeConfig.CubeType.RUBIKS);
-			// fcol[i] holds the parent of location i under the trafo represented by this CubeState object.
-			// Initially this trafo is the id transformation for the Rubik's cube.
-			this.fcol = new int[48];
-			for (int i=0; i<fcol.length; i++) this.fcol[i] = i;
-			break;
+		switch (type) {
+			case COLOR_P -> {
+				assert (CubeConfig.cubeType == CubeConfig.CubeType.POCKET);
+				this.fcol = new int[]{0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5};
+			}
+			case COLOR_R -> {
+				assert (CubeConfig.cubeType == CubeConfig.CubeType.RUBIKS);
+				this.fcol = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2,
+						3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5};
+			}
+			case TRAFO_P -> {
+				assert (CubeConfig.cubeType == CubeConfig.CubeType.POCKET);
+				// fcol[i] holds the parent of location i under the trafo represented by this CubeState object.
+				// Initially this trafo is the id transformation for the pocket cube.
+				this.fcol = new int[24];
+				for (int i = 0; i < fcol.length; i++) this.fcol[i] = i;
+			}
+			case TRAFO_R -> {
+				assert (CubeConfig.cubeType == CubeConfig.CubeType.RUBIKS);
+				// fcol[i] holds the parent of location i under the trafo represented by this CubeState object.
+				// Initially this trafo is the id transformation for the Rubik's cube.
+				this.fcol = new int[48];
+				for (int i = 0; i < fcol.length; i++) this.fcol[i] = i;
+			}
 		}
-		// sloc[i], the location of each face i, is in any case the default sequence 0,...,n where n=fcol.length
+		// sloc[i], the location of each face i, is in any case the default sequence 0,...,n-1 where n=fcol.length
 		this.sloc = new int[this.fcol.length];
 		for (int i=0; i<sloc.length; i++) this.sloc[i] = i;
 	}
@@ -196,28 +199,58 @@ abstract public class CubeState implements Serializable {
 
 	abstract protected void show_invF_invL_invU();
 
-
 	/**
 	 * generate the <b>forward</b> transformations {@link #tforF} (and similar) from {@link #invF} (and similar).
 	 * <p>
-	 * [{@link #invF} is generated via {@link CubeStateFactory#generateInverseTs()}.]
+	 * {@link #invF} is generated via {@link CubeStateFactory#generateInverseTs()}.
+	 * <p>
+	 * The forward trafo {@code T} is calculated from the given inverse trafo {@code invT} with the help of the
+	 * identity relation <pre>
+	 *     T[invT[i]] = i
+	 * </pre>
+	 * This method is called once the {@link ArenaCube} object is constructed.
 	 */
 	public static void generateForwardTs() {
+		boolean DOASSERT = true;
 		tforU = new int[invF.length];
 		tforL = new int[invF.length];
 		tforF = new int[invF.length];
 		tforD = new int[invF.length];
 		tforR = new int[invF.length];
 		tforB = new int[invF.length];
-		// Since 3x applying F is F^3 = F^{-1}, it also holds that 3x applying F^{-1} gives F^9 = F.
-		// So we can calculate tforF by 3x appling invF:
 		for (int i=0; i<invF.length; i++) {
-			tforU[i] = invU[invU[invU[i]]];
-			tforL[i] = invL[invL[invL[i]]];
-			tforF[i] = invF[invF[invF[i]]];
-			tforD[i] = invD[invD[invD[i]]];
-			tforR[i] = invR[invR[invR[i]]];
-			tforB[i] = invB[invB[invB[i]]];
+			tforU[invU[i]]=i;
+			tforL[invL[i]]=i;
+			tforF[invF[i]]=i;
+			tforD[invD[i]]=i;
+			tforR[invR[i]]=i;
+			tforB[invB[i]]=i;
+		}
+		if (DOASSERT) {
+			int[] tf2U = new int[invF.length];
+			int[] tf2L = new int[invF.length];
+			int[] tf2F = new int[invF.length];
+			int[] tf2D = new int[invF.length];
+			int[] tf2R = new int[invF.length];
+			int[] tf2B = new int[invF.length];
+			// Since 3x applying F is F^3 = F^{-1}, it also holds that 3x applying F^{-1} gives F^9 = F.
+			// So we can calculate tforF by 3x applying invF:
+			for (int i=0; i<tf2U.length; i++) {
+				tf2U[i] = invU[invU[invU[i]]];
+				tf2L[i] = invL[invL[invL[i]]];
+				tf2F[i] = invF[invF[invF[i]]];
+				tf2D[i] = invD[invD[invD[i]]];
+				tf2R[i] = invR[invR[invR[i]]];
+				tf2B[i] = invB[invB[invB[i]]];
+			}
+			for (int i=0; i<tf2U.length; i++) {
+				assert (tforU[i]==tf2U[i]) : "difference tforU at i="+i;
+				assert (tforL[i]==tf2L[i]) : "difference tforL at i="+i;
+				assert (tforF[i]==tf2F[i]) : "difference tforF at i="+i;
+				assert (tforD[i]==tf2D[i]) : "difference tforD at i="+i;
+				assert (tforR[i]==tf2R[i]) : "difference tforR at i="+i;
+				assert (tforB[i]==tf2B[i]) : "difference tforB at i="+i;
+			}
 		}
 	}
 
@@ -345,7 +378,7 @@ abstract public class CubeState implements Serializable {
 	}
 
 	/**
-	 * U-face twist, {@code times} * 90° counter-clockwise
+	 * U-face twist, {@code times} * 90 degree counter-clockwise
 	 */
 	public CubeState UTw(int times) {
 		for (int i=0; i<times; i++) this.UTw();
@@ -356,7 +389,7 @@ abstract public class CubeState implements Serializable {
 	}
 	
 	/**
-	 * L-face twist, {@code times} * 90° counter-clockwise
+	 * L-face twist, {@code times} * 90 degree counter-clockwise
 	 */
 	public CubeState LTw(int times) {
 		for (int i=0; i<times; i++) this.LTw();
@@ -367,7 +400,7 @@ abstract public class CubeState implements Serializable {
 	}
 	
 	/**
-	 * F-face twist, {@code times} * 90° counter-clockwise
+	 * F-face twist, {@code times} * 90 degree counter-clockwise
 	 */
 	public CubeState FTw(int times) {
 		for (int i=0; i<times; i++) this.FTw();
@@ -378,7 +411,7 @@ abstract public class CubeState implements Serializable {
 	}
 
 	/**
-	 * U-face twist, {@code times} * 90° counter-clockwise
+	 * U-face twist, {@code times} * 90 degree counter-clockwise
 	 */
 	public CubeState DTw(int times) {
 		for (int i=0; i<times; i++) this.DTw();
@@ -389,7 +422,7 @@ abstract public class CubeState implements Serializable {
 	}
 
 	/**
-	 * L-face twist, {@code times} * 90° counter-clockwise
+	 * L-face twist, {@code times} * 90 degree counter-clockwise
 	 */
 	public CubeState RTw(int times) {
 		for (int i=0; i<times; i++) this.RTw();
@@ -400,7 +433,7 @@ abstract public class CubeState implements Serializable {
 	}
 
 	/**
-	 * F-face twist, {@code times} * 90° counter-clockwise
+	 * F-face twist, {@code times} * 90 degree counter-clockwise
 	 */
 	public CubeState BTw(int times) {
 		for (int i=0; i<times; i++) this.BTw();
@@ -413,38 +446,49 @@ abstract public class CubeState implements Serializable {
 	// CAUTION: This method is not yet extended for member sloc. But apply(trafo) is only needed in case
 	// of color symmetries.
 	/**
-	 * Apply transformation {@code trafo} to this
+	 * Apply transformation {@code trafo} to {@code this}. {@code this} has to be of type COLOR_P or COLOR_R.
+	 *
 	 * @param trafo a {@link CubeState} object of type TRAFO_P or TRAFO_R
-	 * @return the transformed 'this'
+	 * @return the transformed {@code this}
 	 */
 	public CubeState apply(CubeState trafo) {
+		return apply(trafo,false);
+	}
+	public CubeState apply(CubeState trafo, boolean doAssert) {
 		assert(trafo.type==Type.TRAFO_P || this.type==Type.TRAFO_R) : "Wrong type in apply(trafo) !";
 		int i;
 		int[] tmp = this.fcol.clone();
-		//for (i=0; i<fcol.length; i++) tmp[i] = this.fcol[trafo.fcol[i]];
-		for (i=0; i<fcol.length; i++) this.fcol[i] = tmp[trafo.fcol[i]]; 
+		for (i=0; i<fcol.length; i++) this.fcol[i] = tmp[trafo.fcol[i]];
+		//apply_sloc(trafo,doAssert);
+		apply_sloc_slow(trafo,doAssert);			// the slow version (for debug)
 		return this;		
 	}
-	
+
+	abstract protected CubeState apply_sloc(CubeState trafo, boolean doAssert);
+	abstract protected CubeState apply_sloc_slow(CubeState trafo, boolean doAssert);
+
 	/**
-	 * Apply color transformation cT to {@code this}. {@code this} has to be of 
+	 * Apply color transformation {@code cT} to {@code this}. {@code this} has to be of
 	 * type COLOR_P or COLOR_R. 
 	 * @param cT color transformation
-	 * @return the transformed 'this'
+	 * @return the transformed {@code this}
 	 */
+	abstract public CubeState applyCT(ColorTrafo cT,boolean doAssert);
+	abstract public CubeStateMap applyCT(ColorTrafoMap ctMap,boolean doAssert);
 	public CubeState applyCT(ColorTrafo cT) {
-		assert(this.type==Type.COLOR_P || this.type==Type.COLOR_R) : "Wrong type in apply(cT) !";
-		int[] tmp = this.fcol.clone();
-		for (int i=0; i<fcol.length; i++) this.fcol[i] = cT.fcol[tmp[i]];
-		return this;		
+		applyCT(cT,false);
+		return this;
 	}
-	
+	public CubeStateMap applyCT(ColorTrafoMap ctMap) {
+		return applyCT(ctMap,false);
+	}
+
 	/**
 	 * Locate the cubie with the colors of {@link CubieTriple} {@code tri} in {@code this}. 
 	 * {@code this} has to be of type COLOR_P or COLOR_R.<br>
 	 * [This method is only needed if we want to use color symmetries.]
 	 *
-	 * @param tri
+	 * @param tri	a cubie
 	 * @return a {@link CubieTriple} whose member {@code loc} carries the location of the cubie with 
 	 * 		   the colors of {@code tri}.
 	 */
@@ -473,8 +517,33 @@ abstract public class CubeState implements Serializable {
 	}
 	
 	public CubeState print() {
-		System.out.println(this.toString());
+		System.out.println(this);		// calls this.toString()
 		return this;
+	}
+
+	public String print_inv_fcol(){
+		int[] invf = fcol.clone();
+		int isep = (CubeConfig.cubeType== CubeConfig.CubeType.POCKET) ? 4 : 8;
+		DecimalFormat form = new DecimalFormat("00");
+		StringBuilder sb = new StringBuilder();
+		for (int i=0; i<fcol.length; i++)
+			invf[fcol[i]]=i;
+		for (int i=0; i<invf.length; i++) {
+			if (i%isep==0) sb.append("|"); else sb.append(",");
+			sb.append(form.format(invf[i]));
+		}
+		return sb.toString();
+	}
+
+	public String print_sloc() {
+		int isep = (this.type==Type.COLOR_P) ? 4 : 8;
+		DecimalFormat form = new DecimalFormat("00");
+		StringBuilder sb = new StringBuilder();
+		for (int i=0; i<sloc.length; i++) {
+			if (i%isep==0) sb.append("|"); else sb.append(",");
+			sb.append(form.format(sloc[i]));
+		}
+		return sb.toString();
 	}
 	
 	/** 
@@ -484,29 +553,29 @@ abstract public class CubeState implements Serializable {
 	public String toString() {
 		int isep = (this.type==Type.COLOR_P) ? 4 : 8;
 		DecimalFormat form = new DecimalFormat("00");
-		String s = "";
+		StringBuilder sb = new StringBuilder();
 		switch(this.type) {
 		case TRAFO_P: 
     		for (int i=0; i<fcol.length; i++) {
-    			if (i%4==0) s = s + "|";
-    			s = s + form.format(fcol[i]);
+    			if (i%4==0) sb.append("|");
+				sb.append(form.format(fcol[i]));
     		}
     		break;
     	case TRAFO_R:
 			for (int i=0; i<fcol.length; i++) {
-				if (i%isep==0) s = s + "|"; else s = s + ",";
-				s = s + form.format(fcol[i]);
+				if (i%isep==0) sb.append("|"); else sb.append(",");
+				sb.append(form.format(fcol[i]));
 			}
 			break;
 		default:
     		for (int i=0; i<fcol.length; i++) {
-    			if (i%isep==0) s = s + "|";
-    			s = s + fcol[i];
+    			if (i%isep==0) sb.append("|");
+				sb.append(fcol[i]);
     		}
     		break;
 		}
-		s = s + "|";  
-		return s;	
+		sb.append("|");
+		return sb.toString();
 	}
 	
 	public String getTwistSeq() {
@@ -539,15 +608,15 @@ abstract public class CubeState implements Serializable {
 			if (tw.startsWith("R")) T=Twist.R;
 			if (tw.startsWith("B")) T=Twist.B;
 			assert (tw.length()>1);
-			times = (int)(tw.charAt(1)-48);
+			times = (tw.charAt(1)-48);
 			assert (1<=times && times<=3);
-			switch(T) {
-				case U: tst.UTw(times); break;
-				case L: tst.LTw(times); break;
-				case F: tst.FTw(times); break;
-				case D: tst.DTw(times); break;
-				case R: tst.RTw(times); break;
-				case B: tst.BTw(times); break;
+			switch (T) {
+				case U -> tst.UTw(times);
+				case L -> tst.LTw(times);
+				case F -> tst.FTw(times);
+				case D -> tst.DTw(times);
+				case R -> tst.RTw(times);
+				case B -> tst.BTw(times);
 			}
 			tw =  (tw.length()>2) ? tw.substring(2,tw.length()) : "";				
 		}

@@ -8,36 +8,32 @@ import games.BoardVector;
 public class CubeStateFactory {
 
     public CubeState makeCubeState() {
-        switch (CubeConfig.cubeType) {
-            case POCKET: return new CubeState2x2(CubeState.Type.COLOR_P); 
-            case RUBIKS: return new CubeState3x3(CubeState.Type.COLOR_R);
-        }
-        throw new RuntimeException("we should not arrive here");
+        return switch (CubeConfig.cubeType) {
+            case POCKET -> new CubeState2x2(CubeState.Type.COLOR_P);
+            case RUBIKS -> new CubeState3x3(CubeState.Type.COLOR_R);
+        };
     }
 
     public CubeState makeCubeState(CubeState.Type type) {
-        switch (CubeConfig.cubeType) {
-            case POCKET: return new CubeState2x2(type); 
-            case RUBIKS: return new CubeState3x3(type);
-        }
-        throw new RuntimeException("we should not arrive here");
+        return switch (CubeConfig.cubeType) {
+            case POCKET -> new CubeState2x2(type);
+            case RUBIKS -> new CubeState3x3(type);
+        };
     }
 
     @Deprecated
     public CubeState makeCubeState(BoardVector boardVector) {
-        switch (CubeConfig.cubeType) {
-            case POCKET: return new CubeState2x2(boardVector); 
-            case RUBIKS: return new CubeState3x3(boardVector);
-        }
-        throw new RuntimeException("we should not arrive here");
+        return switch (CubeConfig.cubeType) {
+            case POCKET -> new CubeState2x2(boardVector);
+            case RUBIKS -> new CubeState3x3(boardVector);
+        };
     }
 
     public CubeState makeCubeState(CubeState other) {
-        switch (CubeConfig.cubeType) {
-            case POCKET: return new CubeState2x2(other);
-            case RUBIKS: return new CubeState3x3(other);
-        }
-        throw new RuntimeException("we should not arrive here");
+        return switch (CubeConfig.cubeType) {
+            case POCKET -> new CubeState2x2(other);
+            case RUBIKS -> new CubeState3x3(other);
+        };
     }
 
     /**

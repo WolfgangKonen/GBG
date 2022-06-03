@@ -138,7 +138,7 @@ public class PocketCubeTest {
     public void testCS_STICKER_transform() {
         init();
 
-        //         [This test is not really necessary any more since with new class StateObsWithBoardVector
+        //         [This test is not really necessary anymore since with new class StateObsWithBoardVector
         //          we do not need any longer to re-construct a StateObserverCube from BoardVector.
         //	        But we keep it for the moment to have a check on the correctness of BoardVector.]
         CubeConfig.boardVecType = BoardVecType.STICKER;
@@ -160,6 +160,103 @@ public class PocketCubeTest {
 
     }
 
+    /**
+     * Test for a certain twisted cube state {@code cube}:
+     * <ol>
+     * <li> Do all (or a selected subset of all) calor trafos deliver a {@link CubeState} that has its ygr-cubie at 'home'?
+     * <li> How many distinct states produces the set of color trafos?
+     * </ol>
+     * This test tests method {@link CubeState2x2#applyCT(ColorTrafoMap)} and indirectly also the static members
+     * {@link CubeStateMap#allWholeCubeRots} and {@link CubeStateMap#map_ygr_wholeKey}.
+     */
+    @Test
+    public void test_colorTrafo() {
+        boolean SELECTED = false;
+        CubeState cS = csFactory.makeCubeState();
+        cS.UTw(1).FTw(1);
+        System.out.println("Start state: " + cS);
+
+        ColorTrafoMap allCT = new ColorTrafoMap(ColMapType.AllColorTrafos);
+        ColorTrafoMap myMap;
+        if (SELECTED) {
+            int iSel[] = new int[]{0, 1, 2, 5, 6, 8, 9, 12, 15, 17};  // any subset of {0,1,...,23} (we have 24 color trafos)
+            myMap = new ColorTrafoMap();
+            for (int i = 0; i < iSel.length; i++) myMap.put(iSel[i], allCT.get(iSel[i]));
+        } else {
+            myMap = allCT;
+        }
+
+        CubeStateMap csMap = cS.applyCT(myMap,true);
+        // this is the method to test: apply all color trafos stored in myMap to state cS
+        // and return results in csMap
+
+        HashSet<CubeState> distinctCS = new HashSet<>();
+        for (Map.Entry<Integer, CubeState> entry : csMap.entrySet()) {
+            CubeState ecs = entry.getValue();
+            distinctCS.add(ecs);
+            CubieTriple where = ecs.locate(new CubieTriple());
+            assert (where.loc[0] == 12) :             // 12 is the 'home' location of ygr's y-sticker
+                    "ygr-cubie not at 'home' for " + ecs + " (color trafo key = " + entry.getKey() + ")";
+            //System.out.println(ecs + " for ct=" + entry.getKey()+", ygr-cubie at "+where.loc[0]);
+        }
+        System.out.println("All color-transformed cS states have their ygr-cubie at 'home'.");
+        System.out.println(distinctCS.size() + " distinct states:");
+        for (CubeState dcs : distinctCS) {
+            //System.out.println(dcs);
+        }
+    }
+
+    /**
+     * Test for various {@link CubeState#apply(CubeState)}-transformations, which are applied in sequence to a default
+     * cube, whether the {@link CubeState#sloc sloc} transformation works correctly. <br>
+     * Since we call {@link CubeState#apply(CubeState) apply} with {@code doAssert=true}, the assertion
+     * check with {@link CubeState#apply_sloc_slow(CubeState, boolean) apply_sloc_slow} is done in each case.
+     */
+    @Test
+    public void test_sloc() {
+        CubeState cS = csFactory.makeCubeState();
+        // 1) make whole-cube rotation 10 with a default cube state cS: The resulting sloc should be identical
+        //    to 'inv_fcol of trafo'
+        CubeState trafo = new CubeState2x2(CubeStateMap.allWholeCubeRots.get(10));
+        System.out.println("trafo: \n"+trafo);
+        System.out.println("inv_fcol of trafo: \n"+trafo.print_inv_fcol());
+        cS.apply(trafo,true);
+        System.out.println("sloc: \n"+cS.print_sloc());
+        // 2) make an LTw(1) twist on the current cube cS: Now sloc and 'inv_fcol of trafo' are different, because trafo
+        //    does not operate on the default cube
+        trafo = csFactory.makeCubeState(CubeState.Type.TRAFO_P);
+        trafo.LTw(1);
+        System.out.println("trafo: \n"+trafo);
+        System.out.println("inv_fcol of trafo: \n"+trafo.print_inv_fcol());
+        cS.apply(trafo,true);
+        System.out.println("sloc after LTw(1) trafo: \n"+cS.print_sloc());
+        // 3) make an additional LTw(3) twist on the current cube cS: Now sloc should be identical to sloc after step 1)
+        //    because LTw(1).LTw(3) are the identity operation.
+        trafo = csFactory.makeCubeState(CubeState.Type.TRAFO_P);
+        trafo.LTw(3);
+        cS.apply(trafo,true);
+        System.out.println("sloc after LTw(3) trafo: \n"+cS.print_sloc());
+    }
+
+    // OLD
+    public void test_cubeStateMap() {
+        CubeState def = csFactory.makeCubeState();
+        for (Map.Entry<Integer, CubeState> entry : CubeStateMap.allWholeCubeRots.entrySet()) {
+            CubeState trafo = entry.getValue();
+            Integer key = entry.getKey();
+            CubeState rot = csFactory.makeCubeState(def); // make a copy
+            if (key<=3) {
+                int dummy = 0;
+            }
+            rot.apply(trafo);
+            CubieTriple where = rot.locate(new CubieTriple());
+            Integer key2 = CubeStateMap.map_ygr_wholeKey.get(where.loc[0]);
+//            System.out.println(rot + " for awcr=" + key+", key2="+key2+", ygr-cubie at "+where.loc[0]);
+        }
+
+
+
+    }
     /**
      * (Older) CubeStateMap- and ColorTrafoMap-tests and color symmetry tests
      */

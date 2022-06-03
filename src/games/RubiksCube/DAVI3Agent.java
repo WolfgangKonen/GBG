@@ -52,7 +52,7 @@ public class DAVI3Agent extends NTuple4Base implements PlayAgent {
 
 	/**
 	 * change the version ID for serialization only if a newer version is no longer
-	 * compatible with an older one (older .agt.zip will become unreadable or you have
+	 * compatible with an older one (older .agt.zip will become unreadable, or you have
 	 * to provide a special version transformation)
 	 */
 	@Serial
@@ -75,9 +75,11 @@ public class DAVI3Agent extends NTuple4Base implements PlayAgent {
 		initNet(ntPar,tdPar,oPar, nTuples, xnf, maxGameNum);			
 	}
 
-	public DAVI3Agent(String name) {
-		super(name);
-	}
+	// --- never used ---
+//	public DAVI3Agent(String name) {
+//		super(name);
+//	}
+
 	/**
 	 * 
 	 * @param tdPar			temporal difference parameters
@@ -111,7 +113,7 @@ public class DAVI3Agent extends NTuple4Base implements PlayAgent {
 	}
 
 	/**
-	 * If agents need a special treatment after being loaded from disk (e. g. instantiation
+	 * If agents need a special treatment after being loaded from disk (e.g. instantiation
 	 * of transient members), put the relevant code in here.
 	 * 
 	 * @see LoadSaveGBG#transformObjectToPlayAgent
@@ -213,7 +215,7 @@ public class DAVI3Agent extends NTuple4Base implements PlayAgent {
 	}
 
 	/**
-	 * This is the NN version: Ask the neural net (here: an ntuple network) to predict the value of {@code so}
+	 * This is the NN version: Ask the neural net (here: an n-tuple network) to predict the value of {@code so}
 	 * @param so	the state
 	 * @return 0.0, if {@code so} is the solved state (no expected future rewards).
 	 *         In all other cases, return the prediction of {@link #m_Net}.
@@ -426,7 +428,7 @@ public class DAVI3Agent extends NTuple4Base implements PlayAgent {
 	public String stringDescr() {
 		m_Net.setHorizon();
 		String cs = getClass().getSimpleName();
-		String str = cs + ": USESYM:" + (m_ntPar.getUSESYMMETRY()?"true":"false")
+		return cs + ": USESYM:" + (m_ntPar.getUSESYMMETRY()?"true":"false")
 				+ ", P:" + (m_Net.getXnf().getNumPositionValues())
 				+ ", NORMALIZE:" + (m_tdPar.getNormalize()?"true":"false")
 				+ ", sigmoid:"+(m_Net.hasSigmoid()? "tanh":"none")
@@ -436,7 +438,6 @@ public class DAVI3Agent extends NTuple4Base implements PlayAgent {
 				+ ", qMode:" + m_oPar.getQuickEvalMode()
 				+ ", incAmount:" + m_oPar.getIncAmount()
 				;
-		return str;
 	}
 
 	@Override
@@ -448,7 +449,7 @@ public class DAVI3Agent extends NTuple4Base implements PlayAgent {
 	}
 
 	// Callback function from constructor NextState(NTupleAgt,StateObservation,ACTIONS). 
-	// Currently only dummy to make the interface NTupleAgt (which NTupleBase has to implement) happy!
+	// Currently, only dummy to make the interface NTupleAgt (which NTupleBase has to implement) happy!
 	public void collectReward(NextState4 ns) {
 	}
 

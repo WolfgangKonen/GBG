@@ -8,9 +8,14 @@
 #      When evaluating against Edax, we use always 10.000 MCTS iterations
 # ****
 #
-# This script shows that 100 iterations with MCTS-in-the-training-loop do not reach
-# much better results than 0 iterations.
+# This script shows that 100 iterations with MCTS-in-the-training-loop are somewhat better
+# for most levels, with a big jump upwards for level 8 (from 34% to 65%).
+# Overall, the improvement is not dramatic, given that the computation time (from 2h to 2.5d) 
+# has increased by a factor of 30.
 # 
+# With PART = 1,2 or 3 we select between 10, 14 or 18 agents for W-100 (each run costs 2.5 
+# days (!) on lwivs48)
+#
 # TCL-wrap results are obtained with EPS=+1e-8.
 # 
 library(ggplot2)
@@ -25,13 +30,20 @@ path <- "~/GitHub/GBG/agents/Othello/csv/";
 Ylimits=c(0.0,1.0); 
 Xlimits=factor(1:9); 
 
+PART=1    # 1,2 or 3
+numAgents=c("10agents","14agents","18agents")
+filesW100=c(
+  "multiCompeteOthello-W100-250k-part0-1.csv", # 10 agents
+  "multiCompeteOthello-W100-250k-part0-2.csv", # 14 agents
+  "multiCompeteOthello-W100-250k-part0-3.csv"  # 18 agents
+)
 filenames=c(
-            "multiTrainOthello-20Agents.csv",
-            "multiCompeteOthello-W100-250k.csv"
+            filesW100[PART],
+            "multiTrainOthello-20Agents.csv"
             # generated with >GBGBatch Othello 6 ...
 )
-agroup = c("W0","W100")   #"W10000","W1000",
-pdffile="MCTSWrap-W100-250k.pdf"
+agroup = c("W100","W0")   
+pdffile=paste0("MCTSWrap-W100-250k-",numAgents[PART],".pdf")
         
   
 dfAll = data.frame()
@@ -62,14 +74,14 @@ tgc <- tgc[tgc$EPS==1e-8,]
 
 q <- ggplot(tgc,aes(x=dEdax,y=winrate,colour=agentGroup,shape=agentGroup)) #,linetype=agentGroup))
 #q <- q+geom_errorbar(aes(ymin=winrate-se, ymax=winrate+se), width=errWidth) #, position=pd)
-q <- q+labs(title="250000 training episodes ")
+q <- q+labs(title=paste("250,000 training episodes ")) #, numAgents[PART]))
 #q <- q+geom_line(position=pd,size=1.0) + geom_point(position=pd,size=2.0) 
 q <- q+geom_line(size=1.0) + geom_point(size=3.0)
 q <- q+scale_x_discrete(limits=Xlimits) 
 q <- q+scale_y_continuous(limits=Ylimits) + xlab(xlabel) + ylab(ylabel)
-q <- q+guides(colour = guide_legend(reverse = TRUE))
-q <- q+guides(shape = guide_legend(reverse = TRUE))
-q <- q+guides(linetype = guide_legend(reverse = TRUE))
+q <- q+guides(colour = guide_legend(reverse = T))
+q <- q+guides(shape = guide_legend(reverse = T))
+q <- q+guides(linetype = guide_legend(reverse = T))
 q <- q+theme(axis.title = element_text(size = rel(1.5)))    # bigger axis labels 
 q <- q+theme(axis.text = element_text(size = rel(1.5)))     # bigger tick mark text  
 q <- q+theme(legend.text = element_text(size = rel(1.2)))   # bigger legend text  

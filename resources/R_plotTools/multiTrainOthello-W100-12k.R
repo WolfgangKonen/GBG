@@ -1,16 +1,19 @@
 #
-# **** These are April'2022 results with MCTS-wrapped TDNTuple4Agt on Othello. 
+# **** These are April-June'2022 results with MCTS-wrapped TDNTuple4Agt on Othello. 
 #      In contrast to former runs we have MCTS in the training loop.
 #      To keep runtimes managable, we run only 12.000 training episodes for each agent:
 #         W-0:       no MCTS iterations during training
 #         W-100:    100 MCTS iterations during training
 #         W-1000:  1000 MCTS iterations during training
 #         W-10000:10000 MCTS iterations during training
-#      When evaluating against Edax, we use always 10.000 MCTS iterations
+#      When evaluating against Edax, we use always 10.000 MCTS iterations.
 # ****
 #
 # This script shows that MCTS-in-the-training-loop does not reach in 12.000 episodes results
 # comparable to MCTS-not-in-training-loop, but 250.000 episodes
+#
+# With PART = 1,2 or 3 we select between 4,6 or 8 agents for W-10000 (each run costs 11.5 
+# days (!!) on lwivs48)
 # 
 # TCL-wrap results are obtained with EPS=+1e-8.
 # 
@@ -26,15 +29,22 @@ path <- "~/GitHub/GBG/agents/Othello/csv/";
 Ylimits=c(0.0,1.0); 
 Xlimits=factor(1:9); 
 
+PART=1    # 1,2 or 3
+numAgents=c("04agents","06agents","08agents")
+filesW10000=c(
+  "multiCompeteOthello-W10000-12k-part0.csv",    #  4 agents
+  "multiCompeteOthello-W10000-12k-part0-1.csv",  #  6 agents
+  "multiCompeteOthello-W10000-12k-part0-2.csv"   #  8 agents
+)
 filenames=c(
-            "multiCompeteOthello-W0-12k.csv",
-            "multiCompeteOthello-W100.csv",
-            "multiCompeteOthello-W1000-12k.csv",
-            "multiCompeteOthello-W10000-12k.csv"
+            filesW10000[PART],
+            "multiCompeteOthello-W1000-12k.csv", # 10 agents
+            "multiCompeteOthello-W100.csv",      # 10 agents
+            "multiCompeteOthello-W0-12k.csv"     # 10 agents
             # generated with >GBGBatch Othello 6 ...
 )
-agroup = c("W0","W100","W1000","W10000")   #"W10000","W1000",
-pdffile="MCTSWrap-W100-12k.pdf"
+agroup = c("W10000","W1000","W100","W0")   
+pdffile=paste0("MCTSWrap-W100-12k-",numAgents[PART],".pdf")
         
   
 dfAll = data.frame()
@@ -69,7 +79,7 @@ tgc <- tgc[tgc$EPS==1e-8,]
 
 q <- ggplot(tgc,aes(x=dEdax,y=winrate,colour=agentGroup,shape=agentGroup)) #,linetype=agentGroup))
 #q <- q+geom_errorbar(aes(ymin=winrate-se, ymax=winrate+se), width=errWidth) #, position=pd)
-q <- q+labs(title="same training episodes (12000)")
+q <- q+labs(title="same training episodes (12,000)")
 #q <- q+geom_line(position=pd,size=1.0) + geom_point(position=pd,size=2.0) 
 q <- q+geom_line(size=1.0) + geom_point(size=3.0)
 q <- q+scale_x_discrete(limits=Xlimits) 
