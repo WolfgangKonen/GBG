@@ -1,24 +1,17 @@
 package games.RubiksCube;
 
 import games.BoardVector;
-import games.RubiksCube.CubeState.Twist;
-import games.RubiksCube.CubeStateMap.CsMapType;
-import games.RubiksCube.CSArrayList.TupleInt;
-import games.RubiksCube.CSArrayList.CSAListType;
 import games.RubiksCube.ColorTrafoMap.ColMapType;
 import games.RubiksCube.CubeConfig.BoardVecType;
 import org.junit.Test;
 
-import java.util.ArrayList;
+import java.text.DecimalFormat;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 
 /**
- * A main program to test various aspects of the Pocket cube.
- *
- * @author Wolfgang Konen, TH Koeln , 2020
+ * Several JUnit tests for 2x2x2 Pocket Cube
  *
  * @see RubiksCubeTest
  */
@@ -31,7 +24,7 @@ public class PocketCubeTest {
     protected final CubeStateFactory csFactory = new CubeStateFactory();
 
     protected void init() {
-        CubeConfig.cubeType = CubeConfig.CubeType.POCKET;
+        CubeConfig.cubeSize = CubeConfig.CubeSize.POCKET;
 
         gb = new GameBoardCube(ar);
 
@@ -91,16 +84,18 @@ public class PocketCubeTest {
     }
 
     /**
-     * Twist-test:
+     * Further twist-tests:
      *
-     * Test that rep x FTw.UTw.LTw followed by rep x the inverse leads to default cube again, where rep is a random int. <br>
+     * 1) Test that rep x FTw.UTw.LTw followed by rep x the inverse leads to default cube again, where rep is a random int.<br>
+     * 2) Test that executing FTw, UTw, LTw on a cube state cs is identical to constructing the twist trafo and applying it
+     *    via apply() to cs
      */
     @Test
     public void test_UTw_LTw_FTw() {
 
         init();
 
-        // Test 3)
+        // Test 1)
         CubeState def = csFactory.makeCubeState();
         CubeState rot = csFactory.makeCubeState(def);
         int runs = 3;
@@ -110,6 +105,32 @@ public class PocketCubeTest {
             for (int k=0; k<rep; k++) rot.FTw(3).LTw(3).UTw(3);
             assert (def.isEqual(rot)) : "def and rot differ after rep x FTw.UTw.LTw!";
         }
+        System.out.println("All twists rep x FTw.UTw.LTw followed by rep x the inverse lead back to the default cube");
+
+        // Test 2)
+        for (int tw=0; tw<3; tw++) {
+            CubeState cs1 = csFactory.makeCubeState(def);
+            cs1.LTw().UTw(3).fTr(2).FTw();      // apply some arbitrary twists
+            CubeState cs2 = csFactory.makeCubeState(cs1);
+            CubeState trafo = csFactory.makeCubeState(CubeState.Type.TRAFO_P);
+            switch (tw) {
+                case 0 -> {
+                    cs1.UTw();
+                    trafo.UTw();
+                }
+                case 1 -> {
+                    cs1.FTw();
+                    trafo.FTw();
+                }
+                case 2 -> {
+                    cs1.LTw();
+                    trafo.LTw();
+                }
+            }
+            cs2.apply(trafo,true);
+            assert (cs1.isEqual(cs2)) : "cs1 and cs2 differ for case tw="+tw;
+        }
+        System.out.println("All twists U,L,F identical via .*Tw() and via apply() ");
 
     }
 
@@ -166,22 +187,34 @@ public class PocketCubeTest {
      * <li> Do all (or a selected subset of all) calor trafos deliver a {@link CubeState} that has its ygr-cubie at 'home'?
      * <li> How many distinct states produces the set of color trafos?
      * </ol>
-     * This test tests method {@link CubeState2x2#applyCT(ColorTrafoMap)} and indirectly also the static members
+     * This test checks method {@link CubeState2x2#applyCT(ColorTrafoMap)} and indirectly also the static members
      * {@link CubeStateMap#allWholeCubeRots} and {@link CubeStateMap#map_ygr_wholeKey}.
      */
     @Test
     public void test_colorTrafo() {
+        init();
         boolean SELECTED = false;
         CubeState cS = csFactory.makeCubeState();
-        cS.UTw(1).FTw(1);
-        System.out.println("Start state: " + cS);
+        cS.LTw(1).FTw(1);
+        //cS.fTr(3);
+        System.out.println("Start state 1: " + cS);
+
+        CubeState cS2 = csFactory.makeCubeState();
+        CubeState trafo = csFactory.makeCubeState(CubeState.Type.TRAFO_P);
+        trafo.LTw(1).FTw(1);
+        //trafo.fTr(3);
+        cS2.apply(trafo);
+        System.out.println("Start state 2: " + cS2);
+
+        assert (cS.isEqual(cS2)) : "cS and cS2 differ!";
 
         ColorTrafoMap allCT = new ColorTrafoMap(ColMapType.AllColorTrafos);
         ColorTrafoMap myMap;
         if (SELECTED) {
-            int iSel[] = new int[]{0, 1, 2, 5, 6, 8, 9, 12, 15, 17};  // any subset of {0,1,...,23} (we have 24 color trafos)
+            int[] iSel = new int[]{12, 0, 1, 2, 5, 6, 8, 9, 15, 17};  // any subset of {0,1,...,23} (we have 24 color trafos)
+                                // 12 is 'blue up'
             myMap = new ColorTrafoMap();
-            for (int i = 0; i < iSel.length; i++) myMap.put(iSel[i], allCT.get(iSel[i]));
+            for (int j : iSel) myMap.put(j, allCT.get(j));
         } else {
             myMap = allCT;
         }
@@ -192,7 +225,7 @@ public class PocketCubeTest {
 
         HashSet<CubeState> distinctCS = new HashSet<>();
         for (Map.Entry<Integer, CubeState> entry : csMap.entrySet()) {
-            CubeState ecs = entry.getValue();
+            CubeState2x2 ecs = (CubeState2x2) entry.getValue();
             distinctCS.add(ecs);
             CubieTriple where = ecs.locate(new CubieTriple());
             assert (where.loc[0] == 12) :             // 12 is the 'home' location of ygr's y-sticker
@@ -202,8 +235,21 @@ public class PocketCubeTest {
         System.out.println("All color-transformed cS states have their ygr-cubie at 'home'.");
         System.out.println(distinctCS.size() + " distinct states:");
         for (CubeState dcs : distinctCS) {
-            //System.out.println(dcs);
+            System.out.println(dcs);
         }
+
+        // Check that applying to each entry of csMap the inverse color trafo inv_ct yields the initial state cS
+        // (before each color trafo) back.
+        // (The equality check isEqual checks each element of fcol and sloc.)
+        for (Map.Entry<Integer, ColorTrafo> entry : myMap.entrySet()) {
+            Integer key = entry.getKey();
+            CubeState ics = new CubeState2x2(csMap.get(key));  // make a new copy, otherwise we would change csMap (!)
+            ColorTrafo inv_ct = allCT.get(CubeStateMap.map_inv_wholeCube.get(key));
+            ics.applyCT(inv_ct, true);
+            assert (ics.isEqual(cS)) : "ics and cS differ for key:" + key;
+        }
+        System.out.println("All inverse color trafos lead back to initial state cS");
+
     }
 
     /**
@@ -214,233 +260,64 @@ public class PocketCubeTest {
      */
     @Test
     public void test_sloc() {
+        init();
         CubeState cS = csFactory.makeCubeState();
-        // 1) make whole-cube rotation 10 with a default cube state cS: The resulting sloc should be identical
+        // 1) make whole-cube rotation 12 with a default cube state cS: The resulting sloc should be identical
         //    to 'inv_fcol of trafo'
-        CubeState trafo = new CubeState2x2(CubeStateMap.allWholeCubeRots.get(10));
-        System.out.println("trafo: \n"+trafo);
-        System.out.println("inv_fcol of trafo: \n"+trafo.print_inv_fcol());
+        CubeState trafo = new CubeState2x2(CubeStateMap.allWholeCubeRots.get(12));
         cS.apply(trafo,true);
-        System.out.println("sloc: \n"+cS.print_sloc());
+        CubeState cS2 = new CubeState2x2(cS);
+        cS2.inv_fcol_trafo_to_sloc(trafo);
+        if (!cS2.isEqual(cS)) {
+            System.out.println("trafo: \n"+trafo);
+            System.out.println("inv_fcol of trafo: \n"+cS2.print_sloc());
+            System.out.println("sloc: \n"+cS.print_sloc());
+        }
+        assert (cS2.isEqual(cS)) : "trafo.f^(-1) and cS.sloc differ!";
+        cS2 = new CubeState2x2(cS);
         // 2) make an LTw(1) twist on the current cube cS: Now sloc and 'inv_fcol of trafo' are different, because trafo
         //    does not operate on the default cube
         trafo = csFactory.makeCubeState(CubeState.Type.TRAFO_P);
         trafo.LTw(1);
-        System.out.println("trafo: \n"+trafo);
-        System.out.println("inv_fcol of trafo: \n"+trafo.print_inv_fcol());
-        cS.apply(trafo,true);
-        System.out.println("sloc after LTw(1) trafo: \n"+cS.print_sloc());
+        CubeState cS3 = new CubeState2x2(cS);
+        cS3.inv_fcol_trafo_to_sloc(trafo);
+        System.out.println("trafo LTw(1): \n"+trafo);
+        System.out.println("inv_fcol of trafo LTw(1): \n"+cS3.print_sloc());
+        cS2.apply(trafo,true);
+        System.out.println("sloc after LTw(1) trafo: \n"+cS2.print_sloc());
         // 3) make an additional LTw(3) twist on the current cube cS: Now sloc should be identical to sloc after step 1)
-        //    because LTw(1).LTw(3) are the identity operation.
+        //    because .LTw(1).LTw(3) are the identity operation.
         trafo = csFactory.makeCubeState(CubeState.Type.TRAFO_P);
         trafo.LTw(3);
-        cS.apply(trafo,true);
-        System.out.println("sloc after LTw(3) trafo: \n"+cS.print_sloc());
-    }
+        cS2.apply(trafo,true);
+        System.out.println("sloc after LTw(3) trafo: \n"+cS2.print_sloc());
+        assert(cS2.isEqual(cS)) : "cS2 (after .LTw(1).LTw(3) and cS differ";
+        System.out.println("cs2 (after .LTw(1).LTw(3) and cS are the same");
 
-    // OLD
-    public void test_cubeStateMap() {
-        CubeState def = csFactory.makeCubeState();
-        for (Map.Entry<Integer, CubeState> entry : CubeStateMap.allWholeCubeRots.entrySet()) {
-            CubeState trafo = entry.getValue();
-            Integer key = entry.getKey();
-            CubeState rot = csFactory.makeCubeState(def); // make a copy
-            if (key<=3) {
-                int dummy = 0;
-            }
-            rot.apply(trafo);
-            CubieTriple where = rot.locate(new CubieTriple());
-            Integer key2 = CubeStateMap.map_ygr_wholeKey.get(where.loc[0]);
-//            System.out.println(rot + " for awcr=" + key+", key2="+key2+", ygr-cubie at "+where.loc[0]);
+        // 4) time measurement of apply_sloc and apply_sloc_slow
+        int repeat=100000;
+        CubeState2x2 cs1,cs2;
+        long startTime = System.currentTimeMillis();
+        DecimalFormat form = new DecimalFormat("0.00");
+        cs1 = new CubeState2x2(CubeState.Type.COLOR_P);
+        cs1.LTw(1).FTw(2).UTw(1).uTr();
+        cs2 = new CubeState2x2(cs1);
+        for (int k=0; k<repeat; k++) {
+            cs1.apply_sloc(trafo, false);
         }
-
-
-
-    }
-    /**
-     * (Older) CubeStateMap- and ColorTrafoMap-tests and color symmetry tests
-     */
-    private void colorMapTests() {
-
-        // this is just to check the correctness of CubeStateMap::countDifferentStates()
-//		CubeStateMap hmTest = new CubeStateMap();
-//		rot.FTw();
-//		CubeState def2 = CubeState.makeCubeState(def);
-//		hmTest.put(1, def);
-//		hmTest.put(2, def2);  	// Are two different CubeState objects with the same content correctly counted as one?
-//		hmTest.put(3, rot);
-//		System.out.println("num states = "+hmTest.countDifferentStates() + ", " + hmTest.size());  	// should be 2, 3
-//		hmTest.put(4, CubeState.makeCubeState(rot));
-//		System.out.println("num states = "+hmTest.countDifferentStates() + ", " + hmTest.size());	// should be 2, 4
-
-        System.out.println("\nTesting CubeStateMap::allWholeCubeRotTrafos()");
-        // Create the map with all whole-cube rotation transformations.
-        // This should give 24 *distinct* transformations.
-        CubeStateMap hmRots = new CubeStateMap(CsMapType.AllWholeCubeRotTrafos);
-        //hmRots.print();
-        assert (hmRots.countDifferentStates()==hmRots.size()) : "there are duplicate elements in hmRots!";
-        System.out.println("num states = "+hmRots.countDifferentStates() + ", " + hmRots.size() + " --> OK");
-
-        System.out.println("\nTesting ColorMap::allColorTrafos()");
-        // Create the map with all color transformations.
-        // This should give 24 *distinct* transformations.
-        ColorTrafoMap hmCols = new ColorTrafoMap(ColMapType.AllColorTrafos);
-        //hmCols.print();
-        assert (hmCols.countDifferentStates()==hmCols.size()) : "there are duplicate elements in hmRots!";
-        System.out.println("num states = "+hmCols.countDifferentStates() + ", " + hmCols.size() + " --> OK");
-
-        System.out.println("\nTesting ColorMap::applyColSymm(cS,hmRots)");
-        // Given the maps hmRots and hmCols created in the previous steps, take a solved cube and
-        // do, if DISTANCE==1, 3^1 different one-step twists,
-        // or, if DISTANCE==2, 3^2 different two-step twists,
-        // or, if DISTANCE==3, 3^3 different three-step twists.
-        // For each resulting cube state cS, do the following:
-        // 1) Apply all color symmetries to cS. Check the resulting CubeStateMap: Have all
-        //	  resulting symmetry-states their ygr-cubie in the 'home'-position?
-        // 2) Add all symmetry-states to HashSet set. A HashSet will only add an element
-        //    if it is different to all other elements in the set, so we get via set.size()
-        //    in the end the covered states of distance 1, 2 or 3. Ideally, the covered states
-        // 	  should be 9, 54 or 321 for distance 1, 2 or 3, resp. Whether this coverage is
-        //    achieved depends on the diversity of the actions undertaken.
-        for (int DISTANCE = 1; DISTANCE<3; DISTANCE++) {
-            HashSet<CubeState> set = new HashSet<>();
-            int[] totalCoverage = {1, 9, 54, 321}; // see https://en.wikipedia.org/wiki/Pocket_Cube
-            for (int act1=0; act1<3; act1++) {
-                CubeState cS1 = csFactory.makeCubeState();
-                switch(act1) {
-                    case 0: cS1.UTw(1); break;
-                    case 1: cS1.LTw(2); break;
-                    case 2: cS1.FTw(3); break;
-                }
-                if (DISTANCE==1) {
-                    int act2=-1;
-                    int act3=-1;
-                    innerApplyColSymmTest(cS1, act1,act2,act3, hmCols, hmRots, set);
-                } else if (DISTANCE>=2) {
-                    for (int act2=0; act2<3; act2++) {
-                        CubeState cS2 = csFactory.makeCubeState(cS1);
-                        switch(act2) {
-                            // the ternary operators ensure that the twists done in the second step
-                            // (act2) are different twists than the act1 actions (otherwise both actions
-                            // could be concatenated to one action and would lead to a distance-1 state)
-                            case 0: cS2 = (cS2.lastTwist==Twist.F) ? cS2.UTw(3) : cS2.FTw(3); break;
-                            case 1: cS2 = (cS2.lastTwist==Twist.L) ? cS2.FTw(2) : cS2.LTw(2); break;
-                            case 2: cS2 = (cS2.lastTwist==Twist.U) ? cS2.LTw(1) : cS2.UTw(1); break;
-                        }
-                        if (DISTANCE==2) {
-                            int act3=-1;
-                            innerApplyColSymmTest(cS2, act1,act2,act3, hmCols, hmRots, set);
-                        } else if (DISTANCE==3) {
-                            for (int act3=0; act3<3; act3++) {
-                                CubeState cS3 = csFactory.makeCubeState(cS2);
-                                switch(act3) {
-                                    // the ternary operators ensure that the twists done in the second step
-                                    // (act2) are different twists than the act1 actions (otherwise both actions
-                                    // could be concatenated to one action and would lead to a distance-1 state)
-                                    case 0: cS3 = (cS3.lastTwist==Twist.F) ? cS3.UTw(1) : cS3.FTw(1); break;
-                                    case 1: cS3 = (cS3.lastTwist==Twist.L) ? cS3.FTw(2) : cS3.LTw(2); break;
-                                    case 2: cS3 = (cS3.lastTwist==Twist.U) ? cS3.LTw(3) : cS3.UTw(3); break;
-                                }
-                                innerApplyColSymmTest(cS3, act1,act2,act3, hmCols, hmRots, set);
-                            }
-                        }
-                    } // for (act2)
-                } // if (DISTANCE>=2)
-            }
-            System.out.println("Covered states of distance "+DISTANCE+":   "
-                    +set.size()+" from "+ totalCoverage[DISTANCE]+ " in total");
+        long elapsed1 = System.currentTimeMillis() - startTime;
+        System.out.println("time apply_sloc: "+ elapsed1);
+        startTime = System.currentTimeMillis();
+        for (int k=0; k<repeat; k++) {
+            cs2.apply_sloc_slow(trafo, false);
         }
+        long elapsed2 = System.currentTimeMillis() - startTime;
+        System.out.println("time apply_sloc_slow: "+ elapsed2
+                +" (factor "+form.format(((double)elapsed2)/elapsed1)+" slower)");
     }
 
-    private void innerApplyColSymmTest(CubeState cS, int act1,int act2,int act3,
-                                       ColorTrafoMap hmCols, CubeStateMap hmRots, HashSet<CubeState> set) {
-        CubeStateMap mapColSymm = hmCols.applyColSymm(cS,hmRots);
-        //mapColSymm.print();
-        //System.out.println("num states = "+mapColSymm.countYgrHomeStates() + ", " + mapColSymm.size());
-        System.out.print("(act1,act2,act3) = ("+act1+","+act2+","+act3+"):   ");
-        System.out.println("diff states = "+mapColSymm.countDifferentStates() + ", " + mapColSymm.size());
-        assert(mapColSymm.countYgrHomeStates()==mapColSymm.size()) : "not all color-symmetric states have ygr 'home'!";
 
-        Iterator<Map.Entry<Integer,CubeState>> it1 = mapColSymm.entrySet().iterator();
-        while (it1.hasNext()) {
-            Map.Entry<Integer,CubeState> entry = it1.next();
-            set.add(entry.getValue());
-        }
-    }
 
-    /**
-     * Generate the distance sets D[p] and calculate the number of prevs, currents and twins
-     * while generating them. If all works out correctly, the relation
-     * <pre>
-     *       D[p+1].size() = 6*D[p].size() - N_p - N_c - N_t     </pre>
-     * should hold.
-     * <p>
-     * <b>WARNING</b>: This tests take <b>VERY</b> long for pmax &ge; 6 !<br>
-     * Since distance sets are now deprecated, this test method is deprecated as well.
-     */
-    @Deprecated
-    private void generatorTests(int pmax) {
 
-        System.out.println("\nTesting CSArrayList [GenerateNext]");
-        //            0          4                   8
-        int[] Narr = {0,0,9,54, 321,1847,9992,50136, 227536,870072,1887748,623800};	// for GenerateNext
-//		int[] Narr = {0,0,9,50, 150,600,3000,15000,  50,50,50,50};  // for GenerateNextColSymm
-        int[] theoCov = {1,9,54,321,  	// the known maximum sizes for D[0],D[1],D[2],D[3] ...
-                1847,9992,50136,227536,	// ... and D[4],D[5],D[6],D[7],
-                870072,1887748,623800,	// ... and D[8],D[9],D[10],D[7],
-                2644					// ... and D[11]
-        };
-        boolean silent=false;
-        boolean doAssert=true;
-        long seed = 99;
-        Random rand = new Random(seed);
-        ArrayList<TupleInt>[] tintList = new ArrayList[12];
-        CSArrayList[] D = new CSArrayList[12];
-        D[0] = new CSArrayList(CSAListType.GenerateD0);
-        D[1] = new CSArrayList(CSAListType.GenerateD1);
-        D[1].assertTwistSeqInArrayList();
-        for (int p=2; p<=pmax; p++) {
-            if (p>3) silent=true;
-            if (p>5) doAssert=false;
-            tintList[p] = new ArrayList<>();
-            System.out.print("Generating distance set for p="+p+" ..");
-            long startTime = System.currentTimeMillis();
-//			D[p] = new CSArrayList(CSAListType.GenerateNextColSymm, D[p-1], D[p-2], Narr[p], tintList[p], silent);
-            D[p] = new CSArrayList(CSAListType.GenerateNext, D[p-1], D[p-2], Narr[p]
-                    , tintList[p], silent, doAssert, rand);
-            double elapsedTime = (double)(System.currentTimeMillis() - startTime)/1000.0;
-            assert(CubeStateMap.countDifferentStates(D[p])==D[p].size()) : "D["+p+"]: size and # diff. states differ!";
-            D[p].assertTwistSeqInArrayList();
-            System.out.println("\nCoverage D["+p+"] = "+D[p].size()+" of "+ theoCov[p]
-                    +"    Time="+elapsedTime+" sec");
-            //CSArrayList.printTupleIntList(tintList[p]);
-            CSArrayList.printLastTupleInt(tintList[p]);
-            int dummy=1;
-        }
-
-    }
-
-    // --- not needed anymore, we have JUnit tests
-//    /**
-//     * @param args
-//     */
-//    public static void main(String[] args)
-//    {
-//        if (args.length!=0) {
-//            throw new RuntimeException("[TestPocketCube.main] args="+args+" not allowed.");
-//        }
-//
-//        PocketCubeTest tpock = new PocketCubeTest();
-//
-//        tpock.testFourTimeRots();			// test whole-cube rotations and twists
-//        tpock.test_FTw_UTw_LTw();
-//        tpock.testAdjacencySets();
-//        tpock.testCS_STICKER_transform();
-//        //tpock.colorMapTests();		// test maps and color symmetries
-//        //tpock.generatorTests(5);		// tests on distance set generation
-//
-//        System.out.println("*** All done ***");
-//
-//    }
 
 }

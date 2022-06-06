@@ -97,14 +97,15 @@ public class GameBoardCubeGui3x3 extends GameBoardCubeGui {
      * 				 clear any previous values.
      */
     protected void guiUpdateBoard(boolean enable, boolean showValueOnGameboard) {
-        int i;
-        int[] fcol = m_gb.m_so.getCubeState().fcol;
+        int i, fcol_i;
+        int fcol_length = m_gb.m_so.getCubeState().get_fcol_length();
         //                      U         L        F         D          R         B
         Color[] colors = {Color.white, colBlue, colOrang, colYellow, colGreen, colRed};        //{w,b,o,y,g,r}
         // iarr and jarr are set in constructors GameBoardCubeGui2x2 or GameBoardCubeGui3x3
-        for (i = 0; i < fcol.length; i++) {
+        for (i = 0; i < fcol_length; i++) {
+            fcol_i = m_gb.m_so.getCubeState().get_fcol(i);
             Board[iarr[i]][jarr[i]].setEnabled(enable);
-            Board[iarr[i]][jarr[i]].setBackground(colors[fcol[i]]);
+            Board[iarr[i]][jarr[i]].setBackground(colors[fcol_i]);
             Board[iarr[i]][jarr[i]].setForeground(Color.white);
         }
         for (i = 0; i < 6; i++) {

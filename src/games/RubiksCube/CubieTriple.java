@@ -19,22 +19,17 @@ public class CubieTriple {
 	/**
 	 * If {@code i} is a sticker location, then {@code ccolo[i]} is the default color for this location
 	 */
-	public static int[] ccolo= {0,0,0,0,    1,1,1,1,   2,2,2,2,   3,3,3,3,   4,4,4,4,    5,5,5,5  };
+	protected static int[] ccolo= {0,0,0,0,    1,1,1,1,   2,2,2,2,   3,3,3,3,   4,4,4,4,    5,5,5,5  };
 
 	/**
 	 * The ygr-cubie in its default location {12,16,20} with colors {3,4,5}={y,g,r}
 	 */
 	public CubieTriple() {
-//		final int[] loc = {12,16,20};
-//		final int[] col = {3,4,5};
-//		this.loc = loc.clone();
-//		this.col = col.clone();
-//		this.ori = Orientation.CLOCK;
 		initialize(12);
 	}
 
 	/**
-	 * The cubie with its first sticker at position {@code i} in its default location
+	 * The cubie with its first sticker at position {@code i}
 	 * @param i sticker position
 	 */
 	public CubieTriple(int i) {

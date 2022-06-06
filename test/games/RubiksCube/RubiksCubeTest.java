@@ -9,7 +9,7 @@ import java.util.HashSet;
  */
 public class RubiksCubeTest extends PocketCubeTest {
     protected void init() {
-        CubeConfig.cubeType = CubeConfig.CubeType.RUBIKS;
+        CubeConfig.cubeSize = CubeConfig.CubeSize.RUBIKS;
 
         gb = new GameBoardCube(ar);
 

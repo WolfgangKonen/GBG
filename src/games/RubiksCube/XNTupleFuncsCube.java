@@ -43,7 +43,7 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	 */
 	@Override
 	public int getNumCells() {
-		return switch (CubeConfig.cubeType) {
+		return switch (CubeConfig.cubeSize) {
 			case POCKET -> this.getNumCells2x2();
 			case RUBIKS -> this.getNumCells3x3();
 		};
@@ -59,7 +59,7 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	 */
 	@Override
 	public int getNumPositionValues() {
-		return switch (CubeConfig.cubeType) {
+		return switch (CubeConfig.cubeSize) {
 			case POCKET -> this.getNumPositionValues2x2();
 			case RUBIKS -> this.getNumPositionValues3x3();
 		};
@@ -73,7 +73,7 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	 */
 	@Override
 	public int[] getPositionValuesVector(){
-		return switch (CubeConfig.cubeType) {
+		return switch (CubeConfig.cubeSize) {
 			case POCKET -> this.getPositionValuesVector2x2();
 			case RUBIKS -> this.getPositionValuesVector3x3();
 		};
@@ -132,7 +132,7 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 		// calculate all color-symmetric states for cS1, collect
 		// in 'set' only the truly different CubeStates
 		CubeStateMap mapColSymm = hmCols.applyColSymm(cS1,hmRots);
-		if (doAssert && CubeConfig.cubeType== CubeConfig.CubeType.POCKET)
+		if (doAssert && CubeConfig.cubeSize == CubeConfig.CubeSize.POCKET)
 			assert(mapColSymm.countYgrHomeStates()==mapColSymm.size()) :
 				"not all color-symmetric states have ygr 'home'!";
 		for (Map.Entry<Integer, CubeState> entry : mapColSymm.entrySet()) {
@@ -175,7 +175,7 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 		// calculate all color-symmetric states for cS1, collect
 		// in 'set' only the truly different CubeStates
 		CubeStateMap mapColSymm = hmCols.applyColSymm(cS1,hmRots);
-		if (doAssert && CubeConfig.cubeType== CubeConfig.CubeType.POCKET)
+		if (doAssert && CubeConfig.cubeSize == CubeConfig.CubeSize.POCKET)
 			assert(mapColSymm.countYgrHomeStates()==mapColSymm.size()) :
 				"not all color-symmetric states have ygr 'home'!";
 		for (Map.Entry<Integer, CubeState> entry : mapColSymm.entrySet()) {
@@ -222,7 +222,7 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	 */
 	@Override
 	public int[][] fixedNTuples(int mode) {
-		return switch (CubeConfig.cubeType) {
+		return switch (CubeConfig.cubeSize) {
 			case POCKET -> this.fixedNTuples2x2(mode);
 			case RUBIKS -> this.fixedNTuples3x3(mode);
 		};
@@ -248,7 +248,7 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	 * Return all neighbors of cell {@code iCell} in the board vector.
 	 */
 	public HashSet<Integer> adjacencySet(int iCell) {
-		return switch (CubeConfig.cubeType) {
+		return switch (CubeConfig.cubeSize) {
 			case POCKET -> adjacencySet2x2(iCell);
 			case RUBIKS -> adjacencySet3x3(iCell);
 		};
@@ -301,7 +301,7 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	}
 
 	private int[][] fixedNTuples2x2(int mode) {
-		// Examples for some n-tuples in case CubeConfig.cubeType==POCKET:
+		// Examples for some n-tuples in case CubeConfig.cubeSize==POCKET:
 		switch (mode) {
 			case 0:
 				switch(CubeConfig.boardVecType) {

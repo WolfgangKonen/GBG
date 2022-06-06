@@ -13,12 +13,12 @@ public class CubeConfig {
 	 * @see ArenaCube#setCubeType(String)
 	 * 
 	 */
-	public enum CubeType {POCKET,RUBIKS}
+	public enum CubeSize {POCKET,RUBIKS}
 
 	/**
 	 * @see ArenaCube#setCubeType(String)
 	 */
-	public static CubeType cubeType = CubeType.POCKET;
+	public static CubeSize cubeSize = CubeSize.POCKET;
 	
 	/**
 	 * What does a board vector state in {@link StateObserverCube} represent?. The possible options are
@@ -79,7 +79,7 @@ public class CubeConfig {
 	 * The cost-to-go for a transition from one state s to the next state s'. Used as part of the reward in
 	 * DAVI2Agent, DAVI3Agent, DAVI4Agent, TDNTuple3Agt, TDNTuple4Agt (through {@link StateObserverCube#getStepRewardTuple()}).
 	 */
-	public static double stepReward = (CubeConfig.cubeType==CubeType.POCKET) ? -0.04 : -0.1;  //-0.01;
+	public static double stepReward = (CubeConfig.cubeSize == CubeSize.POCKET) ? -0.04 : -0.1;  //-0.01;
 
 	/**
 	 * whether a replay buffer with certain capacity and batch size is used or not

@@ -3,7 +3,7 @@ package games.RubiksCube;
 import controllers.PlayAgent;
 import games.*;
 import games.RubiksCube.CubeConfig.BoardVecType;
-import games.RubiksCube.CubeConfig.CubeType;
+import games.RubiksCube.CubeConfig.CubeSize;
 import games.RubiksCube.CubeConfig.TwistType;
 
 /**
@@ -97,8 +97,8 @@ public class ArenaCube extends Arena   {
      */
     public static void setCubeType(String sCube) {
 		switch (sCube) {
-			case "2x2x2" -> CubeConfig.cubeType = CubeType.POCKET;
-			case "3x3x3" -> CubeConfig.cubeType = CubeType.RUBIKS;
+			case "2x2x2" -> CubeConfig.cubeSize = CubeSize.POCKET;
+			case "3x3x3" -> CubeConfig.cubeSize = CubeSize.RUBIKS;
 			default -> throw new RuntimeException("Cube type " + sCube + " is not known.");
 		}
     }

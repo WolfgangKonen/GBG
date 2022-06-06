@@ -51,18 +51,18 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	/**
 	 * the index for an unknown {@link #m_action}
 	 */
-	public static final int iActUnknown = (CubeConfig.cubeType== CubeConfig.CubeType.POCKET) ? 9 : 18;
+	public static final int iActUnknown = (CubeConfig.cubeSize == CubeConfig.CubeSize.POCKET) ? 9 : 18;
 
 	/**
 	 * the possible QTM actions (twists)
 	 */
-	private static final int[] quarterActs = (CubeConfig.cubeType== CubeConfig.CubeType.POCKET) ?
+	private static final int[] quarterActs = (CubeConfig.cubeSize == CubeConfig.CubeSize.POCKET) ?
 			new int[]{0, 2, 3, 5, 6, 8} :  							//  {U1,U3,L1,L3,F1,F3}
 			new int[]{0, 2, 3, 5, 6, 8, 9, 11, 12, 14, 15, 17};		//  {U1,U3,L1,L3,F1,F3,D1,D3,R1,R3,B1,B3}
 	/**
 	 * the possible HTM actions (twists)
 	 */
-	private static final int[] halfTurnActs = (CubeConfig.cubeType== CubeConfig.CubeType.POCKET) ?
+	private static final int[] halfTurnActs = (CubeConfig.cubeSize == CubeConfig.CubeSize.POCKET) ?
 			new int[]{0,1,2,3,4,5,6,7,8} :  						//  {U1,U2,U3,L1,L2,L3,F1,F2,F3}
 			new int[]{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17};	//  {U1,U2,U3,L1,L2,L3,F1,F2,F3,D1,D2,D3,R1,R2,R3,B1,B2,B3}
 	private static final int[] allActs = (CubeConfig.twistType== CubeConfig.TwistType.QTM) ? quarterActs : halfTurnActs;
@@ -95,7 +95,7 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 
 	public StateObserverCube() {
 		super();
-		m_state = csFactory.makeCubeState(); 		// default (solved) cube of type CubeConfig.cubeType
+		m_state = csFactory.makeCubeState(); 		// default (solved) cube of type CubeConfig.cubeSize
 		m_action = new ACTIONS(iActUnknown);		// iActUnknown (9 or 18) codes 'unknown' (for the generating last action)
 		setAvailableActions();
 	}

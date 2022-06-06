@@ -8,14 +8,14 @@ import games.BoardVector;
 public class CubeStateFactory {
 
     public CubeState makeCubeState() {
-        return switch (CubeConfig.cubeType) {
+        return switch (CubeConfig.cubeSize) {
             case POCKET -> new CubeState2x2(CubeState.Type.COLOR_P);
             case RUBIKS -> new CubeState3x3(CubeState.Type.COLOR_R);
         };
     }
 
     public CubeState makeCubeState(CubeState.Type type) {
-        return switch (CubeConfig.cubeType) {
+        return switch (CubeConfig.cubeSize) {
             case POCKET -> new CubeState2x2(type);
             case RUBIKS -> new CubeState3x3(type);
         };
@@ -23,14 +23,14 @@ public class CubeStateFactory {
 
     @Deprecated
     public CubeState makeCubeState(BoardVector boardVector) {
-        return switch (CubeConfig.cubeType) {
+        return switch (CubeConfig.cubeSize) {
             case POCKET -> new CubeState2x2(boardVector);
             case RUBIKS -> new CubeState3x3(boardVector);
         };
     }
 
     public CubeState makeCubeState(CubeState other) {
-        return switch (CubeConfig.cubeType) {
+        return switch (CubeConfig.cubeSize) {
             case POCKET -> new CubeState2x2(other);
             case RUBIKS -> new CubeState3x3(other);
         };
@@ -40,7 +40,7 @@ public class CubeStateFactory {
      * generate the <b>inverse</b> transformations {@link CubeState#invF}, {@link CubeState#invL} and {@link CubeState#invU}.
      */
     public static void generateInverseTs() {
-        switch (CubeConfig.cubeType) {
+        switch (CubeConfig.cubeSize) {
             case POCKET -> CubeState2x2.generateInverseTs();
             case RUBIKS -> CubeState3x3.generateInverseTs();
         }

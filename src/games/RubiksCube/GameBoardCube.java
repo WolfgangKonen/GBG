@@ -54,7 +54,7 @@ public class GameBoardCube implements GameBoard {
 		m_so		= new StateObserverCube();	// empty table
 		
         if (m_Arena.hasGUI() && m_gameGui==null) {
-			switch (CubeConfig.cubeType) {
+			switch (CubeConfig.cubeSize) {
 				case POCKET -> m_gameGui = new GameBoardCubeGui2x2(this);
 				case RUBIKS -> m_gameGui = new GameBoardCubeGui3x3(this);
 			}
@@ -330,7 +330,7 @@ public class GameBoardCube implements GameBoard {
 	
 	@Override
 	public String getSubDir() {
-		String substr = switch (CubeConfig.cubeType) {
+		String substr = switch (CubeConfig.cubeSize) {
 			case POCKET -> "2x2x2";
 			case RUBIKS -> "3x3x3";
 		};
