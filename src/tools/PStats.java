@@ -21,7 +21,7 @@ import starters.MTrain;
  *  created and finally written with
  *  {@link PStats#printPlayStats(ArrayList, StateObservation, PlayAgent[], Arena) PStats#printPlayStats}
  *  to file {@link Types#PLAYSTATS_FILENAME}. <br>
- *  This happens only if {@link Types#PLAYSTATS_WRITING}{@code ==true}.<p>
+ *  This happens only if {@link Types#PLAYSTATS_WRITING}{@code ==true}.
  *  <p>
  *  This class is currently in part specific to game 2048 (it records for example the number of 
  *  empty tiles). This is the reason why it is needed in addition to the information stored

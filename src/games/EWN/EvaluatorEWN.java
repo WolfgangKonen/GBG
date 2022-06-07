@@ -241,7 +241,7 @@ public class EvaluatorEWN extends Evaluator {
      * @param opponent agent to be played against
      * @param diffStarts if true
      * @param numEpisodes number of episodes during evaluation
-     * @return {@code ScoreTuple} Tuple which holds the average score for {@playAgent} and {@opponent}
+     * @return {@code ScoreTuple} Tuple which holds the average score for {@code playAgent} and {@code opponent}
      */
     public double evaluateFree(PlayAgent playAgent, PlayAgent opponent, boolean diffStarts, int numEpisodes){
         StateObservation so = m_gb.getDefaultStartState();

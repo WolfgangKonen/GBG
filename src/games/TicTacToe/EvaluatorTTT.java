@@ -16,7 +16,7 @@ import tools.Types;
 import tools.Types.ACTIONS;
 
 /**
- * Evaluator for TicTacToe:
+ * Evaluator for TicTacToe.<p>
  * <ul>
  * <li> if mode=0: {@link EvaluatorTTT#evaluateAgent1(PlayAgent,PlayAgent,GameBoard)} (competition against RandomAgent) or 
  * <li> if mode=1: {@link EvaluatorTTT#evaluateAgent1(PlayAgent,PlayAgent,GameBoard)} (competition against MaxNAgent) or 

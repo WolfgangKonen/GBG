@@ -14,7 +14,7 @@ abstract public class SystemConversion {
 
     /**
      * Maps the Ludii index of a board position to the respective GBG position and vice versa.
-     * Ludii indices can be enabled to be shown in the Ludii player via the "View" menu -> "Show Indices" (or CTRL-I).
+     * Ludii indices can be enabled to be shown in the Ludii player via the "View" menu -- "Show Indices" (or CTRL-I).
      */
     protected BiMap<Integer,Integer> indicesMap = HashBiMap.create();
     /**

@@ -71,12 +71,33 @@ import games.BoardVector;
  *      14 13				
  *      15 12				
  * </pre>
- * 
- * @author Wolfgang Konen, TH Koeln, 2018-2020
+ * For the 3x3x3 cube (RUBIKS) the numbering is:
+ * <pre>
+ *               6   5   4
+ *               7       3
+ *               0   1   2
+ *  10   9   8  16  23  22  36  35  34  46  45  44
+ *  11      15  17      21  37      33  47      43
+ *  12  13  14  18  19  20  38  39  32  40  41  42
+ *              28  27  26
+ *              29      25
+ *              30  31  24
+ * </pre>
+ *
+ * @author Wolfgang Konen, TH Koeln, 2018-2022
+ * @see CubeState2x2
+ * @see CubeState3x3
  */
 abstract public class CubeState implements Serializable {
-	
+
+	/**
+	 * COLOR or TRAFO type?
+	 */
 	public enum Type {COLOR_P,COLOR_R,TRAFO_P,TRAFO_R}
+
+	/**
+	 * enumerate ID plus all six twists U,L,...
+	 */
 	public enum Twist {ID,U,L,F,D,R,B}
 
 	/**
@@ -104,6 +125,7 @@ abstract public class CubeState implements Serializable {
 	protected int[] sloc;
 
 	protected static CubeStateFactory csFactory = new CubeStateFactory();
+	protected static CubieTripleFactory ctFactory = new CubieTripleFactory();
 
 	Type type = Type.COLOR_P;
 	Twist lastTwist = Twist.ID;
@@ -450,7 +472,7 @@ abstract public class CubeState implements Serializable {
 		return apply(trafo,false);
 	}
 	public CubeState apply(CubeState trafo, boolean doAssert) {
-		assert(trafo.type==Type.TRAFO_P || this.type==Type.TRAFO_R) : "Wrong type in apply(trafo) !";
+		assert(trafo.type==Type.TRAFO_P || trafo.type==Type.TRAFO_R) : "Wrong type in apply(trafo) !";
 		int i;
 		int[] tmp = this.fcol.clone();
 		for (i=0; i<fcol.length; i++) this.fcol[i] = tmp[trafo.fcol[i]];
@@ -540,6 +562,54 @@ abstract public class CubeState implements Serializable {
 	}
 
 	/**
+	 * Locate the cubie with the colors of {@link CubieTriple} {@code tri} in {@code this}.
+	 * {@code this} has to be of type COLOR_P or COLOR_R.
+	 * <p>
+	 *     Details:
+	 * <ul>
+	 * <li> This method is only needed if we want to use color symmetries.
+	 * <li> This method relies on member {@code floc} to be transformed, member {@code sloc} needs not to be transformed.
+	 * </ul>
+	 *
+	 * @param tri a cubie
+	 * @return a {@link CubieTriple} whose member {@code loc} carries the location of the cubie with
+	 * 		   the colors of {@code tri}.
+	 */
+	public CubieTriple locate(CubieTriple tri) {
+		assert(type==Type.COLOR_P || type==Type.COLOR_R) : "Wrong type "+type+" in locate() !";
+		int isep = (CubeConfig.cubeSize== CubeConfig.CubeSize.POCKET) ? 1 : 2;
+		//            0           4          8          12         16          20
+//      int[] left = {4,11,17,22, 8,3,21,14, 0,7,13,18, 20,19,9,6, 12,23,1,10, 16,15,5,2};  // not needed, use right[right[i]]
+		// right= {8,18,23,5,  0,22,15,9, 4,14,19,1, 16,10,7,21,20,2,11,13, 12,6,3,17};
+		int[] right= CubieTriple.right;
+		int rig,lef;
+		CubieTriple where = ctFactory.makeCubieTriple(tri);
+		switch(tri.ori) {
+			case CLOCK:
+				for (int i=0; i<fcol.length; i=i+isep)
+					assert (right[right[right[i]]]==i) : "right-assertion failed for i="+i;
+				for (int i=0; i<fcol.length; i=i+isep) {
+					if (fcol[i]==tri.col[0]) {
+						where.loc[0]=i;
+						rig = right[i];
+						if (fcol[rig]==tri.col[1]) {
+							where.loc[1]=rig;
+							lef = right[rig];
+							if (fcol[lef]==tri.col[2]) {
+								where.loc[2]=lef;
+								return where;
+							}
+						}
+					}
+				}
+				break;
+			case COUNTER:
+				throw new RuntimeException("Case COUNTER not yet implemented");
+		}
+		throw new RuntimeException("Invalid cube, we should not arrive here!");
+	}
+
+	/**
 	 * Apply color trafo {@code cT} to {@link #sloc}. Calculates the new {@code s' = sloc} via
 	 * <pre>
 	 *     s'[invS[i]] = t[i]   </pre>
@@ -564,7 +634,7 @@ abstract public class CubeState implements Serializable {
 		for (int i=0; i<sloc.length; i++) this.sloc[invS[i]] = tmp[i];
 
 		if (doAssert) {
-			CubeState2x2 cs2 = new CubeState2x2(this);
+			CubeState cs2 = csFactory.makeCubeState(this);
 			cs2.apply_sloc_slow(trafo, doAssert);
 			assert (cs2.isEqual(this)) : "sloc_slow check: cs2 and this differ!";
 		}

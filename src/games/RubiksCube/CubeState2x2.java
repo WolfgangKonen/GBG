@@ -102,7 +102,7 @@ public class CubeState2x2 extends CubeState {
         CubieTriple where;
         // we implement it the slow way by locating each of the eight cubies:
         for (int s : stickers) {
-            where = locate(new CubieTriple(s));
+            where = locate(ctFactory.makeCubieTriple(s));
             sloc[s] = where.loc[0];
             sloc[rig[s]] = where.loc[1];
             sloc[rig[rig[s]]] = where.loc[2];
@@ -127,7 +127,7 @@ public class CubeState2x2 extends CubeState {
      * @return the transformed {@code this}
      */
     public CubeState applyCT(ColorTrafo cT, boolean doAssert) {
-        CubieTriple ygrCubie = new CubieTriple();
+        CubieTriple ygrCubie = ctFactory.makeCubieTriple();
         assert(this.type==Type.COLOR_P || this.type==Type.COLOR_R) : "Wrong type "+this.type+" in apply(cT) !";
         // 1) apply the color trafo to fcol:
         int[] tmp = this.fcol.clone();
@@ -190,52 +190,6 @@ public class CubeState2x2 extends CubeState {
 //        }
 //
 //    }
-
-    /**
-     * Locate the cubie with the colors of {@link CubieTriple} {@code tri} in {@code this}.
-     * {@code this} has to be of type COLOR_P or COLOR_R.
-     * <p>
-     *     Details:
-     * <ul>
-     * <li> This method is only needed if we want to use color symmetries.
-     * <li> This method relies on member {@code floc} to be transformed, member {@code sloc} needs not to be transformed.
-     * </ul>
-     *
-     * @param tri a cubie
-     * @return a {@link CubieTriple} whose member {@code loc} carries the location of the cubie with
-     * 		   the colors of {@code tri}.
-     */
-    public CubieTriple locate(CubieTriple tri) {
-        assert(type==Type.COLOR_P || type==Type.COLOR_R) : "Wrong type "+type+" in locate() !";
-        CubieTriple where = new CubieTriple(tri);
-        //            0           4          8          12         16          20
-//      int[] left = {4,11,17,22, 8,3,21,14, 0,7,13,18, 20,19,9,6, 12,23,1,10, 16,15,5,2};  // not needed, use right[right[i]]
-           // right= {8,18,23,5,  0,22,15,9, 4,14,19,1, 16,10,7,21,20,2,11,13, 12,6,3,17};
-        int[] right= CubieTriple.right;
-        int rig,lef;
-        switch(tri.ori) {
-            case CLOCK:
-                for (int i=0; i<fcol.length; i++) {
-                    assert(right[right[right[i]]]==i);
-                    if (fcol[i]==tri.col[0]) {
-                        where.loc[0]=i;
-                        rig = right[i];
-                        if (fcol[rig]==tri.col[1]) {
-                            where.loc[1]=rig;
-                            lef = right[rig];
-                            if (fcol[lef]==tri.col[2]) {
-                                where.loc[2]=lef;
-                                return where;
-                            }
-                        }
-                    }
-                }
-                break;
-            case COUNTER:
-                throw new RuntimeException("Case COUNTER not yet implemented");
-        }
-        throw new RuntimeException("Invalid cube, we should not arrive here!");
-    }
 
     /**
      * There are four possible board vector types, depending on {@link CubeConfig#boardVecType}

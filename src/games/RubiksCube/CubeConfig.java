@@ -5,7 +5,7 @@ import params.ParOther;
 public class CubeConfig {
 	
 	/**
-	 * What type of cube is it?
+	 * What is the cube size?
 	 * <ul>
 	 * <li> <b>POCKET</b>: 2x2x2 pocket cube
 	 * <li> <b>RUBIKS</b>: 3x3x3 Rubik's cube 		
@@ -41,7 +41,7 @@ public class CubeConfig {
 	public static BoardVecType boardVecType = BoardVecType.CUBESTATE;
 
 	/**
-	 * What type of twists are allowed?
+	 * What type of twists (HTM or QTM) are allowed?
 	 * <ul>
 	 * <li> <b>HTM</b>: half-turn metric, quarter and half twists (i.e. U1, U2, U3)
 	 * <li> <b>QTM</b>: quarter-turn metric, only quarter twists (i.e. U1, U3)

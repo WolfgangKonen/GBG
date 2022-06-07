@@ -88,8 +88,38 @@ public class CubeState3x3 extends CubeState {
         System.out.println("invF: "+t_cs);
     }
 
-    public CubieTriple locate(CubieTriple tri) {
-        throw new RuntimeException("CubeState3x3.locate not yet implemented!");
+    /**
+     * Locate the edge cubie with the colors of {@link CubieDouble} {@code edg} in {@code this}.
+     * {@code this} has to be of type COLOR_P or COLOR_R.
+     * <p>
+     *     Details:
+     * <ul>
+     * <li> This method is only needed if we want to use color symmetries.
+     * <li> This method relies on member {@code floc} to be transformed, member {@code sloc} needs not to be transformed.
+     * </ul>
+     *
+     * @param edg an edge cubie
+     * @return a {@link CubieDouble} whose member {@code loc} carries the location of the cubie with
+     * 		   the colors of {@code edg}.
+     */
+    public CubieDouble locate_edge(CubieDouble edg) {
+        assert(type==Type.COLOR_P || type==Type.COLOR_R) : "Wrong type "+type+" in locate() !";
+        int[] other = CubieDouble.other;
+        int oth;
+        for (int i=1; i<fcol.length; i=i+2)
+            assert(other[other[i]]==i) : "other-assertion failed for i="+i;
+        CubieDouble where = new CubieDouble(edg);
+        for (int i=1; i<fcol.length; i=i+2) {
+            if (fcol[i]==edg.col[0]) {
+                where.loc[0]=i;
+                oth = other[i];
+                if (fcol[oth]==edg.col[1]) {
+                    where.loc[1]=oth;
+                    return where;
+                }
+            }
+        }
+        throw new RuntimeException("Invalid cube, we should not arrive here!");
     }
 
     protected CubeState apply_sloc_slow(CubeState trafo, boolean doAssert) {
@@ -98,11 +128,21 @@ public class CubeState3x3 extends CubeState {
         int[] rig = CubieTriple.right;
         CubieTriple where;
         // we implement it the slow way by locating each of the eight corner cubies:
+
         for (int s : stickers_c) {
-            where = locate(new CubieTriple(s));
+            where = locate(ctFactory.makeCubieTriple(s));
             sloc[s] = where.loc[0];
             sloc[rig[s]] = where.loc[1];
             sloc[rig[rig[s]]] = where.loc[2];
+        }
+
+        int[] stickers_e = {1,3,5,7, 25,27,29,31, 11,15,21,33};     // the necessary edge stickers (one for every edge cubie)
+        int[] oth = CubieDouble.other;
+        CubieDouble edge;
+        for (int s : stickers_e) {
+            edge = locate_edge(new CubieDouble(s));
+            sloc[s] = edge.loc[0];
+            sloc[oth[s]] = edge.loc[1];
         }
 
         if (doAssert) {

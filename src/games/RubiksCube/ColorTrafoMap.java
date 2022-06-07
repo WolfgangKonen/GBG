@@ -21,6 +21,9 @@ import games.RubiksCube.CubeState.Type;
  * @see ColorTrafo
  */
 public class ColorTrafoMap extends Hashtable<Integer,ColorTrafo> implements Serializable {
+	/**
+	 * (currently only {@code AllColorTrafos})
+	 */
 	public enum ColMapType {AllColorTrafos}
 	
 	/**
@@ -113,10 +116,11 @@ public class ColorTrafoMap extends Hashtable<Integer,ColorTrafo> implements Seri
 	 */
 	public CubeStateMap applyColSymm(CubeState cS, CubeStateMap hmRots) {
 		CubeStateFactory csFactory = new CubeStateFactory();
+		CubieTripleFactory ctFactory = new CubieTripleFactory();
 		assert(cS.type==Type.COLOR_P || cS.type==Type.COLOR_R) : "Wrong cS.type in applyColSymm(cS) !";
 		//int[] loc = new int[3];
 		//CubieTriple cub = new CubieTriple();
-		CubieTriple ygr = new CubieTriple();
+		CubieTriple ygr = ctFactory.makeCubieTriple();
 		CubeStateMap newMap = new CubeStateMap();
 		//for (int i=0; i<3; i++) cub.loc[i]=0;		// cub never used
 

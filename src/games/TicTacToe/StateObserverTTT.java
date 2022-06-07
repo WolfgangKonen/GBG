@@ -10,7 +10,8 @@ import tools.Types;
 import tools.Types.ACTIONS;
 
 /**
- * Class StateObservation observes the current state of the game, it has utility functions for
+ * Class StateObservation observes the current state of the game.<p>
+ * It has utility functions for
  * <ul>
  * <li> returning the available actions ({@link #getAvailableActions()}), 
  * <li> advancing the state of the game with a specific action ({@link #advance(Types.ACTIONS)}),

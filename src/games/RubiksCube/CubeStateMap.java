@@ -16,6 +16,9 @@ import java.util.Map;
  * {@link #CubeStateMap()} in that case.
  */
 public class CubeStateMap extends Hashtable<Integer,CubeState> {
+	/**
+	 * (currently only {@code AllWholeCubeRotTrafos})
+	 */
 	public enum CsMapType {AllWholeCubeRotTrafos}
 
 	/**
@@ -84,7 +87,8 @@ public class CubeStateMap extends Hashtable<Integer,CubeState> {
 	private void allWholeCubeRotTrafos() {
 
 		CubeStateFactory csFactory = new CubeStateFactory();
-		CubieTriple ygrCubie = new CubieTriple();	// default constructor is for ygr-cubie
+		CubieTripleFactory ctFactory = new CubieTripleFactory();
+		CubieTriple ygrCubie = ctFactory.makeCubieTriple();   	// default constructor is for ygr-cubie
 		int key=0;
 		CubeState.Type type = (CubeConfig.cubeSize == CubeConfig.CubeSize.POCKET)
 							? CubeState.Type.TRAFO_P : CubeState.Type.TRAFO_R;

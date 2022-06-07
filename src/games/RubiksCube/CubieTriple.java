@@ -2,7 +2,10 @@ package games.RubiksCube;
 
 import java.text.DecimalFormat;
 
-public class CubieTriple {
+/**
+ * A representation of a corner cubie
+ */
+abstract public class CubieTriple {
 	public enum Orientation {COUNTER, CLOCK}
 	int[] loc;
 	int[] col;
@@ -13,33 +16,15 @@ public class CubieTriple {
 	 * for the g-face of the ygr-cubie (marching around the cubie in clockwise orientation).
 	 * And {@code right[right[i]]} is the sticker location of the r-face of the ygr-cubie.
 	 */
-	              //            0           4          8          12         16          20
-	public static int[] right= {8,18,23,5,  0,22,15,9, 4,14,19,1, 16,10,7,21,20,2,11,13, 12,6,3,17};
+	public static int[] right= null;
 
 	/**
 	 * If {@code i} is a sticker location, then {@code ccolo[i]} is the default color for this location
 	 */
-	protected static int[] ccolo= {0,0,0,0,    1,1,1,1,   2,2,2,2,   3,3,3,3,   4,4,4,4,    5,5,5,5  };
+	protected static int[] ccolo=null;
 
-	/**
-	 * The ygr-cubie in its default location {12,16,20} with colors {3,4,5}={y,g,r}
-	 */
 	public CubieTriple() {
-		initialize(12);
-	}
-
-	/**
-	 * The cubie with its first sticker at position {@code i}
-	 * @param i sticker position
-	 */
-	public CubieTriple(int i) {
-		initialize(i);
-	}
-
-	private void initialize(int i) {
-		this.loc = new int[] {i, right[i], right[right[i]]};
-		this.col = new int[] {ccolo[i], ccolo[right[i]], ccolo[right[right[i]]]};
-		this.ori = Orientation.CLOCK;
+		// empty, just a stub for  derived classes
 	}
 
 	public CubieTriple(CubieTriple other) {
@@ -47,7 +32,13 @@ public class CubieTriple {
 		this.col = other.col.clone();
 		this.ori = other.ori;
 	}
-	
+
+	protected void initialize(int i) {
+		this.loc = new int[] {i, right[i], right[right[i]]};
+		this.col = new int[] {ccolo[i], ccolo[right[i]], ccolo[right[right[i]]]};
+		this.ori = Orientation.CLOCK;
+	}
+
 	public CubieTriple print() {
 		System.out.println(this); // calls toString()
 		return this;

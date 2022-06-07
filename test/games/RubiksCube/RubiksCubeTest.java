@@ -8,43 +8,44 @@ import java.util.HashSet;
  * to do the same tests as {@link PocketCubeTest}, but for Rubik's Cube.
  */
 public class RubiksCubeTest extends PocketCubeTest {
+    @Override
     protected void init() {
         CubeConfig.cubeSize = CubeConfig.CubeSize.RUBIKS;
 
+        ar = new ArenaCube("",false,true);
         gb = new GameBoardCube(ar);
 
         CubeStateFactory.generateInverseTs();
         CubeState.generateForwardTs();
     }
 
-    /**
-     *    Test for several randomly twisted CubeStates: Does a transformation from CubeState to STICKER board vector
-     *    and back to CubeState result in the original CubeState again?
-     */
     @Test
-    public void testCS_STICKER_transform() {
-        System.out.println("testCS_STICKER_transform not implemented!");
+    public void testFourTimeRots() {
+        super.testFourTimeRots();
+    }
+
+    @Test
+    public void test_UTw_LTw_FTw() {
+        super.test_UTw_LTw_FTw();
+    }
+
+    @Test
+    public void test_colorTrafo() {
+        super.test_colorTrafo();
+    }
+
+    @Test
+    public void test_sloc() {
+        super.test_sloc();
     }
 
     /**
-     * Twist-test:
-     *
-     * Test that rep x FTw.UTw.LTw followed by rep x the inverse leads to default cube again, where rep is a random int. <br>
-     */
+         *    Test for several randomly twisted CubeStates: Does a transformation from CubeState to STICKER board vector
+         *    and back to CubeState result in the original CubeState again?
+         */
     @Test
-    public void test_DTw_RTw_BTw() {
-
-        init();
-
-        CubeState def = csFactory.makeCubeState();
-        CubeState rot = csFactory.makeCubeState(def);
-        int runs = 3;
-        for (int r=0; r<runs; r++) {
-            int rep = 1+rand.nextInt(5);
-            for (int k=0; k<rep; k++) rot.DTw(1).RTw(1).BTw(1);
-            for (int k=0; k<rep; k++) rot.BTw(3).RTw(3).DTw(3);
-            assert (def.isEqual(rot)) : "def and rot differ after rep x FTw.UTw.LTw!";
-        }
+    public void testCS_STICKER_transform() {
+        System.out.println("testCS_STICKER_transform not implemented!");
     }
 
     /**
@@ -67,5 +68,25 @@ public class RubiksCubeTest extends PocketCubeTest {
         System.out.println(h5 + " --> OK");
     }
 
+    /**
+     * Twist-test:
+     *
+     * Test that rep x DTw.RTw.BTw followed by rep x the inverse leads to default cube again, where rep is a random int. <br>
+     */
+    @Test
+    public void test_DTw_RTw_BTw() {
+
+        init();
+
+        CubeState def = csFactory.makeCubeState();
+        CubeState rot = csFactory.makeCubeState(def);
+        int runs = 3;
+        for (int r=0; r<runs; r++) {
+            int rep = 1+rand.nextInt(5);
+            for (int k=0; k<rep; k++) rot.DTw(1).RTw(1).BTw(1);
+            for (int k=0; k<rep; k++) rot.BTw(3).RTw(3).DTw(3);
+            assert (def.isEqual(rot)) : "def and rot differ after rep x FTw.UTw.LTw!";
+        }
+    }
 
 }
