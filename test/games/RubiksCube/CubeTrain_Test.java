@@ -1,20 +1,21 @@
 package games.RubiksCube;
 
 import controllers.PlayAgent;
-import games.Arena;
-import games.Evaluator;
-import games.StateObservation;
+import games.*;
+import starters.MTrain;
 import starters.SetupGBG;
 import org.junit.Test;
 import tools.ScoreTuple;
 import tools.Types;
 
+import java.io.*;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.OptionalDouble;
 
-public class DAVI_Test {
+public class CubeTrain_Test {
     protected static Arena arenaTrain;
     protected static String filePath = null;
     protected static String savePath = null;
@@ -51,7 +52,7 @@ public class DAVI_Test {
 
         // Step 1
         GameBoardCube gb = (GameBoardCube) arenaTrain.getGameBoard();
-        PlayAgent pa = trainCube(agtFile,filePath,maxGameNum, pMaxTrain, gb );
+        PlayAgent pa = trainCube(agtFile,filePath,maxGameNum, pMaxTrain, gb);
 
         // Step 2
         int qem = 1;
@@ -77,23 +78,51 @@ public class DAVI_Test {
 
     }
 
+    /**
+     * Load agent {@code pa} from {@code filePath}, adjust its parameters {@code maxGameNum, pMax}, re-train agent.
+     * <p>
+     *     WARNING: Agent {@code pa} is not re-constructed, training continues on the loaded agent!
+     *
+     * @param agtFile   the agent filename
+     * @param filePath  full file path
+     * @param maxGameNum how many episodes to train
+     * @param pMax      max. number of twists
+     * @param gb        the game board, needed for chooseStartState
+     * @return the trained agent
+     */
     public PlayAgent trainCube(String agtFile, String filePath, int maxGameNum, int pMax, GameBoardCube gb) {
 
         // load agent to fill it with the appropriate parameter settings
         boolean res = arenaTrain.loadAgent(0, filePath);
         if (!res) {
-            System.err.println("\n[DAVI_Test.batch5] Aborted (no agent found).");
+            System.err.println("\n[trainCube] Aborted: Agent "+agtFile+" not found.");
             return null;
         }
         PlayAgent pa = arenaTrain.m_xfun.m_PlayAgents[0];
+
+        return trainCube(pa,maxGameNum,pMax,gb);
+    }
+
+    /**
+     * Take agent {@code pa}, adjust its parameters {@code maxGameNum, pMax} and re-train it
+     * <p>
+     *     WARNING: Agent {@code pa} is not re-constructed, training continues on the agent passed in!
+     *
+     * @param pa        the agent
+     * @param maxGameNum how many episodes to train
+     * @param pMax      max. number of twists
+     * @param gb        the game board, needed for chooseStartState
+     * @return the trained agent
+     */
+    public PlayAgent trainCube(PlayAgent pa, int maxGameNum, int pMax, GameBoardCube gb) {
+
 
         long startTime = System.currentTimeMillis();
 
         if (maxGameNum!=-1) pa.setMaxGameNum(maxGameNum);   // if -1, take maxGameNum from loaded agent
 
-
         gb.initialize();                // this changes CubeConfig.pMin and .pMax and thus ...
-        CubeConfig.pMax = pMax;         // we set CubeConfig.pMax, which is used in chooseStartState(pa), afterwards
+        CubeConfig.pMax = pMax;         // ... we set CubeConfig.pMax, which is used in chooseStartState(pa), afterwards
         pa.setGameNum(0);
         while (pa.getGameNum()<pa.getMaxGameNum())
         {
@@ -101,10 +130,14 @@ public class DAVI_Test {
 
             pa.trainAgent(so);
 
+            if (pa.getGameNum() % pa.getParOther().getNumEval()==0)
+                System.out.println("gameNum: "+pa.getGameNum());
+
         } // while
 
         double elapsedTime = (System.currentTimeMillis() - startTime)/1000.0;
-        System.out.println("[DAVI_Test.batch5] training finished in "+elapsedTime+" sec. ");
+        System.out.println("[trainCube] training finished in "+elapsedTime+" sec. ");
+        pa.incrementDurationTrainingMs((long)(elapsedTime*1000));
 
         return pa;
     } // trainCube
@@ -239,5 +272,104 @@ public class DAVI_Test {
         assert(vc.std==myStd);
     }
 
+    /**
+     * Helper class for {@link SymmTrainTest} to collect training results and store them in CSV file.
+     *
+     * @see MTrain
+     */
+    public static class MCube {
+        public int i;				// number of training run during multiTrain
+        public int gameNum;			// number of training games (episodes) during a run
+        public double evalQ;		// quick eval score
+        public double evalT;		// train eval score
+        public double totalTrainSec;
+        public double userValue1;
+        public double userValue2;
+        String sep = "; ";
+
+        public MCube(int i, int gameNum, double evalQ, double evalT, double totalTrainSec,
+                     double userValue1, double userValue2) {
+            this.i=i;
+            this.gameNum=gameNum;
+            this.evalQ=evalQ;
+            this.evalT=evalT;
+            this.totalTrainSec=totalTrainSec;
+            this.userValue1=userValue1;
+            this.userValue2=userValue2;
+        }
+
+        public void print(PrintWriter mtWriter)  {
+            mtWriter.print(i + sep + gameNum + sep);
+            mtWriter.println(evalQ + sep + evalT + sep + totalTrainSec
+                    + sep + userValue1 + sep + userValue2);
+        }
+
+        /**
+         * Print the results from {@link XArenaFuncs#multiTrain(int, String, XArenaButtons, GameBoard, String)} XArenaFuncs.multiTrain} to
+         * file <br>
+         *
+         * <pre>  {@link Types#GUI_DEFAULT_DIR_AGENT}{@code /<gameName>[/subDir]/csv/<csvName>} </pre>
+         *
+         * where the optional {@code subdir} is for games with different flavors (like Hex: board size).
+         * The directory is created, if it does not exist.
+         *
+         * @param csvName	where to write results, e.g. "multiTrain.csv"
+         * @param mcList	the results from {@code multiTrain}
+         * @param pa		the agent used in {@code multiTrain}
+         * @param ar		needed for game name and {@code subdir}
+         * @param userTitle1	title of 1st user column
+         * @param userTitle2	title of 2nd user column
+         * @return the filename
+         */
+        public String printMCubeList(String csvName, ArrayList<MCube> mcList, PlayAgent pa, String agtFile, Arena ar,
+                                     String userTitle1, String userTitle2){
+            PrintWriter mcWriter = null;
+            String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+ar.getGameName();
+            String subDir = ar.getGameBoard().getSubDir();
+            if (subDir != null){
+                strDir += "/"+subDir;
+            }
+            strDir += "/csv";
+            tools.Utils.checkAndCreateFolder(strDir);
+
+            boolean retry=true;
+            BufferedReader bufIn=new BufferedReader(new InputStreamReader(System.in));
+            while (retry) {
+                try {
+                    mcWriter = new PrintWriter(new FileWriter(strDir+"/"+csvName,false));
+                    retry = false;
+                } catch (IOException e) {
+                    try {
+                        // We may get here if csvName is open in another application (e.g. Excel).
+                        // Here we give the user the chance to close the file in the other application:
+                        System.out.print("*** Warning *** Could not open "+strDir+"/"+csvName+". Retry? (y/n): ");
+                        String s = bufIn.readLine();
+                        retry = s.contains("y");
+                    } catch (IOException e2) {
+                        e2.printStackTrace();
+                    }
+                }
+            }
+
+            if (mcWriter!=null) {
+                mcWriter.println(pa.stringDescr());
+                mcWriter.println(pa.stringDescr2());
+                mcWriter.println("from: "+agtFile);
+
+                mcWriter.println("run"+sep+"gameNum"+sep+"evalQ"+sep+"evalT"+sep
+                                +"totalTrainSec"+sep+userTitle1+sep+userTitle2);
+                for (MCube mCube : mcList) {
+                    mCube.print(mcWriter);
+                }
+
+                mcWriter.close();
+                return strDir+"/"+csvName;
+            } else {
+                System.err.print("*** Warning *** Could not write "+strDir+"/"+csvName+".");
+                return null;
+            }
+        }
+
+    }
 
 }

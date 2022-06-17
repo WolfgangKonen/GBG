@@ -78,7 +78,7 @@ public class CubeStateMap extends Hashtable<Integer,CubeState> {
 	 */
 	public CubeStateMap(CsMapType csType) {
 		if (csType == CsMapType.AllWholeCubeRotTrafos) {
-			allWholeCubeRotTrafos();	// side effect: fills also map_ygr_wholeKey
+			allWholeCubeRotTrafos();	// side effect: fills also map_ygr_wholeKey and map_inv_wholeCube
 		} else {
 			throw new RuntimeException("Case " + csType + " not allowed!");
 		}
@@ -89,31 +89,27 @@ public class CubeStateMap extends Hashtable<Integer,CubeState> {
 		CubeStateFactory csFactory = new CubeStateFactory();
 		CubieTripleFactory ctFactory = new CubieTripleFactory();
 		CubieTriple ygrCubie = ctFactory.makeCubieTriple();   	// default constructor is for ygr-cubie
+		map_ygr_wholeKey = new Hashtable<>();
+		map_inv_wholeCube = new Hashtable<>();
+		this.clear();
 		int key=0;
 		CubeState.Type type = (CubeConfig.cubeSize == CubeConfig.CubeSize.POCKET)
 							? CubeState.Type.TRAFO_P : CubeState.Type.TRAFO_R;
-		map_ygr_wholeKey = new Hashtable<>();
-		map_inv_wholeCube = new Hashtable<>();
 		for (int i=0; i<6; i++) {
 			CubeState rot = csFactory.makeCubeState(type);
-			switch(i) {
-			case 0: 
-				break;
-			case 1:
+			if (i == 0) {
+			} else if (i == 1) {
 				rot.fTr(1);
-				break;
-			case 2:
+			} else if (i == 2) {
 				rot.fTr(2);
-				break;
-			case 3:
+			} else if (i == 3) {
 				rot.fTr(3);
-				break;
-			case 4:
+			} else if (i == 4) {
 				rot.lTr(1);
-				break;
-			case 5:
+			} else if (i == 5) {
 				rot.lTr(3);
-				break;
+			} else {
+				throw new RuntimeException("allWholeCubeRotTrafos: i=" + i + " not allowed");
 			}
 			for (int j=0; j<4; j++) {
 				//rot.print();

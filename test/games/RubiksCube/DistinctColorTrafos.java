@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Random;
 
 /**
- * Test how many distinct states appear on average, if we start with a t-twisted cube and apply all 24 color trafos
+ * Test how many distinct states appear on average, if we take a t-twisted cube and apply all 24 color trafos
  * to it. The minimum is 1, the maximum is 24.
  */
 public class DistinctColorTrafos {
@@ -20,18 +20,19 @@ public class DistinctColorTrafos {
 
     protected Random rand = new Random(System.currentTimeMillis());
     protected final CubeStateFactory csFactory = new CubeStateFactory();
-    protected final CubieTripleFactory ctFactory = new CubieTripleFactory();
 
     public static Hashtable<Integer,Double> meanDistinct = new Hashtable<>();
 
     @Test
-    public void countDistinct_P() {
+    public void countDistinct_Pocket() {
         initPocket();
+        System.out.println("\nNumber of distinct color-trafo states for t-twisted 2x2x2 cube states:");
         countDistinct();
     }
     @Test
-    public void countDistinct_R() {
+    public void countDistinct_Rubiks() {
         initRubiks();
+        System.out.println("\nNumber of distinct color-trafo states for t-twisted 3x3x3 cube states:");
         countDistinct();
     }
     public void countDistinct() {
@@ -67,8 +68,9 @@ public class DistinctColorTrafos {
         ar = new ArenaCube("",false,true);
         gb = new GameBoardCube(ar);
 
-        CubeStateFactory.generateInverseTs();
-        CubeState.generateForwardTs();
+        // this is already part of ArenaCube-constructor:
+//      CubeStateFactory.generateInverseTs();
+//      CubeState.generateForwardTs();
     }
 
     protected void initRubiks() {
@@ -77,7 +79,8 @@ public class DistinctColorTrafos {
         ar = new ArenaCube("",false,true);
         gb = new GameBoardCube(ar);
 
-        CubeStateFactory.generateInverseTs();
-        CubeState.generateForwardTs();
+        // this is already part of ArenaCube-constructor:
+//      CubeStateFactory.generateInverseTs();
+//      CubeState.generateForwardTs();
     }
 }

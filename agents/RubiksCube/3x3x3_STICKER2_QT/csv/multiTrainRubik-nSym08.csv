@@ -1,0 +1,8 @@
+TDNTuple4Agt: USESYM:true, P:12, NORMALIZE:false, sigmoid:none, lambda:0.0, horizon:1, AFTERSTATE:false, learnFromRM: false
+TDNTuple4Agt: alpha_init->final:0.25->0.25, epsilon_init->final:0.0->0.0, gamma: 1.0, random 120 7-tuple, evalQ: 1, evalT: -1
+run, gameNum, evalQ, evalT, actionNum, trnMoves, totalTrainSec, movesSecond, , 
+0, 20000, 0.6646153846153846, 0.0, 213069, 213069, 173.772, 1226.1411504730338, 0.0, 0.0
+0, 40000, 0.6815384615384615, 0.0, 414798, 414798, 338.91, 1223.917854297601, 0.0, 0.0
+0, 60000, 0.7011538461538461, 0.0, 608146, 608146, 498.248, 1220.5688733321558, 0.0, 0.0
+0, 80000, 0.7173076923076925, 0.0, 799780, 799780, 13260.357, 60.313609957861615, 0.0, 0.0
+0, 100000, 0.7138461538461539, 0.0, 989673, 989673, 13385.355, 73.93700055022822, 0.0, 0.0

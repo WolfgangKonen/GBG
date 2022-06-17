@@ -51,6 +51,7 @@ public class ParOther implements Serializable {
 	private double incAmount = 0;		// only relevant for RubiksCube in case bReplayBuf==true, see DAVI3Agent
     private boolean rewardIsGameScore = true;
     private AgentState aState = AgentState.RAW;
+    private String agtFile = null;
     
     /**
      * This member is only constructed when the constructor 
@@ -224,6 +225,14 @@ public class ParOther implements Serializable {
 
 	public AgentState getAgentState() {
 		return aState;
+	}
+
+	public String getAgentFile() {
+		return agtFile;
+	}
+
+	public void setAgentFile(String aFile) {
+		this.agtFile = aFile;
 	}
 
 	public void setQuickEvalMode(int qem) {

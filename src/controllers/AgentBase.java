@@ -122,6 +122,14 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 		return m_oPar.getAgentState();
 	}
 
+	public String getAgentFile() {
+		return m_oPar.getAgentFile();
+	}
+
+	public void setAgentFile(String aFile) {
+		m_oPar.setAgentFile(aFile);
+	}
+
 	public void setAgentState(AgentState aState) {
 		m_oPar.setAgentState(aState);
 	}

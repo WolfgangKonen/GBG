@@ -25,7 +25,14 @@ public class ColorTrafoMap extends Hashtable<Integer,ColorTrafo> implements Seri
 	 * (currently only {@code AllColorTrafos})
 	 */
 	public enum ColMapType {AllColorTrafos}
-	
+
+	/**
+	 * A map of 24 {@link ColorTrafo} objects that contains all valid color trafos
+	 * of the cube. <br>
+	 * See {@link CubeStateMap#CubeStateMap(CubeStateMap.CsMapType)} for trafo numbering.
+	 */
+	public static ColorTrafoMap allCT = new ColorTrafoMap(ColMapType.AllColorTrafos);
+
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
 	 * compatible with an older one (older .agt.zip will become unreadable or you have
@@ -108,12 +115,16 @@ public class ColorTrafoMap extends Hashtable<Integer,ColorTrafo> implements Seri
 	}
 
 	/**
-	 * Given a cube state in cS, apply all color transformation of {@code this} to it 
+	 * Given a cube state in cS, apply all color transformation of {@code this} to it.
+	 * <p>
+	 *     Deprecated, use {@link CubeState#applyCT(ColorTrafoMap)} instead
+	 * </p>
 	 * 
 	 * @param cS		a cube state of type POCKET or RUBIKS	
 	 * @param hmRots	helper, all whole-cube rotations, to bring ygr-cubie 'home'
 	 * @return	a map with all states which are color-symmetric equivalent to cS
 	 */
+	@Deprecated
 	public CubeStateMap applyColSymm(CubeState cS, CubeStateMap hmRots) {
 		CubeStateFactory csFactory = new CubeStateFactory();
 		CubieTripleFactory ctFactory = new CubieTripleFactory();

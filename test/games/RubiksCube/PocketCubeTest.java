@@ -6,9 +6,7 @@ import games.RubiksCube.CubeConfig.BoardVecType;
 import org.junit.Test;
 
 import java.text.DecimalFormat;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Several JUnit tests for 2x2x2 Pocket Cube
@@ -95,11 +93,24 @@ public class PocketCubeTest {
      * 1) Test that rep x UTw.LTw.FTw followed by rep x the inverse leads to default cube again, where rep is a random int.<br>
      * 2) Test that executing FTw, UTw, LTw on a cube state cs is identical to constructing the twist trafo and applying it
      *    via apply() to cs
+     * 3) Test that cs.fTr(3).UTw().fTr(1)  == cs.LTw() when applied to any cube state cs
+     *    Test that cs.lTr(1).UTw().lTr(3)  == cs.FTw() when applied to any cube state cs
      */
     @Test
     public void test_UTw_LTw_FTw() {
 
         init();
+
+        // just to check a way to generate a random permutation of a list of numbers
+        List<Integer> list = new ArrayList<Integer>();
+        list.add(1);
+        list.add(2);
+        list.add(3);
+        list.add(7);
+        java.util.Collections.shuffle(list);
+        System.out.print("Shuffeled list: ");
+        for (int l : list) System.out.print(l+",");
+        System.out.println();
 
         // Test 1)
         CubeState def = csFactory.makeCubeState();
@@ -140,6 +151,29 @@ public class PocketCubeTest {
         }
         System.out.println("All twists U,L,F identical via .*Tw() and via apply() ");
 
+        // Test 3)
+        CubeState cs1 = csFactory.makeCubeState();
+        cs1.LTw().FTw().UTw();      // any transformation can be applied here
+        CubeState cs2 = csFactory.makeCubeState(cs1);
+        CubeStateMap allWCR = CubeStateMap.allWholeCubeRots;
+        cs1.LTw();
+        cs2.fTr(3).UTw().fTr(1);
+        assert (cs1.isEqual(cs2));
+        cs1.FTw();
+        cs2.lTr(1).UTw().lTr(3);
+        assert (cs1.isEqual(cs2));
+        cs1.DTw();
+        cs2.fTr(2).UTw().fTr(2);
+        assert (cs1.isEqual(cs2));
+        cs1.RTw();
+        cs2.fTr(1).UTw().fTr(3);
+        assert (cs1.isEqual(cs2));
+        cs1.BTw();
+        cs2.lTr(3).UTw().lTr(1);
+        assert (cs1.isEqual(cs2));
+        System.out.println("All twists L, F, D, ... can be generated from U twist and whole-cube rotations");
+
+        //cs1.show_invF_invL_invU();        // just for one-time printout of invU, invL, ...
     }
 
     /**

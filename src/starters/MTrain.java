@@ -67,7 +67,7 @@ public class MTrain {
 	public double userValue1;
 	public double userValue2;
 	//DecimalFormat frm1 = new DecimalFormat("#0.0000");
-	static String sep = ", ";
+	static String sep = "; ";
 
 	// --- never used ---
 //	MTrain(int i, int gameNum, double evalQ, double evalT, /*double evalM,*/
@@ -150,9 +150,11 @@ public class MTrain {
 		}
 		
 		if (mtWriter!=null) {
+			String agtFile = (pa.getAgentFile()==null)?"Unknown":pa.getAgentFile();
 			mtWriter.println(pa.stringDescr());		
 			mtWriter.println(pa.stringDescr2());
-			
+			mtWriter.println("from: "+agtFile);
+
 			mtWriter.println("run"+sep+"gameNum"+sep+"evalQ"+sep+"evalT"+sep+"actionNum"+sep
 					+"trnMoves"+sep+"totalTrainSec"+sep+"movesSecond"+sep+userTitle1+sep+userTitle2);
 			for (MTrain mTrain : mtList) {

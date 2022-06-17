@@ -55,9 +55,10 @@ public class GBGBatch extends SetupGBG {
 	 * @param args <br>
 	 * 			[0] {@code gameName}: name of the game, suitable as subdirectory name in the 
 	 *         		{@code agents} directory <br>
-	 *          [1] {@code n}: 1,2,3,...,7  to call either
-	 *          	{@link #batch1(int, int, String, XArenaButtons, GameBoard, String) batch1} (multiTrain) or
-	 *              {@link #batch2(int, int, String, XArenaButtons, GameBoard, String) batch2} (multiTrainAlphaSweep) or
+	 *          [1] {@code n}: 0,1,2,3,...,7  to call either
+	 *          	{@link #batch1_OLD(int, int, String, XArenaButtons, GameBoard, String) batch1} (multiTrain) or
+	 *              {@link #batch1(int, int, String, String, XArenaButtons, GameBoard, String)}  batch1} (multiTrain_M) or
+	 * 	 *          {@link #batch2(int, int, String, XArenaButtons, GameBoard, String) batch2} (multiTrainAlphaSweep) or
 	 *              {@link #batch3(int, int, String, XArenaButtons, GameBoard, String) batch3} (multiTrainLambdaSweep) or
 	 *              {@link #batch4(int, int, String, XArenaButtons, GameBoard, String) batch4} (multiTrainIncAmountSweep) or
 	 *              {@link #batch5(int, int, String, String, XArenaButtons, GameBoard) batch5} (multiTrainSweep) or
@@ -68,7 +69,7 @@ public class GBGBatch extends SetupGBG {
 	 *          [2] {@code agentFile}: e.g. "tdntuple3.agt.zip". This agent is loaded from
 	 *          	{@code agents/}{@link Types#GUI_DEFAULT_DIR_AGENT}{@code /gameName/}  (+ a suitable subdir, if 
 	 *          	applicable). It specifies the agent type and all its parameters for multi-training 
-	 *          	in {@link #batch1(int, int, String, XArenaButtons, GameBoard, String) batch1},
+	 *          	in {@link #batch1_OLD(int, int, String, XArenaButtons, GameBoard, String) batch1},
 	 *          	{@link #batch2(int, int, String, XArenaButtons, GameBoard, String) batch2}  or 
 	 *          	{@link #batch3(int, int, String, XArenaButtons, GameBoard, String) batch3}.
 	 *          	In case of batch6, this arguments codes the directory where to search for agent files.<br>
@@ -145,7 +146,8 @@ public class GBGBatch extends SetupGBG {
 
 		// start a batch run without any GUI elements
 		switch (args[1]) {
-			case "1" -> t_Batch.batch1(nruns, maxGameNum, filePath, arenaTrain.m_xab, arenaTrain.getGameBoard(), csvName);
+			case "0" -> t_Batch.batch1_OLD(nruns, maxGameNum, filePath, arenaTrain.m_xab, arenaTrain.getGameBoard(), csvName);
+			case "1" -> t_Batch.batch1(nruns, maxGameNum, agtFile, filePath, arenaTrain.m_xab, arenaTrain.getGameBoard(), csvName);
 			case "2" -> t_Batch.batch2(nruns, maxGameNum, filePath, arenaTrain.m_xab, arenaTrain.getGameBoard(), csvName);
 			case "3" -> t_Batch.batch3(nruns, maxGameNum, filePath, arenaTrain.m_xab, arenaTrain.getGameBoard(), csvName);
 			case "4" -> t_Batch.batch4(nruns, maxGameNum, filePath, arenaTrain.m_xab, arenaTrain.getGameBoard(), csvName);
@@ -187,8 +189,8 @@ public class GBGBatch extends SetupGBG {
 	 * <p>
 	 * If trainNum or maxGameNum are -1, the values stored in {@code xab} are taken.
 	 */
-	public void batch1(int trainNum, int maxGameNum, String filePath,
-					   XArenaButtons xab,	GameBoard gb, String csvName) {
+	public void batch1_OLD(int trainNum, int maxGameNum, String filePath,
+						   XArenaButtons xab, GameBoard gb, String csvName) {
 		// load an agent to fill xab with the appropriate parameter settings
 		boolean res = arenaTrain.loadAgent(0, filePath);
 		if (!res) {
@@ -211,6 +213,47 @@ public class GBGBatch extends SetupGBG {
 		} else {
 			System.err.println("[GBGBatch.main] could not save agent!");
 		}
+	} // batch1_OLD
+
+	/**
+	 * Perform multi-training. Write results to file {@code csvName}.
+	 * @param trainNum		how many agents to train
+	 * @param maxGameNum	maximum number of training games
+	 * @param filePath		full path of the agent file
+	 * @param xab			arena buttons object, to assess parameters
+	 * @param gb			game board object, needed by multiTrain for evaluators and start state selection
+	 * @param csvName		filename for CSV results
+	 * <p>
+	 * If trainNum or maxGameNum are -1, the values stored in {@code xab} are taken.
+	 */
+	public void batch1(int trainNum, int maxGameNum, String agtFile, String filePath,
+						   XArenaButtons xab, GameBoard gb, String csvName) {
+		// load an agent to fill xab with the appropriate parameter settings
+		boolean res = arenaTrain.loadAgent(0, filePath);
+		if (!res) {
+			System.err.println("\n[GBGBatch.batch1] Aborted (no agent found).");
+			return;
+		}
+		// overwrite trainNum or maxGameNum in xab, if they are specified here
+		if (trainNum!=-1) xab.setTrainNumber(trainNum);
+		if (maxGameNum!=-1) xab.setGameNumber(maxGameNum);
+
+		PlayAgent pa = arenaTrain.m_xfun.m_PlayAgents[0];
+		pa.setAgentFile(agtFile);
+		PlayAgent qa = arenaTrain.m_xfun.wrapAgent(pa, pa.getParOther(), null, gb.getDefaultStartState());
+		pa.setWrapperParams(xab.oPar[0]);
+
+		long startTime = System.currentTimeMillis();
+
+		MTrainSweep mts = new MTrainSweep();
+		try {
+			mts.multiTrain_M(0,agtFile,arenaTrain,xab,gb,csvName);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		double elapsedTime = (System.currentTimeMillis() - startTime)/1000.0;
+		System.out.println("[GBGBatch.batch1] Results written to "+csvName);
+		System.out.println("[GBGBatch.batch1] multiTrain_M finished in "+elapsedTime+" sec. ");
 	} // batch1
 
 	/**

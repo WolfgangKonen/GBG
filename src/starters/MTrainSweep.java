@@ -8,7 +8,9 @@ import games.*;
 import params.ParMaxN;
 import params.ParOther;
 import tools.Measure;
+import tools.Types;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -26,6 +28,104 @@ public class MTrainSweep {
         this.oQ = new Measure();			     //
         this.oT = new Measure();			     //
     }
+
+    /**
+     * Perform {@code trainNum} cycles of training and evaluation for PlayAgent, and perform
+     * each self-play training with maxGameNum training games.
+     * Both trainNum and maxGameNum are inferred from {@code xab}. <br>
+     * Write trained agents to {@code <agentDir>/multiTrain/}, see below. <br>
+     * Write results to {@code csvName}, see below.
+     * <p>
+     * Side effects: <ul>
+     *     <li> writes results of multi-training to <b>{@code agents/<gameDir>/csv/<csvName>}</b>.
+     *      This file has the columns: <br>
+     *      {@code run, gameNum, evalQ, evalT, actionNum, trnMoves, elapsedTime, movesSecond, userValue1, userValue2}. <br>
+     *      The contents may be visualized with one of the R-scripts found in {@code resources\R_plotTools}.
+     *     <li> writes trained agents to <b>{@code agents/<gameDir>/multiTrain/<agtBase>_<i+k>.agt.zip}</b>  where
+     *     {@code i} it the number of the run and {@code k} is selected in such a way that a yet unused filename is taken
+     *     (see code around {@code agtPath} below). This for multiple concurrent jobs which should not write to a
+     *     filename already written by another job.
+     * </ul>
+     *
+     * @param n			index of agent to train (usually n=0)
+     * @param xab		used for reading parameter values from members *_par and for fetching the name
+     * 					of agent <b>n</b>
+     * @param gb		the game board, needed for evaluators and start state selection
+     * @param csvName	results are written to this filename
+     * @return the (last) trained agent
+     * @throws IOException if something goes wrong with {@code csvName}, see below
+     */
+    public PlayAgent multiTrain_M(int n, String agtFile, Arena t_Game,
+                                  XArenaButtons xab, GameBoard gb, String csvName) throws IOException {
+        DecimalFormat frm3 = new DecimalFormat("+0.000;-0.000");
+        DecimalFormat frm = new DecimalFormat("#0.000");
+        String userTitle1 = "", userTitle2 = "";
+        double userValue1, userValue2;
+        doTrainEvaluation = false;
+
+        int trainNum=xab.getTrainNumber();
+        int maxGameNum=xab.getGameNumber();
+        PlayAgent pa = null;
+
+        System.out.println("*** Starting multiTrain_M with trainNum = "+trainNum+" ***");
+
+        String strDir = Types.GUI_DEFAULT_DIR_AGENT + "/" + t_Game.getGameName();
+        String subDir = t_Game.getGameBoard().getSubDir();
+        if (subDir != null) strDir += "/" + subDir;
+        tools.Utils.checkAndCreateFolder(strDir+"/multiTrain");
+        String agtBase = agtFile.split("\\.")[0];
+
+        mtList = new ArrayList<MTrain>();
+        oQ = new Measure();			// quick eval measure
+        oT = new Measure();			// train eval measure
+
+        for (int i=0; i<trainNum; i++) {
+
+            xab.setTrainNumberText(trainNum, Integer.toString(i+1)+"/"+Integer.toString(trainNum) );
+
+            // re-construct pa, train pa, adjust doTrainEvaluation, and add elements to mtList (evaluation results)
+            pa = doSingleTraining(n,i,pa,t_Game,xab,gb,maxGameNum,0.0,0.0);
+            xab.setOParFrom(0,pa.getParOther());  // /WK/ Bug fix 2022-04-12
+
+            // save pa to a yet unused filename. This for multiple concurrent jobs which should not write to a
+            // filename already written by another job. For single-threaded jobs (and no similar files present in
+            // dir multiTrain/), k=0 will be used.
+            int k=-1;
+            String agtPath;
+            File file;
+            DecimalFormat frm2 = new DecimalFormat("00");
+            do {
+                k++;
+                agtPath = strDir + "/multiTrain/" + agtBase + "_" + frm2.format(i+k) + ".agt.zip";
+                file = new File(agtPath);
+            } while (file.exists());
+            t_Game.saveAgent(pa,agtPath);
+
+            // print the full list mtList after finishing each (i)
+            // (overwrites the file written from previous (i))
+            pa.setAgentFile(agtFile);
+            MTrain.printMultiTrainList(csvName,mtList, pa, t_Game, userTitle1, userTitle2);
+
+            if (xab.m_arena.taskState!=Arena.Task.MULTTRN) {
+                break; //out of for
+            }
+        } // for (i)
+
+        if (m_evaluatorQ.getMode()!=(-1))
+        // m_mode=-1 signals: 'no evaluation done' --> oC did not receive evaluation results
+        {
+            System.out.println("Avg. "+ m_evaluatorQ.getPrintString()+frm3.format(oQ.getMean()) + " +- " + frm.format(oQ.getStd()));
+        }
+        if (doTrainEvaluation && m_evaluatorT.getMode()!=(-1))
+        // m_mode=-1 signals: 'no evaluation done' --> oT did not receive evaluation results
+        {
+            System.out.println("Avg. "+ m_evaluatorT.getPrintString()+frm3.format(oT.getMean()) + " +- " + frm.format(oT.getStd()));
+        }
+
+        xab.setTrainNumber(trainNum);
+        return pa;
+
+    } // multiTrain_M
 
     /**
      * Perform {@code trainNum * alphaArr.length} cycles of training and evaluation for PlayAgent, and perform
@@ -80,7 +180,7 @@ public class MTrainSweep {
                 xab.tdPar[0].setAlpha(alpha);
                 xab.tdPar[0].setAlphaFinal(alphaFinal);
 
-                // train pa, adjust doTrainEvaluation, and add elements to mtList (evaluation results)
+                // construct pa, train pa, adjust doTrainEvaluation, and add elements to mtList (evaluation results)
                 pa = doSingleTraining(n,i,pa,t_Game,xab,gb,maxGameNum,userValue1,userValue2);
 
                 // print the full list mtList after finishing each pair (i,k)

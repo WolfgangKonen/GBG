@@ -215,7 +215,37 @@ abstract public class CubeState implements Serializable {
 		this.sloc = cs.sloc.clone();
 	}
 
-	abstract protected void show_invF_invL_invU();
+	/**
+	 * Just a one-time printout of invU, invL, ... which can be calculated, if we have {@link #FTw()}, which is based on invF.
+	 * <p>
+	 *     All twist trafos can be generated from one twist (here: {@link #FTw()}) by making a whole-cube trafo that brings the
+	 *     twist face to the Front face, doing {@link #FTw()} and then rotating back
+	 * </p>
+	 */
+	protected void show_invF_invL_invU() {
+		CubeState.Type trafoType = (CubeConfig.cubeSize== CubeConfig.CubeSize.POCKET)
+								 ? CubeState.Type.TRAFO_P : CubeState.Type.TRAFO_R;
+		CubeState t_cs = csFactory.makeCubeState(trafoType);
+		t_cs.lTr(3).FTw().lTr(1);					        // invU
+		System.out.println("invU: "+t_cs);
+		t_cs = csFactory.makeCubeState(trafoType);
+		t_cs.uTr(1).FTw().uTr(3);					        // invL
+		System.out.println("invL: "+t_cs);
+		t_cs = csFactory.makeCubeState(trafoType);
+		t_cs.FTw();											// invF
+		System.out.println("invF: "+t_cs);
+		t_cs = csFactory.makeCubeState(trafoType);
+		t_cs.lTr(1).FTw().lTr(3);					        // invD
+		System.out.println("invD: "+t_cs);
+		t_cs = csFactory.makeCubeState(trafoType);
+		t_cs.uTr(3).FTw().uTr(1);					        // invR
+		System.out.println("invR: "+t_cs);
+		t_cs = csFactory.makeCubeState(trafoType);
+		t_cs.uTr(2).FTw().uTr(2);					        // invB
+		System.out.println("invB: "+t_cs);
+	}
+
+//	abstract protected void show_invF_invL_invU();
 
 	/**
 	 * generate the <b>forward</b> transformations {@link #tforF} (and similar) from {@link #invF} (and similar).
@@ -274,13 +304,25 @@ abstract public class CubeState implements Serializable {
 			assert (tforR[i]==tf2R[i]) : "difference tforR at i="+i;
 			assert (tforB[i]==tf2B[i]) : "difference tforB at i="+i;
 		}
+		// Since tforU is the inverse of invU, we can calculate is via the inverse map as well:
+		for (int i=0; i<tf2U.length; i++) {
+			tf2U[invU[i]] = i;
+			tf2L[invL[i]] = i;
+			tf2F[invF[i]] = i;
+			tf2D[invD[i]] = i;
+			tf2R[invR[i]] = i;
+			tf2B[invB[i]] = i;
+		}
+		for (int i=0; i<tf2U.length; i++) {
+			assert (tforU[i]==tf2U[i]) : "difference tforU at i="+i;
+			assert (tforL[i]==tf2L[i]) : "difference tforL at i="+i;
+			assert (tforF[i]==tf2F[i]) : "difference tforF at i="+i;
+			assert (tforD[i]==tf2D[i]) : "difference tforD at i="+i;
+			assert (tforR[i]==tf2R[i]) : "difference tforR at i="+i;
+			assert (tforB[i]==tf2B[i]) : "difference tforB at i="+i;
+		}
 	}
 
-		//
-	// The following methods are currently only valid for 2x2x2 Pocket Cube.
-	// (They need to be generalized later to the 3x3x3 case.)
-	//
-	
 	/**
 	 * Whole-cube rotation 90° counter-clockwise around the u-face
 	 */

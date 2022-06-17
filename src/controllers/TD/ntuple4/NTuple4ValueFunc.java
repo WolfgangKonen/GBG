@@ -1,10 +1,6 @@
 package controllers.TD.ntuple4;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.PrintWriter;
-import java.io.Serializable;
+import java.io.*;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Arrays;
@@ -40,7 +36,7 @@ import tools.Types;
  */
 public class NTuple4ValueFunc implements Serializable {
 	/* Experimental Parameters: */
-	// protected double EPS = 0.5; /* random weights init scale */
+	// protected double EPS = 0.5; /* random weight's init scale */
 	// protected double BIAS = 1.0; /* strength of the bias (constant input) */
 
 	/* initial learning rate (typically 1/n) */
@@ -85,13 +81,14 @@ public class NTuple4ValueFunc implements Serializable {
 	private final DecimalFormat frmS = new DecimalFormat("+0.00000;-0.00000");
 	
 	private final static double[] dbg3PArr = new double[3];
-	private final static double[] dbg3PTer = new double[3];
+	//private final static double[] dbg3PTer = new double[3];
 
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
-	 * compatible with an older one (older .agt.zip will become unreadable or you have
+	 * compatible with an older one (older .agt.zip will become unreadable, or you have
 	 * to provide a special version transformation)
 	 */
+	@Serial
 	private static final long  serialVersionUID = 12L;
 
 	/**
@@ -104,13 +101,13 @@ public class NTuple4ValueFunc implements Serializable {
 	 *            The set of n-tuples as an {@code int} array. For each {@code nTuplesI[i]}
 	 *            the constructor will construct k {@link NTuple4} objects of the same form,
 	 *            one for each player ({@code k=xnf.getNumPlayers()}). Allowed values 
-	 *            for the sampling points of an n-tuple: 0,..,numCells.
-	 * @param xnf
+	 *            for the sampling points of an n-tuple: 0,...,numCells.
+	 * @param xnf needed as reference to a proper {@link XNTupleFuncs} object
 	 * @param posVals
 	 *            number of possible values per board cell (TicTacToe: 3)
 	 * @param randInitWeights
 	 *            true, if all weights of all n-Tuples shall be initialized
-	 *            randomly. Otherwise they are initialized with 0 (which allows to count the active weigths) 
+	 *            randomly. Otherwise, they are initialized with 0 (which allows to count the active weigths)
 	 * @param tcPar	temporal coherence and n-tuple parameters
 	 * @param numCells
 	 * 			  the number of cells on the board (used to check validity of {@code nTuplesI})
@@ -179,8 +176,8 @@ public class NTuple4ValueFunc implements Serializable {
 		NTuple4[] list = new NTuple4[numOutputs * numPlayers * numTuples];
 		for (int j = 0, k = 0; j < nTuples[0][0].length; j++)
 			for (int i = 0; i < nTuples[0].length; i++)
-				for (int o = 0; o < nTuples.length; o++)
-					list[k++] = nTuples[o][i][j];
+				for (NTuple4[][] nTuple : nTuples)
+					list[k++] = nTuple[i][j];
 		return list;
 	}
 
@@ -196,7 +193,7 @@ public class NTuple4ValueFunc implements Serializable {
 	 * @param curSOWB
 	 * 			  the state as 1D-integer vector (position value for each board cell) 
 	 * @param player
-	 *            the player who has to move on {@code board} (0,...,N-1)
+	 *            the player who has to move on {@code board} (0, ..., N-1)
 	 * @param act
 	 *            the action to perform on {@code board}
 	 * @return	Q
@@ -234,17 +231,20 @@ public class NTuple4ValueFunc implements Serializable {
 	 * @param curSOWB
 	 * 			  the state as 1D-integer vector (position value for each board cell) 
 	 * @param player
-	 *            the player who has to move on {@code board} (0,...,N-1)
+	 *            the player who has to move on {@code board} (0, ..., N-1)
 	 * @return	V
 	 */
 	public double getScoreI(StateObsWithBoardVector curSOWB, int player) {
+		boolean USE_SYM_IN_SCORE = true;
 		int i, j;
 		double score = 0.0; 
 		BoardVector[] equiv;
 
+		//if (curSOWB.getStateObservation() instanceof StateObserverCube) USE_SYM_IN_SCORE=false;
+		boolean usesym = USE_SYM_IN_SCORE && getUSESYMMETRY();
+
 		// Get equivalent boards (including self)
-		equiv = getSymBoards2(curSOWB, getUSESYMMETRY(), getNSym());
-		//equiv = getSymBoards2(board, false);    // DON'T, at least for TTT clearly inferior
+		equiv = getSymBoards2(curSOWB, usesym, getNSym());
 
 		for (i = 0; i < numTuples; i++) {
 			for (j = 0; j < equiv.length; j++) {
@@ -323,7 +323,7 @@ public class NTuple4ValueFunc implements Serializable {
 //	 * @param finished
 //	 *            true, if game is over
 //	 * @param reward
-//	 *            reward given for a terminated game (-1,0,+1)
+//	 *            the reward given for a terminated game (-1,0,+1)
 //	 */
 //	public void updateWeights(int[] curBoard, int curPlayer, int[] nextBoard, int nextPlayer,
 //			boolean finished, double reward, boolean upTC) {
@@ -341,68 +341,68 @@ public class NTuple4ValueFunc implements Serializable {
 //	}
 
 	// --- seems to be never used ---
-	/**
-	 * Update the weights of the n-tuple system in case of {@link TDNTuple4Agt}. The difference
-	 * to former {@code updateWeights} is that the target is now: reward + GAMMA*valueFunction(next), irrespective of the 
-	 * former parameter {@code finished}.
-	 * The value function estimated by {@code this} has a different meaning: it 
-	 * estimates the sum of future rewards.
-	 * 
-	 * @param curSOWB
-	 *            the current board
-	 * @param curPlayer
-	 *            the player whose value function is updated (the p in V(s_t|p) )
-	 * @param nextSOWB
-	 *            the following board (not really needed)
-	 * @param nextPlayer
-	 *            the player on next board (only needed for debug)
-	 * @param reward
-	 *            the delta reward given for the transition into nextBoard
-	 * @param target
-	 *            the target to learn, usually (reward + GAMMA * value of the after-state) for
-	 *            non-terminal states. But the target can be as well (r + GAMMA * V) for an
-	 *            n-ply look-ahead or (r - GAMMA * V(opponent)).  
-	 * @param thisSO
-	 * 			  only for debug info: access to the current state's stringDescr()
-	 */
-	public void updateWeightsNew(StateObsWithBoardVector curSOWB, int curPlayer, 
-			StateObsWithBoardVector nextSOWB, int nextPlayer,
-			double reward, double target, /*boolean upTC,*/ StateObservation thisSO) {
-		double v_old = getScoreI(curSOWB,curPlayer); // old value
-		// delta is the error signal:
-		double delta = (target - v_old);
-		// derivative of tanh ( if hasSigmoid()==true):
-		double e = (hasSigmoid() ? (1.0 - v_old * v_old) : 1.0);
-
-		update(curSOWB, curPlayer, 0, delta, e, false, false);
-		
-		if (NTuple4Base.DBG_REWARD || NTuple4Base.DBG_OLD_3P) {
-			final double MAXSCORE = 1; // 1; 3932156;
-			double v_new = getScoreI(curSOWB,curPlayer);
-			if (curPlayer==nextPlayer) {
-				System.out.println("updateWeightsNew[p="+curPlayer+", "+thisSO.stringDescr()
-				+"] v_old,v_new:"+v_old*MAXSCORE+", "+v_new*MAXSCORE+", T="+target*MAXSCORE+", R="+reward);
-				dbg3PArr[curPlayer]=v_new*MAXSCORE;
-			} else {
-				System.out.println("updateWeights_2P[p="+curPlayer+", "+thisSO.stringDescr()
-				+"] v_old,v_new:"+v_old*MAXSCORE+", "+v_new*MAXSCORE+", T="+target*MAXSCORE+", R="+reward);				
-				dbg3PArr[2]=v_new*MAXSCORE;				
-			}
-//			if (Math.abs(reward)>0.5) {
-//				int dummy=1;
+//	/**
+//	 * Update the weights of the n-tuple system in case of {@link TDNTuple4Agt}. The difference
+//	 * to former {@code updateWeights} is that the target is now: reward + GAMMA*valueFunction(next), irrespective of the
+//	 * former parameter {@code finished}.
+//	 * The value function estimated by {@code this} has a different meaning: it
+//	 * estimates the sum of future rewards.
+//	 *
+//	 * @param curSOWB
+//	 *            the current board
+//	 * @param curPlayer
+//	 *            the player whose value function is updated (the p in V(s_t|p) )
+//	 * @param nextSOWB
+//	 *            the following board (not really needed)
+//	 * @param nextPlayer
+//	 *            the player on next board (only needed for debug)
+//	 * @param reward
+//	 *            the delta reward given for the transition into nextBoard
+//	 * @param target
+//	 *            the target to learn, usually (reward + GAMMA * value of the after-state) for
+//	 *            non-terminal states. But the target can be as well (r + GAMMA * V) for an
+//	 *            n-ply look-ahead or (r - GAMMA * V(opponent)).
+//	 * @param thisSO
+//	 * 			  only for debug info: access to the current state's stringDescr()
+//	 */
+//	public void updateWeightsNew(StateObsWithBoardVector curSOWB, int curPlayer,
+//			StateObsWithBoardVector nextSOWB, int nextPlayer,
+//			double reward, double target, /*boolean upTC,*/ StateObservation thisSO) {
+//		double v_old = getScoreI(curSOWB,curPlayer); // old value
+//		// delta is the error signal:
+//		double delta = (target - v_old);
+//		// derivative of tanh ( if hasSigmoid()==true):
+//		double e = (hasSigmoid() ? (1.0 - v_old * v_old) : 1.0);
+//
+//		update(curSOWB, curPlayer, 0, delta, e, false, false);
+//
+//		if (NTuple4Base.DBG_REWARD || NTuple4Base.DBG_OLD_3P) {
+//			final double MAXSCORE = 1; // 1; 3932156;
+//			double v_new = getScoreI(curSOWB,curPlayer);
+//			if (curPlayer==nextPlayer) {
+//				System.out.println("updateWeightsNew[p="+curPlayer+", "+thisSO.stringDescr()
+//				+"] v_old,v_new:"+v_old*MAXSCORE+", "+v_new*MAXSCORE+", T="+target*MAXSCORE+", R="+reward);
+//				dbg3PArr[curPlayer]=v_new*MAXSCORE;
+//			} else {
+//				System.out.println("updateWeights_2P[p="+curPlayer+", "+thisSO.stringDescr()
+//				+"] v_old,v_new:"+v_old*MAXSCORE+", "+v_new*MAXSCORE+", T="+target*MAXSCORE+", R="+reward);
+//				dbg3PArr[2]=v_new*MAXSCORE;
 //			}
-//			if (dbg3PArr[2]!=0.0) {
-//				if (Math.abs(dbg3PArr[0]-dbg3PArr[2])>1e-6) {
-//					int dummy=1;
-//				}
-//				if (Math.abs(dbg3PArr[0]+dbg3PArr[1])>1e-6) {
-//					int dummy=1;
-//				}
-//				dbg3PArr[2]=0.0;
-//			}
-//			int dummy=1;
-		}
-	}
+////			if (Math.abs(reward)>0.5) {
+////				int dummy=1;
+////			}
+////			if (dbg3PArr[2]!=0.0) {
+////				if (Math.abs(dbg3PArr[0]-dbg3PArr[2])>1e-6) {
+////					int dummy=1;
+////				}
+////				if (Math.abs(dbg3PArr[0]+dbg3PArr[1])>1e-6) {
+////					int dummy=1;
+////				}
+////				dbg3PArr[2]=0.0;
+////			}
+////			int dummy=1;
+//		}
+//	}
 
 	/**
 	 * Update the weights of the n-tuple system in case of *new* TD-learning ({@link TDNTuple4Agt}).
@@ -480,12 +480,12 @@ public class NTuple4ValueFunc implements Serializable {
 	 * @param lastAction
  	 *            the action taken on lastBoard
 	 * @param qLast
-	 *            the Q-value Q(s,a) for s=lastBoard and a=lastAction
+	 *            the Q-value {@code Q(s,a)} for {@code s}=lastBoard and {@code a}=lastAction
 	 * @param target
  	 *            the target to learn, usually (reward + GAMMA * value of the after-state) for
 	 *            non-terminal states.
 	 * @param reward
-	 *            only for debug info: the delta reward given for taking action a in state s
+	 *            only for debug info: the delta reward given for taking action {@code a} in state {@code s}
 	 * @param thisSO
 	 * 		  	  only for debug info: access to the current state's stringDescr()
 	 */
@@ -509,46 +509,45 @@ public class NTuple4ValueFunc implements Serializable {
 	}
 
 	// ---- seems to be never used ----
-	/**
-	 * Update the weights of the n-Tuple-system in case of {@link TDNTuple4Agt} for a terminal state towards target 0.
-	 * 
-	 * @param curSOWB 	the current board
-	 * @param curPlayer the player whose value function is updated (the p in V(s_t|p) )
-	 * @param thisSO	only needed when debugging
-	 * @param isNEW_3P	only needed when debugging
-	 */
-	public void updateWeightsNewTerminal(StateObsWithBoardVector curSOWB, int curPlayer,StateObservation thisSO, boolean isNEW_3P) {
-		double v_old = getScoreI(curSOWB,curPlayer); // old value
-		// delta is the error signal (here with target signal = 0.0):
-		double delta = (0.0 - v_old);
-		// derivative of tanh ( if hasSigmoid()==true)
-		double e = (hasSigmoid() ? (1.0 - v_old * v_old) : 1.0);
-
-		update(curSOWB, curPlayer, 0, delta, e, false, false);
-
-		if (NTuple4Base.DBGF_TARGET || NTuple4Base.DBG_REWARD || NTuple4Base.DBG_OLD_3P) {
-			final double MAXSCORE = 1; // 1; 3932156;
-			double v_new = getScoreI(curSOWB,curPlayer);
-			if (isNEW_3P) {
-				System.out.println("updateWeights(***finalSO)[p="+curPlayer+", "+thisSO.stringDescr()
-				+"] v_old,v_new:"+v_old*MAXSCORE+", "+v_new*MAXSCORE);
-				dbg3PTer[curPlayer]=v_new*MAXSCORE;
-			} else {
-				System.out.println("updateWeights(**final_2P)[p="+curPlayer+", "+thisSO.stringDescr()
-				+"] v_old,v_new:"+v_old*MAXSCORE+", "+v_new*MAXSCORE);
-				dbg3PTer[2]=v_new*MAXSCORE;				
-			}
-//			if (!isNEW_3P) {
-//				int dummy=1;
+//	/**
+//	 * Update the weights of the n-Tuple-system in case of {@link TDNTuple4Agt} for a terminal state towards target 0.
+//	 *
+//	 * @param curSOWB 	the current board
+//	 * @param curPlayer the player whose value function is updated (the p in V(s_t|p) )
+//	 * @param thisSO	only needed when debugging
+//	 * @param isNEW_3P	only needed when debugging
+//	 */
+//	public void updateWeightsNewTerminal(StateObsWithBoardVector curSOWB, int curPlayer,StateObservation thisSO, boolean isNEW_3P) {
+//		double v_old = getScoreI(curSOWB,curPlayer); // old value
+//		// delta is the error signal (here with target signal = 0.0):
+//		double delta = (0.0 - v_old);
+//		// derivative of tanh ( if hasSigmoid()==true)
+//		double e = (hasSigmoid() ? (1.0 - v_old * v_old) : 1.0);
+//
+//		update(curSOWB, curPlayer, 0, delta, e, false, false);
+//
+//		if (NTuple4Base.DBGF_TARGET || NTuple4Base.DBG_REWARD || NTuple4Base.DBG_OLD_3P) {
+//			final double MAXSCORE = 1; // 1; 3932156;
+//			double v_new = getScoreI(curSOWB,curPlayer);
+//			if (isNEW_3P) {
+//				System.out.println("updateWeights(***finalSO)[p="+curPlayer+", "+thisSO.stringDescr()
+//				+"] v_old,v_new:"+v_old*MAXSCORE+", "+v_new*MAXSCORE);
+//				dbg3PTer[curPlayer]=v_new*MAXSCORE;
+//			} else {
+//				System.out.println("updateWeights(**final_2P)[p="+curPlayer+", "+thisSO.stringDescr()
+//				+"] v_old,v_new:"+v_old*MAXSCORE+", "+v_new*MAXSCORE);
+//				dbg3PTer[2]=v_new*MAXSCORE;
 //			}
-//			int dummy=1;
-		}
-	}
+////			if (!isNEW_3P) {
+////				int dummy=1;
+////			}
+////			int dummy=1;
+//		}
+//	}
 
 	/**
 	 * Update all n-Tuple LUTs. Simply add dW to all relevant weights. Also
-	 * update the symmetric boards (equivalent states), if wanted 
-	 * (if {@link #getUSESYMMETRY()}{@code =true}).
+	 * update the symmetric boards (equivalent states), if  {@link #getUSESYMMETRY()}{@code =true}.
 	 * <p>
 	 * The value added to all active weights is alphaM*delta*e   (in case LAMBDA==0)
 	 * 
@@ -801,26 +800,26 @@ public class NTuple4ValueFunc implements Serializable {
 	}
 	
 	// debug TicTacToe only: print equivalent boards & equivalent actions
-	private void printEquivs(int[][] equiv, int[] equivAction) {
-		int j,k,m,n;
-		String[] symb = {"o","-","X"};
-		for (j = 0; j < equiv.length; j++) {
-			for (k=0,m=0; m<3; m++) {
-				for (n=0; n<3; n++,k++) 
-					System.out.print(symb[equiv[j][k]]);
-				System.out.println();
-			}
-			System.out.println("Action = "+equivAction[j]);
-		}
-		
-	}
+//	private void printEquivs(int[][] equiv, int[] equivAction) {
+//		int j,k,m,n;
+//		String[] symb = {"o","-","X"};
+//		for (j = 0; j < equiv.length; j++) {
+//			for (k=0,m=0; m<3; m++) {
+//				for (n=0; n<3; n++,k++)
+//					System.out.print(symb[equiv[j][k]]);
+//				System.out.println();
+//			}
+//			System.out.println("Action = "+equivAction[j]);
+//		}
+//
+//	}
 	
 	/**
 	 * Print the configuration of all n-tuples to file {@code agents/theNtuple.txt}.
 	 * <p> 
 	 * For each n-tuple we print
 	 * <pre>   {0,4,15,22, ...} </pre>
-	 * i. e. the list of cells covered by this n-tuple.
+	 * i.e. the list of cells covered by this n-tuple.
 	 * 
 	 * @throws IOException
 	 */
@@ -998,8 +997,8 @@ public class NTuple4ValueFunc implements Serializable {
 		
 		for (i=0,pos=0; i<ntuples.length; i++) {
 			lut = ntuples[i].getWeights();
-			for (int j=0; j<lut.length; j++) {
-				if (lut[j]!=0) {
+			for (double v : lut) {
+				if (v != 0) {
 					pos++;
 				}
 			}

@@ -73,20 +73,29 @@ public class CubeState3x3 extends CubeState {
         }
     }
 
-    /**
-     * just for a one-time printout of invU and invL, which can be calculated if we have {@link #FTw()}, which is based on invF
-     */
-    protected void show_invF_invL_invU() {
-        CubeState3x3 t_cs = new CubeState3x3(CubeState.Type.TRAFO_R);
-        t_cs.lTr().lTr().lTr().FTw().lTr();					// invU
-        System.out.println("invU: "+t_cs);
-        t_cs = new CubeState3x3(CubeState.Type.TRAFO_R);
-        t_cs.uTr().FTw().uTr().uTr().uTr();					// invL
-        System.out.println("invL: "+t_cs);
-        t_cs = new CubeState3x3(CubeState.Type.TRAFO_R);
-        t_cs.FTw();											// invF
-        System.out.println("invF: "+t_cs);
-    }
+//    /**
+//     * just for a one-time printout of invU and invL, which can be calculated if we have {@link #FTw()}, which is based on invF
+//     */
+//    protected void show_invF_invL_invU() {
+//        CubeState3x3 t_cs = new CubeState3x3(CubeState.Type.TRAFO_R);
+//        t_cs.lTr(3).FTw().lTr(1);					        // invU
+//        System.out.println("invU: "+t_cs);
+//        t_cs = new CubeState3x3(CubeState.Type.TRAFO_R);
+//        t_cs.uTr(1).FTw().uTr(3);					        // invL
+//        System.out.println("invL: "+t_cs);
+//        t_cs = new CubeState3x3(CubeState.Type.TRAFO_R);
+//        t_cs.FTw();											// invF
+//        System.out.println("invF: "+t_cs);
+//        t_cs = new CubeState3x3(CubeState.Type.TRAFO_R);
+//        t_cs.lTr(1).FTw().lTr(3);					        // invD
+//        System.out.println("invD: "+t_cs);
+//        t_cs = new CubeState3x3(CubeState.Type.TRAFO_R);
+//        t_cs.uTr(3).FTw().uTr(1);					        // invR
+//        System.out.println("invR: "+t_cs);
+//        t_cs = new CubeState3x3(CubeState.Type.TRAFO_R);
+//        t_cs.uTr(2).FTw().uTr(2);					        // invB
+//        System.out.println("invB: "+t_cs);
+//    }
 
     /**
      * Locate the edge cubie with the colors of {@link CubieDouble} {@code edg} in {@code this}.
@@ -342,9 +351,9 @@ public class CubeState3x3 extends CubeState {
                         34,25,26,27,28,29,32,33,  4, 5, 6,35,36,37,38,39, 46,47,40,41,42,43,44,45};
     //
     // use the following line once on a default TRAFO_R CubeState t_cs to generate int[] invU above:
-    //			return t_cs.lTr().lTr().lTr().FTw().lTr();   	// U(x) = l(F(l^3(x)))
+    //			return t_cs.lTr(3).FTw().lTr(1);   	// U(x) = l(F(l^3(x)))
     // use the following line once on a default TRAFO_R CubeState t_cs to generate int[] invL above:
-    //			return t_cs.uTr().FTw().uTr().uTr().uTr();   	// L(x) = u^3(F(u(x)))
+    //			return t_cs.uTr(1).FTw().uTr(3);   	// L(x) = u^3(F(u(x)))
     // (see CubeState3x3.show_invF_invL_invU(), which is called once by ArenaCube.makeGameBoard if SHOW_INV==true)
 
     /**

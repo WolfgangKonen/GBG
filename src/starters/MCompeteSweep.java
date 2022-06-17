@@ -125,7 +125,9 @@ public class MCompeteSweep {
      * and then trained.
      * <p>
      * Side effect: writes results to directory {@code agents/Othello/multiTrain/}: <ul>
-     *     <li> agent files {@code <agtBase>_<i>.agt.zip} where {@code i} it the number of the run
+     *     <li> agent files {@code <agtBase>_<i+k>.agt.zip} where {@code i} it the number of the run and k is selected
+     *          in such a way that a yet unused filename is taken (see code around {@code agtPath} below). This for
+     *          multiple concurrent jobs which should not write to a filename already written by another job.
      *     <li> train csv file {@code <agtBase>.csv}
      * </ul>
      * The train csv file may be visualized with R-scripts found in {@code resources\R_plotTools}.
@@ -188,7 +190,7 @@ public class MCompeteSweep {
                 pa = sTrainer.doSingleTraining(0, i, pa, arenaTrain, arenaTrain.m_xab, gb, maxGameNum, userValue1, userValue2);
                 arenaTrain.m_xab.setOParFrom(0,pa.getParOther());  // /WK/ Bug fix 2022-04-12
 
-                // save pa in a yet unused filename. This for multiple concurrent jobs which should not write to a
+                // save pa to a yet unused filename. This for multiple concurrent jobs which should not write to a
                 // filename already written by another job. For single-threaded jobs (and no similar files present in
                 // dir multiTrain/), k=0 will be used.
                 int k=-1;

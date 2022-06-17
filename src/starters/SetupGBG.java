@@ -125,7 +125,7 @@ public class SetupGBG {
             case "KuhnPoker":
                 return new ArenaKuhnPoker(title,withUI,withTrainRights);
             case "RubiksCube":
-                ArenaCube.setCubeType(scaPar[0]);
+                ArenaCube.setCubeSize(scaPar[0]);
                 ArenaCube.setBoardVecType(scaPar[1]);
                 ArenaCube.setTwistType(scaPar[2]);
                 return new ArenaCube(title, withUI,withTrainRights);

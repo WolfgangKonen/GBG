@@ -2,9 +2,7 @@ package games.RubiksCube;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
 import controllers.TD.ntuple4.Sarsa4Agt;
 import controllers.TD.ntuple4.TDNTuple4Agt;
@@ -13,9 +11,7 @@ import games.StateObsWithBoardVector;
 import games.StateObservation;
 import games.XNTupleBase;
 import games.XNTupleFuncs;
-import games.RubiksCube.ColorTrafoMap.ColMapType;
 import games.RubiksCube.CubeConfig.BoardVecType;
-import games.RubiksCube.CubeStateMap.CsMapType;
 
 /**
  * Implementation of methods needed for the n-tuple interface {@link XNTupleFuncs}
@@ -23,8 +19,9 @@ import games.RubiksCube.CubeStateMap.CsMapType;
  */
 public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Serializable {
 
-	private final CubeStateMap hmRots = new CubeStateMap(CsMapType.AllWholeCubeRotTrafos);
-	private final ColorTrafoMap hmCols = new ColorTrafoMap(ColMapType.AllColorTrafos);
+	// --- deprecated, we use CubeStateMap.allWholeCubeRots ---
+//	private final CubeStateMap hmRots = new CubeStateMap(CsMapType.AllWholeCubeRotTrafos);
+//	private final ColorTrafoMap hmCols = new ColorTrafoMap(ColMapType.AllColorTrafos);
 
 	/**
 	 * change the version ID for serialization only if a newer version is no longer
@@ -112,37 +109,71 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	 * game has s symmetries, return an array which holds n &le; s symmetric board vectors: <ul>
 	 * <li> the first row {@code boardArray[0]} is the board vector itself
 	 * <li> the other rows are the board vectors when transforming {@code boardVector}
-	 * 		according to the n-1 other symmetries.
+	 * 		according to n-1 other symmetries.
 	 * </ul>
-	 * In the case of the cube we have at most s=24 color symmetries (6 places 1st color * 4 places 2nd color)
+	 * In the case of the cube we have at most s=24 color symmetries (6 places 1st color * 4 places 2nd color).
+	 * If n &lt; 24, we select id plus (n-1) out of the 23 non-id trafos, randomly selected.
 	 *
 	 * @param curSOWB a state with its board vector
 	 * @param n number of symmetry vectors to return (n=0 meaning 'all')
-	 * @return a vector of board vectors
+	 * @return a vector {@code equiv} of board vectors
 	 */
 	@Override
 	public BoardVector[] symmetryVectors(StateObsWithBoardVector curSOWB, int n) {
 		StateObserverCube so = (StateObserverCube) curSOWB.getStateObservation();
 		CubeState cS1 = so.getCubeState();
-		int i=0;
-		boolean doAssert=true;
+		boolean doAssert=false;		// if true, do assertion checks on color trafo (slower!)
 		BoardVector[] equiv;
-		HashSet<CubeState> set = new HashSet<>();
+
 		//
-		// calculate all color-symmetric states for cS1, collect
-		// in 'set' only the truly different CubeStates
-		CubeStateMap mapColSymm = hmCols.applyColSymm(cS1,hmRots);
-		if (doAssert && CubeConfig.cubeSize == CubeConfig.CubeSize.POCKET)
-			assert(mapColSymm.countYgrHomeStates()==mapColSymm.size()) :
-				"not all color-symmetric states have ygr 'home'!";
-		for (Map.Entry<Integer, CubeState> entry : mapColSymm.entrySet()) {
-			set.add(entry.getValue());
+		// select a set of n ColorTrafo objects (or all, if n==0)
+		//
+		ColorTrafoMap allCT = ColorTrafoMap.allCT;
+		ColorTrafoMap myMap = new ColorTrafoMap();
+		assert (n>=0);
+		if (n>0) {
+			myMap.put(0, allCT.get(0));			// put in any case the identity trafo (yielding the state itself)
+			if (n>1) {
+				int nmax = (n <= allCT.size()) ? n-1 : (allCT.size()-1);
+				List<Integer> list = new ArrayList<Integer>();
+				for (int k = 1; k < allCT.size(); k++) list.add(k);
+				java.util.Collections.shuffle(list);
+				for (int k = 0; k < nmax; k++)  myMap.put(list.get(k), allCT.get(list.get(k)));
+			}									// the last line picks nmax random color trafos NOT being 'id'
+		} else {
+			myMap = allCT;						// take all color trafos, if n==0
 		}
 
-		// once we have the truly different CubeStates in 'set',
-		// create and fill 'equiv' accordingly:
-		equiv = new BoardVector[set.size()];
-		for (CubeState cs : set) {
+		CubeStateMap mapColSymm = cS1.applyCT(myMap,doAssert);
+
+// DEPRECATED, use cS1.applyCT	instead
+//		//
+//		// calculate all color-symmetric states for cS1, collect
+//		// in 'set' only the truly different CubeStates
+//		CubeStateMap mapColSymm = hmCols.applyColSymm(cS1,hmRots);
+//		HashSet<CubeState> set = new HashSet<>();
+//		if (doAssert && CubeConfig.cubeSize == CubeConfig.CubeSize.POCKET)
+//			assert(mapColSymm.countYgrHomeStates()==mapColSymm.size()) :
+//				"not all color-symmetric states have ygr 'home'!";
+//		for (Map.Entry<Integer, CubeState> entry : mapColSymm.entrySet()) {
+//			set.add(entry.getValue());
+//		}
+//
+//		// once we have the truly different CubeStates in 'set',
+//		// create and fill 'equiv' accordingly:
+//		equiv = new BoardVector[set.size()];
+//		for (CubeState cs : set) {
+//			equiv[i++] = cs.getBoardVector();
+//		}
+
+		// fill 'equiv'  with all states found in mapColSymm:
+		// (we take here all and not only the distinct ones, because empirically there are in many cases 24 distinct
+		// states for a cube states being more than 5 twists away from the solved cube. See DistinctColorTrafos in
+		// test/games/RubiksCube for the precise numbers
+		equiv = new BoardVector[mapColSymm.size()];
+		int i=0;
+		for (Map.Entry<Integer, CubeState> entry : mapColSymm.entrySet()) {
+			CubeState cs = entry.getValue();
 			equiv[i++] = cs.getBoardVector();
 		}
 
@@ -165,31 +196,33 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	@Override
 	@Deprecated
 	public BoardVector[] symmetryVectors(BoardVector boardVector, int n) {
-		CubeStateFactory csFactory = new CubeStateFactory();
-		int i=0;
-		boolean doAssert=true;
-		BoardVector[] equiv;
-		CubeState cS1 = csFactory.makeCubeState(boardVector);
-		HashSet<CubeState> set = new HashSet<>();
-		//
-		// calculate all color-symmetric states for cS1, collect
-		// in 'set' only the truly different CubeStates
-		CubeStateMap mapColSymm = hmCols.applyColSymm(cS1,hmRots);
-		if (doAssert && CubeConfig.cubeSize == CubeConfig.CubeSize.POCKET)
-			assert(mapColSymm.countYgrHomeStates()==mapColSymm.size()) :
-				"not all color-symmetric states have ygr 'home'!";
-		for (Map.Entry<Integer, CubeState> entry : mapColSymm.entrySet()) {
-			set.add(entry.getValue());
-		}
-
-		// once we have the truly different CubeStates in 'set',
-		// create and fill 'equiv' accordingly:
-		equiv = new BoardVector[set.size()];
-		for (CubeState cs : set) {
-			equiv[i++] = cs.getBoardVector();
-		}
-
-		return equiv;
+		throw new RuntimeException("Not implemented for XNTupleFuncsCube");
+// OLD and DEPRECATED:
+//		CubeStateFactory csFactory = new CubeStateFactory();
+//		int i=0;
+//		boolean doAssert=true;
+//		BoardVector[] equiv;
+//		CubeState cS1 = csFactory.makeCubeState(boardVector);
+//		HashSet<CubeState> set = new HashSet<>();
+//		//
+//		// calculate all color-symmetric states for cS1, collect
+//		// in 'set' only the truly different CubeStates
+//		CubeStateMap mapColSymm = hmCols.applyColSymm(cS1,hmRots);
+//		if (doAssert && CubeConfig.cubeSize == CubeConfig.CubeSize.POCKET)
+//			assert(mapColSymm.countYgrHomeStates()==mapColSymm.size()) :
+//				"not all color-symmetric states have ygr 'home'!";
+//		for (Map.Entry<Integer, CubeState> entry : mapColSymm.entrySet()) {
+//			set.add(entry.getValue());
+//		}
+//
+//		// once we have the truly different CubeStates in 'set',
+//		// create and fill 'equiv' accordingly:
+//		equiv = new BoardVector[set.size()];
+//		for (CubeState cs : set) {
+//			equiv[i++] = cs.getBoardVector();
+//		}
+//
+//		return equiv;
 	}
 
 	/**

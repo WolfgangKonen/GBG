@@ -260,6 +260,9 @@ public interface PlayAgent {
 	AgentState getAgentState();
 	void setAgentState(AgentState aState);
 
+	String getAgentFile();
+	void setAgentFile(String agtFile);
+
 	/**
 	 * reset agent when starting a new episode
 	 * (needed when re-using an agent, e.g. in competeNum episodes during a competition

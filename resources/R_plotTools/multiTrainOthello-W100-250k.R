@@ -30,7 +30,7 @@ path <- "~/GitHub/GBG/agents/Othello/csv/";
 Ylimits=c(0.0,1.0); 
 Xlimits=factor(1:9); 
 
-PART=1    # 1,2 or 3
+PART=3    # 1,2 or 3
 numAgents=c("10agents","14agents","18agents")
 filesW100=c(
   "multiCompeteOthello-W100-250k-part0-1.csv", # 10 agents

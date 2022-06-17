@@ -10,13 +10,13 @@ public class CubeConfig {
 	 * <li> <b>POCKET</b>: 2x2x2 pocket cube
 	 * <li> <b>RUBIKS</b>: 3x3x3 Rubik's cube 		
 	 * </ul>
-	 * @see ArenaCube#setCubeType(String)
+	 * @see ArenaCube#setCubeSize(String)
 	 * 
 	 */
 	public enum CubeSize {POCKET,RUBIKS}
 
 	/**
-	 * @see ArenaCube#setCubeType(String)
+	 * @see ArenaCube#setCubeSize(String)
 	 */
 	public static CubeSize cubeSize = CubeSize.POCKET;
 	
@@ -37,6 +37,7 @@ public class CubeConfig {
 	 * is used in {@link CubeState#getBoardVector()} and in {@link XNTupleFuncsCube}.
 	 * 
 	 * @see ArenaCube#setBoardVecType(String)
+	 * @see games.BoardVector
 	 */
 	public static BoardVecType boardVecType = BoardVecType.CUBESTATE;
 
