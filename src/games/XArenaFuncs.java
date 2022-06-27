@@ -1055,6 +1055,7 @@ public class XArenaFuncs {
 
 			elapsedMs = (System.currentTimeMillis() - startTime);	// ms spent for final evaluation
 			pa.incrementDurationEvaluationMs(elapsedMs);
+			pa.setAgentState(PlayAgent.AgentState.TRAINED);
 
 			// print the full list mtList after finishing each run i
 			// (overwrites the file written from previous run i-1)

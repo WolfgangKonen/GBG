@@ -59,17 +59,16 @@ public class MCTSWrapperAgentTest extends GBGBatch {
         int pMin=1, pMax;
         scaPar=new String[]{"3x3x3", "STICKER2", "QTM"};    // select here between "HTM" and "QTM"
         switch (scaPar[2]) {
-            case "HTM":
+            case "HTM" -> {
                 agtFiles = new String[]{"TCL4-p9-2000k-120-7t.agt.zip"};
                 //agtFiles = new String[]{"TCL4-p20-5000k-120-7t.agt.zip"};
-                pMax=9;
-                break;
-            case "QTM":
+                pMax = 9;
+            }
+            case "QTM" -> {
                 agtFiles = new String[]{"TCL4-p13-3000k-120-7t.agt.zip"};
-                pMax=13;
-                break;
-            default:
-                throw new RuntimeException("Unallowed value "+scaPar[2]+" for scaPar[2]");
+                pMax = 13;
+            }
+            default -> throw new RuntimeException("Unallowed value " + scaPar[2] + " for scaPar[2]");
         }
         int[] iterMCTSWrapArr = {0,100,200,500,1000}; //{20,50}; //{200,500}; //,100,200,300,500,600,800,1000};
         //int[] iterMCTSWrapArr={10000};  // only in conjunction with oPar's nPly > 0 (see below)
@@ -102,17 +101,16 @@ public class MCTSWrapperAgentTest extends GBGBatch {
         int pMin=1, pMax;
         scaPar=new String[]{"2x2x2", "STICKER2", "QTM"};    // select here between "HTM" and "QTM"
         switch (scaPar[2]) {
-            case "HTM":
+            case "HTM" -> {
                 agtFiles = new String[]{"TCL4-p13-3000k-60-7t.agt.zip"};
-                pMax=13;
-                break;
-            case "QTM":
+                pMax = 13;
+            }
+            case "QTM" -> {
                 //agtFiles = new String[]{"TCL4-p16-3000k-60-7t.agt.zip"};
                 agtFiles = new String[]{"TCL4-p16-3000k-60-7t-lam05.agt.zip"};
-                pMax=16;
-                break;
-            default:
-                throw new RuntimeException("Illegal value "+scaPar[2]+" for scaPar[2]");
+                pMax = 16;
+            }
+            default -> throw new RuntimeException("Illegal value " + scaPar[2] + " for scaPar[2]");
         }
         int[] iterMCTSWrapArr={0,50,100,200,500,1000}; //{0,50,100,200,300}; // ,100,200,300,500,600,800,1000};
         //int[] iterMCTSWrapArr={0};  // only in conjunction with oPar's nPly > 0 (see below)
@@ -134,7 +132,7 @@ public class MCTSWrapperAgentTest extends GBGBatch {
     /**
      * @param scaPar    scalable parameters
      * @param agtFiles  the agent(s) to wrap
-     * @param iterMCTSWrapArr
+     * @param iterMCTSWrapArr the iterations for MCTS wrapper
      * @param hm        hash map with expected lower bounds on %-solved-rate as a fct of iterMCTSWrap
      * @param pMin      min number of scrambling twists
      * @param pMax      max number of scrambling twists
@@ -156,7 +154,6 @@ public class MCTSWrapperAgentTest extends GBGBatch {
         double[] epsArr = {1e-8}; // {1e-8, 0.0, -1e-8}; // {1e-8, 0.0};    //
         double c_puct=10.0;
         String userTitle1 = "pTwist", userTitle2 = "EE";
-        double userValue1=0.0, userValue2=0.0;
         int maxDepth = 50;  // 25, 50, -1
         int ee = 20;       // 20 or 50: eval-epiLength
         double percSolved;

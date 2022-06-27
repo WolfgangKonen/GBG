@@ -95,6 +95,7 @@ public class PocketCubeTest {
      *    via apply() to cs
      * 3) Test that cs.fTr(3).UTw().fTr(1)  == cs.LTw() when applied to any cube state cs
      *    Test that cs.lTr(1).UTw().lTr(3)  == cs.FTw() when applied to any cube state cs
+     *    and similarly for the other twists
      */
     @Test
     public void test_UTw_LTw_FTw() {
@@ -102,7 +103,7 @@ public class PocketCubeTest {
         init();
 
         // just to check a way to generate a random permutation of a list of numbers
-        List<Integer> list = new ArrayList<Integer>();
+        List<Integer> list = new ArrayList<>();
         list.add(1);
         list.add(2);
         list.add(3);
@@ -155,7 +156,7 @@ public class PocketCubeTest {
         CubeState cs1 = csFactory.makeCubeState();
         cs1.LTw().FTw().UTw();      // any transformation can be applied here
         CubeState cs2 = csFactory.makeCubeState(cs1);
-        CubeStateMap allWCR = CubeStateMap.allWholeCubeRots;
+        //CubeStateMap allWCR = CubeStateMap.allWholeCubeRots;
         cs1.LTw();
         cs2.fTr(3).UTw().fTr(1);
         assert (cs1.isEqual(cs2));

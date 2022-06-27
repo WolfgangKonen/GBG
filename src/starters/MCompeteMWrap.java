@@ -1,20 +1,9 @@
 package starters;
 
 import java.io.*;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Objects;
-
-import controllers.MCTSWrapper.ConfigWrapper;
-import controllers.MCTSWrapper.MCTSWrapperAgent;
-import controllers.MCTSWrapper.stateApproximation.PlayAgentApproximator;
 import controllers.PlayAgent;
-import controllers.PlayAgtVector;
 import games.*;
-import games.Othello.Edax.Edax2;
-import params.ParEdax;
-import tools.Measure;
-import tools.ScoreTuple;
 import tools.Types;
 
 /**
@@ -50,8 +39,8 @@ public class MCompeteMWrap {
     public double winrate;
     public double userValue1;
     public double userValue2;
-    public String agtFile="";
-    static String sep = ", ";
+    public String agtFile;
+    static String sep = "; ";
 
     protected Evaluator m_evaluatorQ = null;
     protected Evaluator m_evaluatorT = null;

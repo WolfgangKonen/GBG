@@ -2,7 +2,7 @@
 # **** These are new results with MCTSWrapper[TCL4-EXP] from Jan 2021 ****
 #
 # **** see MCTSWrapperResults-2021-01-16.docx, Sec. 'Rubik's Cube'.
-# **** The relevant CSV files are generate with 
+# **** The relevant CSV files are generated with 
 #      MCTSWrapperAgentTest.rubiksCube2x2Test & .rubiksCube3x3Test
 # 
 library(ggplot2)
@@ -12,7 +12,7 @@ source("summarySE.R")
 
 PLOTALLLINES=F  # if =T: make a plot for each filename, with one line for each run
 EE=50           # 20 or 50: eval epiLength
-TWISTTYPE="HTM" # QTM or HTM
+TWISTTYPE="QTM" # QTM or HTM
 
 filenames=c()
 for (CUBEW in c(2,3)) {        # cube width, either 2 or 3
@@ -27,11 +27,12 @@ for (CUBEW in c(2,3)) {        # cube width, either 2 or 3
                     #,paste0("mRubiks3x3-MWrap[TCL4-p20]-SoftMax-p1-9-EE",EE,".csv") # CUBEW=3
     )
   } else {  # i.e. "QTM"
+    EE = 20
     path <- paste("../../agents/RubiksCube/",cubewww,"_STICKER2_QT/csv/",sep=""); 
     fname <- switch(CUBEW
                     ," "
-                    ,paste0("mRubiks2x2-MWrap[TCL4-p16]-QTM-p1-16-EE",EE,".csv")  # CUBEW=2, QTM
-                    #,paste0("mRubiks2x2-MWrap[TCL4-p16-lam05]-QTM-p1-16-EE",EE,".csv")# CUBEW=2, QTM
+                    #,paste0("mRubiks2x2-MWrap[TCL4-p16]-QTM-p1-16-EE",EE,".csv")  # CUBEW=2, QTM
+                    ,paste0("mRubiks2x2-MWrap[TCL4-p16-lam05]-QTM-p1-16-EE",EE,".csv")# CUBEW=2, QTM
                     ,paste0("mRubiks3x3-MWrap[TCL4-p13]-QTM-p1-13-EE",EE,".csv")   # CUBEW=3, QTM
     )
   } 

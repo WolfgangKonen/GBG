@@ -37,6 +37,7 @@ public final class MCTSWrapperAgent extends AgentBase implements PlayAgent, Seri
      * @param name         The name of the agent to be displayed.
      * @param maxDepth     Return from search, if depth==maxDepth. Set to -1, if search should not return because
      *                     of depth. (-1 will be transformed to Integer.MAX_VALUE.)
+     * @param oPar         needed for parent class constructor
      */
     public MCTSWrapperAgent(
         final int iterations,

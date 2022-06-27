@@ -1,10 +1,13 @@
 package games.RubiksCube;
 
+import controllers.MCTSWrapper.MCTSWrapperAgent;
+import controllers.MCTSWrapper.stateApproximation.PlayAgentApproximator;
 import controllers.PlayAgent;
 import controllers.TD.ntuple4.TDNTuple4Agt;
 import org.junit.Test;
 import params.ParNT;
 import params.ParOther;
+import starters.MCube;
 import starters.SetupGBG;
 import java.util.ArrayList;
 
@@ -20,8 +23,8 @@ public class SymmTrainTest extends CubeTrain_Test {
      *    <li> Set {@code USESYMMETRY} and {@code nSym} according to the i-th array elements, re-construct and re-train agent 0
      *         with {@code CubeConfig.pMax=pMaxTrain}. Measure training time.
      *    <li> Evaluate agent 0 with quick-eval-mode 1 and {@code CubeConfig.pMax=pMaxEval}.
-     *    <li> Store results (training time, perc. solved rate, ...) in an {@link games.RubiksCube.CubeTrain_Test.MCube MCube}
-     *         object and collect all {@link games.RubiksCube.CubeTrain_Test.MCube MCube} objects in
+     *    <li> Store results (training time, perc. solved rate, ...) in an {@link MCube MCube}
+     *         object and collect all {@link MCube MCube} objects in
      *         {@code ArrayList<MCube> mcList}.
      * </ol>
      *  Write {@code mcList} to file csvName.
@@ -41,7 +44,7 @@ public class SymmTrainTest extends CubeTrain_Test {
         String agtFile = "TCL4-p16-9000k-60-7t-lam05.agt.zip";
         setupPaths(agtFile, csvName);        // builds filePath
 
-        ColSymTest(usesymArr, nsymArr, maxGameNum, pMaxTrain, pMaxEval, csvName, agtFile);
+        colorSymTest(usesymArr, nsymArr, maxGameNum, pMaxTrain, pMaxEval, csvName, agtFile);
 
     }
     // Configure this run configuration with -ea -Xmx12096M, otherwise Heap Space Exception
@@ -60,12 +63,12 @@ public class SymmTrainTest extends CubeTrain_Test {
         String agtFile = "TCL4-p9-3000k-120-7t.agt.zip";
         setupPaths(agtFile, csvName);        // builds filePath
 
-        ColSymTest(usesymArr, nsymArr, maxGameNum, pMaxTrain, pMaxEval, csvName, agtFile);
+        colorSymTest(usesymArr, nsymArr, maxGameNum, pMaxTrain, pMaxEval, csvName, agtFile);
 
     }
 
-    private void ColSymTest(boolean[] usesymArr, int[] nsymArr, int maxGameNum, int pMaxTrain, int pMaxEval,
-                            String csvName, String agtFile) {
+    private void colorSymTest(boolean[] usesymArr, int[] nsymArr, int maxGameNum, int pMaxTrain, int pMaxEval,
+                              String csvName, String agtFile) {
         // Step 1) load agent to fill it with the appropriate parameter settings
         boolean res = arenaTrain.loadAgent(0, filePath);
         if (!res) {
@@ -78,8 +81,9 @@ public class SymmTrainTest extends CubeTrain_Test {
         assert (pa instanceof TDNTuple4Agt);
         TDNTuple4Agt ta = (TDNTuple4Agt) pa;
         ParNT ntpar = ta.getParNT();
-        MCube mcube = null;
+        MCube mcube;
         ArrayList<MCube> mcList = new ArrayList<>();
+        String s=null;
 
         for (int i=0; i<usesymArr.length; i++) {
             System.out.println("[ColSymTest] Starting run with USESYMMETRY="+usesymArr[i]+", nSym="+nsymArr[i]+" ...");
@@ -114,15 +118,13 @@ public class SymmTrainTest extends CubeTrain_Test {
             System.out.println("Avg.success: "+m_evaluatorQ.getLastResult()+" for pMax="+pMaxEval);
 
             // Step 4
-            mcube = new MCube(0, pa.getGameNum(), m_evaluatorQ.getLastResult(), 0.0, trainSec, nsymArr[i], pMaxEval);
+            mcube = new MCube(0, agtFile, pa.getGameNum(), nsymArr[i], 1, pMaxEval, m_evaluatorQ.getLastResult(), 0.0, trainSec, 0,0);
             mcList.add(mcube);
 
-            mcube.printMCubeList(csvName, mcList, pa, agtFile, arenaTrain, "nSym", "pMax");
+            s = mcube.printMCubeList(csvName, mcList, pa, agtFile, arenaTrain, "", "");
             // just for safety: print results-so-far after each run
         }
-        String s = mcube.printMCubeList(csvName, mcList, pa, agtFile, arenaTrain, "nSym", "pMax");
         if (s!=null) System.out.println("Results written to "+s);
     }
-
 
 }

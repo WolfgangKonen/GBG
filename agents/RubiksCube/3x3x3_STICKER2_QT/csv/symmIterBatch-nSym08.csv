@@ -1,0 +1,28 @@
+TDNTuple4Agt: USESYM:true, P:12, NORMALIZE:false, sigmoid:none, lambda:0.0, horizon:1, AFTERSTATE:false, learnFromRM: false;;;;;;;;;;
+TDNTuple4Agt: alpha_init->final:0.25->0.25, epsilon_init->final:0.0->0.0, gamma: 1.0, random 120 7-tuple, evalQ: 1, evalT: -1;;;;;;;;;;
+from: multiEval/TCL4-p13-3000k-120-7t-nSym08_00.agt.zip;;;;;;;;;;
+run; agtFile; gameNum; nSym; pMinEval; pMaxEval; evalQ; evalT; totalSec; iterMWrap; agtFile
+0; multiEval/TCL4-p13-3000k-120-7t-nSym08_02.agt.zip;3000000;8;10;13;0.40875;0;14.203;0;0
+1; multiEval/TCL4-p13-3000k-120-7t-nSym08_02.agt.zip;3000000;8;10;13;0.6225;0;399.18;50;0
+2; multiEval/TCL4-p13-3000k-120-7t-nSym08_02.agt.zip;3000000;8;10;13;0.7325;0;651.674;100;0
+3; multiEval/TCL4-p13-3000k-120-7t-nSym08_02.agt.zip;3000000;8;10;13;0.75875;0;1210.664;200;0
+4; multiEval/TCL4-p13-3000k-120-7t-nSym08_02.agt.zip;3000000;8;10;13;0.80375;0;2068.898;400;0
+5; multiEval/TCL4-p13-3000k-120-7t-nSym08_02.agt.zip;3000000;8;10;13;0.8225;0;3764.181;800;0
+0; multiEval/TCL4-p13-3000k-120-7t.agt.zip;3000000;0;10;13;0.28375;0;2.237;0;0
+1; multiEval/TCL4-p13-3000k-120-7t.agt.zip;3000000;0;10;13;0.4875;0;77.931;50;0
+2; multiEval/TCL4-p13-3000k-120-7t.agt.zip;3000000;0;10;13;0.54375;0;148.541;100;0
+3; multiEval/TCL4-p13-3000k-120-7t.agt.zip;3000000;0;10;13;0.63875;0;259.525;200;0
+4; multiEval/TCL4-p13-3000k-120-7t.agt.zip;3000000;0;10;13;0.65375;0;549.327;400;0
+5; multiEval/TCL4-p13-3000k-120-7t.agt.zip;3000000;0;10;13;0.7;0;1026.52;800;0
+0; multiEval/TCL4-p13-3000k-120-7t-nSym08_01.agt.zip;3000000;8;10;13;0.37625;0;15.96;0;0
+1; multiEval/TCL4-p13-3000k-120-7t-nSym08_01.agt.zip;3000000;8;10;13;0.65625;0;430.19;50;0
+2; multiEval/TCL4-p13-3000k-120-7t-nSym08_01.agt.zip;3000000;8;10;13;0.70375;0;746.861;100;0
+3; multiEval/TCL4-p13-3000k-120-7t-nSym08_01.agt.zip;3000000;8;10;13;0.76875;0;1205.297;200;0
+4; multiEval/TCL4-p13-3000k-120-7t-nSym08_01.agt.zip;3000000;8;10;13;0.7875;0;2272.847;400;0
+5; multiEval/TCL4-p13-3000k-120-7t-nSym08_01.agt.zip;3000000;8;10;13;0.82875;0;3776.742;800;0
+0; multiEval/TCL4-p13-3000k-120-7t-nSym08_00.agt.zip;3000000;8;10;13;0.41125;0;14.168;0;0
+1; multiEval/TCL4-p13-3000k-120-7t-nSym08_00.agt.zip;3000000;8;10;13;0.64375;0;413.475;50;0
+2; multiEval/TCL4-p13-3000k-120-7t-nSym08_00.agt.zip;3000000;8;10;13;0.7275;0;653.659;100;0
+3; multiEval/TCL4-p13-3000k-120-7t-nSym08_00.agt.zip;3000000;8;10;13;0.74625;0;1210.725;200;0
+4; multiEval/TCL4-p13-3000k-120-7t-nSym08_00.agt.zip;3000000;8;10;13;0.8375;0;1695.035;400;0
+5; multiEval/TCL4-p13-3000k-120-7t-nSym08_00.agt.zip;3000000;8;10;13;0.84375;0;3238.873;800;0
