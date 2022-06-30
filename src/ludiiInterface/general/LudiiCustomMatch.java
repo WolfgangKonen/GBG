@@ -2,6 +2,7 @@ package ludiiInterface.general;
 
 import game.Game;
 import games.Hex.HexConfig;
+import games.Nim.NimConfig;
 import ludiiInterface.Util;
 import other.AI;
 import other.GameLoader;
@@ -18,7 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class LudiiCustomMatch {
-    static String[] games = { "Othello", "Yavalath", "Hex"};
+    static String[] games = { "Othello", "Yavalath", "Hex", "ConnectFour"};
     static final AI PLAYER_1 = new LudiiAI();
     static AI PLAYER_2;
     static Game ludiiGame;
@@ -84,6 +85,11 @@ public class LudiiCustomMatch {
                 PLAYER_2 = new GBGAsLudiiAI(size,2);
                 ludiiGame = GameLoader.loadGameFromName("Hex.lud",options);
             }
+            case "ConnectFour" -> {
+                PLAYER_2 = new GBGAsLudiiAI();
+                ludiiGame = GameLoader.loadGameFromName("Connect Four.lud");
+            }
+
         }
 
 

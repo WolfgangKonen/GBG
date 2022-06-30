@@ -238,6 +238,61 @@ public class LudiiCustomTest extends GBGBatch {
         }
     }
 
+    @Test
+    public void customC4Game(){
+        PlayAgent pa;
+        int winsPlayer1 = 0, winsPlayer2 = 0, ties = 0;
+
+        selectedGame ="ConnectFour";
+        scaPar = new String[]{"","",""};
+        agtFile= "1-AB-DL.agt.zip";
+        arenaTrain = SetupGBG.setupSelectedGame(selectedGame,scaPar,"",false,true);
+        pa = arenaTrain.loadAgent(agtFile);
+        System.out.println(pa.getName()+"\n"+pa.stringDescr());
+
+        PLAYER_2 = new GBGAsLudiiAI();
+        ludiiGame = GameLoader.loadGameFromName("Connect Four.lud");
+
+        final other.context.Context context = new Context(ludiiGame, new Trial(ludiiGame));
+
+        final List<AI> ais = new ArrayList<>();
+        ais.add(null);
+        ais.add(PLAYER_1);
+        ais.add(PLAYER_2);
+
+        for(int gameCounter = 0; gameCounter < GAMESNUMBER; gameCounter++){
+            ludiiGame.start(context);
+
+            ais.get(1).initAI(ludiiGame,1);
+            ((GBGAsLudiiAI)ais.get(2)).initAI(ludiiGame,2,pa);
+
+            final Model model = context.model();
+
+            while(!context.trial().over()){
+                model.startNewStep(context,ais,MAX_SECONDS);
+            }
+
+            if(context.trial().status().winner() == 0){
+                System.out.println("Tie.");
+                ties++;
+            }else {
+                System.out.println("Winner Game " + ": " + ais.get(context.trial().status().winner()).friendlyName());
+                if(context.trial().status().winner() == 1){
+                    winsPlayer1++;
+                }else winsPlayer2++;
+            }
+
+            if(LOGS){
+                String logFullFilePath = getLogPath(arenaTrain);
+                logGame(context,logFullFilePath, ais);
+            }
+            System.out.println("Wins Player 1 ("+ ais.get(1).friendlyName() + "): " + winsPlayer1);
+            System.out.println("Wins Player 2 ("+ ais.get(2).friendlyName() + "): " + winsPlayer2);
+            System.out.println("Ties: " + ties);
+        }
+
+    }
+
     private String getLogPath(Arena arena) {
         String logFullFilePath;
         String logFile="logs.ludiilog";

@@ -5,6 +5,8 @@ import game.Game;
 import games.Hex.HexConfig;
 import games.Othello.ArenaOthello;
 import ludiiInterface.Util;
+import ludiiInterface.games.CFour.StateObserverC4TranslationLayer;
+import ludiiInterface.games.CFour.SystemConversionC4;
 import ludiiInterface.games.Hex.StateObserverHexTranslationLayer;
 import ludiiInterface.games.Hex.SystemConversionHex;
 import ludiiInterface.games.othello.StateObserverOthelloTranslationLayer;
@@ -29,7 +31,7 @@ public class GBGAsLudiiAI extends AI {
     private String gbgAgentPathYavalath = "C:\\Users\\Ann\\IdeaProjects\\GBG\\agents\\Yavalath\\yavAgent.agt.zip";
     private final String gbgAgentPathOthello = "C:\\Users\\Ann\\IdeaProjects\\GBG\\agents\\Othello\\TCL3-100_7_250k-lam05_P4_nPly2-FAm_A.agt.zip";
     private final String gbgAgentPathHex = "C:\\Users\\Ann\\IdeaProjects\\GBG\\agents\\Hex\\06\\TDNT3-TCLid-25_6-300k-eps02.agt.zip";
-    private final String[] games = {"Othello", "Yavalath", "Hex"};
+    private final String[] games = {"Othello", "Yavalath", "Hex", "Connect Four"};
     private String agentPath;
 
     public GBGAsLudiiAI(){
@@ -101,6 +103,10 @@ public class GBGAsLudiiAI extends AI {
             case "Hex" -> {
                 move = selectActionHex(game,context,maxSeconds,maxIterations,maxDepth);
             }
+            case "Connect Four" -> {
+                move = selectActionC4(game,context,maxSeconds,maxIterations,maxDepth);
+            }
+
             default -> {
                 // Default to random move
                 System.err.println("[GBGAsLudiiAI.selectAction] Returning a random move, since game is not part of interface!");
@@ -189,4 +195,20 @@ public class GBGAsLudiiAI extends AI {
         }
         return returnMove;
     }
+
+    private Optional<Move> selectActionC4(Game game, Context context, double maxSeconds, int maxIterations, int maxDepth){
+        Optional<Move> returnMove = Optional.empty();
+        SystemConversionC4 index = new SystemConversionC4();
+
+        FastArrayList<Move> moves = game.moves(context).moves();
+        Types.ACTIONS gbgAction = gbgAgent.getNextAction2(new StateObserverC4TranslationLayer(context, playerID).partialState(),false, true);
+
+        for(Move move : moves){
+            if(move.to() == index.getLudiiIndexFromGBG(gbgAction.toInt())) returnMove = Optional.of(move);
+        }
+
+        return returnMove;
+    }
+
+
 }
