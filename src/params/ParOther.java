@@ -41,6 +41,7 @@ public class ParOther implements Serializable {
     private int stopEval = DEFAULT_STOP_EVAL; 		// new meaning: max episode length during eval & play
     private int wrapperNply = DEFAULT_WRAPPER_NPLY;
 	private int wrapperMCTSIterations = DEFAULT_WRAPPER_MCTS_ITERATIONS;
+	private String moveLogDirectory = null;
 	private double wrapperMCTS_PUCT = DEFAULT_WRAPPER_MCTS_PUCT;
 	private int wrapperMCTS_depth = DEFAULT_WRAPPER_MCTS_DEPTH;
 	private int pMinRubiks = DEFAULT_PMIN_RUBIKS;	// only relevant for RubiksCube, see CubeConfig.pMin
@@ -95,6 +96,7 @@ public class ParOther implements Serializable {
 		this.stopEval = op.getStopEval();
 		this.wrapperNply = op.getWrapperNPly();
 		this.wrapperMCTSIterations = op.getWrapperMCTSIterations();
+		this.moveLogDirectory = op.getMoveLogDirectory();
 		this.wrapperMCTS_PUCT = op.getWrapperMCTS_PUCT();
 		this.wrapperMCTS_depth = op.getWrapperMCTS_depth();
 		this.pMinRubiks = op.getpMinRubiks();
@@ -119,6 +121,7 @@ public class ParOther implements Serializable {
 		this.stopEval = op.getStopEval();
 		this.wrapperNply = op.getWrapperNPly();
 		this.wrapperMCTSIterations = op.getWrapperMCTSIterations();
+		this.moveLogDirectory = op.getMoveLogDirectory();
 		this.wrapperMCTS_PUCT = op.getWrapperMCTS_PUCT();
 		this.wrapperMCTS_depth = op.getWrapperMCTS_depth();
 		this.pMinRubiks = op.getpMinRubiks();
@@ -193,6 +196,10 @@ public class ParOther implements Serializable {
 	
 	public int getWrapperMCTSIterations() {
 		return wrapperMCTSIterations;
+	}
+
+	public String getMoveLogDirectory() {
+		return moveLogDirectory;
 	}
 
 	public double getWrapperMCTS_PUCT() {

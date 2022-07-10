@@ -2,21 +2,13 @@ package params;
 
 import java.awt.BorderLayout;
 import java.awt.Button;
-import java.awt.Canvas;
 import java.awt.Checkbox;
 import java.awt.Frame;
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
+import java.awt.event.*;
 
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.*;
 
-import controllers.PlayAgent;
 import controllers.PlayAgent.AgentState;
 import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.TDNTuple3Agt;
@@ -95,6 +87,9 @@ public class OtherParams extends Frame {
 	public Checkbox replayBuf;
 	public JLabel agentState;
 
+	private final JTextField moveLogDirectory_T;
+	private final JLabel moveLogDirectory_L;
+
 	Button ok;
 	JPanel oPanel;
 	OtherParams m_par;
@@ -139,6 +134,8 @@ public class OtherParams extends Frame {
 		learnRM = new Checkbox("", false);
 		replayBuf = new Checkbox("", false);
 		agentState = new JLabel("");
+		moveLogDirectory_T = new JTextField("");
+		moveLogDirectory_L = new JLabel("Log move times in");
 		rewardIsGameScore = new Checkbox("", true);
 		ok = new Button("OK");
 		m_par = this;
@@ -171,6 +168,7 @@ public class OtherParams extends Frame {
 				"RubiksCube: max. number of initial twists (during traing and eval)");
 		rBuf_L.setToolTipText(
 				"RubiksCube: use replay buffer during training");
+		moveLogDirectory_L.setToolTipText("Select a directory in which a file will be created to log the move times.");
 
 		// this.setQuickEvalMode(0);
 		// this.setTrainEvalMode(0);
@@ -190,6 +188,16 @@ public class OtherParams extends Frame {
 					 }
 				 }
 		);
+
+		moveLogDirectory_T.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				var fileChooser = new JFileChooser();
+				fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+				fileChooser.showSaveDialog(null);
+				moveLogDirectory_T.setText(fileChooser.getSelectedFile().getAbsolutePath());
+			}
+		});
 
 		// only for RubiksCube:
 		pMin_T.addActionListener(new ActionListener()
@@ -245,6 +253,9 @@ public class OtherParams extends Frame {
 
 		oPanel.add(wMCTS_L);
 		oPanel.add(wMCTS_T);
+
+		oPanel.add(moveLogDirectory_L);
+		oPanel.add(moveLogDirectory_T);
 
 		oPanel.add(wMCTSpUCT_L);
 		oPanel.add(wMCTSpUCT_T);
@@ -366,6 +377,14 @@ public class OtherParams extends Frame {
 		return Integer.parseInt(wMCTS_T.getText());
 	}
 
+	public String getMoveLogDirectory() {
+		return moveLogDirectory_T.getText();
+	}
+
+	public void setMoveLogDirectory(final String moveLogDirectory) {
+		moveLogDirectory_T.setText(moveLogDirectory);
+	}
+	
 	public double getWrapperMCTS_PUCT() {
 		return Double.parseDouble(wMCTSpUCT_T.getText());
 	}

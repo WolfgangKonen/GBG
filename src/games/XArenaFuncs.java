@@ -3,6 +3,7 @@ package games;
 import TournamentSystem.TSTimeStorage;
 import TournamentSystem.tools.TSGameDataTransfer;
 import controllers.*;
+import controllers.Decorators.UseMoveTimesOfAgent;
 import controllers.MC.MCAgentN;
 import controllers.MCTS.MCTSAgentT;
 import controllers.MCTSExpWrapper.MctseWrapperAgent;
@@ -34,6 +35,9 @@ import tools.*;
 import tools.Types.ACTIONS;
 
 import javax.swing.*;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -603,7 +607,35 @@ public class XArenaFuncs {
 			}
 		}
 
+		qa = WithLoggingOfMoves(qa, oPar.getMoveLogDirectory());
+
 		return qa;
+	}
+
+	private PlayAgent WithLoggingOfMoves(PlayAgent agent, String moveLogDirectory) {
+		if (moveLogDirectory == null || moveLogDirectory.length() == 0) return agent;
+
+		final var logFile = new File(moveLogDirectory + "/move-times-of-" + agent.getName());
+		logFile.delete();
+		try {
+			if (!logFile.createNewFile()) return agent;
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
+		try (var fw = new FileWriter(logFile, true)) {
+			fw.write(agent.getName() + "\n");
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+
+		return new UseMoveTimesOfAgent(agent, moveTime -> {
+			try (var writer = new FileWriter(logFile, true)) {
+				writer.write(moveTime.inSeconds() + "\n");
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		});
 	}
 
 	/**
