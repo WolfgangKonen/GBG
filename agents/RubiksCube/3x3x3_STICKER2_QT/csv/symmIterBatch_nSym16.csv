@@ -1,0 +1,22 @@
+TDNTuple4Agt: USESYM:true, P:12, NORMALIZE:false, sigmoid:none, lambda:0.0, horizon:1, AFTERSTATE:false, learnFromRM: false;;;;;;;;;;
+TDNTuple4Agt: alpha_init->final:0.25->0.25, epsilon_init->final:0.0->0.0, gamma: 1.0, random 120 7-tuple, evalQ: 1, evalT: -1;;;;;;;;;;
+from: multiEval/TCL4-p13-3000k-120-7t-nSym16_00.agt.zip;;;;;;;;;;
+run; agtFile; gameNum; nSym; pMinEval; pMaxEval; evalQ; evalT; totalSec; iterMWrap; userVal2
+0; multiEval/TCL4-p13-3000k-120-7t-nSym16_02.agt.zip;3000000;16;10;13;0.45;0;23.977;0;0
+1; multiEval/TCL4-p13-3000k-120-7t-nSym16_02.agt.zip;3000000;16;10;13;0.6125;0;773.013;50;0
+2; multiEval/TCL4-p13-3000k-120-7t-nSym16_02.agt.zip;3000000;16;10;13;0.72125;0;1130.404;100;0
+3; multiEval/TCL4-p13-3000k-120-7t-nSym16_02.agt.zip;3000000;16;10;13;0.7875;0;1773.285;200;0
+4; multiEval/TCL4-p13-3000k-120-7t-nSym16_02.agt.zip;3000000;16;10;13;0.82375;0;3127.405;400;0
+5; multiEval/TCL4-p13-3000k-120-7t-nSym16_02.agt.zip;3000000;16;10;13;0.85375;0;5217.57;800;0
+0; multiEval/TCL4-p13-3000k-120-7t-nSym16_01.agt.zip;3000000;16;10;13;0.44625;0;26.448;0;0
+1; multiEval/TCL4-p13-3000k-120-7t-nSym16_01.agt.zip;3000000;16;10;13;0.6075;0;844.994;50;0
+2; multiEval/TCL4-p13-3000k-120-7t-nSym16_01.agt.zip;3000000;16;10;13;0.75;0;1124.785;100;0
+3; multiEval/TCL4-p13-3000k-120-7t-nSym16_01.agt.zip;3000000;16;10;13;0.81;0;1684.606;200;0
+4; multiEval/TCL4-p13-3000k-120-7t-nSym16_01.agt.zip;3000000;16;10;13;0.795;0;3508.105;400;0
+5; multiEval/TCL4-p13-3000k-120-7t-nSym16_01.agt.zip;3000000;16;10;13;0.84375;0;5678.586;800;0
+0; multiEval/TCL4-p13-3000k-120-7t-nSym16_00.agt.zip;3000000;16;10;13;0.43;0;28.498;0;0
+1; multiEval/TCL4-p13-3000k-120-7t-nSym16_00.agt.zip;3000000;16;10;13;0.63;0;833.904;50;0
+2; multiEval/TCL4-p13-3000k-120-7t-nSym16_00.agt.zip;3000000;16;10;13;0.71625;0;1262.464;100;0
+3; multiEval/TCL4-p13-3000k-120-7t-nSym16_00.agt.zip;3000000;16;10;13;0.76625;0;2077.275;200;0
+4; multiEval/TCL4-p13-3000k-120-7t-nSym16_00.agt.zip;3000000;16;10;13;0.81875;0;3303.145;400;0
+5; multiEval/TCL4-p13-3000k-120-7t-nSym16_00.agt.zip;3000000;16;10;13;0.82875;0;6343.113;800;0

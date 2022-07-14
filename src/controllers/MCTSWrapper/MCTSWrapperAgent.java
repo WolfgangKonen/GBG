@@ -8,10 +8,8 @@ import controllers.MCTSWrapper.passStates.PassAction;
 import controllers.MCTSWrapper.stateApproximation.Approximator;
 import controllers.PlayAgent;
 import controllers.PlayAgtVector;
-import games.GameBoard;
 import games.ObserverBase;
 import games.StateObservation;
-import games.XArenaButtons;
 import params.ParOther;
 import tools.ScoreTuple;
 import tools.Types;
@@ -20,6 +18,8 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Map;
+import java.util.Random;
+import java.util.stream.Collectors;
 
 /**
  * PlayAgent that performs a Monte Carlo Tree Search (MCTS) to calculate the next action to be selected.
@@ -29,6 +29,10 @@ public final class MCTSWrapperAgent extends AgentBase implements PlayAgent, Seri
     private final int iterations;
     private final MCTS mcts;
     private final Approximator approximator;
+
+    private final Random rand; // generate random Numbers
+    private final double m_epsilon = 0.15;        // a quick hack to set epsilon for ConfigWrapper.EXPLORATION_MODE=2 (later it
+                // should be taken from ParTD of the wrapped agent, if the wrapped agent is derived from NTuple4Base)
 
     /**
      * @param iterations   Number of monte carlo iterations to be performed before the next action is selected.
@@ -50,6 +54,7 @@ public final class MCTSWrapperAgent extends AgentBase implements PlayAgent, Seri
         super(name,oPar);
         this.iterations = iterations;
         this.approximator = approximator;
+        this.rand = new Random(System.currentTimeMillis()); //(System.currentTimeMillis()); (42);
         mcts = new MCTS(approximator, c_puct, maxDepth);
         setAgentState(AgentState.TRAINED);
     }
@@ -166,26 +171,49 @@ public final class MCTSWrapperAgent extends AgentBase implements PlayAgent, Seri
             int dummy = 1;
         }
 
+        final var randomSelectProportional = (random && ConfigWrapper.EXPLORATION_MODE==1);
+        final var randomSelectEpsilon = (random && ConfigWrapper.EXPLORATION_MODE==2 && rand.nextDouble() < m_epsilon);
         mcts.largestDepth=0;
-        // Performs the given number of mcts iterations.
-        for (int i = 0; i < iterations; i++) {
-            mcts.search(mctsNode,0);
+        if(!randomSelectEpsilon){
+            // Performs the given number of mcts iterations.
+            for (int i = 0; i < iterations; i++) {
+                mcts.search(mctsNode, 0);
+            }
+
+            if (mctsNode.visitCounts.size() == 0) {
+                // As far as we see, this can only happen if iterations==1 (which is not a sensible choice),
+                // but we leave it in as debug check for the moment.
+                // We return always action 0 (which may or may not be a sensible choice)
+                System.err.println("MCTSWrapperAgent.getNextAction2: *** Warning *** visitCounts.size = 0");
+                System.err.println(mctsNode.gameState.stringDescr());
+                return new Types.ACTIONS_VT(0, false, new double[sob.getNumAvailableActions()], 0.0);
+            }
         }
 
-        // Selects the int value of the action that leads to the child node that maximizes the visit count.
-        // This value is also cached for further calls.
-        if (mctsNode.visitCounts.size()==0) {
-            // As far as we see, this can only happen if iterations==1 (which is not a sensible choice),
-            // but we leave it in as debug check for the moment
-            System.err.println("MCTSWrapperAgent.getNextAction2: *** Warning *** visitCounts.size = 0");
-            System.err.println(mctsNode.gameState.stringDescr());
-            return new Types.ACTIONS_VT(0,false,new double[sob.getNumAvailableActions()],0.0);
+        // Selects the int value of one of the available actions:
+        // If called with random==true (during training), select lastSelectedAction either stochastically (explore if
+        // EXPLORATION_MODE==1) or do it non-stochastically (exploit if EXPLORATION_MODE!=1)
+        if (randomSelectProportional) {
+            lastSelectedAction = selectActionProportional(mctsNode);
+            //lastSelectedNode = null; // do not reuse the tree if random action. // TODO: Why not?
+        } else if (randomSelectEpsilon) {
+            final var vTable2 = getVTableRandom(mctsNode);
+            final var vBest2 = Arrays.stream(vTable2).max().orElse(Double.NaN);
+            ScoreTuple scBest2 = new ScoreTuple(sob, vBest2);
+            final var oldProbabilities = mctsNode.moveProbabilities.values().stream().mapToDouble(Double::doubleValue).toArray();
+            mctsNode.setMoveProbabilities(vTable2);
+            lastSelectedAction = mctsNode.moveProbabilities.entrySet().stream().max(
+                    Comparator.comparingDouble(Map.Entry::getValue)
+            ).orElseThrow().getKey();
+            mctsNode.setMoveProbabilities(oldProbabilities);
+        } else {
+            lastSelectedAction = mctsNode.visitCounts.entrySet().stream().max(
+                    Comparator.comparingDouble(Map.Entry::getValue)
+            ).orElseThrow().getKey();
+            // Caches the child node belonging to the previously selected action.
+            lastSelectedNode = mctsNode.childNodes.get(lastSelectedAction);
         }
-        lastSelectedAction = mctsNode.visitCounts.entrySet().stream().max(
-            Comparator.comparingDouble(Map.Entry::getValue)
-        ).orElseThrow().getKey();
-        // Caches the child node belonging to the previously selected action.
-        lastSelectedNode = mctsNode.childNodes.get(lastSelectedAction);
+
 
         // Pass states should not be cached.
         while (lastSelectedNode != null && lastSelectedNode.gameState.lazyMustPass.value()) {
@@ -200,7 +228,7 @@ public final class MCTSWrapperAgent extends AgentBase implements PlayAgent, Seri
         ScoreTuple scBest = new ScoreTuple(sob,vBest);
         return new Types.ACTIONS_VT(
             lastSelectedAction,
-            false,
+            random && (ConfigWrapper.EXPLORATION_MODE==1 || ConfigWrapper.EXPLORATION_MODE==2),
             vTable,
             vBest,
             scBest
@@ -208,7 +236,7 @@ public final class MCTSWrapperAgent extends AgentBase implements PlayAgent, Seri
     }   // getNextAction2
 
     // just a check whether this is faster than getVTableFor --> see MCTSWrapperAgentTest::getVTableForTest.
-    // getVTable2For is 5x faster than getVTableFor, but it it has only negligible effect on overall performance since
+    // getVTable2For is 5x faster than getVTableFor, but it has only negligible effect on overall performance since
     // it is called seldom.
     public double[] getVTable2For(final MCTSNode mctsNode) {
         ApplicableAction[] arrAction = mctsNode.gameState.getAvailableActionsIncludingPassActions();
@@ -233,6 +261,15 @@ public final class MCTSWrapperAgent extends AgentBase implements PlayAgent, Seri
         );
     }
 
+    public double[] getVTableRandom(final MCTSNode mctsNode) {
+        return getDistributionOver(
+                Arrays
+                        .stream(mctsNode.gameState.getAvailableActionsIncludingPassActions())
+                        .mapToDouble(action -> rand.nextDouble())
+                        .toArray()
+        );
+    }
+
     private double[] getDistributionOver(final double[] values) {
         final var sum = Arrays.stream(values).sum();
 
@@ -240,6 +277,41 @@ public final class MCTSWrapperAgent extends AgentBase implements PlayAgent, Seri
             .map(v -> v / sum)
             .toArray();
     }
+
+    /**
+     * Sample and return an action proportional to the visit count distribution in {@code mctsNode}
+     * @param mctsNode the node
+     * @return the selected action id
+     */
+    private int selectActionProportional(final MCTSNode mctsNode) {
+        double r = rand.nextDouble();
+        double[] cTab = getCumulTable2For(mctsNode);
+        int i=0;
+        for (var action : mctsNode.visitCounts.keySet()) {
+            if ((i == 0 || cTab[i-1]<=r) && r<cTab[i])
+                return action;  // the normal return (r has to be between 0.0=cTab[0] and 1.0=cTab[n])
+            i++;
+        }
+        throw new RuntimeException("[selectActionProportional] We should not get here!");
+    }
+
+	/**
+	 * Return the cumulative distribution function for {@code mctsNode}'s visit counts
+	 *
+	 * @param mctsNode the node
+	 * @return array of length (numberAvailableActions + 1)
+	 */
+	public double[] getCumulTable2For(final MCTSNode mctsNode) {
+		final int[] visitCounts = mctsNode.visitCounts.values().stream().mapToInt(Integer::intValue).toArray();
+		final double sum = Arrays.stream(visitCounts).sum();
+
+		Arrays.parallelPrefix(
+				visitCounts,
+				Integer::sum
+		);
+
+		return Arrays.stream(visitCounts).mapToDouble(it -> it / sum).toArray();
+	}
 
 //    @Override
 //    public double getScore(final StateObservation sob) {
