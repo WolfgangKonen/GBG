@@ -1,6 +1,7 @@
 package controllers.MCTSWrapper;
 
 import controllers.MCTSWrapper.stateApproximation.PlayAgentApproximator;
+import games.StateObservation;
 
 public class ConfigWrapper {
 
@@ -23,6 +24,21 @@ public class ConfigWrapper {
      * </ul>
      */
     public static boolean USELASTMCTS = true;
+
+    /**
+     * A switch for {@link MCTSWrapperAgent}: If this wrapper agent is trained, use one of the following exploration modes
+     * during training. Exploration will be used if {@link MCTSWrapperAgent#getNextAction2(StateObservation, boolean, boolean) getNextAction2}
+     * is called with parameter {@code random = true}.
+     * <ul>
+     *  <li>  <strong>mode 0</strong>: no explicit exploration (there is only implicit exploration through the iteration-wise
+     *        changes in the tree and through the weight changes of the inner agent that modify a node's probability distribution)
+     *  <li>  <strong>mode 1</strong>: select actions proportional to their visit counts (also actions with lower visit
+     *        count will be selected with lower probability)
+     *  <li>  <strong>mode 2</strong>: epsilon-greedy selection (where parameter m_epsilon is currently hard-coded in
+     *        {@link MCTSWrapperAgent}
+     * </ul>
+     */
+    public static int EXPLORATION_MODE = 1;
 
     /**
      * EPS is a parameter for {@link MCTSNode#selectChild(double)}, it should be <code>&lt;&lt;</code> 1. It controls the behavior

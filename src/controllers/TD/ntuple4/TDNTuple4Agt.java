@@ -226,8 +226,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 //        	System.out.println("Game over: "+so.getRewardTuple(true));
 //        }
 
-		boolean randomSelect;		// true signals: the next action is a randomly selected one
-		randomSelect = false;
+		boolean randomSelect = false;		// true signals: the next action is a randomly selected one
 		if (random) {
 			randomSelect = (rand.nextDouble() < m_epsilon);
 		}

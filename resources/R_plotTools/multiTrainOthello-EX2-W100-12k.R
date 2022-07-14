@@ -38,13 +38,13 @@ filesW10000=c(
 )
 filenames=c(
             filesW10000[PART],
-            "multiCompeteOthello-W1000-12k.csv", # 10 agents
-            "multiCompeteOthello-EX1-W100.csv",      # 10 agents
+            "multiCompeteOthello-EX2-W1000-12k.csv", # 10 agents
+            "multiCompeteOthello-EX2-W100.csv",      # 10 agents
             "multiCompeteOthello-W0-12k.csv"     # 10 agents
             # generated with >GBGBatch Othello 6 ...
 )
 agroup = c("W10000","W1000","W100","W0")   
-pdffile=paste0("MCTSWrap-W100-12k-",numAgents[PART],".pdf")
+pdffile=paste0("MCTSWrap-EX2-W100-12k-",numAgents[PART],".pdf")
         
   
 dfAll = data.frame()
@@ -79,7 +79,7 @@ tgc <- tgc[tgc$EPS==1e-8,]
 
 q <- ggplot(tgc,aes(x=dEdax,y=winrate,colour=agentGroup,shape=agentGroup)) #,linetype=agentGroup))
 #q <- q+geom_errorbar(aes(ymin=winrate-se, ymax=winrate+se), width=errWidth) #, position=pd)
-q <- q+labs(title="same training episodes (12,000)")
+q <- q+labs(title="same training episodes (12,000), EX2")
 #q <- q+geom_line(position=pd,size=1.0) + geom_point(position=pd,size=2.0) 
 q <- q+geom_line(size=1.0) + geom_point(size=3.0)
 q <- q+scale_x_discrete(limits=Xlimits) 
