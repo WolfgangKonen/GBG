@@ -237,7 +237,7 @@ public class C4Base extends AgentBase implements Serializable {
 	 */
 	public void setBoard(int[][] field) {
 		// Konvertierung des Arrays in das Bitboard-Format
-		// und Eintragen der einzelnen Spaltenhöhen in colHeight
+		// und Eintragen der einzelnen Spaltenhï¿½hen in colHeight
 		if (isLegalBoard(field)) {
 			resetBoard();
 			for (int i = 0; i < COLCOUNT; i++) {
@@ -444,7 +444,7 @@ public class C4Base extends AgentBase implements Serializable {
 	 * @return
 	 */
 	protected long getMask(int col, int row) {
-		// Ermittelt Maske Für eine Zelle des Spielfeldes
+		// Ermittelt Maske FÃ¼r eine Zelle des Spielfeldes
 		return 1L << (ROWCOUNT * COLCOUNT - 1 - (col * ROWCOUNT + row));
 	}
 
@@ -553,9 +553,9 @@ public class C4Base extends AgentBase implements Serializable {
 	 * @param col
 	 */
 	public void removePiece(int player, int col) {
-		// Es muss ggfs. geprüft werden, ob überhaupt ein Stein in der Spalte
+		// Es muss ggfs. geprï¿½ft werden, ob ï¿½berhaupt ein Stein in der Spalte
 		// ist
-		// Es wird eine invertierte Maske zum löschen benötigt
+		// Es wird eine invertierte Maske zum lï¿½schen benï¿½tigt
 		long mask = ~fieldMask[col][--colHeight[col]];
 
 		if (player == PLAYER1) {
@@ -569,7 +569,7 @@ public class C4Base extends AgentBase implements Serializable {
 	 * Compute the height of all columns, and put results in array {@link #colHeight} (of length COLCOUNT).
 	 */
 	protected void computeColHeight() {
-		// Berechnet die Füllhöhe der einzelnen Spalten
+		// Berechnet die Fï¿½llhï¿½he der einzelnen Spalten
 		long mask;
 		int i, j;
 		for (i = 0; i < COLCOUNT; i++) {
@@ -671,7 +671,7 @@ public class C4Base extends AgentBase implements Serializable {
 		// Convert to 32-Bit, since a lot of the literals are only 32-Bit long
 		int y = (int) x;
 		// X und Y Position in eine feste Position(0-41) umgerechnet, da die
-		// switch-anweisung schneller ausgeführt wird
+		// switch-anweisung schneller ausgefï¿½hrt wird
 		switch (xx * 6 + yy) {
 		case 0:
 			if (!((x & 0x408100000L) != 0 && (x & 0x820800000L) != 0))
@@ -1225,8 +1225,8 @@ public class C4Base extends AgentBase implements Serializable {
 	 * @return mirrored BitBoard
 	 */
 	protected long getMirroredField(int player) {
-		// Feld spiegeln. Wird benötigt, da Stellungen nur jeweils in einer
-		// Variante in der Eröffnungsdatenbank vorhanden sind
+		// Feld spiegeln. Wird benï¿½tigt, da Stellungen nur jeweils in einer
+		// Variante in der Erï¿½ffnungsdatenbank vorhanden sind
 		long temp = (player == PLAYER1 ? fieldP1 : fieldP2);
 		long mirroredField = 0L;
 

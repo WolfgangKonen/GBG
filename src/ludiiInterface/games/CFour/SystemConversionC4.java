@@ -22,11 +22,11 @@ public class SystemConversionC4 extends SystemConversion {
 
     @Override
     public boolean isValidGBGIndex(int index) {
-        return (index>=0 && index <=7);
+        return (index>=0 && index <=6);
     }
 
     @Override
     public boolean isValidLudiiIndex(int index) {
-        return (index>=0 && index <=7);
+        return (index>=0 && index <=6);
     }
 }

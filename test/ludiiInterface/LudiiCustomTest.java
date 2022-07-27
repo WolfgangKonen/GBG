@@ -238,6 +238,16 @@ public class LudiiCustomTest extends GBGBatch {
         }
     }
 
+    /**
+     * Play {@link #GAMESNUMBER} Connect Four episodes {@link #PLAYER_1}( {@code = }{@link LudiiAI}) vs.
+     * {@link #PLAYER_2}( {@code = }{@link GBGAsLudiiAI}), where the GBG agent is loaded from {@code agtFile}
+     * as specified in source code.
+     * <p>
+     * If {@link #LOGS}{@code = true}, then append
+     * <pre>
+     *    timestamp | Winner : Moves: ...  </pre>
+     * as one-liner to log file {@code logs/<gameName>[/<subdir]/logs.ludiilog}.
+     */
     @Test
     public void customC4Game(){
         PlayAgent pa;
@@ -256,13 +266,14 @@ public class LudiiCustomTest extends GBGBatch {
         final other.context.Context context = new Context(ludiiGame, new Trial(ludiiGame));
 
         final List<AI> ais = new ArrayList<>();
-        ais.add(null);
+        ais.add(null); //Need to add a null entry, because Ludii starts player numbering on 1
         ais.add(PLAYER_1);
         ais.add(PLAYER_2);
 
         for(int gameCounter = 0; gameCounter < GAMESNUMBER; gameCounter++){
             ludiiGame.start(context);
 
+            // Initialize the AIs
             ais.get(1).initAI(ludiiGame,1);
             ((GBGAsLudiiAI)ais.get(2)).initAI(ludiiGame,2,pa);
 

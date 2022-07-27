@@ -198,17 +198,18 @@ public class GBGAsLudiiAI extends AI {
 
     private Optional<Move> selectActionC4(Game game, Context context, double maxSeconds, int maxIterations, int maxDepth){
         Optional<Move> returnMove = Optional.empty();
-        SystemConversionC4 index = new SystemConversionC4();
+        SystemConversionC4 conversion = new SystemConversionC4();
 
         FastArrayList<Move> moves = game.moves(context).moves();
         Types.ACTIONS gbgAction = gbgAgent.getNextAction2(new StateObserverC4TranslationLayer(context, playerID).partialState(),false, true);
 
         for(Move move : moves){
-            if(move.to() == index.getLudiiIndexFromGBG(gbgAction.toInt())) returnMove = Optional.of(move);
+            if(move.to() == conversion.getLudiiIndexFromGBG(gbgAction.toInt())) returnMove = Optional.of(move);
         }
 
         return returnMove;
     }
+
 
 
 }
