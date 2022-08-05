@@ -17,6 +17,9 @@
 # 
 # TCL-wrap results are obtained with EPS=+1e-8.
 # 
+# EX1 is for EXPLORATION_MODE==1 (sample actions proportional to visit counts, only for W100 
+# and W1000)
+# 
 library(ggplot2)
 library(grid)
 source("~/GitHub/GBG/resources/R_plotTools/summarySE.R")
@@ -29,10 +32,6 @@ path <- "~/GitHub/GBG/agents/Othello/csv/";
 Ylimits=c(0.0,1.0); 
 Xlimits=factor(1:9); 
 
-EX0_STRING = "-EX0"  # either "-EX0" or ""
-# if EX0_STRING=="", reproduce ToG-paper results
-# if EX0_STRING=="EX0", take the repeated results, which show statistical fluctuations for the W100 case
-
 PART=3    # 1,2 or 3
 numAgents=c("04agents","06agents","08agents")
 filesW10000=c(
@@ -42,14 +41,13 @@ filesW10000=c(
 )
 filenames=c(
             filesW10000[PART],
-            "multiCompeteOthello-W1000-12k.csv", # 10 agents
-            #"multiCompeteOthello-EX0-W100.csv", # 10 agents
-            paste0("multiCompeteOthello",EX0_STRING,"-W100.csv"),      # 10 agents
+            "multiCompeteOthello-EX1-W1000-12k.csv", # 10 agents
+            "multiCompeteOthello-EX1-W100.csv",      # 10 agents
             "multiCompeteOthello-W0-12k.csv"     # 10 agents
             # generated with >GBGBatch Othello 6 ...
 )
 agroup = c("W10000","W1000","W100","W0")   
-pdffile=paste0("MCTSWrap",EX0_STRING,"-W100-12k-",numAgents[PART],".pdf")
+pdffile=paste0("MCTSWrap-EX1-W100-12k-",numAgents[PART],".pdf")
         
   
 dfAll = data.frame()
@@ -84,14 +82,14 @@ tgc <- tgc[tgc$EPS==1e-8,]
 
 q <- ggplot(tgc,aes(x=dEdax,y=winrate,colour=agentGroup,shape=agentGroup)) #,linetype=agentGroup))
 #q <- q+geom_errorbar(aes(ymin=winrate-se, ymax=winrate+se), width=errWidth) #, position=pd)
-q <- q+labs(title=paste("same training episodes (12,000)",EX0_STRING))
+q <- q+labs(title="same training episodes (12,000), EX1")
 #q <- q+geom_line(position=pd,size=1.0) + geom_point(position=pd,size=2.0) 
 q <- q+geom_line(size=1.0) + geom_point(size=3.0)
 q <- q+scale_x_discrete(limits=Xlimits) 
 q <- q+scale_y_continuous(limits=Ylimits) + xlab(xlabel) + ylab(ylabel)
-q <- q+guides(colour = guide_legend(reverse = F))
-q <- q+guides(shape = guide_legend(reverse = F))
-q <- q+guides(linetype = guide_legend(reverse = F))
+q <- q+guides(colour = guide_legend(reverse = TRUE))
+q <- q+guides(shape = guide_legend(reverse = TRUE))
+q <- q+guides(linetype = guide_legend(reverse = TRUE))
 q <- q+theme(axis.title = element_text(size = rel(1.5)))    # bigger axis labels 
 q <- q+theme(axis.text = element_text(size = rel(1.5)))     # bigger tick mark text  
 q <- q+theme(legend.text = element_text(size = rel(1.2)))   # bigger legend text  

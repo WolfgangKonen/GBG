@@ -117,7 +117,7 @@ public final class MCTSWrapperAgent extends AgentBase implements PlayAgent, Seri
                     break;
                 }
                 default:    // i. e. EXPLORATION_MODE=0,1
-                    break;      // do nothing (EXPLORATION_MODE=1 is handled below, see lastSelectedAction)
+                    break;      // do nothing (EXPLORATION_MODE 0 and 1 are handled below, see lastSelectedAction)
             }
         } // if (random)
 
@@ -221,12 +221,15 @@ public final class MCTSWrapperAgent extends AgentBase implements PlayAgent, Seri
 
         // Selects the int value of one of the available actions:
         // If called with random==true (during training), select lastSelectedAction either stochastically (explore if
-        // EXPLORATION_MODE==1) or do it non-stochastically (exploit if EXPLORATION_MODE!=1)
+        // EXPLORATION_MODE==1) or do it non-stochastically (exploit if EXPLORATION_MODE!=1, i.e. =0, since 2 was
+        // handled above)
         boolean randomSelect = random && ConfigWrapper.EXPLORATION_MODE==1;
         if (randomSelect) {
+            // case EXPLORATION_MODE==1
             lastSelectedAction = selectActionProportional(mctsNode);
             lastSelectedNode = null; // do not reuse the tree if random action.
         } else {
+            // case EXPLORATION_MODE==0
             lastSelectedAction = mctsNode.visitCounts.entrySet().stream().max(
                     Comparator.comparingDouble(Map.Entry::getValue)
             ).orElseThrow().getKey();
@@ -299,7 +302,7 @@ public final class MCTSWrapperAgent extends AgentBase implements PlayAgent, Seri
     }
 
     /**
-     * Sample and return an action proportional to the visit count distribution in {@code mctsNode}
+     * Sample an action proportional to the visit count distribution in {@code mctsNode}.
      * @param mctsNode the node
      * @return the selected action id
      */

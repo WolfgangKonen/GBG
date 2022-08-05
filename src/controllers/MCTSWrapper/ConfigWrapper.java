@@ -38,7 +38,7 @@ public class ConfigWrapper {
      *        {@link MCTSWrapperAgent}
      * </ul>
      */
-    public static int EXPLORATION_MODE = 1;
+    public static int EXPLORATION_MODE = 0;
 
     /**
      * EPS is a parameter for {@link MCTSNode#selectChild(double)}, it should be <code>&lt;&lt;</code> 1. It controls the behavior
