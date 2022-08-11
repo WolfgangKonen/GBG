@@ -9,6 +9,7 @@ import games.GameBoard;
 import games.StateObservation;
 import params.ParOther;
 import params.ParRB;
+import params.ParWrapper;
 import tools.ScoreTuple;
 import tools.Types;
 
@@ -35,6 +36,7 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	private long durationTrainingMs = 0L;		// total time in ms used for training
 	private long durationEvaluationMs = 0L;		// total time in ms used for evaluation (during training)
 	protected ParOther m_oPar;
+	protected ParWrapper m_wrPar;
 	protected ParRB m_rbPar;					// needed only by trainable agents, but we put it here to have the code
 												// only once
 	public static String EGV_EXCEPTION_TEXT = "Agents derived from AgentBase have to implement this method: estimateGameValueTuple";
@@ -62,13 +64,17 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	}
 
 	public AgentBase(String name, ParOther oPar) {
-		this(name, oPar, new ParRB());
+		this(name, oPar, new ParRB(), new ParWrapper());
 	}
 
 	public AgentBase(String name, ParOther oPar, ParRB rbPar) {
+		this(name, oPar, rbPar, new ParWrapper());
+	}
+	public AgentBase(String name, ParOther oPar, ParRB rbPar, ParWrapper wrPar) {
 		m_name = name;
 		m_oPar = new ParOther(oPar);
 		m_rbPar = new ParRB(rbPar);
+		m_wrPar = new ParWrapper(wrPar);
 	}
 
 	/**
@@ -365,6 +371,11 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 		m_rbPar.setFrom(prb);
 	}
 
+	@Override
+	public void setParWrapper(ParWrapper pwr) {
+		m_wrPar.setFrom(pwr);
+	}
+
 	/**
 	 * Set defaults for m_oPar (needed in {@link Arena#loadAgent} when
 	 * loading older agents, where m_oPar=null in the saved version).
@@ -388,6 +399,10 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	@Override
 	public ParRB getParReplay() {
 		return m_rbPar;
+	}
+	@Override
+	public ParWrapper getParWrapper() {
+		return m_wrPar;
 	}
 
 	/**

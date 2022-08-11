@@ -30,6 +30,10 @@ path <- "~/GitHub/GBG/agents/Othello/csv/";
 Ylimits=c(0.0,1.0); 
 Xlimits=factor(1:9); 
 
+EX0_STRING = "-EX0"  # either "-EX0" or ""
+# if EX0_STRING=="", reproduce ToG-paper results
+# if EX0_STRING=="EX0", take the repeated results, which show statistical fluctuations for the W100 case
+
 PART=3    # 1,2 or 3
 numAgents=c("10agents","14agents","18agents")
 filesW100=c(
@@ -37,14 +41,23 @@ filesW100=c(
   "multiCompeteOthello-W100-250k-part0-2.csv", # 14 agents
   "multiCompeteOthello-W100-250k-part0-3.csv"  # 18 agents
 )
+if (EX0_STRING=="-EX0") {
+  numAgents=c("10agents","10agents","10agents")
+  filesW100=c(
+    "multiCompeteOthello-EX0-W100-250k.csv", # 
+    "multiCompeteOthello-EX0-W100-250k.csv", # currently, 10 agents is the only option
+    "multiCompeteOthello-EX0-W100-250k.csv"  # 
+  )
+}
 filenames=c(
             filesW100[PART],
-            "multiTrainOthello-20Agents.csv"
+            "multiTrainOthello-20Agents.csv"      # no iter during training (W0) for comparison
             # generated with >GBGBatch Othello 6 ...
 )
 agroup = c("W100","W0")   
-pdffile=paste0("MCTSWrap-W100-250k-",numAgents[PART],".pdf")
-        
+#pdffile=paste0("MCTSWrap-W100-250k-",numAgents[PART],".pdf")
+pdffile=paste0("MCTSWrap",EX0_STRING,"-W100-250k-",numAgents[PART],".pdf")
+
   
 dfAll = data.frame()
 for (k in 1:length(filenames)) {
@@ -79,9 +92,9 @@ q <- q+labs(title=paste("250,000 training episodes ")) #, numAgents[PART]))
 q <- q+geom_line(size=1.0) + geom_point(size=3.0)
 q <- q+scale_x_discrete(limits=Xlimits) 
 q <- q+scale_y_continuous(limits=Ylimits) + xlab(xlabel) + ylab(ylabel)
-q <- q+guides(colour = guide_legend(reverse = T))
-q <- q+guides(shape = guide_legend(reverse = T))
-q <- q+guides(linetype = guide_legend(reverse = T))
+q <- q+guides(colour = guide_legend(reverse = F))
+q <- q+guides(shape = guide_legend(reverse = F))
+q <- q+guides(linetype = guide_legend(reverse = F))
 q <- q+theme(axis.title = element_text(size = rel(1.5)))    # bigger axis labels 
 q <- q+theme(axis.text = element_text(size = rel(1.5)))     # bigger tick mark text  
 q <- q+theme(legend.text = element_text(size = rel(1.2)))   # bigger legend text  

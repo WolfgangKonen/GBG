@@ -14,7 +14,8 @@ public class XArenaTabs extends JFrame
 	JTabbedPane[] tp;
 	int bufIndex = 6; 		// index of tab "Buffer"
 	int opIndex = 7;		// index of tab "Other pars"
-	
+	int wrIndex = 8;		// index of tab "Wrapper pars"
+
 	public XArenaTabs(Arena arena) {
 		super(arena.getGameName()+" Parameters");
 		//addWindowListener(new WindowClosingAdapter(true));
@@ -36,13 +37,17 @@ public class XArenaTabs extends JFrame
 				tp[i].setToolTipTextAt(6, "Edax (Othello-specific)");
 				tp[i].addTab("Buffer",arena.m_xab.rbPar[i].getPanel());					// 7
 				bufIndex=7;
-				tp[i].addTab("Other pars", arena.m_xab.oPar[i].getPanel());				// 8
-				opIndex=8;
+				tp[i].addTab("Wrapper pars", arena.m_xab.wrPar[i].getPanel());				// 8
+				wrIndex=8;
+				tp[i].addTab("Other pars", arena.m_xab.oPar[i].getPanel());				// 9
+				opIndex=9;
 			} else {
 				tp[i].addTab("Buffer",arena.m_xab.rbPar[i].getPanel());					// 6
 				bufIndex=6;
-				tp[i].addTab("Other pars", arena.m_xab.oPar[i].getPanel());				// 7
-				opIndex=7;
+				tp[i].addTab("Wrapper pars", arena.m_xab.wrPar[i].getPanel());				// 7
+				wrIndex=7;
+				tp[i].addTab("Other pars", arena.m_xab.oPar[i].getPanel());				// 8
+				opIndex=8;
 			}
 			tp[i].setSize(getMinimumSize());
 			tp[i].setEnabledAt(i, true); 			// do we need this?
@@ -54,6 +59,7 @@ public class XArenaTabs extends JFrame
 			tp[i].setToolTipTextAt(5, "MCTS-Expectimax");
 			tp[i].setToolTipTextAt(bufIndex, "Replay buffer");
 			tp[i].setToolTipTextAt(opIndex, "Evaluator, Wrapper & General Training");
+			tp[i].setToolTipTextAt(wrIndex, "Wrapper");
 
 
 			String str = (numPlayer==2) ? Types.GUI_2PLAYER_NAME[i] : Types.GUI_PLAYER_NAME[i];

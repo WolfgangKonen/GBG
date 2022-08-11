@@ -14,10 +14,7 @@ import controllers.RandomAgent;
 import games.Arena;
 import games.StateObsWithBoardVector;
 import games.StateObservation;
-import params.ParNT;
-import params.ParOther;
-import params.ParRB;
-import params.ParTD;
+import params.*;
 
 /**
  *  Abstract superclass for {@link Sarsa4Agt} and {@link TDNTuple4Agt}.
@@ -106,8 +103,8 @@ abstract public class NTuple4Base extends AgentBase implements NTuple4Agt, Seria
 		super(name);
 	}
 
-	public NTuple4Base(String name, ParOther oPar, ParRB rbPar) {
-		super(name,oPar,rbPar);
+	public NTuple4Base(String name, ParOther oPar, ParRB rbPar, ParWrapper wrPar) {
+		super(name,oPar,rbPar,wrPar);
 	}
 
 	public boolean instantiateAfterLoading() {

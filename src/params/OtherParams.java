@@ -2,21 +2,18 @@ package params;
 
 import java.awt.BorderLayout;
 import java.awt.Button;
-import java.awt.Canvas;
 import java.awt.Checkbox;
 import java.awt.Frame;
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.Serial;
 
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import controllers.PlayAgent;
 import controllers.PlayAgent.AgentState;
 import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.TDNTuple3Agt;
@@ -39,7 +36,7 @@ import games.RubiksCube.GameBoardCube;
  * <li><b>EpiLength Eval</b>: During evaluation: Maximum number of moves in an episode. 
  * If reached, this episode terminates prematurely. -1: never terminate.
  * <li><b>stopTest</b>: [ 0] whether to perform the stop test during training.
- * If {@literal> 0}, then m_evaluator2 is checked during training whether its
+ * If {@literal > 0}, then m_evaluator2 is checked during training whether its
  * goal is reached
  * <li><b>Wrapper nPly</b>: [0] if &gt; 0, wrap the agent in an (Expecti)Max-N wrapper with
  * n plies of look-ahead. CAUTION: n &gt; 5 can dramatically slow down computation. 
@@ -49,20 +46,19 @@ import games.RubiksCube.GameBoardCube;
  * <li><b>Learn from RM</b>: [false] whether to learn from random moves or not
  * </ul>
  * 
- * @see TDAgent
- * @see TDNTuple3Agt
  * @see games.XArenaButtons
  */
 // Deprecated meaning of stopEval:
 // <li><b>stopEval</b>: [100] During training: How many successful evaluator
 // calls are needed to stop training prematurely?
 public class OtherParams extends Frame {
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	JLabel evalQ_L;
-	public JComboBox choiceEvalQ;
+	public JComboBox<String> choiceEvalQ;
 	JLabel evalT_L;
-	public JComboBox choiceEvalT;
+	public JComboBox<String> choiceEvalT;
 
 	JLabel numEval_L;
 	JLabel epiLeng_L;
@@ -98,7 +94,7 @@ public class OtherParams extends Frame {
 	Button ok;
 	JPanel oPanel;
 	OtherParams m_par;
-	Arena m_arena;
+	Arena m_arena;			// needed to infer the game name
 
 	public OtherParams(Arena m_arena) {
 		super("Other Parameter");
@@ -106,9 +102,9 @@ public class OtherParams extends Frame {
 		this.m_arena = m_arena;
 
 		evalQ_L = new JLabel("Quick Eval Mode");
-		this.choiceEvalQ = new JComboBox();
+		this.choiceEvalQ = new JComboBox<>();
 		evalT_L = new JLabel("Train Eval Mode");
-		this.choiceEvalT = new JComboBox();
+		this.choiceEvalT = new JComboBox<>();
 
 		numEval_T = new JTextField("500"); 	//
 		epiLeng_T = new JTextField("-1"); 	//
@@ -142,10 +138,9 @@ public class OtherParams extends Frame {
 		rewardIsGameScore = new Checkbox("", true);
 		ok = new Button("OK");
 		m_par = this;
-		oPanel = new JPanel(); // put the inner buttons into panel oPanel. This
-								// panel
+		oPanel = new JPanel();  // put the inner buttons into panel oPanel. This panel
 								// can be handed over to a tab of a JTabbedPane
-								// (see class TicTacToeTabs)
+								// (see class XArenaTabs)
 
 		evalQ_L.setToolTipText("'Quick Evaluation' evaluator has this mode");
 		evalT_L.setToolTipText(
@@ -160,9 +155,9 @@ public class OtherParams extends Frame {
 		learnRM_L.setToolTipText("Learn from random moves during training");
 		rgs_L.setToolTipText("Use game score as reward (def.) or use some other, game specific reward");
 		wNply_L.setToolTipText(
-				"Wrapper n-ply look ahead (for play, compete, eval). CAUTION: Numbers >5 can take VERY long!");
+				"<html>Wrapper n-ply look ahead <br>(for play, compete, eval). <br>CAUTION: Numbers >5 can take long!</html>");
 		wMCTS_L.setToolTipText(
-				"Wrapper MCTS look ahead (for play, compete, eval)");
+				"<html>Wrapper MCTS iterations <br>(for play, compete, eval tasks)</html>");
 		wMCTSpUCT_L.setToolTipText("PUCT value for MCTS Wrapper");
 		wMCTSdepth_L.setToolTipText("max depth value for MCTS Wrapper. -1: no max depth");
 		pMin_L.setToolTipText(
@@ -175,45 +170,30 @@ public class OtherParams extends Frame {
 		// this.setQuickEvalMode(0);
 		// this.setTrainEvalMode(0);
 
-		ok.addActionListener(new ActionListener()
-			{
-				public void actionPerformed(ActionEvent e) {
-					m_par.setVisible(false);
-				}
-			});
 
-		wMCTS_T.addActionListener(new ActionListener()
-				 {
-					 public void actionPerformed(ActionEvent e)
-					 {
-						 enableWrapMCTSPart();
-					 }
-				 }
-		);
+		// the following lambda's, where e is an ActionEvent, are a simpler replacement for anonymous action listeners:
+
+		ok.addActionListener( e -> m_par.setVisible(false) );
+		wMCTS_T.addActionListener( e -> enableWrapMCTSPart() );
 
 		// only for RubiksCube:
-		pMin_T.addActionListener(new ActionListener()
-				 {
-					 public void actionPerformed(ActionEvent e)
-					 {
-						 //if pMin is changed by user, set the corresponding element in GameBoardCubeGUI
-						 if (m_arena.getGameBoard() instanceof GameBoardCube) {
-							 ((GameBoardCube)m_arena.getGameBoard()).setPMin(getpMinRubiks());
-						 }
-					 }
-				 }
-		);
-		pMax_T.addActionListener(new ActionListener()
+		pMin_T.addActionListener( e ->
 				{
-					public void actionPerformed(ActionEvent e)
-					{	
-						//if pMax is changed by user, set the corresponding element in GameBoardCubeGUI
-						if (m_arena.getGameBoard() instanceof GameBoardCube) {
-							((GameBoardCube)m_arena.getGameBoard()).setPMax(getpMaxRubiks());
-						}
-					}
+					//if pMin is changed by user, set the corresponding element in GameBoardCubeGUI
+					if (m_arena.getGameBoard() instanceof GameBoardCube) {
+						((GameBoardCube)m_arena.getGameBoard()).setPMin(getpMinRubiks());
 				}
+		}
 		);
+		pMax_T.addActionListener(e ->
+				{
+					//if pMax is changed by user, set the corresponding element in GameBoardCubeGUI
+					if (m_arena.getGameBoard() instanceof GameBoardCube) {
+						((GameBoardCube)m_arena.getGameBoard()).setPMax(getpMaxRubiks());
+				}
+		}
+		);
+
 
 		replayBuf.addItemListener(new ItemListener()
 				{
@@ -279,8 +259,6 @@ public class OtherParams extends Frame {
 		}
 		oPanel.add(aState_L);
 		oPanel.add(agentState);
-//		oPanel.add(new Canvas());
-//		oPanel.add(new Canvas());
 
 		add(oPanel, BorderLayout.CENTER);
 		add(ok, BorderLayout.SOUTH);
@@ -333,7 +311,7 @@ public class OtherParams extends Frame {
 		if (s == null)
 			return 0; 	// return a dummy, if choiceEvalQ is empty (happens in
 					  	// case of 'new OtherParams()')
-		return Integer.valueOf(s).intValue();
+		return Integer.parseInt(s);
 	}
 
 	public int getTrainEvalMode() {
@@ -341,25 +319,25 @@ public class OtherParams extends Frame {
 		if (s == null)
 			return 0; 	// return a dummy, if choiceEvalT is empty (happens in
 						// case of 'new OtherParams()')
-		return Integer.valueOf(s).intValue();
+		return Integer.parseInt(s);
 	}
 
 	public int getStopTest() {
-		return Integer.valueOf(stopTest_T.getText()).intValue();
+		return Integer.parseInt(stopTest_T.getText());
 	}
 
 	public int getStopEval() {
-		int elen = Integer.valueOf(stopEval_T.getText()).intValue();
+		int elen = Integer.parseInt(stopEval_T.getText());
 		if (elen == -1)	elen = Integer.MAX_VALUE;
 		return elen;
 	}
 
 	public int getNumEval() {
-		return Integer.valueOf(numEval_T.getText()).intValue();
+		return Integer.parseInt(numEval_T.getText());
 	}
 
 	public int getWrapperNPly() {
-		return Integer.valueOf(wNply_T.getText()).intValue();
+		return Integer.parseInt(wNply_T.getText());
 	}
 
 	public int getWrapperMCTSIterations() {
@@ -371,15 +349,15 @@ public class OtherParams extends Frame {
 	}
 
 	public int getWrapperMCTS_depth() {
-		return Integer.valueOf(wMCTSdepth_T.getText());
+		return Integer.parseInt(wMCTSdepth_T.getText());
 	}
 
 	public int getpMinRubiks() {
-		return Integer.valueOf(pMin_T.getText()).intValue();
+		return Integer.parseInt(pMin_T.getText());
 	}
 
 	public int getpMaxRubiks() {
-		return Integer.valueOf(pMax_T.getText()).intValue();
+		return Integer.parseInt(pMax_T.getText());
 	}
 
 	public boolean getReplayBuffer() {
@@ -392,7 +370,7 @@ public class OtherParams extends Frame {
 	}
 
 	public int getEpisodeLength() {
-		int elen = Integer.valueOf(epiLeng_T.getText()).intValue();
+		int elen = Integer.parseInt(epiLeng_T.getText());
 		if (elen == -1)	elen = Integer.MAX_VALUE;
 		return elen;
 	}
@@ -514,10 +492,10 @@ public class OtherParams extends Frame {
 	}
 
 	public void setAgentState(AgentState as) {
-		switch(as) {
-			case RAW: agentState.setText("RAW"); break;
-			case INIT: agentState.setText("INIT"); break;
-			case TRAINED: agentState.setText("TRAINED"); break;
+		switch (as) {
+			case RAW -> agentState.setText("RAW");
+			case INIT -> agentState.setText("INIT");
+			case TRAINED -> agentState.setText("TRAINED");
 		}
 	}
 

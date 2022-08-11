@@ -43,7 +43,7 @@ public class XArenaButtonsGui extends JPanel {
 	JLabel AgentX_L;
 	JLabel SleepDurationL;
 	JPanel[][] qcol;			// the color stripes
-	JComboBox[] choiceAgent;
+	JComboBox<String>[] choiceAgent;
 	JLabel showValOnGB_L;
 	JCheckBox showValOnGB;		// show game values on GameBoard
 	private LogManagerGUI logManagerGUI = null;
@@ -168,7 +168,7 @@ public class XArenaButtonsGui extends JPanel {
 		}
 		
 		for (int n=numPlayers-1; n>=0; n--) {
-			choiceAgent[n] = new JComboBox(gui_agent_list);
+			choiceAgent[n] = new JComboBox<>(gui_agent_list);
 			choiceAgent[n].setSelectedItem(Types.GUI_AGENT_INITIAL[n]);
 			
 			// only applicable agents:
@@ -481,7 +481,7 @@ public class XArenaButtonsGui extends JPanel {
 			p1.add(GameNumL);
 			p1.add(GameNumT);			
 //			p1.add(new Canvas());		// WK: 	comment this out to let player-1 choicebox 
-//			p1.add(new Canvas());		//		appear in full length (always)
+//			p1.add(new Canvas());		//		appear (always) in full length
 		} else {
 			for (int i=0; i<4; i++) p1.add(new Canvas());
 		}
@@ -599,7 +599,7 @@ public class XArenaButtonsGui extends JPanel {
 		return showValOnGB.isSelected();
 	}
 	
-	public JComboBox getChoiceAgent(int i) {
+	public JComboBox<String> getChoiceAgent(int i) {
 		return choiceAgent[i];
 	}
 	

@@ -8,6 +8,7 @@ import games.Arena;
 import games.Evaluator;
 import games.GameBoard;
 import params.ParRB;
+import params.ParWrapper;
 import tools.ScoreTuple;
 import tools.Types;
 
@@ -246,6 +247,7 @@ public interface PlayAgent {
 	
 	ParOther getParOther();
 	ParRB getParReplay();
+	ParWrapper getParWrapper();
 
 	/**
 	 * @return During training: Call {@link Evaluator} after this number of training games
@@ -256,6 +258,7 @@ public interface PlayAgent {
 	void setWrapperParams(ParOther otherPar);
 	void setParOther(ParOther op);
 	void setParReplay(ParRB prb);
+	void setParWrapper(ParWrapper pwr);
 
 	AgentState getAgentState();
 	void setAgentState(AgentState aState);

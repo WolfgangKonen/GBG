@@ -37,7 +37,9 @@ public final class PlayAgentApproximator implements Approximator, Serializable {
         assert (vTable.length == stateObservation.getNumAvailableActions()) : "Ooops, wrong size for vTable!";
         final var minV = stateObservation.getMinGameScore();
         final var maxV = stateObservation.getMaxGameScore();
-        return optSoftmax(vTable,minV,maxV);
+        final var softmaxArr = optSoftmax(vTable,minV,maxV);
+        //final var softmaxArr2 = softmax2(vTable);
+        return softmaxArr;
     }
 
     private static double[] optSoftmax(final double[] values, final double minV, final double maxV) {
@@ -58,6 +60,19 @@ public final class PlayAgentApproximator implements Approximator, Serializable {
         return Arrays.stream(exponentialValues).map(
             v -> v / sum
         ).toArray();
+    }
+
+    // just as debug check
+    private static double[] softmax2(final double[] values) {
+        double[] expvalues = values.clone();
+        double sum=0.0;
+        for (int i=0; i<values.length; i++) {
+            expvalues[i] = Math.exp(values[i]);
+            sum += expvalues[i];
+        }
+        for (int i=0; i<expvalues.length; i++) expvalues[i] /= sum;
+
+        return expvalues;
     }
 
     /*

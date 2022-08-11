@@ -1,5 +1,6 @@
 package starters;
 
+import controllers.MCTSWrapper.ConfigWrapper;
 import controllers.PlayAgent;
 import games.*;
 import tools.Types;
@@ -143,6 +144,7 @@ public class MCompeteSweep {
     {
         String userTitle1 = "time";
         DecimalFormat frm = new DecimalFormat("00");
+        DecimalFormat frm1 = new DecimalFormat("0");
         double userValue1=0.0, userValue2=0.0;
         long startTime;
         double elapsedTime=0,deltaTime;
@@ -185,8 +187,9 @@ public class MCompeteSweep {
                 String agtPath;
                 File file;
                 do {
-                    k++;
-                    agtPath = strDir + "/multiTrain/" + agtBase + "_" + frm.format(i+k) + ".agt.zip";
+                    k++;    // start with k=0
+                    agtPath = strDir + "/multiTrain/" + agtBase + "_EX" + frm.format(ConfigWrapper.EXPLORATION_MODE)
+                                     + "_" + frm.format(i+k) + ".agt.zip";
                     file = new File(agtPath);
                 } while (file.exists());
                 arenaTrain.saveAgent(pa,agtPath);

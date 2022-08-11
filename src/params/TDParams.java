@@ -1,9 +1,9 @@
 package params;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.io.Serial;
 import java.io.Serializable;
+import java.util.Objects;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -55,8 +55,9 @@ public class TDParams extends Frame implements Serializable
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
 	 * compatible with an older one (older .agt.zip containing this object will become 
-	 * unreadable or you have to provide a special version transformation)
+	 * unreadable, or you have to provide a special version transformation)
 	 */
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	JLabel alphaL;
@@ -69,15 +70,15 @@ public class TDParams extends Frame implements Serializable
 	JLabel epochL;
 //	JLabel tNplyL;
 	JPanel tdPanel;
-	private JTextField alphaT;
-	private JTextField alfinT;
-	private JTextField epsilT;
-	private JTextField epfinT;
-	private JTextField lambdaT;
-	private JTextField horcutT;
-	private JTextField gammaT;
-	private JTextField epochT;
-//	private JTextField tNply_T;
+	private final JTextField alphaT;
+	private final JTextField alfinT;
+	private final JTextField epsilT;
+	private final JTextField epfinT;
+	private final JTextField lambdaT;
+	private final JTextField horcutT;
+	private final JTextField gammaT;
+	private final JTextField epochT;
+//	private final JTextField tNply_T;
 
 	JLabel SigTypeL;
 	JLabel NormalizeL;
@@ -88,13 +89,12 @@ public class TDParams extends Frame implements Serializable
 	public JCheckBox withSigType;
 	public JCheckBox normalize;
 	public JCheckBox cbStopOnRoundOver;
-	public JComboBox choiceLrnType;
-	public JComboBox choiceNetType;
-	public JComboBox eligModeType;
+	public JComboBox<String> choiceLrnType;
+	public JComboBox<String> choiceNetType;
+	public JComboBox<String> eligModeType;
 	JLabel FeatTDS_L;
-	public JComboBox choiceFeatTDS;
-	String FeatTDS;
-	
+	public JComboBox<String> choiceFeatTDS;
+
 	public TDParams() {
 		super("TD Parameter");
 		
@@ -146,21 +146,17 @@ public class TDParams extends Frame implements Serializable
 		StopOnRoundL.setToolTipText(TIPSTOPONROUNDL);
 		eligTypeL.setToolTipText(TIPELIGTYPE);
 
-		eligModeType = new JComboBox(eligModeString);
+		eligModeType = new JComboBox<>(eligModeString);
 
-		choiceNetType = new JComboBox(neuralNetString);
+		choiceNetType = new JComboBox<>(neuralNetString);
 
-		choiceLrnType = new JComboBox(lrnTypeString);
+		choiceLrnType = new JComboBox<>(lrnTypeString);
 		//for (String s : lrnTypeString) choiceLrnType.addItem(s);
 		
-		this.choiceFeatTDS = new JComboBox();
+		this.choiceFeatTDS = new JComboBox<>();
 
-		lambdaT.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				enableLambdaPart();
-			}
-		});
+		// the following lambda, where e is an ActionEvent, is a simpler replacement for anonymous action listeners:
+		lambdaT.addActionListener( e -> enableLambdaPart() );
 
 		tdPanel = new JPanel();		// put the inner buttons into panel oPanel. This panel
 									// can be handed over to a tab of a JTabbedPane 
@@ -227,7 +223,7 @@ public class TDParams extends Frame implements Serializable
 	
 	/**
 	 * Needed for {@link Arena} (which has no train rights) to disable this param tab 
-	 * @param enable
+	 * @param enable whether to enable or not
 	 */
 	public void enableAll(boolean enable) {
 		this.alphaT.setEnabled(enable);
@@ -248,8 +244,8 @@ public class TDParams extends Frame implements Serializable
 	}
 	
 	private void enableAgentPart(String agentName) {
-		boolean featureEnable= (agentName=="TDS" ? true : false);
-		boolean netTypeEnable= (agentName=="TDS" ? true : false);
+		boolean featureEnable= (agentName.equals("TDS"));
+		boolean netTypeEnable= (agentName.equals("TDS"));
 //		boolean mode3PEnable= ((agentName=="TD-Ntuple-2" && TDNTuple2Agt.VER_3P )? true : false);
 		FeatTDS_L.setEnabled(featureEnable);
 		choiceFeatTDS.setEnabled(featureEnable);		
@@ -282,34 +278,34 @@ public class TDParams extends Frame implements Serializable
 		return tdPanel;
 	}
 	public double getAlpha() {
-		return Double.valueOf(alphaT.getText()).doubleValue();
+		return Double.parseDouble(alphaT.getText());
 	}
 	public double getAlphaFinal() {
-		return Double.valueOf(alfinT.getText()).doubleValue();
+		return Double.parseDouble(alfinT.getText());
 	}
 	public double getEpsilon() {
-		return Double.valueOf(epsilT.getText()).doubleValue();
+		return Double.parseDouble(epsilT.getText());
 	}
 	public double getEpsilonFinal() {
-		return Double.valueOf(epfinT.getText()).doubleValue();
+		return Double.parseDouble(epfinT.getText());
 	}
 	public double getLambda() {
-		return Double.valueOf(lambdaT.getText()).doubleValue();
+		return Double.parseDouble(lambdaT.getText());
 	}
 	public double getHorizonCut() {
-		return Double.valueOf(horcutT.getText()).doubleValue();
+		return Double.parseDouble(horcutT.getText());
 	}
 	public double getGamma() {
-		return Double.valueOf(gammaT.getText()).doubleValue();
+		return Double.parseDouble(gammaT.getText());
 	}
 	public int getEpochs() {
-		return Integer.valueOf(epochT.getText()).intValue();
+		return Integer.parseInt(epochT.getText());
 	}
 	public int getFeatmode() {
 		String s = (String) choiceFeatTDS.getSelectedItem();
 		if (s==null) return 0;
 		//int i = Integer.valueOf(s).intValue();
-		return Integer.valueOf(s).intValue();
+		return Integer.parseInt(s);
 	}
 	public boolean hasSigmoid() {
 		return withSigType.isSelected();
@@ -322,15 +318,11 @@ public class TDParams extends Frame implements Serializable
 	}
 	public boolean hasLinearNet() {
 		String Type = (String) choiceNetType.getSelectedItem();
-		if (Type == "linear")
-			return true;
-		return false;		
+		return Objects.equals(Type, "linear");
 	}
 	public boolean hasRpropLrn() {
 		String Type = (String) choiceLrnType.getSelectedItem();
-		if (Type == "RPROP")
-			return true;
-		return false;
+		return Objects.equals(Type, "RPROP");
 	}
 	public int getNPly() {
 		return 0; //Integer.valueOf(tNply_T.getText()).intValue();
@@ -394,39 +386,7 @@ public class TDParams extends Frame implements Serializable
 	public void setEligMode(int value) {
 		this.eligModeType.setSelectedIndex(value);
 	}
-//	public void setNPly(int value) {
-//		tNply_T.setText(value+"");
-//	}
 
-//	@Deprecated
-//	public void enableNPly(boolean enable) {
-//		tNplyL.setEnabled(enable);
-//		tNply_T.setEnabled(enable);
-//	}
-
-//	/**
-//	 * Needed to restore the param tab with the parameters from a re-loaded agent
-//	 * @param tp  TDParams of the re-loaded agent
-//	 */
-//	public void setFrom(TDParams tp) {
-//		setAlpha(tp.getAlpha());
-//		setAlphaFinal(tp.getAlphaFinal());
-//		setEpsilon(tp.getEpsilon());
-//		setEpsilonFinal(tp.getEpsilonFinal());
-//		setGamma(tp.getGamma());
-//		setLambda(tp.getLambda());
-//		setHorizonCut(tp.getHorizonCut());
-//		setLinearNet(tp.hasLinearNet());
-//		setRpropLrn(tp.hasRpropLrn());
-//		setSigmoid(tp.hasSigmoid());
-//		setNormalize(tp.getNormalize());
-//		setEligMode(tp.getEligMode());
-//		setEpochs(tp.getEpochs());
-//		setFeatmode(tp.getFeatmode());
-//		setNPly(tp.getNPly());
-//		setMode3P(tp.getMode3P());
-//	}
-	
 	/**
 	 * Needed to restore the param tab with the parameters from a re-loaded agent
 	 * @param tp  ParTD of the re-loaded agent
@@ -437,8 +397,8 @@ public class TDParams extends Frame implements Serializable
 	/**
 	 * Needed to restore the param tab after {@link ParTD#setParamDefaults(String, String)} has been
 	 * called with a certain agent name
-	 * @param tp
-	 * @param agentName
+	 * @param tp		the param object
+	 * @param agentName the agent string
 	 */
 	public void setFrom(ParTD tp, String agentName) {
 		setAlpha(tp.getAlpha());
@@ -464,103 +424,5 @@ public class TDParams extends Frame implements Serializable
 			enableAgentPart(agentName);
 	}
 
-	// --- never used, we use {@link ParTD#setParamDefaults(String, String)} instead ---
-//	/**
-//	 * DEPRECATED: use {@link ParTD#setParamDefaults(String, String)} instead.
-//	 * <p>
-//	 * Set sensible parameters for a specific agent and specific game. By "sensible
-//	 * parameters" we mean parameters producing good results. Likewise, some parameter
-//	 * choices may be enabled or disabled.
-//	 *
-//	 * @param agentName one out of "
-//	 * 			"TD-Ntuple-3" ({@link TDNTuple3Agt}),
-//	 * 			"Sarsa" ({@link SarsaAgt}) or "TDS" ({@link TDAgent})
-//	 * @param gameName the string from {@link games.StateObservation#getName()}
-//	 */
-//	@Deprecated
-//	public void setParamDefaults(String agentName, String gameName) {
-//		// Currently we have here only the sensible defaults for some games and
-//		// for three agents ("TD-Ntuple[-2,-3]" = class TDNTuple[2,3]Agt and "TDS" = class TDAgent).
-//		//
-//		// If later good parameters for other games are found, they should be
-//		// added with suitable nested switch(gameName).
-//		// Currently we have only one switch(gameName) on the initial featmode (=3 for
-//		// TicTacToe, =2 for Hex, and =0 for all others)
-//		horcutT.setText("0.1"); 			//
-//		switch (agentName) {
-//		case "TD-Ntuple-3":
-//		case "Sarsa":
-//			switch (agentName) {
-//			case "TD-Ntuple-3":
-//				switch (gameName) {
-//				case "ConnectFour":
-//					alphaT.setText("5.0");  		// the defaults
-//					alfinT.setText("5.0");			//
-//					horcutT.setText("0.001"); 		//
-//					break;
-//				default:
-//					alphaT.setText("0.2");  		// the defaults
-//					alfinT.setText("0.2");			//
-//				}
-//				break;
-//			case "Sarsa":
-//				alphaT.setText("1.0");  		// the defaults
-//				alfinT.setText("0.5");			//
-//				epsilT.setText("0.1");  		//
-//				break;
-//			default:	//  all other
-//				epsilT.setText("0.3");
-//				break;
-//			}
-//			epfinT.setText("0.0");				//
-//			lambdaT.setText("0.0"); 			//
-//			gammaT.setText("1.0");				//
-//			epochT.setText("1");				//
-//			withSigType.setSelected(true);		// tanh
-//			normalize.setSelected(false);		//
-//			SigTypeL.setEnabled(true);    // NEW
-//			switch (gameName) {
-//			case "2048":
-//				epsilT.setText("0.0");
-//				break;
-//			}
-//			break;
-//		case "TDS":
-//			alphaT.setText("0.1");				// the defaults
-//			alfinT.setText("0.001");			//
-//			epfinT.setText("0.0");				//
-//			lambdaT.setText("0.9");				//
-//			horcutT.setText("0.1"); 			//
-//			gammaT.setText("1.0");				//
-//			epochT.setText("1");				//
-//			withSigType.setSelected(false);		// Fermi fct
-//			normalize.setSelected(false);		//
-//			SigTypeL.setEnabled(true);
-//			switch (gameName) {
-//			case "TicTacToe":
-//				setFeatmode(3);
-//				break;
-//			case "Hex":
-//				setFeatmode(2);
-//				lambdaT.setText("0.0");
-//				break;
-//			default:	//  all other
-//				setFeatmode(0);
-//				lambdaT.setText("0.0");
-//				break;
-//			}
-//			switch (gameName) {
-//			case "2048":
-//				epsilT.setText("0.0");
-//				break;
-//			default:	//  all other
-//				epsilT.setText("0.3");
-//				break;
-//			}
-//			break;
-//		}
-//		enableLambdaPart();
-//		enableAgentPart(agentName);
-//	}
-	
+
 } // class TDParams

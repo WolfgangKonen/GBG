@@ -14,10 +14,7 @@ import controllers.TD.ntuple2.NTuple2;
 import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.BlackJack.BasicStrategyBlackJackAgent;
 import games.BlackJack.StateObserverBlackJack;
-import params.ParNT;
-import params.ParOther;
-import params.ParRB;
-import params.ParTD;
+import params.*;
 import tools.ScoreTuple;
 import tools.Types;
 import tools.Types.ACTIONS_VT;
@@ -101,6 +98,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 		ParNT ntPar = new ParNT();
 		ParOther oPar = new ParOther();
 		ParRB rbPar = new ParRB();
+		ParWrapper wrPar = new ParWrapper();
 		initNet(ntPar, tdPar, oPar, null, null, 1000);
 	}
 
@@ -111,13 +109,15 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	 * @param tdPar			temporal difference parameters
 	 * @param ntPar			n-tuples and temporal coherence parameter
 	 * @param rbPar         replay buffer parameter
+	 * @param wrPar         wrapper parameter
+	 * @param oPar          other parameter
 	 * @param nTuples		the set of n-tuples
 	 * @param xnf			contains game-specific n-tuple functions
 	 * @param maxGameNum	maximum number of training games
 	 */
-	public TDNTuple4Agt(String name, ParTD tdPar, ParNT ntPar, ParOther oPar, ParRB rbPar,
+	public TDNTuple4Agt(String name, ParTD tdPar, ParNT ntPar, ParOther oPar, ParRB rbPar, ParWrapper wrPar,
 						int[][] nTuples, XNTupleFuncs xnf, int maxGameNum) {
-		super(name,oPar,rbPar);
+		super(name,oPar,rbPar,wrPar);
 		this.numPlayers = xnf.getNumPlayers();
 		this.sLast = new StateObservation[numPlayers];
 		this.randLast = new boolean[numPlayers];

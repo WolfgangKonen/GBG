@@ -81,6 +81,15 @@ public final class MCTSWrapperAgent extends AgentBase implements PlayAgent, Seri
         this.lastSelectedAction = Integer.MIN_VALUE;
     }
 
+    /**
+     * Get the best next action and return it
+     *
+     * @param sob			current game state (is returned unchanged)
+     * @param random		allow random action selection (exploration)
+     * @param silent		whether to be silent
+     * @return the best action (or random action). If several actions have the same
+     * 		   score, break ties by selecting one of them at random.
+     */
     @Override
     public Types.ACTIONS_VT getNextAction2(
         final StateObservation sob,
@@ -88,44 +97,11 @@ public final class MCTSWrapperAgent extends AgentBase implements PlayAgent, Seri
         final boolean silent
     ) {
 
-        if (random) {
-            switch (ConfigWrapper.EXPLORATION_MODE) {
-                case 2: {
-                    MCTSNode mctsNode2 = new MCTSNode(new GameStateIncludingPass(sob));;
-                    boolean randomSelect = false;        // true signals: the next action is a randomly selected one
-                    randomSelect = (rand.nextDouble() < m_epsilon);
-
-                    if (randomSelect) {
-                        final var vTable2 = getVTableRandom(mctsNode2);
-                        final var vBest2 = Arrays.stream(vTable2).max().orElse(Double.NaN);
-                        ScoreTuple scBest2 = new ScoreTuple(sob, vBest2);
-                        mctsNode2.setMoveProbabilities(vTable2);
-                        int selectedAction = mctsNode2.moveProbabilities.entrySet().stream().max(
-                                Comparator.comparingDouble(Map.Entry::getValue)
-                        ).orElseThrow().getKey();
-                        lastSelectedNode = null;    // IMPORTANT: we have to reset lastSelectedNode after each random
-                                                    // action because the tree is then no longer valid (this reset may
-                                                    // affect adversely the quality of training)
-                        return new Types.ACTIONS_VT(
-                                selectedAction,
-                                randomSelect,
-                                vTable2,
-                                vBest2,
-                                scBest2
-                        );
-                    }
-                    break;
-                }
-                default:    // i. e. EXPLORATION_MODE=0,1
-                    break;      // do nothing (EXPLORATION_MODE 0 and 1 are handled below, see lastSelectedAction)
-            }
-        } // if (random)
-
         MCTSNode mctsNode;
 
         if (lastSelectedNode == null || !ConfigWrapper.USELASTMCTS || !sob.isDeterministicGame()) {
-            // There is no search tree yet or it is not valid for the current situation.
-            // So a new mcts node is created from the given game state sob.
+            // There is no search tree yet, or it is not valid for the current situation.
+            // So a new MCTSNode is created from the given game state sob.
             mctsNode = new MCTSNode(new GameStateIncludingPass(sob));
         } else {
             // There already exists a search-tree, which was built in a previous call to MCTSWrapper in this episode.
@@ -194,7 +170,7 @@ public final class MCTSWrapperAgent extends AgentBase implements PlayAgent, Seri
             }
         }  // else (lastSelectedNode...)
 
-        // At this point mctsNode represents the current game state's node in the Monte Carlo search tree.
+        // At this point, mctsNode represents the current game state's node in the Monte Carlo search tree.
 
         // /WK/ a possible assertion, which turns out to be violated from time to time in RubiksCube.
         //      It seems always true in the Othello case --> TODO: Clarify the RubiksCube case!
@@ -204,39 +180,68 @@ public final class MCTSWrapperAgent extends AgentBase implements PlayAgent, Seri
             int dummy = 1;
         }
 
-        mcts.largestDepth=0;
-        // Performs the given number of mcts iterations.
-        for (int i = 0; i < iterations; i++) {
-            mcts.search(mctsNode,0);
+        int exploMode = ConfigWrapper.EXPLORATION_MODE;
+        if (!random) exploMode=0;               // always exploit, if random==false
+        if (exploMode==2 && (rand.nextDouble() >= m_epsilon) ) {
+            exploMode=0;                        // exploit (the greedy case of EXPLORATION_MODE==2)
         }
 
-        if (mctsNode.visitCounts.size()==0) {
-            // As far as we see, this can only happen if iterations==1 (which is not a sensible choice),
-            // but we leave it in as debug check for the moment.
-            // We return always action 0 (which may or may not be a sensible choice)
-            System.err.println("MCTSWrapperAgent.getNextAction2: *** Warning *** visitCounts.size = 0");
-            System.err.println(mctsNode.gameState.stringDescr());
-            return new Types.ACTIONS_VT(0,false,new double[sob.getNumAvailableActions()],0.0);
-        }
+        if (exploMode!=2) {     // in case exploMode==2, we do not need the MCTS search, because we take a random action anyway
+            mcts.largestDepth=0;
+            // Performs the given number of mcts iterations.
+            for (int i = 0; i < iterations; i++) {
+                mcts.search(mctsNode,0);
+            }
+
+            if (mctsNode.visitCounts.size()==0) {
+                // As far as we see, this can only happen if iterations==1 (which is not a sensible choice),
+                // but we leave it in as debug check for the moment.
+                // We return always action 0 (which may or may not be a sensible choice)
+                System.err.println("MCTSWrapperAgent.getNextAction2: *** Warning *** visitCounts.size = 0");
+                System.err.println(mctsNode.gameState.stringDescr());
+                return new Types.ACTIONS_VT(0,false,new double[sob.getNumAvailableActions()],0.0);
+            }
+        } // exploMode!=2
 
         // Selects the int value of one of the available actions:
-        // If called with random==true (during training), select lastSelectedAction either stochastically (explore if
-        // EXPLORATION_MODE==1) or do it non-stochastically (exploit if EXPLORATION_MODE!=1, i.e. =0, since 2 was
-        // handled above)
-        boolean randomSelect = random && ConfigWrapper.EXPLORATION_MODE==1;
-        if (randomSelect) {
-            // case EXPLORATION_MODE==1
-            lastSelectedAction = selectActionProportional(mctsNode);
-            lastSelectedNode = null; // do not reuse the tree if random action.
-        } else {
-            // case EXPLORATION_MODE==0
-            lastSelectedAction = mctsNode.visitCounts.entrySet().stream().max(
-                    Comparator.comparingDouble(Map.Entry::getValue)
-            ).orElseThrow().getKey();
-            // Caches the child node belonging to the previously selected action.
-            lastSelectedNode = mctsNode.childNodes.get(lastSelectedAction);
-        }
-
+        // If getNextAction2 is called with random==false (eval or play), exploMode is always 0.
+        // If it is called with random==true (during training), exploMode depends on EXPLORATION_MODE (see above).
+        switch (exploMode) {
+            case 0 -> {
+                // case EXPLORATION_MODE==0 or the greedy case of EXPLORATION_MODE==2: exploit, take action with max visit counts
+                lastSelectedAction = mctsNode.visitCounts.entrySet().stream().max(
+                        Comparator.comparingDouble(Map.Entry::getValue)
+                ).orElseThrow().getKey();
+                // Caches the child node belonging to the previously selected action.
+                lastSelectedNode = mctsNode.childNodes.get(lastSelectedAction);
+            }
+            case 1 -> {
+                // case EXPLORATION_MODE==1: sample an action proportional to visit counts
+                lastSelectedAction = selectActionProportional(mctsNode);
+                lastSelectedNode = null;    // do not reuse the tree if random action.
+            }
+            case 2 -> {
+                // the random case of EXPLORATION_MODE==2:
+                final var vTable2 = getVTableRandom(mctsNode);
+                final var vBest2 = Arrays.stream(vTable2).max().orElse(Double.NaN);
+                ScoreTuple scBest2 = new ScoreTuple(sob, vBest2);
+                mctsNode.setMoveProbabilities(vTable2);
+                int selectedAction = mctsNode.moveProbabilities.entrySet().stream().max(
+                        Comparator.comparingDouble(Map.Entry::getValue)
+                ).orElseThrow().getKey();
+                lastSelectedNode = null;    // IMPORTANT: we have to reset lastSelectedNode after each random
+                                            // action because the tree is then no longer valid (this reset may
+                                            // affect adversely the quality of training)
+                return new Types.ACTIONS_VT(
+                        selectedAction,
+                        true,
+                        vTable2,
+                        vBest2,
+                        scBest2
+                );
+            }
+            default ->  throw new RuntimeException("[MCTSWrapperAgent] Invalid choice for exploMode");
+        } // switch(exploMode)
 
         // Pass states should not be cached.
         while (lastSelectedNode != null && lastSelectedNode.gameState.lazyMustPass.value()) {
@@ -251,7 +256,7 @@ public final class MCTSWrapperAgent extends AgentBase implements PlayAgent, Seri
         ScoreTuple scBest = new ScoreTuple(sob,vBest);
         return new Types.ACTIONS_VT(
             lastSelectedAction,
-            randomSelect,
+            exploMode==1,
             vTable,
             vBest,
             scBest
@@ -278,18 +283,18 @@ public final class MCTSWrapperAgent extends AgentBase implements PlayAgent, Seri
     public double[] getVTableFor(final MCTSNode mctsNode) {
         return getDistributionOver(
             Arrays
-                .stream(mctsNode.gameState.getAvailableActionsIncludingPassActions())
-                .mapToDouble(action -> mctsNode.visitCounts.getOrDefault(action.getId(), 0))
-                .toArray()
+                    .stream(mctsNode.gameState.getAvailableActionsIncludingPassActions())
+                    .mapToDouble(action -> mctsNode.visitCounts.getOrDefault(action.getId(), 0))
+                    .toArray()
         );
     }
 
     public double[] getVTableRandom(final MCTSNode mctsNode) {
         return getDistributionOver(
-                Arrays
-                        .stream(mctsNode.gameState.getAvailableActionsIncludingPassActions())
-                        .mapToDouble(action -> rand.nextDouble())
-                        .toArray()
+            Arrays
+                    .stream(mctsNode.gameState.getAvailableActionsIncludingPassActions())
+                    .mapToDouble(action -> rand.nextDouble())
+                    .toArray()
         );
     }
 

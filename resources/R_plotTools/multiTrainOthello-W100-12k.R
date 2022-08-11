@@ -43,7 +43,6 @@ filesW10000=c(
 filenames=c(
             filesW10000[PART],
             "multiCompeteOthello-W1000-12k.csv", # 10 agents
-            #"multiCompeteOthello-EX0-W100.csv", # 10 agents
             paste0("multiCompeteOthello",EX0_STRING,"-W100.csv"),      # 10 agents
             "multiCompeteOthello-W0-12k.csv"     # 10 agents
             # generated with >GBGBatch Othello 6 ...

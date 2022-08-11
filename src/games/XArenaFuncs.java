@@ -110,6 +110,7 @@ public class XArenaFuncs {
 		m_xab.mctsePar[n].pushFromMCTSEParams();
 		m_xab.edPar[n].pushFromEdaxParams();
 		m_xab.rbPar[n].pushFromRBParams();
+		m_xab.wrPar[n].pushFromWrParams();
 		// update element pMaxValue in GameBoardCubeGUI, if present:
 		if (m_xab.m_arena.getGameBoard() instanceof GameBoardCube) {
 			((GameBoardCube)m_xab.m_arena.getGameBoard()).setPMin(CubeConfig.pMin);
@@ -163,7 +164,7 @@ public class XArenaFuncs {
 				NTuple4Factory ntupfac = new NTuple4Factory();
 				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
 				pa = new TDNTuple4Agt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
-						m_xab.oPar[n],m_xab.rbPar[n], nTuples, xnf, maxGameNum);
+						m_xab.oPar[n],m_xab.rbPar[n], m_xab.wrPar[n], nTuples, xnf, maxGameNum);
 			} else if (sAgent.equals("Sarsa")) {
 				XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
 				NTupleFactory ntupfac = new NTupleFactory();
@@ -349,6 +350,7 @@ public class XArenaFuncs {
 
 						pa.setParOther(m_xab.oPar[n]);   // for all agents
 						pa.setParReplay(m_xab.rbPar[n]); // for all agents
+						pa.setParWrapper(m_xab.wrPar[n]); // for all agents
 						break;
 					case TRAINED:
 						// When fetching an agent in state TRAINED, we want to take it 'as-is' (it was perhaps trained
@@ -363,6 +365,7 @@ public class XArenaFuncs {
 						pa.setWrapperParams(m_xab.oPar[n]);
 
 						pa.setParReplay(m_xab.rbPar[n]);
+						pa.setParWrapper(m_xab.wrPar[n]);
 						break;
 					default:
 						throw new RuntimeException("Not supported AgentState");
@@ -400,7 +403,7 @@ public class XArenaFuncs {
 				NTuple4Factory ntupfac = new NTuple4Factory();
 				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
 				pa = new TDNTuple4Agt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
-						m_xab.oPar[n],m_xab.rbPar[n], nTuples, xnf, maxGameNum);
+						m_xab.oPar[n],m_xab.rbPar[n], m_xab.wrPar[n], nTuples, xnf, maxGameNum);
 			} catch (Exception e) {
 				m_Arena.showMessage(e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
 				// e.printStackTrace();
