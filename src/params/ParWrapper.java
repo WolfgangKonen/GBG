@@ -5,19 +5,48 @@ import java.io.Serializable;
 
 import javax.swing.JPanel;
 
+import controllers.MCTSWrapper.ConfigWrapper;
 import controllers.MCTSWrapper.MCTSWrapperAgent;
+import controllers.MCTSWrapper.stateApproximation.PlayAgentApproximator;
 import controllers.MaxN2Wrapper;
 import controllers.TD.ntuple2.SarsaAgt;
 import controllers.TD.ntuple2.TDNTuple3Agt;
-import games.Arena;
 
 /**
- *  Wrapper parameters for all agents
- *  <p>
- *  Game- and agent-specific parameters are set with {@link #setParamDefaults(String, String)}.
+ * <b>Wrapper parameter</b> settings for board games.
+ * <p>
+ * These parameters and their [defaults] are:
+ * <ul>
+ * <li><b>wrapperMode</b>: [0] 0: none, 1: (Expecti)Max-N wrapper, 2: MCTS(E)Wrapper
+ * <li><b>wrapperNPly</b>: [1] n for (Expecti)Max-N wrapper: wrap the agent with an (Expecti)Max-N wrapper with
+ * n plies of look-ahead. CAUTION: n &gt; 5 can dramatically slow down computation.
+ * </ul>
+ * The following parameters are only for {@link MCTSWrapperAgent}:
+ * <ul>
+ * <li><b>wrapperMCTS_iterations</b>: [100] i for MCTSWrapper: wrap the agent with a {@link MCTSWrapperAgent} with i iterations.
+ * <li><b>wrapperMCTS_PUCT</b>: [1] PUCT parameter from [0,1] for {@link MCTSWrapperAgent}
+ * <li><b>wrapperMCTS_depth</b>: [100] Depth parameter for {@link MCTSWrapperAgent}
+ * <li><b>wrapperMCTS_exploMode</b>: [0] 0: none, 1: proportional to visit counts, 2: epsilon-greedy, only for {@link MCTSWrapperAgent}
+ * <li><b>wrapperMCTS_epsInit</b>: [0.2] initial epsilon, only for Exploration Mode = 2
+ * <li><b>wrapperMCTS_epsFinal</b>: [0.1] final epsilon, only for Exploration Mode = 2
+ * <li><b>useSoftMax</b>: [true] <br>
+ *      A switch for {@link PlayAgentApproximator}:
+ *      <ul>
+ *          <li> If false (recommended setting for RubiksCube 2x2x2), do not use softmax squashing for move probabilities.
+ *          <li> If true (recommended setting for Othello, ConnectFour, RubiksCube 3x3x3), use softmax squashing.
+ *      </ul>
+ * <li><b>useLastMCTS</b>: [true] <br>
+ *      A switch for {@link MCTSWrapperAgent}:
+ *      <ul>
+ *          <li>  If false (recommended setting for ConnectFour), force tree re-build in every call.
+ *          <li>  If true (recommended setting for Othello, RubiksCube), re-use the tree (i.e. as in JS's master code) in
+ *                  subsequent calls during one episode.
+ *      </ul>
+ * </ul>
  *
- *  @see MCTSWrapperAgent
- *  @see MaxN2Wrapper
+ * @see MCTSWrapperAgent
+ * @see MaxN2Wrapper
+ * @see WrapperParams
  */
 public class ParWrapper implements Serializable {
     public static int DEFAULT_WRAPPER_MODE = 0;
@@ -31,7 +60,7 @@ public class ParWrapper implements Serializable {
 
     private int wrapperMode = DEFAULT_WRAPPER_MODE;
     private int wrapperNply = DEFAULT_WRAPPER_NPLY;
-    private int wrapperMCTSIterations = DEFAULT_WRAPPER_MCTS_ITERATIONS;
+    private int wrapperMCTS_iterations = DEFAULT_WRAPPER_MCTS_ITERATIONS;
     private double wrapperMCTS_PUCT = DEFAULT_WRAPPER_MCTS_PUCT;
     private int wrapperMCTS_depth = DEFAULT_WRAPPER_MCTS_DEPTH;
     private int wrapperMCTS_exploMode = DEFAULT_WRAPPER_MCTS_EXPLOMODE;
@@ -71,7 +100,7 @@ public class ParWrapper implements Serializable {
     public void setFrom(ParWrapper wp) {
         this.wrapperMode = wp.getWrapperMode();
         this.wrapperNply = wp.getWrapperNPly();
-        this.wrapperMCTSIterations = wp.getWrapperMCTSIterations();
+        this.wrapperMCTS_iterations = wp.getWrapperMCTS_iterations();
         this.wrapperMCTS_PUCT = wp.getWrapperMCTS_PUCT();
         this.wrapperMCTS_depth = wp.getWrapperMCTS_depth();
         this.wrapperMCTS_exploMode = wp.getWrapperMCTS_ExplorationMode();
@@ -87,7 +116,7 @@ public class ParWrapper implements Serializable {
     public void setFrom(WrapperParams wp) {
         this.wrapperMode = wp.getWrapperMode();
         this.wrapperNply = wp.getWrapperNPly();
-        this.wrapperMCTSIterations = wp.getWrapperMCTSIterations();
+        this.wrapperMCTS_iterations = wp.getWrapperMCTSIterations();
         this.wrapperMCTS_PUCT = wp.getWrapperMCTS_PUCT();
         this.wrapperMCTS_depth = wp.getWrapperMCTS_depth();
         this.wrapperMCTS_exploMode = wp.getWrapperMCTS_ExplorationMode();
@@ -122,8 +151,8 @@ public class ParWrapper implements Serializable {
         return wrapperNply;
     }
 
-    public int getWrapperMCTSIterations() {
-        return wrapperMCTSIterations;
+    public int getWrapperMCTS_iterations() {
+        return wrapperMCTS_iterations;
     }
 
     public double getWrapperMCTS_PUCT() {
@@ -160,8 +189,8 @@ public class ParWrapper implements Serializable {
             wrparams.setWrapperNPly(nply);
     }
 
-    public void setWrapperMCTSIterations(final int iterations) {
-        this.wrapperMCTSIterations =iterations;
+    public void setWrapperMCTS_iterations(final int iterations) {
+        this.wrapperMCTS_iterations =iterations;
         if (wrparams !=null)
             wrparams.setWrapperMCTSIterations(iterations);
     }

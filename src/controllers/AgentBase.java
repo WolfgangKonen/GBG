@@ -3,6 +3,7 @@ package controllers;
 import java.io.Serial;
 import java.io.Serializable;
 
+import controllers.MCTSWrapper.ConfigWrapper;
 import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.Arena;
 import games.GameBoard;
@@ -281,6 +282,15 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 		// older agents may not have the agent state, so it is null. Set it to TRAINED:
 		if (this.getParOther().getAgentState()==null) this.getParOther().setAgentState(AgentState.TRAINED);
 
+		// older agents may not have ParWrapper. If so, set a default ParWrapper and copy the wrapper params
+		// from ParOther over to it.
+		if (this.getParWrapper()==null) {
+			this.setDefaultParWrapper();
+			m_wrPar.setWrapperNPly(getParOther().getWrapperNPly());
+			m_wrPar.setWrapperMCTS_iterations(getParOther().getWrapperMCTSIterations());
+			m_wrPar.setWrapperMCTS_PUCT(getParOther().getWrapperMCTS_PUCT());
+			m_wrPar.setWrapperMCTS_depth(getParOther().getWrapperMCTS_depth());
+		}
 
 		return true;
 	}
@@ -392,7 +402,21 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 		m_rbPar = new ParRB();
 	}
 
-    @Override
+	/**
+	 * Set defaults for m_wrPar (needed in {@link Arena#loadAgent} when
+	 * loading older agents, where m_wrPar=null in the saved version).
+	 */
+	public void setDefaultParWrapper() {
+		m_wrPar = new ParWrapper();
+		//m_wrPar.setParamDefaults(m_name,gameName); // currently, we do not have gameName here
+		m_wrPar.setWrapperMCTS_ExplorationMode(ConfigWrapper.EXPLORATION_MODE);
+		m_wrPar.setWrapperMCTS_epsInit(ConfigWrapper.epsilon);
+		m_wrPar.setWrapperMCTS_epsFinal(ConfigWrapper.epsilon);
+		m_wrPar.setUseSoftMax(ConfigWrapper.USESOFTMAX);
+		m_wrPar.setUseLastMCTS(ConfigWrapper.USELASTMCTS);
+	}
+
+	@Override
 	public ParOther getParOther() {
 		return m_oPar;
 	}

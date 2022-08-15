@@ -41,6 +41,11 @@ public class ConfigWrapper {
     public static int EXPLORATION_MODE = 2;
 
     /**
+     * a quick hack to set epsilon for ConfigWrapper.EXPLORATION_MODE=2 (eps-greedy)
+     */
+    public static double epsilon = 0.15;
+
+    /**
      * EPS is a parameter for {@link MCTSNode#selectChild(double)}, it should be <code>&lt;&lt;</code> 1. It controls the behavior
      * if N(s)==0, where N(s) is the number of visits to {@code this} node:
      * <ul>

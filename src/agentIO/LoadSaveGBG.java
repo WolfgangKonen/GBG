@@ -817,6 +817,9 @@ public class LoadSaveGBG {
 			if (pa.getParReplay() == null) {
 				((AgentBase) pa).setDefaultParReplay();
 			}
+			if (pa.getParWrapper() == null) {
+				((AgentBase) pa).setDefaultParWrapper();
+			}
 
 //			disposeProgressDialog(dlg);
 //			arenaGame.setProgress(null);

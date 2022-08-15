@@ -14,7 +14,7 @@ import controllers.MaxN2Wrapper;
  * <p>
  * These parameters and their [defaults] are:
  * <ul>
- * <li><b>Wrapper type</b>: [0] 0: none, 1: (Expecti)Max-N wrapper, 2: MCTSWrapper
+ * <li><b>Wrapper type</b>: [0] 0: none, 1: (Expecti)Max-N wrapper, 2: MCTS(E)Wrapper
  * <li><b>Wrapper nPly</b>: [1] n for (Expecti)Max-N wrapper: wrap the agent with an (Expecti)Max-N wrapper with
  * n plies of look-ahead. CAUTION: n &gt; 5 can dramatically slow down computation.
  * </ul>
@@ -26,14 +26,13 @@ import controllers.MaxN2Wrapper;
  * <li><b>Exploration Mode</b>: [0] 0: none, 1: proportional to visit counts, 2: epsilon-greedy, only for {@link MCTSWrapperAgent}
  * <li><b>epsilon init</b>: [0.2] initial epsilon, only for Exploration Mode = 2
  * <li><b>epsilon final</b>: [0.1] final epsilon, only for Exploration Mode = 2
- * <li><b>epsilon final</b>: [0.1] final epsilon, only for Exploration Mode = 2
- * <li><b>Use SoftMax</b>: [true] <br>
+ * <li><b>USESOFTMAX</b>: [true] <br>
  *      A switch for {@link PlayAgentApproximator}:
  *      <ul>
  *          <li> If false (recommended setting for RubiksCube 2x2x2), do not use softmax squashing for move probabilities.
  *          <li> If true (recommended setting for Othello, ConnectFour, RubiksCube 3x3x3), use softmax squashing.
  *      </ul>
- * <li><b>Use Last MCTS</b>: [true] <br>
+ * <li><b>USELASTMCTS</b>: [true] <br>
  *      A switch for {@link MCTSWrapperAgent}:
  *      <ul>
  *          <li>  If false (recommended setting for ConnectFour), force tree re-build in every call.
@@ -44,6 +43,7 @@ import controllers.MaxN2Wrapper;
  *
  * @see MCTSWrapperAgent
  * @see MaxN2Wrapper
+ * @see ParWrapper
  */
 public class WrapperParams extends Frame {
     @Serial
@@ -299,7 +299,7 @@ public class WrapperParams extends Frame {
     public void setFrom(ParWrapper wp) {
         this.setWrapperMode(wp.getWrapperMode());
         this.setWrapperNPly(wp.getWrapperNPly());
-        this.setWrapperMCTSIterations(wp.getWrapperMCTSIterations());
+        this.setWrapperMCTSIterations(wp.getWrapperMCTS_iterations());
         this.setWrapperMCTS_PUCT(wp.getWrapperMCTS_PUCT());
         this.setWrapperMCTS_depth(wp.getWrapperMCTS_depth());
         this.setWrapperMCTS_ExplorationMode(wp.getWrapperMCTS_ExplorationMode());

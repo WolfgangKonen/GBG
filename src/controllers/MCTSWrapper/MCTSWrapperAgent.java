@@ -11,6 +11,7 @@ import controllers.PlayAgtVector;
 import games.ObserverBase;
 import games.StateObservation;
 import params.ParOther;
+import params.ParWrapper;
 import tools.ScoreTuple;
 import tools.Types;
 
@@ -29,9 +30,23 @@ public final class MCTSWrapperAgent extends AgentBase implements PlayAgent, Seri
     private final MCTS mcts;
     private final Approximator approximator;
 
+    /**
+     * Controls the amount of exploration moves in case ConfigWrapper.EXPLORATION_MODE==2
+     * during training. <br>
+     * m_epsilon = 0.0: no exploration (random) moves, <br>
+     * m_epsilon = 0.1 (def.): 10% of the moves are random, and so forth
+     * m_epsilon undergoes a linear change from {@code ParWrapper.epsInit}
+     * to {@code ParWrapper.epsFinal}.
+     * This is realized in {@link #adjustEpsilon()}.
+     */
+    protected double m_epsilon = 0.1;
+
+    /**
+     * m_EpsilonChangeDelta is the epsilon change per episode.
+     */
+    protected double m_epsilonChangeDelta = 0.001;
+
     private final Random rand; // generate random Numbers
-    private double m_epsilon = 0.15;        // a quick hack to set epsilon for ConfigWrapper.EXPLORATION_MODE=2 (later it
-                // should be taken from ParTD of the wrapped agent, if the wrapped agent is derived from NTuple4Base)
 
     /**
      * @param iterations   Number of monte carlo iterations to be performed before the next action is selected.
@@ -56,6 +71,7 @@ public final class MCTSWrapperAgent extends AgentBase implements PlayAgent, Seri
         this.rand = new Random(System.currentTimeMillis()); //(System.currentTimeMillis()); (42);
         mcts = new MCTS(approximator, c_puct, maxDepth);
         setAgentState(AgentState.TRAINED);
+        setWrParams(this.m_wrPar,this.getMaxGameNum());
     }
 
     /**
@@ -182,7 +198,7 @@ public final class MCTSWrapperAgent extends AgentBase implements PlayAgent, Seri
 
         int exploMode = ConfigWrapper.EXPLORATION_MODE;
         if (!random) exploMode=0;               // always exploit, if random==false
-        if (exploMode==2 && (rand.nextDouble() >= m_epsilon) ) {
+        if (exploMode==2 && (rand.nextDouble() >= ConfigWrapper.epsilon) ) {
             exploMode=0;                        // exploit (the greedy case of EXPLORATION_MODE==2)
         }
 
@@ -390,5 +406,19 @@ public final class MCTSWrapperAgent extends AgentBase implements PlayAgent, Seri
         resetAgent();	// do not re-use last MCTS
         return getWrappedPlayAgent().trainAgent(so,this);
 
+    }
+
+    public void setWrParams(ParWrapper wrPar, int maxGameNum) {
+        m_epsilon = wrPar.getWrapperMCTS_epsInit();
+        m_epsilonChangeDelta = (m_epsilon - wrPar.getWrapperMCTS_epsFinal()) / maxGameNum;
+    }
+
+    public void adjustEpsilon() {
+        m_epsilon = m_epsilon - m_epsilonChangeDelta;   // linear decrease of m_epsilon
+    }
+
+    public boolean instantiateAfterLoading() {
+        setWrParams(this.m_wrPar,this.getMaxGameNum());
+        return true;
     }
 }

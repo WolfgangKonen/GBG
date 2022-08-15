@@ -124,7 +124,7 @@ public class RBParams extends Frame{
      * agent
      *
      * @param ep
-     *            ParOther of the re-loaded agent
+     *            ParRB of the re-loaded agent
      */
     public void setFrom(ParRB ep) {
         this.setUseRb(ep.getUseRB());
