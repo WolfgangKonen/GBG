@@ -126,6 +126,7 @@ abstract public class NTuple4Base extends AgentBase implements NTuple4Agt, Seria
 		m_arena.m_xab.setNtParFrom(n, this.getParNT() );
 		m_arena.m_xab.setOParFrom(n, this.getParOther() );
 		m_arena.m_xab.setRBParFrom(n, this.getParReplay() );
+		m_arena.m_xab.setWrapperParFrom(n, this.getParWrapper());
 	}
 	
 	/**

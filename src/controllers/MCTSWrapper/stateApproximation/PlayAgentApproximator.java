@@ -33,7 +33,8 @@ public final class PlayAgentApproximator implements Approximator, Serializable {
         );
     }
 
-    private static double[] moveProbabilitiesForVTable(final double[] vTable, final StateObservation stateObservation) {
+    // removed 'static' in front of double[] (needed for optSoftmax) --> any unwanted side effects?
+    private double[] moveProbabilitiesForVTable(final double[] vTable, final StateObservation stateObservation) {
         assert (vTable.length == stateObservation.getNumAvailableActions()) : "Ooops, wrong size for vTable!";
         final var minV = stateObservation.getMinGameScore();
         final var maxV = stateObservation.getMaxGameScore();
@@ -42,8 +43,10 @@ public final class PlayAgentApproximator implements Approximator, Serializable {
         return softmaxArr;
     }
 
-    private static double[] optSoftmax(final double[] values, final double minV, final double maxV) {
-        return (ConfigWrapper.USESOFTMAX) ? softmax(values) : minmaxmap(values,minV,maxV);
+    // removed 'static' in front of double[] (in order to access member agent) --> any unwanted side effects?
+    private double[] optSoftmax(final double[] values, final double minV, final double maxV) {
+        return (agent.getParWrapper().getUseSoftMax()) ? softmax(values) : minmaxmap(values,minV,maxV);
+        //return (ConfigWrapper.USESOFTMAX) ? softmax(values) : minmaxmap(values,minV,maxV);
     }
 
     /*

@@ -3,7 +3,6 @@ package starters;
 import java.io.IOException;
 
 import controllers.*;
-import controllers.PlayAgent.AgentState;
 import games.*;
 import tools.Types;
 
@@ -242,8 +241,8 @@ public class GBGBatch extends SetupGBG {
 
 		PlayAgent pa = arenaTrain.m_xfun.m_PlayAgents[0];
 		pa.setAgentFile(agtFile);
-		PlayAgent qa = arenaTrain.m_xfun.wrapAgent(pa, pa.getParOther(), null, gb.getDefaultStartState());
-		pa.setWrapperParams(xab.oPar[0]);
+		PlayAgent qa = arenaTrain.m_xfun.wrapAgent(pa, pa.getParOther(), pa.getParWrapper() , null, gb.getDefaultStartState());
+		pa.setWrapperParamsO(xab.oPar[0]);
 
 		long startTime = System.currentTimeMillis();
 
@@ -410,8 +409,8 @@ public class GBGBatch extends SetupGBG {
 			return;
 		}
 		PlayAgent pa = arenaTrain.m_xfun.m_PlayAgents[0];
-		PlayAgent qa = arenaTrain.m_xfun.wrapAgent(pa, pa.getParOther(), null, gb.getDefaultStartState());
-		pa.setWrapperParams(xab.oPar[0]);
+		PlayAgent qa = arenaTrain.m_xfun.wrapAgent(pa, pa.getParOther(), pa.getParWrapper(), null, gb.getDefaultStartState());
+		pa.setWrapperParamsO(xab.oPar[0]);
 
 		long startTime = System.currentTimeMillis();
 
@@ -471,8 +470,8 @@ public class GBGBatch extends SetupGBG {
 	} // batch7
 
 	/**
-	 * Perform RubiksCube evaluation for all agents found in directory {@code agents/RubiksCube/<subDir>/<agtDir>}, which
-	 * is wrapped by MCTSWrapperAgent with iterMWrapArr iterations.
+	 * Perform RubiksCube evaluation for all agents found in directory {@code agents/RubiksCube/<subDir>/<agtDir>}.
+	 * Each agent is wrapped by MCTSWrapperAgent with iterMWrapArr iterations.
 	 * <p>
 	 * Write results to file {@code csvName}.
 	 * @param agtDir		directory with RubikCube agents

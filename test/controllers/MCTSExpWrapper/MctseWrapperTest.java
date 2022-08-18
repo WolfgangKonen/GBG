@@ -15,6 +15,7 @@ import games.ZweiTausendAchtundVierzig.GameBoard2048;
 import org.junit.Test;
 import params.ParMC;
 import params.ParOther;
+import params.ParWrapper;
 import starters.GBGBatch;
 import starters.MCompeteMWrap;
 import starters.SetupGBG;
@@ -446,8 +447,9 @@ public class MctseWrapperTest extends GBGBatch {
 
                 pa = arenaTrain.loadAgent(agtFile);
                 ParOther oPar = new ParOther();
-                oPar.setWrapperNPly(0);     // or >0 together with iterMCTSWrapArr={0}, if testing MaxNWrapper
-                pa.setWrapperParams(oPar);
+                ParWrapper wrPar = new ParWrapper();
+                wrPar.setWrapperNPly(0);     // or >0 together with iterMCTSWrapArr={0}, if testing MaxNWrapper
+                pa.setWrapperParamsOfromWr(wrPar);
 
                 for (int iterMctseWrap : iterMctseWrapArr) {
                     System.out.println("*** iterMctseWrap="+iterMctseWrap+ " ***");
@@ -456,9 +458,9 @@ public class MctseWrapperTest extends GBGBatch {
                             new PlayAgentApproximator2(pa),
                             "Mctse-wrapped " + pa.getName(),
                             maxDepth,oPar);
-                    if (oPar.getWrapperNPly() > 0) {
-                        System.out.println("oPar nPly = " + oPar.getWrapperNPly());
-                        qa = new ExpectimaxN2Wrapper(pa, oPar.getWrapperNPly());
+                    if (wrPar.getWrapperNPly() > 0) {
+                        System.out.println("wrPar nPly = " + wrPar.getWrapperNPly());
+                        qa = new ExpectimaxN2Wrapper(pa, wrPar.getWrapperNPly());
                     }
 
                     startTime = System.currentTimeMillis();
@@ -583,8 +585,9 @@ public class MctseWrapperTest extends GBGBatch {
 //                pa = new MCTSExpectimaxAgt("",params);
 
                 ParOther oPar = new ParOther();
-                oPar.setWrapperNPly(0);     // or >0 together with iterMCTSWrapArr={0}, if testing MaxNWrapper
-                pa.setWrapperParams(oPar);
+                ParWrapper wrPar = new ParWrapper();
+                wrPar.setWrapperNPly(0);     // or >0 together with iterMCTSWrapArr={0}, if testing MaxNWrapper
+                pa.setWrapperParamsOfromWr(wrPar);
 
                 for (double EPS : epsArr) {
                     ConfigWrapper.EPS = EPS;
@@ -594,9 +597,9 @@ public class MctseWrapperTest extends GBGBatch {
                                 new PlayAgentApproximator2(pa),
                                 "Mctse-wrapped " + pa.getName(),
                                 maxDepth,oPar);
-                        if (oPar.getWrapperNPly() > 0) {
-                            System.out.println("oPar nPly = " + oPar.getWrapperNPly());
-                            qa = new ExpectimaxN2Wrapper(pa, oPar.getWrapperNPly());
+                        if (wrPar.getWrapperNPly() > 0) {
+                            System.out.println("wrPar nPly = " + wrPar.getWrapperNPly());
+                            qa = new ExpectimaxN2Wrapper(pa, wrPar.getWrapperNPly());
                         }
 
                         // just a check (only for 3x3 EWN): ExpectimaxN with nply=15 is a perfect agent for 3x3 EWN.
@@ -656,7 +659,7 @@ public class MctseWrapperTest extends GBGBatch {
     private double precision3x3EWNStates(PlayAgent pa, PlayAgent qa, GameBoardEWN gb) {
         PlayAgent ea = new ExpectimaxNAgent("",15);
         int s=0, cp=0, cq=0, fpq=0, numStates=1000;
-        int iterMctseWrap = qa.getParOther().getWrapperMCTSIterations();
+        int iterMctseWrap = qa.getParWrapper().getWrapperMCTS_iterations();
         Types.ACTIONS_VT act_pa,act_qa,act_ea;
         //Random rand = new Random(System.currentTimeMillis());
         Random rand = new Random(42);

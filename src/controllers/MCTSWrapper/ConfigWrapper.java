@@ -38,7 +38,7 @@ public class ConfigWrapper {
      *        {@link MCTSWrapperAgent}
      * </ul>
      */
-    public static int EXPLORATION_MODE = 2;
+    public static int EXPLORATION_MODE = 0;
 
     /**
      * a quick hack to set epsilon for ConfigWrapper.EXPLORATION_MODE=2 (eps-greedy)

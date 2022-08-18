@@ -3,7 +3,6 @@ package controllers;
 import java.io.Serial;
 import java.io.Serializable;
 
-import controllers.MCTSWrapper.ConfigWrapper;
 import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.Arena;
 import games.GameBoard;
@@ -31,7 +30,7 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	 */
 	private int m_MaxGameNum;
 	private String m_name;
-	private AgentState m_agentState = AgentState.RAW;	// deprecated, use m_oPar.agentState
+	private final AgentState m_agentState = AgentState.RAW;	// deprecated, use m_oPar.agentState
 	private int epochMax = 0;
 	protected long m_numTrnMoves = 0L;			// moves (calls to getNextAction2) done during training
 	private long durationTrainingMs = 0L;		// total time in ms used for training
@@ -140,6 +139,7 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	public void setAgentState(AgentState aState) {
 		m_oPar.setAgentState(aState);
 	}
+
 	public void resetAgent() {  }
 
 	public String getName() {
@@ -271,7 +271,7 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 
     @Override
 	public boolean instantiateAfterLoading() {		// needed by LoadSaveTD.saveTDAgent
-		// older agents may have only m_agentState set:
+		// older agents may have only this.m_agentState set:
 		if (this.m_agentState!=null && m_oPar.getAgentState()==null)
 			m_oPar.setAgentState(this.m_agentState);
 
@@ -285,11 +285,7 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 		// older agents may not have ParWrapper. If so, set a default ParWrapper and copy the wrapper params
 		// from ParOther over to it.
 		if (this.getParWrapper()==null) {
-			this.setDefaultParWrapper();
-			m_wrPar.setWrapperNPly(getParOther().getWrapperNPly());
-			m_wrPar.setWrapperMCTS_iterations(getParOther().getWrapperMCTSIterations());
-			m_wrPar.setWrapperMCTS_PUCT(getParOther().getWrapperMCTS_PUCT());
-			m_wrPar.setWrapperMCTS_depth(getParOther().getWrapperMCTS_depth());
+			this.setDefaultParWrapper(getParOther());
 		}
 
 		return true;
@@ -364,13 +360,32 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 		m_oPar.setStopEval(num);
 	}
 
+	/**
+	 * Set the wrapper part + stopEval in {@link ParOther} m_oPar from {@code otherPar}
+	 * (needed to store {@link ParOther} from environment in the agent)
+	 */
     @Override
-	public void setWrapperParams(ParOther otherPar) {
+	public void setWrapperParamsO(ParOther otherPar) {
 		m_oPar.setWrapperNPly(otherPar.getWrapperNPly());
 		m_oPar.setWrapperMCTS_PUCT(otherPar.getWrapperMCTS_PUCT());
 		m_oPar.setWrapperMCTS_depth(otherPar.getWrapperMCTS_depth());
 		m_oPar.setWrapperMCTSIterations(otherPar.getWrapperMCTSIterations());
 		m_oPar.setStopEval(otherPar.getStopEval());
+	}
+
+	/**
+	 * Just for safety, make the wrapper params in {@link ParOther} m_oPar the same as the
+	 * wrapper params in {@link ParWrapper} wrPar. Should be obsolete in principle, because we do not
+	 * use any longer the wrapper params in {@link ParOther}. But we keep them for some time to be able
+	 * to load older agents.
+	 * @param wrPar wrapper params
+	 */
+	@Override
+	public void setWrapperParamsOfromWr(ParWrapper wrPar) {
+		m_oPar.setWrapperNPly(wrPar.getWrapperNPly());
+		m_oPar.setWrapperMCTS_PUCT(wrPar.getWrapperMCTS_PUCT());
+		m_oPar.setWrapperMCTS_depth(wrPar.getWrapperMCTS_depth());
+		m_oPar.setWrapperMCTSIterations(wrPar.getWrapperMCTS_iterations());
 	}
 
 	@Override
@@ -403,17 +418,25 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	}
 
 	/**
-	 * Set defaults for m_wrPar (needed in {@link Arena#loadAgent} when
-	 * loading older agents, where m_wrPar=null in the saved version).
+	 * Set defaults for {@code m_wrPar} (called from {@link Arena#loadAgent} and {@link AgentBase#instantiateAfterLoading()} when
+	 * loading older agents, where {@code m_wrPar=null} in the saved version).
+	 * Take over the wrapper parameters from {@link ParOther} {@code oPar} (usually = {@code this.m_oPar}).
 	 */
-	public void setDefaultParWrapper() {
-		m_wrPar = new ParWrapper();
+	public void setDefaultParWrapper(ParOther oPar) {
+		assert m_wrPar==null : "Oops, m_wrPar is not null!";
+		m_wrPar = new ParWrapper();		// takes over some defaults from ConfigWrapper
+
 		//m_wrPar.setParamDefaults(m_name,gameName); // currently, we do not have gameName here
-		m_wrPar.setWrapperMCTS_ExplorationMode(ConfigWrapper.EXPLORATION_MODE);
-		m_wrPar.setWrapperMCTS_epsInit(ConfigWrapper.epsilon);
-		m_wrPar.setWrapperMCTS_epsFinal(ConfigWrapper.epsilon);
-		m_wrPar.setUseSoftMax(ConfigWrapper.USESOFTMAX);
-		m_wrPar.setUseLastMCTS(ConfigWrapper.USELASTMCTS);
+
+		// since m_wrPar was null when calling this method, take over wrapper parameters from ParOther oPar
+		m_wrPar.setWrapperNPly(oPar.getWrapperNPly());
+		m_wrPar.setWrapperMCTS_iterations(oPar.getWrapperMCTSIterations());
+		m_wrPar.setWrapperMCTS_PUCT(oPar.getWrapperMCTS_PUCT());
+		m_wrPar.setWrapperMCTS_depth(oPar.getWrapperMCTS_depth());
+
+		if (m_wrPar.getWrapperNPly()>0) m_wrPar.setWrapperMode(1); 				// Max-N wrapper
+		if (m_wrPar.getWrapperMCTS_iterations()>0) m_wrPar.setWrapperMode(2); 	// MCTSWrapperAgent
+
 	}
 
 	@Override

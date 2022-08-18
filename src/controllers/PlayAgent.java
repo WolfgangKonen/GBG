@@ -255,7 +255,8 @@ public interface PlayAgent {
 	int getNumEval();
 	void setNumEval(int num);
 	void setStopEval(int num);
-	void setWrapperParams(ParOther otherPar);
+	void setWrapperParamsO(ParOther otherPar);
+	void setWrapperParamsOfromWr(ParWrapper wrPar);
 	void setParOther(ParOther op);
 	void setParReplay(ParRB prb);
 	void setParWrapper(ParWrapper pwr);

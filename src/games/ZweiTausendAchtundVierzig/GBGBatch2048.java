@@ -136,8 +136,8 @@ public class GBGBatch2048 {
 
 			// run Quick Evaluation
 			try {
-				int nPly1 = xab.oPar[0].getWrapperNPly();
-				int nPly2 = pa.getParOther().getWrapperNPly();
+				int nPly1 = xab.wrPar[0].getWrapperNPly();
+				int nPly2 = pa.getParWrapper().getWrapperNPly();
 				assert nPly == nPly1 : "Ooops, nPly  and nPly1 differ! " + nPly + " != " + nPly1;
 				assert nPly1 == nPly2 : "Ooops, nPly1 and nPly2 differ! " + nPly1 + " != " + nPly2;
 				System.out.println("nPly: " + nPly1);

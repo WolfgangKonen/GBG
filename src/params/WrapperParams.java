@@ -49,10 +49,11 @@ public class WrapperParams extends Frame {
     @Serial
     private static final long serialVersionUID = 1L;
     private final String[] wrapperList = {"None","MaxNWrapper","MCTSWrapper"};
+    // MaxNWrapper stands for MaxN or ExpectimaxN, MCTSWrapper stands for MCTS or MCTSE, depending on deterministic nature of game
     private final String[] exploModeList = {"None","proportional","eps-greedy"};
     JLabel wrapper_L;
     public JComboBox<String> choiceWrapper=new JComboBox<>(wrapperList);
-    JLabel notyetready_L;
+    //JLabel notyetready_L;
     JLabel wNply_L;
     JLabel wMCTSiter_L;
     JLabel wMCTSpUCT_L;
@@ -82,8 +83,8 @@ public class WrapperParams extends Frame {
 
         //this.m_arena = m_arena;
 
-        notyetready_L = new JLabel("NOT YET READY!");
-        wrapper_L = new JLabel("Wrapper type");
+        //notyetready_L = new JLabel("NOT YET READY!");
+        wrapper_L = new JLabel("Wrapper Mode");
         wNply_L = new JLabel("Wrapper nPly");
         wMCTSiter_L = new JLabel("Wrapper MCTS");
         wMCTSpUCT_L = new JLabel("PUCT for WrapM");
@@ -107,18 +108,22 @@ public class WrapperParams extends Frame {
                                 // can be handed over to a tab of a JTabbedPane
                                 // (see class XArenaTabs)
 
-        choiceWrapper.setToolTipText("<html>0: None <br>1: MCTS Wrapper <br>2: MaxN Wrapper<\\html>");
+        //wrapper_L.setToolTipText("<html>Wrapper mode blabla</html>");
+        choiceWrapper.setToolTipText("<html>0: None <br>1: MaxN Wrapper<br>2: MCTS Wrapper blabla</html>");
         wNply_L.setToolTipText(
-                "<html>Wrapper n-ply look ahead <br>(for play, compete, eval). <br>CAUTION: Numbers >5 can take long!</html>");
+                "<html>Wrapper n-ply look ahead <br>(for play, compete, eval). <br>CAUTION: Numbers > 5 <br> can take long!</html>");
         wMCTSiter_L.setToolTipText(
                 "<html>Wrapper MCTS iterations <br>(for play, compete, eval tasks)</html>");
         wMCTSpUCT_L.setToolTipText("PUCT value for MCTS Wrapper");
         wMCTSdepth_L.setToolTipText("max depth value for MCTS Wrapper. -1: no max depth");
         wMCTSexplorationMode_L.setToolTipText(
-                "<html>Wrapper MCTS exploration mode (EXPLO_MODE)</html>");
+                "Wrapper MCTS exploration mode (EXPLO_MODE)");
+        choiceExplorationMode.setToolTipText("<html>0: None <br>1: proportional to visit counts<br>2: epsilon-greedy mode</html>");
         wMCTSepsInit_L.setToolTipText("initial random move rate for EXPLO_MODE==2");
         wMCTSepsFinal_L.setToolTipText("final random move rate for EXPLO_MODE==2");
-        notyetready_L.setToolTipText("<html><b>Wrapper pars is not yet integrated!</b></html>");
+        wMCTSuseSoft_L.setToolTipText("Use softMax() in MCTS wrapper");
+        wMCTSuseLast_L.setToolTipText("Re-use last MCTS in wrapper");
+        //notyetready_L.setToolTipText("<html><b>Wrapper pars is not yet integrated!</b></html>");
 
 
         // the following lambda's, where e is an ActionEvent, are a simpler replacement for anonymous action listeners:
@@ -135,8 +140,8 @@ public class WrapperParams extends Frame {
         wPanel.add(wrapper_L);
         wPanel.add(choiceWrapper);
 
-        wPanel.add(notyetready_L);
-        //wPanel.add(new Canvas());
+        //wPanel.add(notyetready_L);
+        wPanel.add(new Canvas());
         wPanel.add(new Canvas());
 
         wPanel.add(wNply_L);

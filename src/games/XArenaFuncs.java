@@ -348,9 +348,10 @@ public class XArenaFuncs {
 						// TODO: extend this for other agents and their param tabs
 						//
 
+						pa.setParWrapper(m_xab.wrPar[n]); // for all agents
+						pa.setWrapperParamsOfromWr(pa.getParWrapper());
 						pa.setParOther(m_xab.oPar[n]);   // for all agents
 						pa.setParReplay(m_xab.rbPar[n]); // for all agents
-						pa.setParWrapper(m_xab.wrPar[n]); // for all agents
 						break;
 					case TRAINED:
 						// When fetching an agent in state TRAINED, we want to take it 'as-is' (it was perhaps trained
@@ -362,10 +363,11 @@ public class XArenaFuncs {
 						// set/changed BEFORE training a trainable agent.) The following line of code was missing before 2020-08-11
 						// and caused the bug that a Wrapper nPly set for a trained agent was not saved to disk.
 						// Now it will be saved:
-						pa.setWrapperParams(m_xab.oPar[n]);
+						pa.setParWrapper(m_xab.wrPar[n]);
+						pa.setWrapperParamsOfromWr(pa.getParWrapper());
+						//pa.setWrapperParamsO(m_xab.oPar[n]);		// obsolete
 
 						pa.setParReplay(m_xab.rbPar[n]);
-						pa.setParWrapper(m_xab.wrPar[n]);
 						break;
 					default:
 						throw new RuntimeException("Not supported AgentState");
@@ -504,14 +506,14 @@ public class XArenaFuncs {
 	}
 
 	/**
-	 * Given the selected agents in {@code paVector}, call {@link #wrapAgent(PlayAgent, ParOther, ParMaxN, StateObservation)}
+	 * Given the selected agents in {@code paVector}, call {@link #wrapAgent(PlayAgent, ParOther, ParWrapper, ParMaxN, StateObservation)}
 	 * for every {@code n}.
 	 *
 	 * @param paVector
 	 *            the (unwrapped) agents for each player
 	 * @param m_xab
-	 *            for access to m_xab.oPar, the vector of {@link ParOther},
-	 *            containing {@code nply = oPar[n].getWrapperNPly()} for each
+	 *            for access to m_xab.oPar, the vector of {@link ParWrapper},
+	 *            containing {@code nply = wrPar[n].getWrapperNPly()} for each
 	 *            agent separately. And for access to m_xab.maxnParams, the
 	 *            vector of {@link ParMaxN} containing
 	 *            {@code boolean maxNHashMap}.
@@ -527,7 +529,7 @@ public class XArenaFuncs {
 	{
 		PlayAgent[] qaVector = new PlayAgent[numPlayers];
 		for (int n = 0; n < numPlayers; n++) {
-			qaVector[n] = wrapAgent(paVector[n], m_xab.oPar[n], m_xab.maxnPar[n], so);
+			qaVector[n] = wrapAgent(paVector[n], m_xab.oPar[n], m_xab.wrPar[n], m_xab.maxnPar[n], so);
 		} // for (n)
 		return qaVector;
 	}
@@ -536,7 +538,7 @@ public class XArenaFuncs {
 	public PlayAgent[] wrapAgents_TS(PlayAgent[] paVector, XArenaButtons m_xab, StateObservation so) {
 		PlayAgent[] qaVector = new PlayAgent[numPlayers];
 		for (int n = 0; n < numPlayers; n++) {
-			qaVector[n] = wrapAgent(paVector[n], paVector[n].getParOther(), m_xab.maxnPar[n], so);
+			qaVector[n] = wrapAgent(paVector[n], paVector[n].getParOther(), m_xab.wrPar[n], m_xab.maxnPar[n], so);
 		} // for (n)
 		return qaVector;
 	}
@@ -544,7 +546,7 @@ public class XArenaFuncs {
 
 	/**
 	 * Given the selected agents {@code pa}, do nothing if both {@code nply==0 and iter==0}
-	 * (where {@code nply=oPar.getWrapperNPly()} and {@code iter=oPar.getWrapperMCTSIterations()}).
+	 * (where {@code nply=wrPar.getWrapperNPly()} and {@code iter=wrPar.getWrapperMCTSIterations()}).
 	 * <p>
 	 * If {@code nply>0}, wrap them by an n-ply look-ahead tree search. The tree is of type Max-N for deterministic
 	 * games and of type Expectimax-N for nondeterministic games.
@@ -558,14 +560,15 @@ public class XArenaFuncs {
 	 *
 	 * @param pa    the inner agent
 	 * @param oPar    needed for the wrapper parameter
+	 * @param wrPar
 	 * @param mPar    (currently not used)
 	 * @param so    needed only to detect whether game is deterministic or not.
 	 * @return	the wrapper agent enclosing the wrapped (inner) agent
 	 */
-	public PlayAgent wrapAgent(PlayAgent pa, ParOther oPar, ParMaxN mPar, StateObservation so) {
+	public PlayAgent wrapAgent(PlayAgent pa, ParOther oPar, ParWrapper wrPar, ParMaxN mPar, StateObservation so) {
 		PlayAgent qa;
-		int nply = oPar.getWrapperNPly();
-		int iter = oPar.getWrapperMCTSIterations();
+		int nply = wrPar.getWrapperNPly();
+		int iter = wrPar.getWrapperMCTS_iterations();
 		if (nply!=0 && iter!=0) {
 			throw new RuntimeException("Both Wrapper MCTS and Wrapper nPly are non-zero!");
 		}
@@ -584,23 +587,23 @@ public class XArenaFuncs {
 		}
 
 		// Wrap the agent with MCTS lookahead if 'Wrapper MCTS' is greater than zero.
-		if(oPar.getWrapperMCTSIterations() > 0 && !(pa instanceof HumanPlayer)){
+		if(wrPar.getWrapperMCTS_iterations() > 0 && !(pa instanceof HumanPlayer)){
 			if (so.isDeterministicGame()) {
 				qa = new MCTSWrapperAgent(
-						oPar.getWrapperMCTSIterations(),
-						oPar.getWrapperMCTS_PUCT(),
+						wrPar.getWrapperMCTS_iterations(),
+						wrPar.getWrapperMCTS_PUCT(),
 						new PlayAgentApproximator(qa),
 						"MCTS-wrapped "+qa.getName(),
-						oPar.getWrapperMCTS_depth(),
+						wrPar.getWrapperMCTS_depth(),
 						oPar
 				);
 			} else {
 				qa = new MctseWrapperAgent(
-						oPar.getWrapperMCTSIterations(),
-						oPar.getWrapperMCTS_PUCT(),
+						wrPar.getWrapperMCTS_iterations(),
+						wrPar.getWrapperMCTS_PUCT(),
 						new PlayAgentApproximator2(qa),
 						"Mctse-wrapped "+qa.getName(),
-						oPar.getWrapperMCTS_depth(),
+						wrPar.getWrapperMCTS_depth(),
 						oPar
 				);
 			}
@@ -649,12 +652,12 @@ public class XArenaFuncs {
 			pa = this.constructAgent(n, sAgent, xab);
 			if (pa == null)
 				throw new RuntimeException("Could not construct agent = " + sAgent);
-			qa = wrapAgent(pa, xab.oPar[n], xab.maxnPar[n], gb.getDefaultStartState());
+			qa = wrapAgent(pa, xab.oPar[n], xab.wrPar[n],  xab.maxnPar[n], gb.getDefaultStartState());
 
 			if (qa == null)
 				throw new RuntimeException("Could not wrap agent = " + sAgent);
 			pa = qa;
-			pa.setWrapperParams(xab.oPar[n]);
+			pa.setWrapperParamsO(xab.oPar[n]);
 		} catch (RuntimeException e) {
 			m_Arena.showMessage(e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
 			return null;
@@ -736,7 +739,7 @@ public class XArenaFuncs {
 				qa = pa;
 				// --- OLD, no longer needed, since pa is already wrapped, if wrapping is activated: ---
 				// construct 'qa' anew (possibly wrapped agent for eval)
-				//qa = wrapAgent(pa, xab.oPar[n], xab.maxnPar[n], gb.getStateObs());
+				//qa = wrapAgent(pa, xab.oPar[n], xab.wrPar[n], xab.maxnPar[n], gb.getStateObs());
 
 				m_evaluatorQ.eval(qa);		// throws RuntimeException, if TDReferee.agt.zip is not found
 				if (doTrainEvaluation) {
@@ -766,7 +769,7 @@ public class XArenaFuncs {
 				qa = pa;
 				// --- OLD, no longer needed, since pa is already wrapped, if wrapping is activated: ---
 				// construct 'qa' anew (possibly wrapped agent for eval)
-				//qa = wrapAgent(pa, xab.oPar[n], xab.maxnPar[n], gb.getStateObs());
+				//qa = wrapAgent(pa, xab.oPar[n], xab.wrPar[n], xab.maxnPar[n], gb.getStateObs());
 
 				if (doTrainEvaluation) {
 					m_evaluatorT.eval(qa);
@@ -942,12 +945,12 @@ public class XArenaFuncs {
 				pa = constructAgent(n, sAgent, xab);
 				if (pa == null)
 					throw new RuntimeException("Could not construct AgentX = " + sAgent);
-				qa = wrapAgent(pa, xab.oPar[n], xab.maxnPar[n], gb.getDefaultStartState());
+				qa = wrapAgent(pa, xab.oPar[n], xab.wrPar[n],  xab.maxnPar[n], gb.getDefaultStartState());
 
 				if (qa == null)
 					throw new RuntimeException("Could not wrap agent = " + sAgent);
 				pa = qa;
-				pa.setWrapperParams(xab.oPar[n]);
+				pa.setWrapperParamsO(xab.oPar[n]);
 			} catch (RuntimeException e) {
 				m_Arena.showMessage(e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
 				return pa;
@@ -999,7 +1002,7 @@ public class XArenaFuncs {
 					qa = pa;
 					// --- OLD, no longer needed, since pa is already wrapped, if wrapping is activated: ---
 					// construct 'qa' anew (possibly wrapped agent for eval)
-					//qa = wrapAgent(pa, xab.oPar[n], xab.maxnPar[n], gb.getStateObs());
+					//qa = wrapAgent(pa, xab.oPar[n],  xab.wrPar[n], xab.maxnPar[n], gb.getStateObs());
 
 					m_evaluatorQ.eval(qa);			// throws RuntimeException, if TDReferee.agt.zip is not found
 					evalQ = m_evaluatorQ.getLastResult();
@@ -1046,7 +1049,7 @@ public class XArenaFuncs {
 			qa = pa;
 			// --- OLD, no longer needed, since pa is already wrapped, if wrapping is activated: ---
 			// construct 'qa' anew (possibly wrapped agent for eval)
-			//qa = wrapAgent(pa, xab.oPar[n], xab.maxnPar[n], gb.getStateObs());
+			//qa = wrapAgent(pa, xab.oPar[n], xab.wrPar[n], xab.maxnPar[n], gb.getStateObs());
 
 			// final evaluation:
 			m_evaluatorQ.eval(qa);
@@ -1135,21 +1138,17 @@ public class XArenaFuncs {
 			pa_string[i] = paVector.pavec[i].stringDescr();
 
 		switch (numPlayers) {
-			case (1):
-				sMsg = "Competition, " + competeNum + " episodes: \n" + pa_string[0];
-				break;
-			case (2):
-				sMsg = "Competition, " + competeNum + " episodes: \n" +
-						"      X: " + pa_string[0] + " \n" + "   vs O: " + pa_string[1];
-				break;
-			default:
+			case (1) -> sMsg = "Competition, " + competeNum + " episodes: \n" + pa_string[0];
+			case (2) -> sMsg = "Competition, " + competeNum + " episodes: \n" +
+					"      X: " + pa_string[0] + " \n" + "   vs O: " + pa_string[1];
+			default -> {
 				sMsg = "Competition, " + competeNum + " episodes: \n";
 				for (int n = 0; n < numPlayers; n++) {
 					sMsg = sMsg + "    P" + n + ": " + pa_string[n];
 					if (n < numPlayers - 1)
 						sMsg = sMsg + ", \n";
 				}
-				break;
+			}
 		}
 		if (verbose > 0)
 			System.out.println(sMsg);

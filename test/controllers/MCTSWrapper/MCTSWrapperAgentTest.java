@@ -17,6 +17,7 @@ import games.RubiksCube.CubeConfig;
 import games.RubiksCube.EvalCubeParams;
 import games.RubiksCube.EvaluatorCube;
 import games.RubiksCube.GameBoardCube;
+import params.ParWrapper;
 import starters.GBGBatch;
 import starters.MCompeteMWrap;
 import org.junit.Test;
@@ -172,8 +173,9 @@ public class MCTSWrapperAgentTest extends GBGBatch {
                 pa = arenaTrain.loadAgent(agtFile);
 
                 ParOther oPar = new ParOther();
-                oPar.setWrapperNPly(0);     // or >0 together with iterMCTSWrapArr={0}, if testing MaxNWrapper
-                pa.setWrapperParams(oPar);
+                ParWrapper wrPar = new ParWrapper();
+                wrPar.setWrapperNPly(0);     // or >0 together with iterMCTSWrapArr={0}, if testing MaxNWrapper
+                pa.setWrapperParamsOfromWr(wrPar);
 
                 for (double EPS : epsArr) {
                     ConfigWrapper.EPS = EPS;
@@ -183,9 +185,9 @@ public class MCTSWrapperAgentTest extends GBGBatch {
                                 new PlayAgentApproximator(pa),
                                 "MCTS-wrapped", // +" " + pa.getName(),
                                 maxDepth, oPar);
-                        if (oPar.getWrapperNPly() > 0) {
-                            System.out.println("oPar nPly = " + oPar.getWrapperNPly());
-                            qa = new MaxN2Wrapper(pa, oPar.getWrapperNPly(), oPar);
+                        if (wrPar.getWrapperNPly() > 0) {
+                            System.out.println("wrPar nPly = " + wrPar.getWrapperNPly());
+                            qa = new MaxN2Wrapper(pa, wrPar.getWrapperNPly(), oPar);
                         }
 
                         startTime = System.currentTimeMillis();
@@ -408,7 +410,7 @@ public class MCTSWrapperAgentTest extends GBGBatch {
                         {
                             ParOther oPar = pa.getParOther();
                             oPar.setWrapperNPly(nPly);
-                            pa.setWrapperParams(oPar);
+                            pa.setWrapperParamsO(oPar);
                             System.out.println("oPar nPly = " + nPly);
                             qa = new MaxN2Wrapper(pa, nPly, oPar);
                         }
@@ -546,7 +548,7 @@ public class MCTSWrapperAgentTest extends GBGBatch {
                         {
                             ParOther oPar = pa.getParOther();
                             oPar.setWrapperNPly(nPly);
-                            pa.setWrapperParams(oPar);
+                            pa.setWrapperParamsO(oPar);
                             System.out.println("oPar nPly = " + nPly);
                             qa = new MaxN2Wrapper(pa, nPly, oPar);
                         }
