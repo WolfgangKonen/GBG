@@ -2,13 +2,13 @@ package params;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.io.Serial;
 
 public class RBParams extends Frame{
 
 
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     JLabel useRp_L;
@@ -20,15 +20,15 @@ public class RBParams extends Frame{
     public Checkbox useRP_T;
     public JTextField capacity_T;
     public JTextField batchSize_T;
-    private String[] pushers = new String[]{"All"};
+    private final String[] pushers = new String[]{"All"};
     public JComboBox<String> pusher_cb;
 
     public JComboBox<String> selector_cb;
-    private String[] selectors = new String[]{"Random"};
+    private final String[] selectors = new String[]{"Random"};
 
     Button ok;
     JPanel ePanel;
-    RBParams e_par;
+    RBParams rb_par;
 
     public RBParams() {
         super("Buffer");
@@ -48,7 +48,7 @@ public class RBParams extends Frame{
         pusher_cb = new JComboBox<>(pushers);
 
         ok = new Button("OK");
-        e_par = this;
+        rb_par = this;
         ePanel = new JPanel(); 	// put the inner buttons into panel oPanel. This
         // panel
         // can be handed over to a tab of a JTabbedPane
@@ -59,11 +59,8 @@ public class RBParams extends Frame{
         batchSize_L.setToolTipText("The amount of transitions sampled from the buffer for each episode (Amount of avg. game length)");
         selector_L.setToolTipText("The policy used for selecting a transition from the replay buffer");
         pusher_L.setToolTipText("The policy used for adding transitions to the replay buffer");
-        ok.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                e_par.setVisible(false);
-            }
-        });
+        ok.addActionListener( e -> rb_par.setVisible(false) );
+        useRP_T.addItemListener( e -> this.enableRBPart() );
 
         setLayout(new BorderLayout(10, 0)); // rows,columns,hgap,vgap
         ePanel.setLayout(new GridLayout(0, 4, 10, 10));
@@ -90,6 +87,8 @@ public class RBParams extends Frame{
         pack();
         setVisible(false);
 
+        enableRBPart();
+
     } // constructor OtherParams()
 
     public JPanel getPanel() {
@@ -97,7 +96,7 @@ public class RBParams extends Frame{
     }
 
     public int getCapacity() {
-        return Integer.valueOf(capacity_T.getText()).intValue();
+        return Integer.parseInt(capacity_T.getText());
     }
     public void setCapacity(int value) {
         capacity_T.setText(value + "");
@@ -111,7 +110,7 @@ public class RBParams extends Frame{
     }
 
     public void setBatchSize(int i){batchSize_T.setText(i+"");}
-    public int getBatchSize(){return Integer.valueOf(batchSize_T.getText()).intValue();}
+    public int getBatchSize(){return Integer.parseInt(batchSize_T.getText());}
 
     public int getPusher(){return pusher_cb.getSelectedIndex();}
     public void setPusher(int i){pusher_cb.setSelectedIndex(i);}
@@ -133,4 +132,18 @@ public class RBParams extends Frame{
         this.setSelector(ep.getSelectorV());
         this.setPusher(ep.getPusherV());
     }
+
+    private void enableRBPart() {
+        boolean enable = (this.getUseRb());
+        capacity_L.setEnabled(enable);
+        capacity_T.setEnabled(enable);
+        batchSize_L.setEnabled(enable);
+        batchSize_T.setEnabled(enable);
+        selector_L.setEnabled(enable);
+        selector_cb.setEnabled(enable);
+        pusher_L.setEnabled(enable);
+        pusher_cb.setEnabled(enable);
+    }
+
+
 }

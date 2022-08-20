@@ -381,9 +381,7 @@ public class XArenaButtons //extends JPanel
 	public void setNtParFrom(int n, ParNT parNT) {
 		ntPar[n].setFrom( parNT );
 	}
-	public void setOParFrom(int n, ParOther parOther) {
-		oPar[n].setFrom( parOther );
-	}
+	public void setOParFrom(int n, ParOther parOther) { oPar[n].setFrom( parOther ); }
 	public void setEdaxParFrom(int n, ParEdax parEdax) {
 		edPar[n].setFrom( parEdax );
 	}

@@ -408,11 +408,10 @@ public class MCTSWrapperAgentTest extends GBGBatch {
                         int nPly=0;                 // if nPly>0, test this together with iterMCTSWrapArr={0}
                         if (nPly > 0)
                         {
-                            ParOther oPar = pa.getParOther();
-                            oPar.setWrapperNPly(nPly);
-                            pa.setWrapperParamsO(oPar);
+                            pa.getParOther().setWrapperNPly(nPly);
+                            pa.getParWrapper().setWrapperNPly(nPly);
                             System.out.println("oPar nPly = " + nPly);
-                            qa = new MaxN2Wrapper(pa, nPly, oPar);
+                            qa = new MaxN2Wrapper(pa, nPly, pa.getParOther());
                         }
 
                         ScoreTuple sc;
@@ -546,11 +545,10 @@ public class MCTSWrapperAgentTest extends GBGBatch {
                         int nPly=0;                 // if nPly>0, test this together with iterMCTSWrapArr={0}
                         if (nPly > 0)
                         {
-                            ParOther oPar = pa.getParOther();
-                            oPar.setWrapperNPly(nPly);
-                            pa.setWrapperParamsO(oPar);
+                            pa.getParOther().setWrapperNPly(nPly);
+                            pa.getParWrapper().setWrapperNPly(nPly);
                             System.out.println("oPar nPly = " + nPly);
-                            qa = new MaxN2Wrapper(pa, nPly, oPar);
+                            qa = new MaxN2Wrapper(pa, nPly, pa.getParOther());
                         }
 
                         ScoreTuple sc;

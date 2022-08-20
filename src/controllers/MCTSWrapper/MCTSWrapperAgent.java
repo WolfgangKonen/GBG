@@ -423,6 +423,7 @@ public final class MCTSWrapperAgent extends AgentBase implements PlayAgent, Seri
     }
 
     public boolean instantiateAfterLoading() {
+        super.instantiateAfterLoading();
         setWrParams(this.m_wrPar,this.getMaxGameNum());
         return true;
     }

@@ -1,52 +1,18 @@
-TDNTuple3Agt: USESYM:true, P:4, NORMALIZE:false, sigmoid:tanh, lambda:0.0, horizon:1, AFTERSTATE:false, learnFromRM: true;;;;;;;;;
-TDNTuple3Agt: alpha_init->final:3.7->3.7, epsilon_init->final:0.1->0.0, gamma: 1.0, fixed n-tuple, mode=1, evalQ: 0, evalT: -1;;;;;;;;;
-run; competeNum; dEdax; iterMWrap; EPS; p_MWrap; c_puct; winrate;opponent; user2
-0;25;0;50;1.00E-08;1;1;0.92;TCL-wrap;0
-0;25;0;100;1.00E-08;1;1;0.88;TCL-wrap;0
-0;25;0;200;1.00E-08;1;1;0.84;TCL-wrap;0
-0;25;0;300;1.00E-08;1;1;0.96;TCL-wrap;0
-0;25;0;500;1.00E-08;1;1;0.98;TCL-wrap;0
-0;25;0;750;1.00E-08;1;1;1;TCL-wrap;0
-0;25;0;1000;1.00E-08;1;1;1;TCL-wrap;0
-1;25;0;50;1.00E-08;1;1;0.88;TCL-wrap;0
-1;25;0;100;1.00E-08;1;1;0.96;TCL-wrap;0
-1;25;0;200;1.00E-08;1;1;0.98;TCL-wrap;0
-1;25;0;300;1.00E-08;1;1;0.8;TCL-wrap;0
-1;25;0;500;1.00E-08;1;1;0.98;TCL-wrap;0
-1;25;0;750;1.00E-08;1;1;1;TCL-wrap;0
-1;25;0;1000;1.00E-08;1;1;0.98;TCL-wrap;0
-2;25;0;50;1.00E-08;1;1;0.8;TCL-wrap;0
-2;25;0;100;1.00E-08;1;1;0.9;TCL-wrap;0
-2;25;0;200;1.00E-08;1;1;0.9;TCL-wrap;0
-2;25;0;300;1.00E-08;1;1;0.92;TCL-wrap;0
-2;25;0;500;1.00E-08;1;1;1;TCL-wrap;0
-2;25;0;750;1.00E-08;1;1;0.98;TCL-wrap;0
-2;25;0;1000;1.00E-08;1;1;0.96;TCL-wrap;0
-3;25;0;50;1.00E-08;1;1;0.76;TCL-wrap;0
-3;25;0;100;1.00E-08;1;1;0.9;TCL-wrap;0
-3;25;0;200;1.00E-08;1;1;0.88;TCL-wrap;0
-3;25;0;300;1.00E-08;1;1;0.96;TCL-wrap;0
-3;25;0;500;1.00E-08;1;1;1;TCL-wrap;0
-3;25;0;750;1.00E-08;1;1;1;TCL-wrap;0
-3;25;0;1000;1.00E-08;1;1;1;TCL-wrap;0
-4;25;0;50;1.00E-08;1;1;0.84;TCL-wrap;0
-4;25;0;100;1.00E-08;1;1;0.84;TCL-wrap;0
-4;25;0;200;1.00E-08;1;1;0.9;TCL-wrap;0
-4;25;0;300;1.00E-08;1;1;0.94;TCL-wrap;0
-4;25;0;500;1.00E-08;1;1;1;TCL-wrap;0
-4;25;0;750;1.00E-08;1;1;1;TCL-wrap;0
-4;25;0;1000;1.00E-08;1;1;0.98;TCL-wrap;0
-0;25;0;0;1.00E-08;1;1;0.77;AB-DL;0
-0;25;0;1000;1.00E-08;1;1;0.77;AB-DL;0
-1;25;0;0;1.00E-08;1;1;0.8;AB-DL;0
-1;25;0;1000;1.00E-08;1;1;0.8;AB-DL;0
-0;25;0;0;1.00E-08;1;1;-1.11E-16;TCL-base;0
-1;25;0;0;1.00E-08;1;1;-1.11E-16;TCL-base;0
-2;25;0;0;1.00E-08;1;1;-1.11E-16;TCL-base;0
-3;25;0;0;1.00E-08;1;1;0.08;TCL-base;0
-4;25;0;0;1.00E-08;1;1;0.08;TCL-base;0
-0;25;0;1000;1.00E-08;1;1;-1.11E-16;TCL-base;0
-1;25;0;1000;1.00E-08;1;1;-1.11E-16;TCL-base;0
-2;25;0;1000;1.00E-08;1;1;-1.11E-16;TCL-base;0
-3;25;0;1000;1.00E-08;1;1;0.08;TCL-base;0
-4;25;0;1000;1.00E-08;1;1;0.08;TCL-base;0
+TDNTuple3Agt: USESYM:true, P:4, NORMALIZE:false, sigmoid:tanh, lambda:0.0, horizon:1, AFTERSTATE:false, learnFromRM: true
+TDNTuple3Agt: alpha_init->final:3.7->3.7, epsilon_init->final:0.1->0.0, gamma: 1.0, fixed n-tuple, mode=1, evalQ: 0, evalT: -1
+agtFile; run; competeNum; dEdax; iterMWrap; EPS; p_MWrap; c_puct; winrate; time; user2
+2-TCL-EXP-NT3-al37-lam000-6000k-epsfin0.agt.zip; 0; 25; 0; 0; 1.0E-8; 1; 1.0; -1.1102230246251565E-16; 17.586; 0.0
+2-TCL-EXP-NT3-al37-lam000-6000k-epsfin0.agt.zip; 0; 25; 0; 50; 1.0E-8; 1; 1.0; 0.9000000000000001; 34.485; 0.0
+2-TCL-EXP-NT3-al37-lam000-6000k-epsfin0.agt.zip; 0; 25; 0; 100; 1.0E-8; 1; 1.0; 0.9400000000000002; 34.59; 0.0
+2-TCL-EXP-NT3-al37-lam000-6000k-epsfin0.agt.zip; 0; 25; 0; 200; 1.0E-8; 1; 1.0; 0.8800000000000001; 36.333; 0.0
+2-TCL-EXP-NT3-al37-lam000-6000k-epsfin0.agt.zip; 0; 25; 0; 300; 1.0E-8; 1; 1.0; 1.0; 35.887; 0.0
+2-TCL-EXP-NT3-al37-lam000-6000k-epsfin0.agt.zip; 0; 25; 0; 500; 1.0E-8; 1; 1.0; 0.9400000000000002; 38.836; 0.0
+2-TCL-EXP-NT3-al37-lam000-6000k-epsfin0.agt.zip; 0; 25; 0; 750; 1.0E-8; 1; 1.0; 1.0; 41.893; 0.0
+2-TCL-EXP-NT3-al37-lam000-6000k-epsfin0.agt.zip; 0; 25; 0; 1000; 1.0E-8; 1; 1.0; 0.9800000000000002; 45.436; 0.0
+2-TCL-EXP-NT3-al37-lam000-6000k-epsfin0.agt.zip; 1; 25; 0; 0; 1.0E-8; 1; 1.0; -1.1102230246251565E-16; 15.044; 0.0
+2-TCL-EXP-NT3-al37-lam000-6000k-epsfin0.agt.zip; 1; 25; 0; 50; 1.0E-8; 1; 1.0; 0.8600000000000001; 34.143; 0.0
+2-TCL-EXP-NT3-al37-lam000-6000k-epsfin0.agt.zip; 1; 25; 0; 100; 1.0E-8; 1; 1.0; 0.9200000000000002; 34.791; 0.0
+2-TCL-EXP-NT3-al37-lam000-6000k-epsfin0.agt.zip; 1; 25; 0; 200; 1.0E-8; 1; 1.0; 0.8400000000000001; 36.729; 0.0
+2-TCL-EXP-NT3-al37-lam000-6000k-epsfin0.agt.zip; 1; 25; 0; 300; 1.0E-8; 1; 1.0; 0.9400000000000002; 36.677; 0.0
+2-TCL-EXP-NT3-al37-lam000-6000k-epsfin0.agt.zip; 1; 25; 0; 500; 1.0E-8; 1; 1.0; 1.0; 38.693; 0.0
+2-TCL-EXP-NT3-al37-lam000-6000k-epsfin0.agt.zip; 1; 25; 0; 750; 1.0E-8; 1; 1.0; 1.0; 40.479; 0.0

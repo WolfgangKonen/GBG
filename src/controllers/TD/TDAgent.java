@@ -162,9 +162,9 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	 * 
 	 * @see Arena#loadAgent
 	 */
-	public void fillParamTabsAfterLoading(int n, Arena m_arena) { 
+	public void fillParamTabsAfterLoading(int n, Arena m_arena) {
+		super.fillParamTabsAfterLoading(n, m_arena);
 		m_arena.m_xab.setTdParFrom(n, this.getParTD() );
-		m_arena.m_xab.setOParFrom(n, this.getParOther() );
 	}
 	
 	/**

@@ -191,18 +191,10 @@ public class ParOther implements Serializable {
 		return stopEval;
 	}
 
-	public int getWrapperNPly() {
-		return wrapperNply;
-	}
-	
-	public int getWrapperMCTSIterations() {
-		return wrapperMCTSIterations;
-	}
-
-	public double getWrapperMCTS_PUCT() {
-		return wrapperMCTS_PUCT;
-	}
-
+	// deprecated, use these getters only for older agents. Otherwise, use the new getters in ParWrapper
+	public int getWrapperNPly() { return wrapperNply; }
+	public int getWrapperMCTSIterations() { return wrapperMCTSIterations; }
+	public double getWrapperMCTS_PUCT() { return wrapperMCTS_PUCT; }
 	public int getWrapperMCTS_depth() { return wrapperMCTS_depth; }
 
 	public int getpMinRubiks() { return pMinRubiks;	}

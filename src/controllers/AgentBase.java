@@ -292,8 +292,11 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	}
 	
     @Override
-	public void fillParamTabsAfterLoading(int n, Arena m_arena) { 
-		 				// dummy stub, see XArenaMenu.loadAgent
+	public void fillParamTabsAfterLoading(int n, Arena m_arena) {
+		setWrapperParamsOfromWr(this.getParWrapper());
+		m_arena.m_xab.setOParFrom(n, this.getParOther() );
+		m_arena.m_xab.setWrapperParFrom(n, this.getParWrapper());
+		m_arena.m_xab.setRBParFrom(n, this.getParReplay());
 	}
 	
     @Override

@@ -87,9 +87,10 @@ public class MCTSExpectimaxAgt extends AgentBase implements PlayAgent
 	 * 
 	 * @see Arena#loadAgent
 	 */
-	public void fillParamTabsAfterLoading(int n, Arena m_arena) { 
+	public void fillParamTabsAfterLoading(int n, Arena m_arena) {
+		super.fillParamTabsAfterLoading(n, m_arena);
 		m_arena.m_xab.setMctseParFrom(n, this.getParMCTSE() );
-		m_arena.m_xab.setOParFrom(n, this.getParOther() );
+		//m_arena.m_xab.setOParFrom(n, this.getParOther() ); // now in super
 	}
 	
     /**

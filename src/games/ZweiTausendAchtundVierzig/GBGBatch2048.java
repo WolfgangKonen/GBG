@@ -125,7 +125,8 @@ public class GBGBatch2048 {
 
 		for (int nPly : nPlyArr) {
 
-			xab.oPar[0].setWrapperNPly(nPly);
+			xab.oPar[0].setWrapperNPly(nPly);	// deprecated
+			xab.wrPar[0].setWrapperNPly(nPly);
 			String sAgent = xab.getSelectedAgent(0);
 			xab.m_arena.m_xfun.m_PlayAgents = xab.m_arena.m_xfun.fetchAgents(xab);
 			AgentBase.validTrainedAgents(xab.m_arena.m_xfun.m_PlayAgents, 1);

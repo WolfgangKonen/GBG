@@ -42,7 +42,8 @@ public class ExpectimaxN2Wrapper extends AgentBase implements PlayAgent, Seriali
 
 	public ExpectimaxN2Wrapper(PlayAgent pa, int nply) {
 		super("Expectimax2Wrapper");
-		this.m_oPar.setWrapperNPly(nply);
+		this.m_oPar.setWrapperNPly(nply); 	// deprecated
+		this.m_wrPar.setWrapperNPly(nply);
 		m_depth = nply;
 		this.wrapped_pa = pa;
 	}
@@ -72,9 +73,9 @@ public class ExpectimaxN2Wrapper extends AgentBase implements PlayAgent, Seriali
 	 * 
 	 * @see Arena#loadAgent
 	 */
-	public void fillParamTabsAfterLoading(int n, Arena m_arena) { 
+	public void fillParamTabsAfterLoading(int n, Arena m_arena) {
+		super.fillParamTabsAfterLoading(n, m_arena);
 		m_arena.m_xab.setMaxNDepthFrom(n, this.getDepth() );
-//		m_arena.m_xab.setOParFrom(n, this.getParOther() );		// do or don't?
 	}
 	
 	/**

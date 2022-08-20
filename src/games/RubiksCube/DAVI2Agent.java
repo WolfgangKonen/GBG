@@ -57,8 +57,9 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
 	 * 
 	 * @see Arena#loadAgent
 	 */
-	public void fillParamTabsAfterLoading(int n, Arena m_arena) { 
-		m_arena.m_xab.setOParFrom(n, this.getParOther() );
+	public void fillParamTabsAfterLoading(int n, Arena m_arena) {
+		super.fillParamTabsAfterLoading(n, m_arena);
+		//m_arena.m_xab.setOParFrom(n, this.getParOther() );	// now in super
 		System.out.println("DAVI2 vm.size="+this.vm.size());
 	}
 
