@@ -1,7 +1,6 @@
 *.class
 bin/*
 doc/*
-myDocs/*
 .classpath
 .project
 Arena.comp.csv
