@@ -48,6 +48,7 @@ import games.XArenaFuncs;
  * @see MCTSWrapperAgent
  * @see MaxN2Wrapper
  * @see WrapperParams
+ * @see ConfigWrapper
  */
 public class ParWrapper implements Serializable {
     public static int DEFAULT_WRAPPER_MODE = 0;

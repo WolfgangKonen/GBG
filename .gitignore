@@ -19,17 +19,13 @@ logs/*
 Pokerlogs/*
 agents/temp/*
 
+#Files not for the public GitHub version:
+myDocs/*
+
 # all JAR files (GBGBatch.jar,...) now moved to jartools/, but excluded from GitHub:
 jartools/*
 GBGLaunch_BACKUP.jar
 
-
-
-
-#Files not for the public GitHub version
-#TODO.docx		-- now in myDocs
-#TDNTupleAgt.docx	-- now in myDocs	
-#FutureWork.docx	-- now in myDocs
 ~$*.*
 ~*.tmp
 
@@ -37,6 +33,8 @@ GBGLaunch_BACKUP.jar
 src/games/ZweiTausendAchtundVierzig/Parallel/*
 
 agents/theNtuple.txt
+agents/test_MC.agt.zip
+agents/test_TD4_EWN.zip.agt.zip
 # too big (92 MB) for a regular save to GitHub (remember that GitHub has a hard file limit at 100 MB -
 # and if such a >100-MB file happens to be in a commit, the commit will fail - and so far there is no other 
 # option to reset this than setting up the whole local clone anew again (!!))
@@ -67,17 +65,23 @@ agents/Othello/multiTrain-10agents-2/*
 agents/Othello/TCL3-*noFA*.agt.zip
 agents/Othello/TCL3-fixed6_250k-lam05_P4_H001-diff1-FAm.agt.zip
 agents/Othello/TCL4-100_7_100k-RB*.agt.zip
+agents/Othello/TCL4-100_7_250k-lam05_P4_nPly2-FAm_C.agt.zip
 # (the only Othello agent we have in repos is TCL3-fixed6_250k-lam05_P4_H001-FAm.agt.zip)
 agents/Othello/WrappeMCTS-100-OLD.agt.zip
 agents/Othello/WrappeMCTS-100-tst.agt.zip
+agents/Othello/csv/multiCompeteOthello-i10000-TCL4C.xlsx
 agents/RubiksCube/tooBigForGit
 # (no RubiksCube agents in repos, they are still experimental)
 agents/RubiksCube/2x2x2_STICKER_AT/*test.agt.zip
+agents/RubiksCube/2x2x2_STICKER2_AT/multiTrain*/*.zip
 agents/RubiksCube/2x2x2_STICKER2_AT/*lam05.agt.zip
+agents/RubiksCube/2x2x2_STICKER2_AT/TCL4-p13-3000k-60-7t-OLD.agt.zip
+agents/RubiksCube/2x2x2_STICKER2_QT/multiTrain*/*.zip
 agents/RubiksCube/2x2x2_STICKER2_QT/*lam05.agt.zip
 agents/RubiksCube/2x2x2_STICKER2_QT/davi*.agt.zip
 agents/RubiksCube/2x2x2_STICKER2_QT/TCL4-p13-3000k-60-7t.agt.zip
 agents/RubiksCube/2x2x2_STICKER2_QT/TCL4-p16-3000k-60-7t.agt.zip
+agents/RubiksCube/3x3x3_STICKER2_AT/multiTrain*/*.zip
 agents/RubiksCube/3x3x3_STICKER2_AT/TCL4-p5-1000k-120-7t.agt.zip
 agents/RubiksCube/3x3x3_STICKER2_AT/TCL4-p9-2000k-120-7t.agt.zip
 agents/RubiksCube/3x3x3_STICKER2_QT/*.zip
@@ -86,7 +90,7 @@ agents/TicTacToe/test.agt.zip
 agents/Yavalath/02 Players Size 05/T*.agt.zip
 
 agents/theNtuple.txt
-# (all playStas.csv files in agents/...)
+# (all playStats.csv files in agents/...)
 agents/ConnectFour/csv/playStats.csv
 agents/2048/csv/playStats.csv
 agents/Othello/csv/playStats.csv
@@ -145,10 +149,4 @@ Desktop.ini
 # Windows shortcuts
 *.lnk
 /bin/
-agents/Sim/K6_Player2/csv/playStats.csv
-agents/theNtuple.txt
 /experiments/
-agents/Othello/csv/multiCompeteOthello-i10000-TCL4C.xlsx
-agents/Othello/TCL4-100_7_250k-lam05_P4_nPly2-FAm_C.agt.zip
-agents/test_MC.agt.zip
-agents/test_TD4_EWN.zip.agt.zip

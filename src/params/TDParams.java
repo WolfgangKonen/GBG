@@ -44,8 +44,11 @@ public class TDParams extends Frame implements Serializable
 	private static final String TIPEPSIL2L = "Final random move rate in [0,1]";
 	private static final String TIPLAMBDAL = "Eligibility trace parameter in [0,1]";
 	private static final String TIPHORCUTL = "Horizon cut: neglect eligibility terms with lambda^k < cut";
-	private static final String TIPELIGTYPE = "Eligibility trace type: normal or reset on random move";
+	private static final String TIPELIGTYPEL = "Eligibility trace type: normal or reset on random move";
+	private static final String TIPELIGMODE = "ET: normal, RESET: reset on random move";
 	private static final String TIPSTOPONROUNDL = "stop training episode on round over";
+	private static final String TIPNETTYPEL = "(only TDS)";
+	private static final String TIPFEATTDSL = "(only TDS) select feature mode";
 
 	
 	private final static String[] lrnTypeString = { "backprop","RPROP" };
@@ -68,7 +71,6 @@ public class TDParams extends Frame implements Serializable
 	JLabel horcutL;
 	JLabel gammaL;
 	JLabel epochL;
-//	JLabel tNplyL;
 	JPanel tdPanel;
 	private final JTextField alphaT;
 	private final JTextField alfinT;
@@ -120,7 +122,6 @@ public class TDParams extends Frame implements Serializable
 		gammaL = new JLabel("Gamma");
 		epochL = new JLabel("Epochs");
 		FeatTDS_L = new JLabel("Feature set");
-//		tNplyL = new JLabel("Train nPly");		// only TD-Ntuple-2, currently not shown
 		alphaL.setToolTipText(TIPALPHA1L);
 		alfinL.setToolTipText(TIPALPHA2L);
 		lambdaL.setToolTipText(TIPLAMBDAL);
@@ -129,8 +130,6 @@ public class TDParams extends Frame implements Serializable
 		epfinL.setToolTipText(TIPEPSIL2L);
 		gammaL.setToolTipText(TIPGAMMAL);
 		epochL.setToolTipText(TIPEPOCHL);
-		FeatTDS_L.setToolTipText("Only TDS: select feature mode");
-//		tNplyL.setToolTipText("Only TD-Ntuple-2: Train n-ply look ahead");
 
 		withSigType = new JCheckBox();
 		normalize = new JCheckBox();
@@ -142,11 +141,13 @@ public class TDParams extends Frame implements Serializable
 		StopOnRoundL = new JLabel("Stop round over: ");
 		LrnTypeL = new JLabel("Learning rule: ");
 		eligTypeL = new JLabel("Eligibility: ");
+		eligModeType = new JComboBox<>(eligModeString);
+		NetTypeL.setToolTipText(TIPNETTYPEL);
+		FeatTDS_L.setToolTipText(TIPFEATTDSL);
 		NormalizeL.setToolTipText(TIPNORMALIZEL);
 		StopOnRoundL.setToolTipText(TIPSTOPONROUNDL);
-		eligTypeL.setToolTipText(TIPELIGTYPE);
-
-		eligModeType = new JComboBox<>(eligModeString);
+		eligTypeL.setToolTipText(TIPELIGTYPEL);
+		eligModeType.setToolTipText(TIPELIGMODE);
 
 		choiceNetType = new JComboBox<>(neuralNetString);
 

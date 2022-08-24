@@ -36,7 +36,7 @@ public class ParOther implements Serializable {
     private int quickEvalMode = DEFAULT_QUICK_EVAL_MODE;
     private int trainEvalMode = DEFAULT_TRAIN_EVAL_MODE;
     private int numEval = DEFAULT_NUM_EVAL;
-    private int episodeLength = DEFAULT_EPISODE_LENGTH;
+    private int episodeLength = DEFAULT_EPISODE_LENGTH;		// max. episode length during training
 	private int stopTest = DEFAULT_STOP_TEST;
     private int stopEval = DEFAULT_STOP_EVAL; 		// new meaning: max episode length during eval & play
 	private int pMinRubiks = DEFAULT_PMIN_RUBIKS;	// only relevant for RubiksCube, see CubeConfig.pMin

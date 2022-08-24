@@ -2,7 +2,14 @@ package controllers.MCTSWrapper;
 
 import controllers.MCTSWrapper.stateApproximation.PlayAgentApproximator;
 import games.StateObservation;
+import params.ParWrapper;
 
+/**
+ * This class is now now longer in direct use, we have the relevant parameters now in {@link ParWrapper} such
+ * that they are stored together with the agent.
+ * <p>
+ * {@link ConfigWrapper} serves now only as the DEFAULT-setter in {@link ParWrapper} and as documentation
+ */
 public class ConfigWrapper {
 
     /**
