@@ -113,14 +113,14 @@ public class WrapperParams extends Frame {
         wNply_L.setToolTipText(
                 "<html>Wrapper n-ply look ahead <br>(for play, compete, eval). <br>CAUTION: Numbers > 5 <br> can take long!</html>");
         wMCTSiter_L.setToolTipText(
-                "<html>Wrapper MCTS iterations <br>(for play, compete, eval tasks)</html>");
-        wMCTSpUCT_L.setToolTipText("PUCT value for MCTS Wrapper");
-        wMCTSdepth_L.setToolTipText("max depth value for MCTS Wrapper. -1: no max depth");
+                "Wrapper MCTS iterations (for play, compete, eval, train)");
+        wMCTSpUCT_L.setToolTipText("PUCT value for MCTS wrapper");
+        wMCTSdepth_L.setToolTipText("max depth for MCTS wrapper. -1: no max depth");
         wMCTSexplorationMode_L.setToolTipText(
-                "Wrapper MCTS exploration mode (EXPLO_MODE)");
+                "MCTS wrapper exploration mode (during training)");
         choiceExplorationMode.setToolTipText("<html>0: None <br>1: proportional to visit counts<br>2: epsilon-greedy mode</html>");
-        wMCTSepsInit_L.setToolTipText("initial random move rate for EXPLO_MODE==2");
-        wMCTSepsFinal_L.setToolTipText("final random move rate for EXPLO_MODE==2");
+        wMCTSepsInit_L.setToolTipText("initial random move rate for Exploration Mode==2");
+        wMCTSepsFinal_L.setToolTipText("final random move rate for Exploration Mode==2");
         wMCTSuseSoft_L.setToolTipText("Use softMax() in MCTS wrapper");
         wMCTSuseLast_L.setToolTipText("Re-use last MCTS in wrapper");
         //notyetready_L.setToolTipText("<html><b>Wrapper pars is not yet integrated!</b></html>");
