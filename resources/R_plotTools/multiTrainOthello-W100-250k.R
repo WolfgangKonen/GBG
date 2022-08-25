@@ -30,11 +30,13 @@ path <- "~/GitHub/GBG/agents/Othello/csv/";
 Ylimits=c(0.0,1.0); 
 Xlimits=factor(1:9); 
 
-EX0_STRING = ""  # either "-EX0", "-EX0-TEST", "-EX0-TST2", "-EX1", "-EX2" or ""
+EX0_STRING = "-EX0"  # either "-EX0", "-EX0-TEST", "-EX0-TST2", "-EX1", "-EX2" or ""
 # if EX0_STRING=="", reproduce ToG-paper results
 # if           =="EX0", take the repeated results, which show statistical fluctuations for the W100 case
 # if           =="EX1", take the results for EXPLORATION_MODE==1 (sample proportional visit counts)
 # if           =="EX2", take the results for EXPLORATION_MODE==2 (eps-greedy with eps=0.15)
+# ("-EX0-TEST" & "-EX0-TST2" are just software checks, should be statistically the same as
+# "-EX0" and as "")
 
 
 PART=3    # 1,2 or 3
