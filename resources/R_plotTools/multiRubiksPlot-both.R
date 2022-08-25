@@ -11,6 +11,7 @@ source("summarySE.R")
 PLOTALLLINES=F  # if =T: make a plot for each filename, with one line for each run
 EE=20           # 20 or 50: eval epiLength
 TWISTTYPE="QTM"
+pdffile=paste0("Rubiks-both-cubes-iter-",TWISTTYPE,".pdf")
 
 filenames=c()
 for (CUBEW in c(2,3)) {        # cube width, either 2 or 3
@@ -138,7 +139,6 @@ q <- q+theme(legend.text = element_text(size = rel(1.2)))   # bigger legend text
 q <- q+theme(plot.title = element_text(size = rel(1.5)))    # bigger title text  
 
 plot(q)
-pdffile=paste0("Rubiks-both-cubes-iter-",TWISTTYPE,".pdf")
 ggsave(pdffile, width = 8.04, height = 4.95, units = "in")
 cat(paste("Plot saved to",pdffile,"\n"))
 

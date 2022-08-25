@@ -6,7 +6,6 @@ import controllers.MCTSExpWrapper.stateApproximation2.Approximator2;
 import controllers.MCTSWrapper.passStates.GameStateIncludingPass;
 import controllers.PlayAgent;
 import controllers.PlayAgtVector;
-import controllers.TD.ntuple2.NTupleAgt;
 import games.StateObservation;
 import params.ParOther;
 import tools.ScoreTuple;

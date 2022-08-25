@@ -68,7 +68,7 @@ public class OtherParams extends Frame {
 	JLabel learnRM_L;
 	JLabel rgs_L;
 	JLabel wNply_L;
-	JLabel wMCTS_L;
+	JLabel wMCTSiter_L;
 	JLabel wMCTSpUCT_L;
 	JLabel wMCTSdepth_L;
 	JLabel pMin_L;
@@ -80,7 +80,7 @@ public class OtherParams extends Frame {
 	public JTextField stopTest_T;
 	public JTextField stopEval_T;
 	public JTextField wNply_T;
-	public JTextField wMCTS_T;
+	public JTextField wMCTSiter_T;
 	public JTextField wMCTSpUCT_T;
 	public JTextField wMCTSdepth_T;
 	public JTextField pMin_T;
@@ -111,7 +111,7 @@ public class OtherParams extends Frame {
 		stopTest_T = new JTextField("0"); 	//
 		stopEval_T = new JTextField("-1"); 	// the defaults
 		wNply_T = new JTextField("0"); 		//
-		wMCTS_T = new JTextField("0"); 		//
+		wMCTSiter_T = new JTextField("0"); 		//
 		wMCTSpUCT_T = new JTextField("1"); 		//
 		wMCTSdepth_T = new JTextField("-1"); 		//
 		pMin_T = new JTextField("1");		//
@@ -124,7 +124,7 @@ public class OtherParams extends Frame {
 		learnRM_L = new JLabel("Learn from RM");
 		rgs_L = new JLabel("Reward = Score");
 		wNply_L = new JLabel("Wrapper nPly");
-		wMCTS_L = new JLabel("Wrapper MCTS");
+		wMCTSiter_L = new JLabel("Wrapper MCTS");
 		wMCTSpUCT_L = new JLabel("PUCT for WrapM");
 		wMCTSdepth_L = new JLabel("Depth for WrapM");
 		pMin_L = new JLabel("pMin");
@@ -156,7 +156,7 @@ public class OtherParams extends Frame {
 		rgs_L.setToolTipText("Use game score as reward (def.) or use some other, game specific reward");
 		wNply_L.setToolTipText(
 				"<html>Wrapper n-ply look ahead <br>(for play, compete, eval). <br>CAUTION: Numbers >5 can take long!</html>");
-		wMCTS_L.setToolTipText(
+		wMCTSiter_L.setToolTipText(
 				"<html>Wrapper MCTS iterations <br>(for play, compete, eval tasks)</html>");
 		wMCTSpUCT_L.setToolTipText("PUCT value for MCTS Wrapper");
 		wMCTSdepth_L.setToolTipText("max depth value for MCTS Wrapper. -1: no max depth");
@@ -174,7 +174,7 @@ public class OtherParams extends Frame {
 		// the following lambda's, where e is an ActionEvent, are a simpler replacement for anonymous action listeners:
 
 		ok.addActionListener( e -> m_par.setVisible(false) );
-		wMCTS_T.addActionListener( e -> enableWrapMCTSPart() );
+		wMCTSiter_T.addActionListener(e -> enableWrapMCTSPart() );
 
 		// only for RubiksCube:
 		pMin_T.addActionListener( e ->
@@ -223,8 +223,8 @@ public class OtherParams extends Frame {
 		oPanel.add(stopEval_L);
 		oPanel.add(stopEval_T);
 
-		oPanel.add(wMCTS_L);
-		oPanel.add(wMCTS_T);
+		oPanel.add(wMCTSiter_L);
+		oPanel.add(wMCTSiter_T);
 
 		oPanel.add(wMCTSpUCT_L);
 		oPanel.add(wMCTSpUCT_T);
@@ -266,6 +266,7 @@ public class OtherParams extends Frame {
 		pack();
 		setVisible(false);
 
+		enableWrapNPlyPart();
 		enableWrapMCTSPart();
 		enableStopTest(false);			// stop test is now deprecated
 
@@ -287,17 +288,20 @@ public class OtherParams extends Frame {
 	}
 
 	private void enableWrapMCTSPart() {
-		if(this.getWrapperMCTSIterations()>0){
-			wMCTSdepth_L.setEnabled(true);
-			wMCTSdepth_T.setEnabled(true);
-			wMCTSpUCT_L.setEnabled(true);
-			wMCTSpUCT_T.setEnabled(true);
-		} else {
-			wMCTSdepth_L.setEnabled(false);
-			wMCTSdepth_T.setEnabled(false);
-			wMCTSpUCT_L.setEnabled(false);
-			wMCTSpUCT_T.setEnabled(false);
-		}
+		//boolean enable = getWrapperMCTSIterations()>0;	// old version, before WrapperParams
+		boolean enable = false;				// always disable, we use now WrapperParams
+		wMCTSdepth_L.setEnabled(enable);
+		wMCTSdepth_T.setEnabled(enable);
+		wMCTSpUCT_L.setEnabled(enable);
+		wMCTSpUCT_T.setEnabled(enable);
+		wMCTSiter_L.setEnabled(enable);		// this is for the
+		wMCTSiter_T.setEnabled(enable);		// disable-always case
+	}
+
+	private void enableWrapNPlyPart() {
+		boolean enable = false;				// always disable, we use now WrapperParams
+		wNply_L.setEnabled(enable);
+		wNply_T.setEnabled(enable);
 	}
 
 
@@ -341,7 +345,7 @@ public class OtherParams extends Frame {
 	}
 
 	public int getWrapperMCTSIterations() {
-		return Integer.parseInt(wMCTS_T.getText());
+		return Integer.parseInt(wMCTSiter_T.getText());
 	}
 
 	public double getWrapperMCTS_PUCT() {
@@ -451,7 +455,7 @@ public class OtherParams extends Frame {
 	}
 
 	public void setWrapperMCTSIterations(final int value) {
-		wMCTS_T.setText(value + "");
+		wMCTSiter_T.setText(value + "");
 	}
 
 	public void setWrapperMCTS_PUCT(final double value) {
@@ -535,6 +539,7 @@ public class OtherParams extends Frame {
 			((GameBoardCube)m_arena.getGameBoard()).setPMax(getpMaxRubiks());
 		}
 
+		enableWrapNPlyPart();
 		enableWrapMCTSPart();
 
 	}

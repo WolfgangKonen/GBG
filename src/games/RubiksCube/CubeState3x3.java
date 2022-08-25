@@ -131,6 +131,23 @@ public class CubeState3x3 extends CubeState {
         throw new RuntimeException("Invalid cube, we should not arrive here!");
     }
 
+    /**
+     * Apply transformation {@code trafo} to {@link #sloc}. Needs {@link #fcol} to be transformed
+     * already, but does not need {@code trafo} (it is only here to have the same signature as
+     * {@link #apply_sloc(CubeState, boolean) apply_sloc}).
+     * Do it the <b>slow</b> way (as an independent check): <br>
+     * 1) {@link #locate(CubieTriple) locate} one sticker {@code s} for every corner cubie by finding the right color
+     * configuration in {@code this.}{@link #fcol} <br>
+     * 2) Set {@link #sloc}{@code [s]} to this location, set the clockwise-right sticker to the 2nd cubie location, and
+     * set its clockwise-right neighbor to the 3rd location.<br>
+     * 3) {@link #locate_edge(CubieDouble) locate_edge} one sticker {@code s} for every edge cubie by finding the right color
+     * configuration in {@code this.}{@link #fcol} <br>
+     * 4) Set {@link #sloc}{@code [s]} to this location, set the other sticker of this edge cubie to the 2nd cubie location.
+     *
+     * @param trafo a {@link CubeState} object of type TRAFO_P or TRAFO_R
+     * @param doAssert assert the correctness of {@link #sloc} transformation by checking the {@code fcol[sloc]}-relation.
+     * @return {@code this} with its member {@link #sloc} transformed
+     */
     protected CubeState apply_sloc_slow(CubeState trafo, boolean doAssert) {
         assert(type==Type.COLOR_P || type==Type.COLOR_R) : "Wrong type "+type+" in apply_sloc_slow() !";
         int[] stickers_c = {0,2,4,6,24,26,28,30};     // the necessary corner stickers (one for every corner cubie)

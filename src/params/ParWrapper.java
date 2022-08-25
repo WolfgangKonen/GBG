@@ -11,6 +11,7 @@ import controllers.MCTSWrapper.stateApproximation.PlayAgentApproximator;
 import controllers.MaxN2Wrapper;
 import controllers.TD.ntuple2.SarsaAgt;
 import controllers.TD.ntuple2.TDNTuple3Agt;
+import games.XArenaFuncs;
 
 /**
  * <b>Wrapper parameter</b> settings for board games.
@@ -27,7 +28,7 @@ import controllers.TD.ntuple2.TDNTuple3Agt;
  * <li><b>wrapperMCTS_PUCT</b>: [1] PUCT parameter from [0,1] for {@link MCTSWrapperAgent}
  * <li><b>wrapperMCTS_depth</b>: [100] Depth parameter for {@link MCTSWrapperAgent}
  * <li><b>wrapperMCTS_exploMode</b>: [0] 0: none, 1: proportional to visit counts, 2: epsilon-greedy, only for {@link MCTSWrapperAgent}
- * <li><b>wrapperMCTS_epsInit</b>: [0.2] initial epsilon, only for Exploration Mode = 2
+ * <li><b>wrapperMCTS_epsInit</b>: [0.1] initial epsilon, only for Exploration Mode = 2
  * <li><b>wrapperMCTS_epsFinal</b>: [0.1] final epsilon, only for Exploration Mode = 2
  * <li><b>useSoftMax</b>: [true] <br>
  *      A switch for {@link PlayAgentApproximator}:
@@ -47,6 +48,7 @@ import controllers.TD.ntuple2.TDNTuple3Agt;
  * @see MCTSWrapperAgent
  * @see MaxN2Wrapper
  * @see WrapperParams
+ * @see ConfigWrapper
  */
 public class ParWrapper implements Serializable {
     public static int DEFAULT_WRAPPER_MODE = 0;
@@ -54,9 +56,11 @@ public class ParWrapper implements Serializable {
     public static int DEFAULT_WRAPPER_MCTS_ITERATIONS = 0;
     public static double DEFAULT_WRAPPER_MCTS_PUCT = 1;
     public static int DEFAULT_WRAPPER_MCTS_DEPTH = 100;
-    public static int DEFAULT_WRAPPER_MCTS_EXPLOMODE = 0;
-    public static double DEFAULT_WRAPPER_MCTS_EPSINIT = 0.1;
-    public static double DEFAULT_WRAPPER_MCTS_EPSFINAL = 0.1;
+    public static int DEFAULT_WRAPPER_MCTS_EXPLOMODE = ConfigWrapper.EXPLORATION_MODE; //0;
+    public static double DEFAULT_WRAPPER_MCTS_EPSINIT = ConfigWrapper.epsilon; //0.1;
+    public static double DEFAULT_WRAPPER_MCTS_EPSFINAL = ConfigWrapper.epsilon; //0.1;
+    public static boolean DEFAULT_USESOFTMAX = ConfigWrapper.USESOFTMAX; // true
+    public static boolean DEFAULT_USELASTMCTS = ConfigWrapper.USELASTMCTS; //true;
 
     private int wrapperMode = DEFAULT_WRAPPER_MODE;
     private int wrapperNply = DEFAULT_WRAPPER_NPLY;
@@ -66,8 +70,8 @@ public class ParWrapper implements Serializable {
     private int wrapperMCTS_exploMode = DEFAULT_WRAPPER_MCTS_EXPLOMODE;
     private double wrapperMCTS_epsInit = DEFAULT_WRAPPER_MCTS_EPSINIT;
     private double wrapperMCTS_epsFinal = DEFAULT_WRAPPER_MCTS_EPSFINAL;
-    private boolean useSoftMax = true;
-    private boolean useLastMCTS = true;
+    private boolean useSoftMax = DEFAULT_USESOFTMAX;
+    private boolean useLastMCTS = DEFAULT_USELASTMCTS;
 
     /**
      * This member is only constructed when the constructor
@@ -87,8 +91,10 @@ public class ParWrapper implements Serializable {
     public ParWrapper() {    }
 
     public ParWrapper(boolean withUI) {
-        if (withUI)
+        if (withUI) {
             wrparams = new WrapperParams();
+            wrparams.setFrom(this);             // set GUI parameter according to 'this'
+        }
     }
 
     public ParWrapper(ParWrapper wp) {
@@ -130,7 +136,7 @@ public class ParWrapper implements Serializable {
     }
 
     /**
-     * Call this from XArenaFuncs constructAgent or fetchAgent to get the latest changes from GUI
+     * Call this from {@link XArenaFuncs} constructAgent or fetchAgent to get the latest changes from GUI
      */
     public void pushFromWrParams() {
         if (wrparams !=null)

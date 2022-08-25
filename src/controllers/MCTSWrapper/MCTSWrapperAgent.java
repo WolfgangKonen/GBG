@@ -115,7 +115,8 @@ public final class MCTSWrapperAgent extends AgentBase implements PlayAgent, Seri
 
         MCTSNode mctsNode;
 
-        if (lastSelectedNode == null || !ConfigWrapper.USELASTMCTS || !sob.isDeterministicGame()) {
+        if (lastSelectedNode == null || !getParWrapper().getUseLastMCTS() || !sob.isDeterministicGame()) {
+//      if (lastSelectedNode == null || !ConfigWrapper.USELASTMCTS || !sob.isDeterministicGame()) {
             // There is no search tree yet, or it is not valid for the current situation.
             // So a new MCTSNode is created from the given game state sob.
             mctsNode = new MCTSNode(new GameStateIncludingPass(sob));
@@ -196,9 +197,9 @@ public final class MCTSWrapperAgent extends AgentBase implements PlayAgent, Seri
             int dummy = 1;
         }
 
-        int exploMode = ConfigWrapper.EXPLORATION_MODE;
+        int exploMode = this.getParWrapper().getWrapperMCTS_ExplorationMode(); //ConfigWrapper.EXPLORATION_MODE;
         if (!random) exploMode=0;               // always exploit, if random==false
-        if (exploMode==2 && (rand.nextDouble() >= ConfigWrapper.epsilon) ) {
+        if (exploMode==2 && (rand.nextDouble() >= this.m_epsilon /*ConfigWrapper.epsilon*/) ) {
             exploMode=0;                        // exploit (the greedy case of EXPLORATION_MODE==2)
         }
 
@@ -404,21 +405,31 @@ public final class MCTSWrapperAgent extends AgentBase implements PlayAgent, Seri
     @Override
     public boolean trainAgent(StateObservation so) {
         resetAgent();	// do not re-use last MCTS
+        setWrParams(this.m_wrPar,this.getMaxGameNum());     // adjust m_epsilonChangeDelta to the actual maxGameNum
         return getWrappedPlayAgent().trainAgent(so,this);
 
     }
 
+    /**
+     * Set the agent parameters {@code m_epsilon} and {@code m_epsilonChangeDelta} from wrPar and maxGameNum
+     * (only relevant for 'MCTS inside training loop' and {@code wrapperMCTS_exploMode==2})
+     *
+     * @param wrPar       the wrapper parameters, we need here epsInit and epsFinal
+     * @param maxGameNum  number of training episodes
+     */
     public void setWrParams(ParWrapper wrPar, int maxGameNum) {
         m_epsilon = wrPar.getWrapperMCTS_epsInit();
         m_epsilonChangeDelta = (m_epsilon - wrPar.getWrapperMCTS_epsFinal()) / maxGameNum;
+    }
+
+    public boolean instantiateAfterLoading() {
+        super.instantiateAfterLoading();
+        setWrParams(this.m_wrPar,this.getMaxGameNum());
+        return true;
     }
 
     public void adjustEpsilon() {
         m_epsilon = m_epsilon - m_epsilonChangeDelta;   // linear decrease of m_epsilon
     }
 
-    public boolean instantiateAfterLoading() {
-        setWrParams(this.m_wrPar,this.getMaxGameNum());
-        return true;
-    }
 }

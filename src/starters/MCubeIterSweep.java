@@ -12,6 +12,7 @@ import games.RubiksCube.GameBoardCube;
 import org.junit.Test;
 import params.ParNT;
 import params.ParOther;
+import params.ParWrapper;
 import tools.Types;
 
 import java.io.File;
@@ -105,6 +106,7 @@ public class MCubeIterSweep extends GBGBatch {
         ParNT ntpar = ta.getParNT();
         int nSym = ntpar.getNSym();
         ParOther opar = pa.getParOther();
+        ParWrapper wpar = pa.getParWrapper();
         opar.setNumEval(10000);
         opar.setpMinRubiks(pMinEval);
         opar.setpMaxRubiks(pMaxEval);
@@ -116,6 +118,7 @@ public class MCubeIterSweep extends GBGBatch {
             double c_puct = 1.0;
             System.out.println("[symmIterTest] Starting run with iterMCTSWrap="+iterMWrap+" ...");
             opar.setWrapperMCTSIterations(iterMWrap);
+            wpar.setWrapperMCTS_iterations(iterMWrap);
 
             arenaTrain.m_xab.oPar[0] = opar;
             if (iterMWrap == 0) qa = pa;

@@ -2,7 +2,14 @@ package controllers.MCTSWrapper;
 
 import controllers.MCTSWrapper.stateApproximation.PlayAgentApproximator;
 import games.StateObservation;
+import params.ParWrapper;
 
+/**
+ * This class is now now longer in direct use, we have the relevant parameters now in {@link ParWrapper} such
+ * that they are stored together with the agent.
+ * <p>
+ * {@link ConfigWrapper} serves now only as the DEFAULT-setter in {@link ParWrapper} and as documentation
+ */
 public class ConfigWrapper {
 
     /**
@@ -38,7 +45,7 @@ public class ConfigWrapper {
      *        {@link MCTSWrapperAgent}
      * </ul>
      */
-    public static int EXPLORATION_MODE = 2;
+    public static int EXPLORATION_MODE = 0;
 
     /**
      * a quick hack to set epsilon for ConfigWrapper.EXPLORATION_MODE=2 (eps-greedy)

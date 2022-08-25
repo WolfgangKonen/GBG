@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import controllers.TD.ntuple2.TDNTuple3Agt;
+import games.Arena;
 import games.StateObservation;
 import params.ParOther;
 import tools.ScoreTuple;
@@ -56,6 +57,20 @@ public class MaxN2Wrapper extends AgentBase implements PlayAgent, Serializable {
 		super.setAgentState(AgentState.TRAINED);
 		m_depth = nPly;
 		this.wrapped_pa = pa;
+	}
+
+	/**
+	 * After loading an agent from disk fill the param tabs of {@link Arena} according to the
+	 * settings of this agent
+	 *
+	 * @param n         fill the {@code n}th parameter tab
+	 * @param m_arena	member {@code m_xab} has the param tabs
+	 *
+	 * @see Arena#loadAgent
+	 */
+	public void fillParamTabsAfterLoading(int n, Arena m_arena) {
+		super.fillParamTabsAfterLoading(n, m_arena);
+		m_arena.m_xab.setMaxNDepthFrom(n, m_depth );
 	}
 
 	/**

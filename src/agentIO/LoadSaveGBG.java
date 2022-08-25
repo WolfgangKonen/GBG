@@ -818,7 +818,7 @@ public class LoadSaveGBG {
 				((AgentBase) pa).setDefaultParReplay();
 			}
 			if (pa.getParWrapper() == null) {
-				((AgentBase) pa).setDefaultParWrapper();
+				((AgentBase) pa).setDefaultParWrapper(pa.getParOther());
 			}
 
 //			disposeProgressDialog(dlg);

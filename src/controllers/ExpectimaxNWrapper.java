@@ -21,7 +21,8 @@ public class ExpectimaxNWrapper extends ExpectimaxNAgent implements Serializable
 	
 	public ExpectimaxNWrapper(PlayAgent pa, int nply) {
 		super("ExpectimaxWrapper", nply);
-		this.m_oPar.setWrapperNPly(nply);
+		this.m_oPar.setWrapperNPly(nply); 	// deprecated
+		this.m_wrPar.setWrapperNPly(nply);
 		this.wrapped_pa = pa;
 	}
 

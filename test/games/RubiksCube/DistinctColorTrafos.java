@@ -1,6 +1,8 @@
 package games.RubiksCube;
 
+import games.Arena;
 import org.junit.Test;
+import starters.SetupGBG;
 
 import java.text.DecimalFormat;
 import java.util.HashSet;
@@ -13,10 +15,11 @@ import java.util.Random;
  * to it. The minimum is 1, the maximum is 24.
  */
 public class DistinctColorTrafos {
-    int TWISTMAX = 15;
-    int RUNS=100;
+    int TWISTMAX = 20;
+    int RUNS=500;
     ArenaCube ar;
     GameBoardCube gb;		// needed for chooseStartState()
+    String selectedGame = "RubiksCube";
 
     protected Random rand = new Random(System.currentTimeMillis());
     protected final CubeStateFactory csFactory = new CubeStateFactory();
@@ -25,14 +28,19 @@ public class DistinctColorTrafos {
 
     @Test
     public void countDistinct_Pocket() {
-        initPocket();
+        //scaPar = SetupGBG.setDefaultScaPars(selectedGame);    // "2x2x2", "STICKER2", "HTM"
+        String[] scaPar = new String[] {"2x2x2", "STICKER2", "HTM"};
+        initPocket(scaPar);
         System.out.println("\nNumber of distinct color-trafo states for t-twisted 2x2x2 cube states:");
+        System.out.println("scaPar:" +scaPar[0] + " " + scaPar[1] + " " + scaPar[2] + ";  average over NRUNS=" + RUNS);
         countDistinct();
     }
     @Test
     public void countDistinct_Rubiks() {
-        initRubiks();
-        System.out.println("\nNumber of distinct color-trafo states for t-twisted 3x3x3 cube states:");
+        String[] scaPar = new String[] {"3x3x3", "STICKER2", "QTM"};
+        initRubiks(scaPar);
+        System.out.println("\nMean number of distinct color-trafo states for t-twisted 3x3x3 cube states:");
+        System.out.println("scaPar:" +scaPar[0] + " " + scaPar[1] + " " + scaPar[2] + ";  average over NRUNS=" + RUNS);
         countDistinct();
     }
     public void countDistinct() {
@@ -56,16 +64,19 @@ public class DistinctColorTrafos {
             meanDistinct.put(t,meanVal);
         }
         DecimalFormat form = new DecimalFormat("00.000");
+        System.out.println("TWISTS; NSYM_TRUE_DIFF");
         for (Map.Entry<Integer, Double> entry : meanDistinct.entrySet()) {
-            System.out.println("t="+entry.getKey()+": "+form.format(entry.getValue()));
+            System.out.println(entry.getKey()+"; "+form.format(entry.getValue()));
         }
 
     }
 
-    protected void initPocket() {
+    protected void initPocket(String[] scaPar) {
         CubeConfig.cubeSize = CubeConfig.CubeSize.POCKET;
 
-        ar = new ArenaCube("",false,true);
+        Arena arena = SetupGBG.setupSelectedGame(selectedGame, scaPar,"",false,true);
+        assert (arena instanceof ArenaCube);
+        ar = (ArenaCube) arena;
         gb = new GameBoardCube(ar);
 
         // this is already part of ArenaCube-constructor:
@@ -73,10 +84,13 @@ public class DistinctColorTrafos {
 //      CubeState.generateForwardTs();
     }
 
-    protected void initRubiks() {
+    protected void initRubiks(String[] scaPar) {
         CubeConfig.cubeSize = CubeConfig.CubeSize.RUBIKS;
 
-        ar = new ArenaCube("",false,true);
+        String selectedGame = "RubiksCube";
+        Arena arena = SetupGBG.setupSelectedGame(selectedGame, scaPar,"",false,true);
+        assert (arena instanceof ArenaCube);
+        ar = (ArenaCube) arena;
         gb = new GameBoardCube(ar);
 
         // this is already part of ArenaCube-constructor:

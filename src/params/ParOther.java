@@ -36,13 +36,9 @@ public class ParOther implements Serializable {
     private int quickEvalMode = DEFAULT_QUICK_EVAL_MODE;
     private int trainEvalMode = DEFAULT_TRAIN_EVAL_MODE;
     private int numEval = DEFAULT_NUM_EVAL;
-    private int episodeLength = DEFAULT_EPISODE_LENGTH;
+    private int episodeLength = DEFAULT_EPISODE_LENGTH;		// max. episode length during training
 	private int stopTest = DEFAULT_STOP_TEST;
     private int stopEval = DEFAULT_STOP_EVAL; 		// new meaning: max episode length during eval & play
-    private int wrapperNply = DEFAULT_WRAPPER_NPLY;
-	private int wrapperMCTSIterations = DEFAULT_WRAPPER_MCTS_ITERATIONS;
-	private double wrapperMCTS_PUCT = DEFAULT_WRAPPER_MCTS_PUCT;
-	private int wrapperMCTS_depth = DEFAULT_WRAPPER_MCTS_DEPTH;
 	private int pMinRubiks = DEFAULT_PMIN_RUBIKS;	// only relevant for RubiksCube, see CubeConfig.pMin
 	private int pMaxRubiks = DEFAULT_PMAX_RUBIKS;	// only relevant for RubiksCube, see CubeConfig.pMax
 	private boolean chooseStart01 = false;
@@ -52,7 +48,15 @@ public class ParOther implements Serializable {
     private boolean rewardIsGameScore = true;
     private AgentState aState = AgentState.RAW;
     private String agtFile = null;
-    
+
+    // These elements should become obsolete on the long run, they are now replaced by parameters in ParWrapper.
+	// But we keep them for some transient time to correctly load older agents which had ParWrapper wrPar==null
+	// at the time they were saved.
+	private int wrapperNply = DEFAULT_WRAPPER_NPLY;
+	private int wrapperMCTSIterations = DEFAULT_WRAPPER_MCTS_ITERATIONS;
+	private double wrapperMCTS_PUCT = DEFAULT_WRAPPER_MCTS_PUCT;
+	private int wrapperMCTS_depth = DEFAULT_WRAPPER_MCTS_DEPTH;
+
     /**
      * This member is only constructed when the constructor 
      * {@link #ParOther(boolean,Arena) ParOther(boolean withUI,Arena)}
@@ -68,14 +72,13 @@ public class ParOther implements Serializable {
 	@Serial
 	private static final long serialVersionUID = 1L;
 	
-	public ParOther() {
-		aState = AgentState.RAW;
-	}
+	public ParOther() {    }
     
 	public ParOther(boolean withUI, Arena m_arena) {
-		aState = AgentState.RAW;
-		if (withUI)
+		if (withUI) {
 			otparams = new OtherParams(m_arena);
+			otparams.setFrom(this);             // set GUI parameter according to 'this'
+		}
 	}
 	
 	public ParOther(ParOther op) {
@@ -188,18 +191,10 @@ public class ParOther implements Serializable {
 		return stopEval;
 	}
 
-	public int getWrapperNPly() {
-		return wrapperNply;
-	}
-	
-	public int getWrapperMCTSIterations() {
-		return wrapperMCTSIterations;
-	}
-
-	public double getWrapperMCTS_PUCT() {
-		return wrapperMCTS_PUCT;
-	}
-
+	// deprecated, use these getters only for older agents. Otherwise, use the new getters in ParWrapper
+	public int getWrapperNPly() { return wrapperNply; }
+	public int getWrapperMCTSIterations() { return wrapperMCTSIterations; }
+	public double getWrapperMCTS_PUCT() { return wrapperMCTS_PUCT; }
 	public int getWrapperMCTS_depth() { return wrapperMCTS_depth; }
 
 	public int getpMinRubiks() { return pMinRubiks;	}

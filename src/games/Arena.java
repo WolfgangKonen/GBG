@@ -15,6 +15,7 @@ import games.SimpleGame.StateObserverSG;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import gui.ArenaGui;
 import gui.MessageBox;
+import params.ParWrapper;
 import starters.GBGLaunch;
 import tools.PStats;
 import tools.ScoreTuple;
@@ -330,8 +331,8 @@ abstract public class Arena implements Runnable {
 		gb.updateBoard(null, true, true); // update with reset
 		gb.enableInteraction(true); // needed for CFour
 
-		boolean stored_USELASTMCTS = ConfigWrapper.USELASTMCTS;
-		ConfigWrapper.USELASTMCTS = false;
+		boolean stored_USELASTMCTS = paX.getParWrapper().getUseLastMCTS();
+		paX.getParWrapper().setUseLastMCTS(false);
 		// We need to disable USELASTMCTS in InspectV, otherwise we get AssertionError "Oops, action mismatch!"
 		// We restore it later, when finishing InspectV
 
@@ -423,7 +424,7 @@ abstract public class Arena implements Runnable {
 		} // while(taskState == Task.INSPECTV) [will be left only by the break
 		  // above or when taskState changes]
 
-		ConfigWrapper.USELASTMCTS = stored_USELASTMCTS;
+		paX.getParWrapper().setUseLastMCTS(stored_USELASTMCTS);
 
 		// We arrive here under three conditions:
 		// 1) InspectV pressed again --> taskState changed to Task.IDLE
@@ -805,7 +806,7 @@ abstract public class Arena implements Runnable {
 //				agentVec[0] = m_xab.getSelectedAgent(0);
 				agentList.add(0,m_xab.getSelectedAgent(0));
 				sMsg = new StringBuilder("Playing a game ... [ " + agentList.get(0) + " ]");
-				int wrappedNPly = m_xab.oPar[0].getWrapperNPly();
+				int wrappedNPly = m_xab.wrPar[0].getWrapperNPly();
 				if (wrappedNPly > 0)
 					sMsg = new StringBuilder("Playing a game ... [ " + agentList.get(0) + ", nPly=" + wrappedNPly + " ]");
 			}

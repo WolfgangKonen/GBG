@@ -122,10 +122,9 @@ abstract public class NTuple4Base extends AgentBase implements NTuple4Agt, Seria
 	 * @see Arena#loadAgent
 	 */
 	public void fillParamTabsAfterLoading(int n, Arena m_arena) {
+		super.fillParamTabsAfterLoading(n, m_arena);
 		m_arena.m_xab.setTdParFrom(n, this.getParTD() );
 		m_arena.m_xab.setNtParFrom(n, this.getParNT() );
-		m_arena.m_xab.setOParFrom(n, this.getParOther() );
-		m_arena.m_xab.setRBParFrom(n, this.getParReplay() );
 	}
 	
 	/**

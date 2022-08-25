@@ -34,7 +34,7 @@ class SingleCompetitor {
         String userTitle1 = "time", userTitle2 = "user2";
         int numEpisodes;    // parameter for competeNPlayer
         int[] iterMWrapArr = (iterMWrap == 0) ? new int[]{0} : new int[]{0, iterMWrap};
-        int[] depthArr = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+        int[] depthArr = {1, 2, 3, 4, 5, 6, 7, 8, 9};       // Edax depth
         double[] epsArr = {1e-8}; //  {1e-8, 0.0};  //  {1e-8, 0.0, -1e-8}; //
         double[] cpuctArr = {1.0}; //{0.2, 0.4, 0.6, 0.8, 1.0, 1.4, 2.0, 4.0, 10.0}; // {1.0};
         double winrate;

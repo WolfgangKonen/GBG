@@ -143,8 +143,8 @@ public class MCompeteSweep {
             Arena arenaTrain, GameBoard gb, int[] batchSizeArr)
     {
         String userTitle1 = "time";
-        DecimalFormat frm = new DecimalFormat("00");
         DecimalFormat frm1 = new DecimalFormat("0");
+        DecimalFormat frm2 = new DecimalFormat("00");
         double userValue1=0.0, userValue2=0.0;
         long startTime;
         double elapsedTime=0,deltaTime;
@@ -155,12 +155,13 @@ public class MCompeteSweep {
         String subDir = arenaTrain.getGameBoard().getSubDir();
         if (subDir != null) strDir += "/" + subDir;
         tools.Utils.checkAndCreateFolder(strDir+"/multiTrain");
-        String agtBase = agtFile.split("\\.")[0];
+        String agtBase = agtFile.split("\\.")[0];       // agtBase = agtFile w/o .agt.zip
 
         int[] sweepArr = (batchSizeArr==null) ? new int[]{0} : batchSizeArr;
+        int exploMode = pa.getParWrapper().getWrapperMCTS_ExplorationMode();
         String fCsvName="";
         String userTitle2 = (batchSizeArr==null) ? "user2" : "RB_batch";
-        String trainCsvName = "../multiTrain/" + agtBase + ".csv";
+        String trainCsvName = "../multiTrain/" + agtBase + "_EX" + frm1.format(exploMode) + ".csv";
         // we use "../" because we do not want to store in subdir "csv/" as printMultiTrainList usually does
 
         for (int s : sweepArr) {
@@ -188,8 +189,8 @@ public class MCompeteSweep {
                 File file;
                 do {
                     k++;    // start with k=0
-                    agtPath = strDir + "/multiTrain/" + agtBase + "_EX" + frm.format(ConfigWrapper.EXPLORATION_MODE)
-                                     + "_" + frm.format(i+k) + ".agt.zip";
+                    agtPath = strDir + "/multiTrain/" + agtBase + "_EX" + frm1.format(exploMode)
+                                     + "_" + frm2.format(i+k) + ".agt.zip";
                     file = new File(agtPath);
                 } while (file.exists());
                 arenaTrain.saveAgent(pa,agtPath);
@@ -206,78 +207,5 @@ public class MCompeteSweep {
         System.out.println("[multiTrainSweepOthello] "+elapsedTime+" sec.");
         return pa;
     } // multiTrainSweepOthello
-
-    // --- never used ---
-//    /**
-//     * Perform Othello multi-training-and-competition with MCTSWrapperAgent wrapped around agent {@code pa} vs. Edax2 with
-//     * different depth levels. In each run, agent {@code pa} is trained anew. (We need param {@code pa} only to load it
-//     * and to infer from this all the training params.) The Edax depth values to sweep are coded in array {@code depthArr}
-//     * in this method. The wrapped agent plays both roles (parameter {@code p_MWrap = 0,1}).
-//     * <p>
-//     * Side effect: writes results of multi-competition to <b>{@code agents/<gameDir>/csv/<csvName>}</b>.
-//     * This file has the columns: <br>
-//     * {@code agtFile, run, competeNum, dEdax, iterMWrap, EPS, p_MWrap, c_puct, winrate, time, userValue2}. <br>
-//     * The contents may be visualized with R-scripts found in {@code resources\R_plotTools}.
-//     * <p>
-//     * NOTE: This method can only be run under Windows, since edax.exe is a Windows executable.
-//     *
-//     * @param pa		    agent to wrap
-//     * @param agtFile       agent filename, we use its {@code agtBase} (part w/o ".agt.zip") to form the new filenames
-//     * @param maxGameNum    number of training episodes in each run
-//     * @param iterMWrap	    number of MCTS wrapper iterations
-//     * @param nruns	        number of runs, each run prints a line to csv. Should be 1 for deterministic agent {@code pa}
-//     * @param arenaTrain    Arena object with train rights
-//     * @param gb		    the game board, needed for start state selection
-//     * @param csvName	    results of competition are written to this filename
-//     * @return the last wrapped agent
-//     */
-//    public PlayAgent multiTrainCompeteSweepOthello(
-//            PlayAgent pa, String agtFile, int maxGameNum, int iterMWrap, int nruns, Arena arenaTrain,
-//            GameBoard gb, String csvName)
-//    {
-//        String userTitle1 = "time", userTitle2 = "user2";
-//        DecimalFormat frm = new DecimalFormat("00");
-//        double userValue1=0.0, userValue2=0.0;
-//        PlayAgent qa=null;
-//
-//        SingleTrainer sTrainer = new SingleTrainer();
-//        SingleCompetitor sCompetitor = new SingleCompetitor();
-//
-//        String strDir = Types.GUI_DEFAULT_DIR_AGENT + "/" + arenaTrain.getGameName();
-//        String subDir = arenaTrain.getGameBoard().getSubDir();
-//        if (subDir != null) strDir += "/" + subDir;
-//        tools.Utils.checkAndCreateFolder(strDir+"/multiTrain");
-//        String agtBase = agtFile.split("\\.")[0];   // agent filename w/o ".agt.zip"
-//
-//        for (int i=0; i<nruns; i++) {
-//
-//            // train pa, adjust doTrainEvaluation, and add elements to mtList (evaluation results during train) + save it
-//            pa = sTrainer.doSingleTraining(0, i, pa, arenaTrain, arenaTrain.m_xab, gb, maxGameNum, userValue1, userValue2);
-//
-//            // save pa in a yet unused filename. This for multiple concurrent jobs which should not write to a
-//            // filename already written by another job. For single-threaded jobs (and no similar files present in
-//            // dir multiTrain/), k=0 will be used.
-//            int k=-1;
-//            String agtPath;
-//            File file;
-//            do {
-//                k++;
-//                agtPath = strDir + "/multiTrain/" + agtBase + "_" + frm.format(i+k) + ".agt.zip";
-//                file = new File(agtPath);
-//            } while (file.exists());
-//            arenaTrain.saveAgent(pa,agtPath);
-//
-//            // print the full list mtList after finishing training run i.
-//            // We use "../" because we do not want to store in subdir "csv/" as printMultiTrainList usually does
-//            String trainCsvName = "../multiTrain/"+agtBase+".csv";
-//            MTrain.printMultiTrainList(trainCsvName,sTrainer.getMtList(), pa, arenaTrain, userTitle1, userTitle2);
-//
-//            // multi-competition of trained (and possibly wrapped) agent against Edax
-//            qa = sCompetitor.doSingleCompetition(i, pa, agtFile, iterMWrap, arenaTrain, gb, userValue2, csvName);
-//        } // for (i)
-//
-//        System.out.println("[multiTrainCompeteSweepOthello] "+sCompetitor.getElapsedTime()+" sec.");
-//        return qa;
-//    } // multiTrainCompeteSweepOthello
 
 }

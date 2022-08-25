@@ -414,7 +414,7 @@ public class MTrainSweep {
 //                xab.setGameNumber(gameNum);
 //
 //                // construct 'qa' anew (possibly wrapped agent for eval)
-//                qa = wrapAgent(n, pa, xab.oPar[n], xab.maxnPar[n], gb.getStateObs());
+//                qa = wrapAgent(n, pa, xab.oPar[n], xab.wrPar[n], xab.maxnPar[n], gb.getStateObs());
 //
 //                m_evaluatorQ.eval(qa);
 //                evalQ = m_evaluatorQ.getLastResult();
@@ -444,7 +444,7 @@ public class MTrainSweep {
 //
 //        // construct 'qa' anew (possibly wrapped agent for eval)
 //
-//        qa = wrapAgent(0, pa, xab.oPar[n], xab.maxnPar[n], gb.getStateObs());
+//        qa = wrapAgent(0, pa, xab.oPar[n], xab.wrPar[n], xab.maxnPar[n], gb.getStateObs());
 //        m_evaluatorQ.eval(qa);
 //        evalQ = m_evaluatorQ.getLastResult();
 //        oQ.add(evalQ);
@@ -477,7 +477,7 @@ public class MTrainSweep {
 //    protected PlayAgent wrapAgent(int n, PlayAgent pa, ParOther oPar, ParMaxN mPar, StateObservation so)
 //    {
 //        PlayAgent qa;
-//        int nply = oPar.getWrapperNPly();
+//        int nply = wrPar.getWrapperNPly();
 //        mPar.setMaxNDepth(nply);
 //        if (nply>0 && !(pa instanceof HumanPlayer)) {
 //            if (so.isDeterministicGame()) {

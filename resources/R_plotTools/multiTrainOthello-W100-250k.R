@@ -30,23 +30,27 @@ path <- "~/GitHub/GBG/agents/Othello/csv/";
 Ylimits=c(0.0,1.0); 
 Xlimits=factor(1:9); 
 
-EX0_STRING = "-EX0"  # either "-EX0" or ""
+EX0_STRING = ""  # either "-EX0", "-EX0-TEST", "-EX0-TST2", "-EX1", "-EX2" or ""
 # if EX0_STRING=="", reproduce ToG-paper results
-# if EX0_STRING=="EX0", take the repeated results, which show statistical fluctuations for the W100 case
+# if           =="EX0", take the repeated results, which show statistical fluctuations for the W100 case
+# if           =="EX1", take the results for EXPLORATION_MODE==1 (sample proportional visit counts)
+# if           =="EX2", take the results for EXPLORATION_MODE==2 (eps-greedy with eps=0.15)
+
 
 PART=3    # 1,2 or 3
-numAgents=c("10agents","14agents","18agents")
-filesW100=c(
-  "multiCompeteOthello-W100-250k-part0-1.csv", # 10 agents
-  "multiCompeteOthello-W100-250k-part0-2.csv", # 14 agents
-  "multiCompeteOthello-W100-250k-part0-3.csv"  # 18 agents
-)
-if (EX0_STRING=="-EX0") {
-  numAgents=c("10agents","10agents","10agents")
+if (EX0_STRING=="") {
+  numAgents=c("10agents","14agents","18agents")
+  
   filesW100=c(
-    "multiCompeteOthello-EX0-W100-250k.csv", # 
-    "multiCompeteOthello-EX0-W100-250k.csv", # currently, 10 agents is the only option
-    "multiCompeteOthello-EX0-W100-250k.csv"  # 
+    "multiCompeteOthello-W100-250k-part0-1.csv", # 10 agents
+    "multiCompeteOthello-W100-250k-part0-2.csv", # 14 agents
+    "multiCompeteOthello-W100-250k-part0-3.csv"  # 18 agents
+  )
+} else {
+  numAgents=c("10agents","10agents","10agents")
+  fname = paste0("multiCompeteOthello",EX0_STRING,"-W100-250k.csv")
+  filesW100=c(
+    fname,fname,fname      # currently, 10 agents is the only option
   )
 }
 filenames=c(
@@ -87,7 +91,7 @@ tgc <- tgc[tgc$EPS==1e-8,]
 
 q <- ggplot(tgc,aes(x=dEdax,y=winrate,colour=agentGroup,shape=agentGroup)) #,linetype=agentGroup))
 #q <- q+geom_errorbar(aes(ymin=winrate-se, ymax=winrate+se), width=errWidth) #, position=pd)
-q <- q+labs(title=paste("250,000 training episodes ")) #, numAgents[PART]))
+q <- q+labs(title=paste("250,000 training episodes ",EX0_STRING)) #, numAgents[PART]))
 #q <- q+geom_line(position=pd,size=1.0) + geom_point(position=pd,size=2.0) 
 q <- q+geom_line(size=1.0) + geom_point(size=3.0)
 q <- q+scale_x_discrete(limits=Xlimits) 

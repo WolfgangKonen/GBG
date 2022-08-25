@@ -15,6 +15,9 @@ abstract public class CubieTriple {
 	 * If {@code i} is the sticker location for the y-face of the ygr-cubie, then {@code right[i]} is the sticker location
 	 * for the g-face of the ygr-cubie (marching around the cubie in clockwise orientation).
 	 * And {@code right[right[i]]} is the sticker location of the r-face of the ygr-cubie.
+	 * <p>
+	 * {@code right} is set to {@link CubieTriple2x2#right_P right_P} for the Pocket cube and to
+	 * {@link CubieTriple3x3#right_R right_R} for Rubik's cube.
 	 */
 	public static int[] right= null;
 

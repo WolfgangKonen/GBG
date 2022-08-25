@@ -1,0 +1,23 @@
+Number of distinct color-trafo states for t-twisted 2x2x2 cube states:
+scaPar:2x2x2 STICKER2 QTM;  average over NRUNS=500
+TWISTS; NSYM_TRUE_DIFF
+19; 23,550
+18; 23,466
+17; 23,448
+16; 23,202
+15; 23,196
+14; 22,868
+13; 22,272
+12; 22,472
+11; 22,312
+10; 21,450
+9; 20,780
+8; 19,860
+7; 18,738
+6; 17,946
+5; 14,754
+4; 13,746
+3; 08,166
+2; 05,562
+1; 03,000
+0; 01,000

@@ -264,7 +264,7 @@ public class Evaluator2048 extends Evaluator {
         if (verbose==1) System.out.println("Finished evaluation of "+ConfigEvaluator.NUMBEREVALUATIONS+" games with average score "
         		+ Math.round(lastResult) + " +- " + Math.round(standarddeviation));
         
-        int nPly = pa.getParOther().getWrapperNPly();
+        int nPly = pa.getParWrapper().getWrapperNPly();
         long duration = (stopTime - startTime);
         avgGameDur = Math.round((double) duration / (double)ConfigEvaluator.NUMBEREVALUATIONS);
         avgMovPerGame =  Math.round((double)moves / (double)ConfigEvaluator.NUMBEREVALUATIONS);

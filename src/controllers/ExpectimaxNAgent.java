@@ -110,10 +110,11 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 	 * 
 	 * @see Arena#loadAgent
 	 */
-	public void fillParamTabsAfterLoading(int n, Arena m_arena) { 
+	public void fillParamTabsAfterLoading(int n, Arena m_arena) {
+		super.fillParamTabsAfterLoading(n, m_arena);
 		m_arena.m_xab.setMaxNDepthFrom(n, this.getDepth() );
 		m_arena.m_xab.setMaxNParFrom(n,this.m_mpar);
-		m_arena.m_xab.setOParFrom(n, this.getParOther() );
+		//m_arena.m_xab.setOParFrom(n, this.getParOther() );  // now in super
 	}
 
 	private ScoreTuple retrieveFromHashMap(boolean m_useHashMap, String stringRep) {

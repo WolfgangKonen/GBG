@@ -9,6 +9,7 @@ library(scales)     # needed for 'labels=percent'
 source("summarySE.R")
 
 TWISTTYPE="QTM"
+pdffile=paste0("Rubiks-nsym-ptwist-",TWISTTYPE,".pdf")
 
 filenames=c()
 for (CUBEW in c(3)) {        # cube width, either 2 or 3, currently only 3
@@ -62,6 +63,7 @@ for (k in 1:length(filenames)) {
 
 dfBoth <- dfBoth[dfBoth$iterMWrap %in% c(0,50,100,200,400,800),]
 #-- if only a subset of iterMWrap shall be shown: --
+dfBoth <- dfBoth[dfBoth$iterMWrap %in% c(0,800),]
 #dfBoth <- dfBoth[dfBoth$iterMWrap %in% c(0,200),]
 #dfBoth <- dfBoth[dfBoth$iterMWrap %in% c(50,400),]
 #dfBoth <- dfBoth[dfBoth$iterMWrap %in% c(100,800),]
@@ -70,8 +72,8 @@ colnames(dfBoth)[colnames(dfBoth) %in% c("pMaxEval", "evalQ")] <- c("pTwist", "w
 
 #dfBoth <- dfBoth[dfBoth$pTwist > 9,]
 
-dfBoth <- dfBoth[dfBoth$nSym %in% c(0,8),]
-NSYM = "nSym=0,8"
+dfBoth <- dfBoth[dfBoth$nSym %in% c(0,8,16),]
+NSYM = "nSym=0,8,16"
 
 # summarySE is a very useful script from www.cookbook-r.com/Graphs/Plotting_means_and_error_bars_(ggplot2)
 # It summarizes a dataset, by grouping measurevar according to groupvars and calculating
@@ -100,7 +102,6 @@ q <- q+theme(plot.title = element_text(size = rel(1.5)))    # bigger title text
 
 
 plot(q)
-pdffile=paste0("Rubiks-nsym-ptwist-",TWISTTYPE,".pdf")
 ggsave(pdffile, width = 8.04, height = 4.95, units = "in")
 cat(paste("Plot saved to",pdffile,"\n"))
 

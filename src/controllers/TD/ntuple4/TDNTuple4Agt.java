@@ -1,5 +1,6 @@
 package controllers.TD.ntuple4;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -7,6 +8,7 @@ import java.util.List;
 import java.util.Random;
 
 import agentIO.LoadSaveGBG;
+import controllers.MCTSWrapper.MCTSWrapperAgent;
 import controllers.ReplayBuffer.Buffer.BaseBuffer;
 import controllers.ReplayBuffer.ConfigReplayBuffer;
 import controllers.ReplayBuffer.Transition.ITransition;
@@ -59,6 +61,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	 * compatible with an older one (older .agt.zip will become unreadable, or you have
 	 * to provide a special version transformation)
 	 */
+	@Serial
 	private static final long  serialVersionUID = 13L;
 
 	private int numPlayers;
@@ -96,10 +99,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 		super();
 		ParTD tdPar = new ParTD();
 		ParNT ntPar = new ParNT();
-		ParOther oPar = new ParOther();
-		ParRB rbPar = new ParRB();
-		ParWrapper wrPar = new ParWrapper();
-		initNet(ntPar, tdPar, oPar, null, null, 1000);
+		initNet(ntPar, tdPar, m_oPar, null, null, 1000);
 	}
 
 	/**
@@ -750,11 +750,11 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 
 	/**
 	 * Train the agent for one complete game episode <b>using self-play</b>. <p>
-	 * Side effects: Increment m_GameNum and {@code acting_pa}'s gameNum by +1.
+	 * Side effects: Increment m_GameNum and {@code acting_pa}'s gameNum by +1. Adjust ALPHA and epsilon after each episode.
 	 * Change the agent's internal parameters (weights and so on).
 	 * <p>
 	 * This method is used by the wrappers: They call it with {@code this} being the wrapped agent (it has the internal
-	 * parameters) and {@code acting_pa} being the wrapper.
+	 * parameters) and {@code acting_pa} being the wrapper. Unwrapped agents have {@code acting_pa = this}.
 	 *
 	 * @param so		the state from which the episode is played (usually the
 	 * 					return value of {@link GameBoard#chooseStartState(PlayAgent)} to get
@@ -832,7 +832,11 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 		// start learning
 
 		try {
-			this.finishUpdateWeights();		// adjust learn params ALPHA & m_epsilon
+			this.finishUpdateWeights();		// adjust learn params ALPHA & epsilon of wrapped agent
+			if (acting_pa instanceof MCTSWrapperAgent) {
+				// adjust epsilon of wrapper (only relevant for wrapperMCTS_exploMode==2)
+				((MCTSWrapperAgent) acting_pa).adjustEpsilon();
+			}
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
