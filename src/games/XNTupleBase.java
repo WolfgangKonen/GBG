@@ -69,7 +69,8 @@ abstract public class XNTupleBase implements Serializable, XNTupleFuncs {
 	@Override
 	public int[] getPositionValuesVector() {
 		int[] posValVec = new int[getNumCells()];
-		for (int i=0; i<posValVec.length; i++) posValVec[i] = getNumPositionValues();
+		int commonP = getNumPositionValues();
+		for (int i=0; i<posValVec.length; i++) posValVec[i] = commonP;
 		return posValVec;
 	}
 

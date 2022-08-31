@@ -1,7 +1,7 @@
 #
-# **** These are new results with MCTSWrapper[TCL4-EXP], nSym, and QTM from June 2022 ****
+# **** These are new results with MCTSWrapper[TCL4-EXP], nSym, and QTM from Aug 2022 ****
 #
-# **** see notes-WK-RubiksCube.docx, Sec. 'With Symmetries'.
+# **** see MCTSWrapperResults-2021-01-16.docx, Sec. 'With Symmetries'.
 # 
 library(ggplot2)
 library(grid)
@@ -9,7 +9,7 @@ library(scales)     # needed for 'labels=percent'
 source("summarySE.R")
 
 TWISTTYPE="QTM"
-pdffile=paste0("Rubiks-nsym-ptwist-",TWISTTYPE,".pdf")
+pdffile=paste0("Rubiks-XnSym-ptwist-",TWISTTYPE,"-ET16.pdf")
 
 filenames=c()
 cubeWidthCol=c()
@@ -28,7 +28,8 @@ for (CUBEW in c(3)) {        # cube width, either 2 or 3, currently only 3
     fname <- switch(CUBEW
                     ," "
                     ,paste0("TODO")   # CUBEW=2, QTM
-                    ,paste0("symmIterSingle-nSym0-16.csv")   # CUBEW=3, QTM
+                    #,paste0("symmIterSingle-nSym0-16.csv")   # CUBEW=3, QTM
+                    ,paste0("symmIterSingle-nSym0-24-ET16.csv")   # CUBEW=3, QTM
     )
   } 
   filename <- paste0(path,fname)
@@ -57,38 +58,39 @@ for (k in 1:length(filenames)) {
   dfBoth <- rbind(dfBoth,cbind(df,cubeWidth=cubeWidthCol[k]))
 }
 
+colnames(dfBoth)[colnames(dfBoth) %in% c("pMaxEval", "evalQ")] <- c("pTwist", "winrate")
+
+dfBoth <- dfBoth[dfBoth$pTwist > 9,]
+
+
+tgcomp <- summarySE(dfBoth, measurevar="totalSec", groupvars=c("iterMWrap","nSym","pTwist"))
+
+
 dfBoth <- dfBoth[dfBoth$iterMWrap %in% c(0,50,100,200,400,800),]
 #-- if only a subset of iterMWrap shall be shown: --
-dfBoth <- dfBoth[dfBoth$iterMWrap %in% c(0,100,800),]
+dfBoth <- dfBoth[dfBoth$iterMWrap %in% c(0,200,800),]
 #dfBoth <- dfBoth[dfBoth$iterMWrap %in% c(0,200),]
 #dfBoth <- dfBoth[dfBoth$iterMWrap %in% c(50,400),]
 #dfBoth <- dfBoth[dfBoth$iterMWrap %in% c(100,800),]
 
-colnames(dfBoth)[colnames(dfBoth) %in% c("pMaxEval", "evalQ")] <- c("pTwist", "winrate")
-
-#dfBoth <- dfBoth[dfBoth$pTwist > 9,]
-
-dfBoth <- dfBoth[dfBoth$nSym %in% c(0,8,16),]
-NSYM = "nSym=0,8,16"
 
 # summarySE is a very useful script from www.cookbook-r.com/Graphs/Plotting_means_and_error_bars_(ggplot2)
 # It summarizes a dataset, by grouping measurevar according to groupvars and calculating
 # its mean, sd, se (standard dev of the mean), ci (conf.interval) and count N.
 tgc <- summarySE(dfBoth, measurevar="winrate", groupvars=c("iterMWrap","nSym","pTwist"))
-#tgc$pTwist <- as.factor(tgc$pTwist)
-tgc$nSym <- as.factor(tgc$nSym)
+tgc$pTwist <- as.factor(tgc$pTwist)
+#tgc$nSym <- as.factor(tgc$nSym)
 tgc$iterMWrap <- as.factor(tgc$iterMWrap)
 
-q <- ggplot(tgc,aes(x=pTwist,y=winrate,color=iterMWrap,shape=iterMWrap,linetype=nSym))
+q <- ggplot(tgc,aes(x=nSym,y=winrate,color=iterMWrap,shape=pTwist))#,linetype=iterMWrap))
 #q <- q+labs(title=titleStr)
 q <- q+geom_errorbar(aes(ymin=winrate-se, ymax=winrate+se), width=0.3) #, position=pd)
 q <- q+geom_line(size=1.0) + geom_point(size=3.0)
 q <- q+scale_y_continuous(limits=Ylimits, labels=percent) 
 q <- q+ylab(evalStr)
-q <- q+scale_x_continuous(limits=c(1,ifelse(TWISTTYPE=="HTM",13,14)), breaks=c(1,3,5,7,9,11,13)) 
-q <- q+xlab("scrambling twists") +
-  annotate("text",x=ifelse(TWISTTYPE=="HTM",11,11),y=0.05,label=TWISTTYPE, size=5) +
-  annotate("text",x=3,y=0.05,label=NSYM, size=5)
+q <- q+scale_x_continuous(breaks=c(0,8,16,24)) 
+q <- q+xlab("nSym") 
+#q <- q+annotate("text",x=ifelse(TWISTTYPE=="HTM",11,11),y=0.05,label=paste0(TWISTTYPE,", ET16"), size=5) 
 q <- q+guides(colour = guide_legend(reverse = FALSE))
 q <- q+guides(linetype = guide_legend(reverse = FALSE))
 q <- q+theme(axis.title = element_text(size = rel(1.5)))    # bigger axis labels 

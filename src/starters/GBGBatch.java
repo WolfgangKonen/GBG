@@ -63,7 +63,7 @@ public class GBGBatch extends SetupGBG {
 	 *              {@link #batch5(int, int, String, String, XArenaButtons, GameBoard) batch5} (multiTrainSweep) or
 	 *              {@link #batch6(int, String, GameBoard, String) batch6} (multiCompeteSweep) or
 	 *              {@link #batch7(int, String, GameBoard, String) batch7} (multiCompete) or
-	 *              {@link #batch8(String, String, int) batch8} ({@link MCubeIterSweep}).<br>
+	 *              {@link #batch8(String, String, int, double) batch8} ({@link MCubeIterSweep}).<br>
 	 *              The values 5,6,7 are only for game Othello, value 8 is only for game RubiksCube.
 	 *              <br>
 	 *          [2] {@code agentFile}: e.g. "tdntuple3.agt.zip". This agent is loaded from
@@ -102,6 +102,7 @@ public class GBGBatch extends SetupGBG {
 		int nruns = -1;
 		int maxGameNum = -1;
 		String csvName = "";
+		double c_puct = 1.0;
 		
 		if (args.length<3) {
 			System.err.println("[GBGBatch.main] needs at least 3 arguments.");
@@ -137,6 +138,8 @@ public class GBGBatch extends SetupGBG {
 		for (int i = 0; i < 3; i++)
 			if (args.length >= i + 7) scaPar[i] = args[i + 6];
 
+		if (args.length>=10) c_puct = Double.parseDouble(args[9]);
+
 		arenaTrain = setupSelectedGame(selectedGame, scaPar,"",false,true);
 
 		String agtFile = args[2];
@@ -155,7 +158,7 @@ public class GBGBatch extends SetupGBG {
 			case "5" -> t_Batch.batch5(nruns, maxGameNum, agtFile, filePath, arenaTrain.m_xab, arenaTrain.getGameBoard());
 			case "6" -> t_Batch.batch6(nruns, agtFile, arenaTrain.getGameBoard(), csvName);
 			case "7" -> t_Batch.batch7(nruns, agtFile, arenaTrain.getGameBoard(), csvName);
-			case "8" -> t_Batch.batch8(agtFile, csvName, nruns);
+			case "8" -> t_Batch.batch8(agtFile, csvName, nruns, c_puct);
 			default -> {
 				System.err.println("[GBGBatch.main] args[1]=" + args[1] + " not allowed.");
 				System.exit(1);
@@ -478,16 +481,16 @@ public class GBGBatch extends SetupGBG {
 	 * @param csvName		filename for CSV results
 	 * @param pMode			switch for pTwist level
 	 */
-	public void batch8(String agtDir, String csvName, int pMode) {
+	public void batch8(String agtDir, String csvName, int pMode, double c_puct) {
 
-		int[] iterMWrapArr = {0, 50, 100, 200, 400, 800};
+		int[] iterMWrapArr = {0,100,800}; //{0, 50, 100, 200, 400, 800};
 		long startTime = System.currentTimeMillis();
 
 		MCubeIterSweep mcis = new MCubeIterSweep();
 		if (pMode!=1) {
-			mcis.symmIterTest3x3x3(iterMWrapArr,agtDir,arenaTrain,csvName);
+			mcis.symmIterTest3x3x3(iterMWrapArr,c_puct,agtDir,arenaTrain,csvName);
 		} else {
-			mcis.symmIterSingle3x3x3(iterMWrapArr,agtDir,arenaTrain,csvName);
+			mcis.symmIterSingle3x3x3(iterMWrapArr,c_puct,agtDir,arenaTrain,csvName);
 		}
 
 		double elapsedTime = (System.currentTimeMillis() - startTime)/1000.0;

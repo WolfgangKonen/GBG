@@ -1,5 +1,5 @@
 #
-# **** These are new results with MCTSWrapper[TCL4-EXP] from Aug-2022 ****
+# **** These are new results with MCTSWrapper[TCL4-EXP] from Sep-2022 ****
 #
 # **** see MCTSWrapperResults-2021-01-16.docx, Sec. 'Rubik's Cube'.
 # **** The relevant CSV files are generated with 
@@ -12,7 +12,7 @@ source("summarySE.R")
 
 EE=50           # 20 or 50: eval epiLength
 TWISTTYPE="QTM" # QTM or HTM
-pdffile=paste0("Rubiks-both-cubes-ptwist-",TWISTTYPE,"-Aug22.pdf")
+pdffile=paste0("Rubiks-both-cubes-ptwist-",TWISTTYPE,"-Sep22.pdf")
 
 filenames=c()
 cubeWidthCol=c()
@@ -23,26 +23,24 @@ for (CUBEW in c(2,3)) {        # cube width, either 2 or 3
     path <- paste("../../agents/RubiksCube/",cubewww,"_STICKER2_AT/csv/",sep=""); 
     fname <- switch(CUBEW
                     ," "
-                    ,paste0("mRubiks2x2-MWrap[TCL4-p13-ET16]-SoftMax-p1-13-EE",EE,".csv") # CUBEW=2, HTM
-                    ,paste0("mRubiks3x3-MWrap[TCL4-p9-ET13]-SoftMax-p1-9-EE",EE,".csv")   # CUBEW=3, HTM
+                    ,paste0("mRubiks2x2-MWrap[TCL4-p13-ET16]-Sep22-p1-13-EE50.csv") # CUBEW=2, HTM
+                    ,paste0("mRubiks3x3-MWrap[TCL4-p9-ET13]-Sep22-p1-9-EE50.csv")   # CUBEW=3, HTM
     )
   } else {  # i.e. "QTM"
     path <- paste("../../agents/RubiksCube/",cubewww,"_STICKER2_QT/csv/",sep=""); 
     fname <- switch(CUBEW
                     ," "
-                    ,paste0("mRubiks2x2-MWrap[TCL4-p16-ET20]-SoftMax-p1-16-EE",EE,".csv")# CUBEW=2, QTM
-                    ,paste0("mRubiks3x3-MWrap[TCL4-p13-ET16]-SoftMax-p1-13-EE50.csv")   # CUBEW=3, QTM
+                    ,paste0("mRubiks2x2-MWrap[TCL4-p16-ET20]-Sep22-p1-16-EE",EE,".csv")# CUBEW=2, QTM
+                    ,paste0("mRubiks3x3-MWrap[TCL4-p13-ET16]-Sep22-p1-13-EE50.csv")   # CUBEW=3, QTM
     )
   } 
-  # -noSoftMax/-SoftMax: with USESOFTMAX=false/true in ConfigWrapper.
-  # -noLast: with USELASTMCTS=false in ConfigWrapper.
-  # other settings: maxDepth=50, c_puct=1.0, STICKER2 
+  # other settings: maxDepth=50, c_puct=1.0, USESOFTMAX=true, USELASTMCTS=true, STICKER2 
   # agtFiles for HTM: 
   #   2x2: "TCL4-p13-3000k-60-7t.agt.zip"
   #   3x3: "TCL4-p9-2000k-120-7t.agt.zip"
   # agtFiles for QTM: 
-  #   2x2: "TCL4-p16-3000k-60-7t.agt.zip" or "TCL4-p16-3000k-60-7t-lam05.agt.zip"
-  #   3x3: "TCL4-p13-3000k-120-7t.agt.zip"
+  #   2x2: "multiTrain/TCL4-p16-ET20-3000k-60-7t_00.agt.zip" 
+  #   3x3: "multiEval/TCL4-p13-ET16-3000k-120-7t_02.agt.zip"
   filename <- paste0(path,fname)
   filenames = c(filenames,filename)
   cubeWidthCol = c(cubeWidthCol,cubewww)
@@ -73,7 +71,7 @@ for (k in 1:length(filenames)) {
 
 # select the iterMWrap levels:
 #dfBoth <- dfBoth[dfBoth$iterMWrap %in% c(0,100,500,1000),]
-dfBoth <- dfBoth[dfBoth$iterMWrap %in% c(0,100,1000),]
+dfBoth <- dfBoth[dfBoth$iterMWrap %in% c(0,100,800),]
 
 # summarySE is a very useful script from www.cookbook-r.com/Graphs/Plotting_means_and_error_bars_(ggplot2)
 # It summarizes a dataset, by grouping measurevar according to groupvars and calculating

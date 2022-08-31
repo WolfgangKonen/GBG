@@ -1,7 +1,7 @@
 #
-# **** These are new results with MCTSWrapper[TCL4-EXP], nSym, and QTM from June 2022 ****
+# **** These are new results with MCTSWrapper[TCL4-EXP], nSym, and QTM from Aug 2022 ****
 #
-# **** see notes-WK-RubiksCube.docx, Sec. 'With Symmetries'.
+# **** see MCTSWrapperResults-2021-01-16.docx, Sec. 'With Symmetries'.
 # 
 library(ggplot2)
 library(grid)
@@ -9,7 +9,7 @@ library(scales)     # needed for 'labels=percent'
 source("summarySE.R")
 
 TWISTTYPE="QTM"
-pdffile=paste0("Rubiks-nsym-ptwist-",TWISTTYPE,".pdf")
+pdffile=paste0("Rubiks-nsym-ptwist-",TWISTTYPE,"-ET16.pdf")
 
 filenames=c()
 cubeWidthCol=c()
@@ -28,7 +28,8 @@ for (CUBEW in c(3)) {        # cube width, either 2 or 3, currently only 3
     fname <- switch(CUBEW
                     ," "
                     ,paste0("TODO")   # CUBEW=2, QTM
-                    ,paste0("symmIterSingle-nSym0-16.csv")   # CUBEW=3, QTM
+                    #,paste0("symmIterSingle-nSym0-16.csv")   # CUBEW=3, QTM
+                    ,paste0("symmIterSingle-nSym0-24-ET16.csv")   # CUBEW=3, QTM
     )
   } 
   filename <- paste0(path,fname)
@@ -68,8 +69,8 @@ colnames(dfBoth)[colnames(dfBoth) %in% c("pMaxEval", "evalQ")] <- c("pTwist", "w
 
 #dfBoth <- dfBoth[dfBoth$pTwist > 9,]
 
-dfBoth <- dfBoth[dfBoth$nSym %in% c(0,8,16),]
-NSYM = "nSym=0,8,16"
+dfBoth <- dfBoth[dfBoth$nSym %in% c(0,16,24),];  NSYM = "nSym=0,16,24"
+#dfBoth <- dfBoth[dfBoth$nSym %in% c(0,8,16),];  NSYM = "nSym=0,8,16"
 
 # summarySE is a very useful script from www.cookbook-r.com/Graphs/Plotting_means_and_error_bars_(ggplot2)
 # It summarizes a dataset, by grouping measurevar according to groupvars and calculating
@@ -79,7 +80,7 @@ tgc <- summarySE(dfBoth, measurevar="winrate", groupvars=c("iterMWrap","nSym","p
 tgc$nSym <- as.factor(tgc$nSym)
 tgc$iterMWrap <- as.factor(tgc$iterMWrap)
 
-q <- ggplot(tgc,aes(x=pTwist,y=winrate,color=iterMWrap,shape=iterMWrap,linetype=nSym))
+q <- ggplot(tgc,aes(x=pTwist,y=winrate,color=iterMWrap,shape=nSym,linetype=nSym))
 #q <- q+labs(title=titleStr)
 q <- q+geom_errorbar(aes(ymin=winrate-se, ymax=winrate+se), width=0.3) #, position=pd)
 q <- q+geom_line(size=1.0) + geom_point(size=3.0)
@@ -87,7 +88,7 @@ q <- q+scale_y_continuous(limits=Ylimits, labels=percent)
 q <- q+ylab(evalStr)
 q <- q+scale_x_continuous(limits=c(1,ifelse(TWISTTYPE=="HTM",13,14)), breaks=c(1,3,5,7,9,11,13)) 
 q <- q+xlab("scrambling twists") +
-  annotate("text",x=ifelse(TWISTTYPE=="HTM",11,11),y=0.05,label=TWISTTYPE, size=5) +
+  annotate("text",x=ifelse(TWISTTYPE=="HTM",11,11),y=0.05,label=paste0(TWISTTYPE,""), size=5) +
   annotate("text",x=3,y=0.05,label=NSYM, size=5)
 q <- q+guides(colour = guide_legend(reverse = FALSE))
 q <- q+guides(linetype = guide_legend(reverse = FALSE))

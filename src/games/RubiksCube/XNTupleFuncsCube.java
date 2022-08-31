@@ -451,17 +451,20 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	}
 
 	/**
-	 * Return all neighbors of {@code iCell} for the 2x2x2 pocket cube.
+	 * Return all neighbors (adjacent cells) of {@code iCell} for the 2x2x2 pocket cube.
 	 * <p>
-	 * If {@link CubeConfig#boardVecType}{@code  =CUBESTATE, CUBEPLUSACTION}:  See {@link CubeState}
-	 * for board coding. 4-point-neighborhoods on the cube with wrap-around.
-	 * <p>
-	 * If {@link CubeConfig#boardVecType}{@code  =STICKER}: Adjacency set on the 7x7 stickers board:
-	 * All cells from the next row, except the cell in the same column as {@code iCell}, are in the adjacency set.
-	 * See {@link CubeState#getBoardVector()} for the stickers board coding.
+	 * This is, depending on {@link CubeConfig#boardVecType}:
+	 * <ul>
+	 *     <li><strong>{@code CUBESTATE, CUBEPLUSACTION}</strong>: See {@link CubeState}
+	 * 	for board coding. 4-point-neighborhoods on the cube with wrap-around.
+	 *     <li><strong>{@code STICKER}</strong>: Adjacency set on the 7x7 stickers board:
+	 * 	 All cells from the next row, except the cell in the same column as {@code iCell}, are in the adjacency set.
+	 * 	 See {@link CubeState#getBoardVector()} for the stickers board coding.
+	 *     <li><strong>{@code STICKER2}</strong>: All cells different from {@code iCell}.
+	 * </ul>
 	 *
 	 * @param iCell	the board cell for which we want the set of adjacent cells
-	 * @return a set of all cells adjacent to {@code iCell} (referring to the coding in
+	 * @return a set of numbers for all cells adjacent to {@code iCell} (referring to the coding in
 	 * 		a board vector)
 	 */
 	private HashSet<Integer> adjacencySet2x2(int iCell) {
@@ -603,19 +606,34 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 
 	private int[][] fixedNTuples3x3(int mode) {
 		// TODO:
-		throw new RuntimeException("[XNTupleFuncsCube::fixedNTuples3x3] Not yet implemented!");
+		throw new RuntimeException("[XNTupleFuncsCube::fixedNTuples3x3]: Not yet implemented!");
 	}
 
+	/**
+	 * Return all neighbors (adjacent cells) of {@code iCell} for the 2x2x2 pocket cube.
+	 * <p>
+	 * This is, depending on {@link CubeConfig#boardVecType}:
+	 * <ul>
+	 *     <li><strong>{@code CUBESTATE, CUBEPLUSACTION}</strong>: -- not yet implemented --
+	 *     <li><strong>{@code STICKER}</strong>: -- not yet implemented --
+	 *     <li><strong>{@code STICKER2}</strong>: For {@code iCell} in {0,...,15} (corner): all other cells in {0,...,15}.
+	 *     For {@code iCell} in {16,...,39} (edge): all other cells in {16,...,39}.
+	 * </ul>
+	 *
+	 * @param iCell	the board cell for which we want the set of adjacent cells
+	 * @return a set of numbers for all cells adjacent to {@code iCell} (referring to the coding in
+	 * 		a board vector)
+	 */
 	private HashSet<Integer> adjacencySet3x3(int iCell) {
 		HashSet<Integer> adjSet = new HashSet<>();
 		switch (CubeConfig.boardVecType) {
 			case CUBESTATE:
 			case CUBEPLUSACTION:
 				// TODO:
-				throw new RuntimeException("[adjacencySet3x3] Case CUBESTATE Not yet implemented!");
+				throw new RuntimeException("[XNTupleFuncsCube::adjacencySet3x3], case CUBESTATE: Not yet implemented!");
 			case STICKER:
 				// TODO:
-				throw new RuntimeException("[XNTupleFuncsCube::adjacencySet3x3] Not yet implemented!");
+				throw new RuntimeException("[XNTupleFuncsCube::adjacencySet3x3], case STICKER: Not yet implemented!");
 			case STICKER2:
 				if (iCell<16) {
 					for (int k=0; k<16; k++) {

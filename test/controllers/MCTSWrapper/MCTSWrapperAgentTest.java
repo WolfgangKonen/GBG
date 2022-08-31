@@ -45,7 +45,7 @@ public class MCTSWrapperAgentTest extends GBGBatch {
      * and for MCTSWrapper wrapped around 3x3x3_STICKER2_AT/TCL4-p9-2000k-120-7t.agt.zip with nPly=0.
      * The %-solved rates are reported like in QuickEval.
      * Results are written to console and to {@code csvFile}.
-     * Results (%-solved rates) are tested against certain expectations for EPS=1e-08, c_puct=1.0, see HashMap hm.
+     * Results (%-solved rates) for EPS=1e-08, c_puct=1.0 are tested against certain expectations, see HashMap hm.
      * <p>
      * Note that pMax=9 (HTM) or 13 (QTM). This is still far away from God's number = 20 (HTM) or 26 (QTM) for the 3x3x3 cube.
      * hus, the evaluation results are not yet very satisfactorily (we get not much better than a 65% solved-rate).
@@ -68,12 +68,13 @@ public class MCTSWrapperAgentTest extends GBGBatch {
             }
             case "QTM" -> {
                 //agtFiles = new String[]{"TCL4-p13-3000k-120-7t.agt.zip"};                   // older setting Jan-2022
-                agtFiles = new String[]{"multiTrain/TCL4-p13-ET16-3000k-120-7t_00.agt.zip"};  // newer setting Aug-2022
+                //agtFiles = new String[]{"multiTrain/TCL4-p13-ET16-3000k-120-7t_00.agt.zip"};  // newer setting Aug-2022
+                agtFiles = new String[]{"multiEval/TCL4-p13-ET16-3000k-120-7t_02.agt.zip"};  // Aug-2022, from lwivs48
                 pMax = 13;
             }
             default -> throw new RuntimeException("Unallowed value " + scaPar[2] + " for scaPar[2]");
         }
-        int[] iterMCTSWrapArr = {0,100,200,500,1000}; //{20,50}; //{200,500}; //,100,200,300,500,600,800,1000};
+        int[] iterMCTSWrapArr = {0,100,800};//{0,100,200,500,1000}; //{20,50}; //{200,500}; //,100,200,300,500,600,800,1000};
         //int[] iterMCTSWrapArr={10000};  // only in conjunction with oPar's nPly > 0 (see below)
         int fact=0;   // 1 or 0: whether to invoke lower bounds (1) or not (0)
         HashMap<Integer, Double> hm = new HashMap<>();  // lower bounds of %-solved-rates to expect as a fct of iterMCTSWrap
@@ -81,6 +82,7 @@ public class MCTSWrapperAgentTest extends GBGBatch {
         hm.put( 100,fact*0.23);
         hm.put( 200,fact*0.44);
         hm.put( 500,fact*0.65);
+        hm.put( 800,fact*0.65);
         hm.put(1000,fact*0.65);
         int nTrial = 4;
         String csvFile = "mRubiks3x3.csv";
@@ -117,7 +119,7 @@ public class MCTSWrapperAgentTest extends GBGBatch {
             }
             default -> throw new RuntimeException("Illegal value " + scaPar[2] + " for scaPar[2]");
         }
-        int[] iterMCTSWrapArr={0,50,100,200,500,1000}; //{0,50,100,200,300}; // ,100,200,300,500,600,800,1000};
+        int[] iterMCTSWrapArr={0,100,800}; //{0,50,100,200,500,1000}; //{0,50,100,200,300}; // ,100,200,300,500,600,800,1000};
         //int[] iterMCTSWrapArr={0};  // only in conjunction with oPar's nPly > 0 (see below)
         int fact=0;   // 1 or 0: whether to invoke lower bounds (1) or not (0)
         HashMap<Integer, Double> hm = new HashMap<>();  // lower bounds of %-solved-rates to expect as a fct of iterMCTSWrap
@@ -127,6 +129,7 @@ public class MCTSWrapperAgentTest extends GBGBatch {
         hm.put( 200,fact*0.99);
         hm.put( 300,fact*0.99);
         hm.put( 500,fact*0.99);
+        hm.put( 800,fact*0.99);
         hm.put(1000,fact*0.99);
         int nTrial = 4;
         String csvFile = "mRubiks2x2.csv";
@@ -157,7 +160,7 @@ public class MCTSWrapperAgentTest extends GBGBatch {
         PlayAgent pa;
         PlayAgent qa;
         double[] epsArr = {1e-8}; // {1e-8, 0.0, -1e-8}; // {1e-8, 0.0};    //
-        double c_puct=10.0;
+        double c_puct=10.0; //1.0; //10.0;      // Sep'2022: c_puct=1.0  was found to be in most cases better than 10.0
         String userTitle1 = "pTwist", userTitle2 = "EE";
         int maxDepth = 50;  // 25, 50, -1
         int ee = 50;       // 20 or 50: eval-epiLength

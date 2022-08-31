@@ -84,6 +84,7 @@ agents/RubiksCube/3x3x3_STICKER2_AT/multiTrain*/*.zip
 agents/RubiksCube/3x3x3_STICKER2_AT/TCL4-p5-1000k-120-7t.agt.zip
 agents/RubiksCube/3x3x3_STICKER2_AT/TCL4-p9-2000k-120-7t.agt.zip
 agents/RubiksCube/3x3x3_STICKER2_QT/*.zip
+agents/RubiksCube/3x3x3_STICKER2_QT/multiEval/*.zip
 agents/RubiksCube/3x3x3_STICKER2_QT/multiTrain/*.zip
 agents/TicTacToe/test.agt.zip
 agents/Yavalath/02 Players Size 05/T*.agt.zip

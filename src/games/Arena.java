@@ -1254,9 +1254,7 @@ abstract public class Arena implements Runnable {
 			td = this.tdAgentIO.loadGBGAgent(filePath);			
 		} catch(Exception e) {
 			str = e.getMessage();			
-//		} catch(ClassNotFoundException e) {
-//			str = e.getMessage();			
-		} 
+		}
 		
 		if (td == null) {
 			str = str + "\n No Agent loaded!";
@@ -1285,13 +1283,7 @@ abstract public class Arena implements Runnable {
 				this.m_xab.setGameNumber(td.getMaxGameNum());
 				this.m_xab.oPar[n].setNumEval(td.getNumEval());
 			}
-//			if (td instanceof TDNTuple2Agt && TDNTuple2Agt.VER_3P) {
-//				this.m_xab.tdPar[n].enableMode3P(true);
-//				this.m_xab.tdPar[n].enableNPly(false);
-//			} else {
-//				this.m_xab.tdPar[n].enableNPly(false);
-//			}
-			
+
 			// if called via Arena, then disable all actionable elements in all param tabs
 			// "TD pars" and "NT par" (allow only viewing of parameters)
 			if (!this.hasTrainRights()) {
@@ -1306,12 +1298,14 @@ abstract public class Arena implements Runnable {
 			this.m_xfun.m_PlayAgents[n] = td;
 			String strAgent = (numPlayers==2) ? "Agent-"+Types.GUI_2PLAYER_NAME[n] :
 												"Agent-"+Types.GUI_PLAYER_NAME[n];
-			str = "Agent "+td.getName()+" succesfully loaded to "
-				+ strAgent + "!";
+			str = "Agent "+td.getName()+" successfully loaded from " + td.getAgentFile() + "!";
+			System.out.println("[Arena.loadAgent] "+str);
+			str = "Agent "+td.getName()+" successfully loaded to " + strAgent + "!";
 			res = true;
 		}
 		this.setStatusMessage(str);
-		System.out.println("[LoadAgent] "+str);
+		if (!res) 		// in the (res==true)-case we have already the td.getAgentFile()-printout above
+			System.out.println("[Arena.loadAgent] "+str);
 		return res;
 	}
 
