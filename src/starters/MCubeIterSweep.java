@@ -67,7 +67,7 @@ public class MCubeIterSweep extends GBGBatch {
     // same as symmIterTest3x3x3, but each pTwist-level separate
     public void symmIterSingle3x3x3(int [] iterMWrapArr, double c_puct, String agtDir, Arena arenaTrain, String csvName) {
         int pMinEval = 1;   // min number of twists during evaluation
-        int pMaxEval = 13;   // max number of twists during evaluation
+        int pMaxEval = 18; // 13;   // max number of twists during evaluation
 //        int pMinEval = 14;   // min number of twists during evaluation
 //        int pMaxEval = 26;   // max number of twists during evaluation
         String strDir = Types.GUI_DEFAULT_DIR_AGENT + "/" + arenaTrain.getGameName();
@@ -87,7 +87,7 @@ public class MCubeIterSweep extends GBGBatch {
                     symmIterTest(iterMWrapArr, pTwist, pTwist, c_puct, csvName, agtFile, mcList);
                 }
             }
-        } // for (i)
+        } // for (content)
 
     }
 

@@ -71,6 +71,22 @@ public class DistinctColorTrafos {
 
     }
 
+    @Test
+    public void examplePocket_CT() {
+        String[] scaPar = new String[] {"2x2x2", "STICKER2", "HTM"};
+        ColorTrafoMap allCT = new ColorTrafoMap(ColorTrafoMap.ColMapType.AllColorTrafos);
+        initPocket(scaPar);
+        System.out.println("\nExample 2x2x2 cube state after U^1:");
+        CubeState cs = ((StateObserverCube) gb.getDefaultStartState()).getCubeState();
+        cs.UTw();
+        System.out.println(cs);
+        System.out.println(cs.print_inv_sloc());
+        CubeStateMap csMap = cs.applyCT(allCT,true);
+        CubeState csct = csMap.get(4);
+        System.out.println(csct);
+        System.out.println(csct.print_inv_sloc());
+    }
+
     protected void initPocket(String[] scaPar) {
         CubeConfig.cubeSize = CubeConfig.CubeSize.POCKET;
 

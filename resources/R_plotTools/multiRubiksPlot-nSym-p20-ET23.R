@@ -9,7 +9,7 @@ library(scales)     # needed for 'labels=percent'
 source("summarySE.R")
 
 TWISTTYPE="QTM"
-pdffile=paste0("Rubiks-nsym-ptwist-",TWISTTYPE,"-ET16.pdf")
+pdffile=paste0("Rubiks-nsym-ptwist-",TWISTTYPE,"-p20-ET23.pdf")
 
 filenames=c()
 cubeWidthCol=c()
@@ -29,7 +29,7 @@ for (CUBEW in c(3)) {        # cube width, either 2 or 3, currently only 3
                     ," "
                     ,paste0("TODO")   # CUBEW=2, QTM
                     #,paste0("symmIterSingle-nSym0-16.csv")   # CUBEW=3, QTM (old: ET=12)
-                    ,paste0("symmIterSingle-nSym0-24-ET16.csv")   # CUBEW=3, QTM, cPUCT=1
+                    ,paste0("symmIterSingle-nSym0-24-P20-ET23.csv")   # CUBEW=3, QTM, cPUCT=1
                     #,paste0("symmIterSingle-nSym0-24-ET16-cPUCT10.csv")   # cPUCT=10, clearly worse
     )
   } 
@@ -88,7 +88,7 @@ q <- q+geom_errorbar(aes(ymin=winrate-se, ymax=winrate+se), width=0.3) #, positi
 q <- q+geom_line(size=1.0) + geom_point(size=3.0)
 q <- q+scale_y_continuous(limits=Ylimits, labels=percent) 
 q <- q+ylab(evalStr)
-q <- q+scale_x_continuous(limits=c(1,ifelse(TWISTTYPE=="HTM",13,14)), breaks=c(1,3,5,7,9,11,13)) 
+q <- q+scale_x_continuous(limits=c(1,ifelse(TWISTTYPE=="HTM",13,15)), breaks=c(1,3,5,7,9,11,13,15,17)) 
 q <- q+xlab("scrambling twists") +
   annotate("text",x=ifelse(TWISTTYPE=="HTM",11,11),y=0.05,label=paste0(TWISTTYPE,""), size=5) +
   annotate("text",x=3,y=0.05,label=NSYM, size=5)

@@ -38,9 +38,8 @@ public final class PlayAgentApproximator implements Approximator, Serializable {
         assert (vTable.length == stateObservation.getNumAvailableActions()) : "Ooops, wrong size for vTable!";
         final var minV = stateObservation.getMinGameScore();
         final var maxV = stateObservation.getMaxGameScore();
-        final var softmaxArr = optSoftmax(vTable,minV,maxV);
         //final var softmaxArr2 = softmax2(vTable);
-        return softmaxArr;
+        return optSoftmax(vTable,minV,maxV);
     }
 
     // removed 'static' in front of double[] (in order to access member agent) --> any unwanted side effects?

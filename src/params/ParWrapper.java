@@ -57,8 +57,8 @@ public class ParWrapper implements Serializable {
     public static double DEFAULT_WRAPPER_MCTS_PUCT = 1;
     public static int DEFAULT_WRAPPER_MCTS_DEPTH = 100;
     public static int DEFAULT_WRAPPER_MCTS_EXPLOMODE = ConfigWrapper.EXPLORATION_MODE; //0;
-    public static double DEFAULT_WRAPPER_MCTS_EPSINIT = ConfigWrapper.epsilon; //0.1;
-    public static double DEFAULT_WRAPPER_MCTS_EPSFINAL = ConfigWrapper.epsilon; //0.1;
+    public static double DEFAULT_WRAPPER_MCTS_EPSINIT = ConfigWrapper.epsilon; //0.15;
+    public static double DEFAULT_WRAPPER_MCTS_EPSFINAL = ConfigWrapper.epsilon; //0.15;
     public static boolean DEFAULT_USESOFTMAX = ConfigWrapper.USESOFTMAX; // true
     public static boolean DEFAULT_USELASTMCTS = ConfigWrapper.USELASTMCTS; //true;
 
@@ -68,8 +68,8 @@ public class ParWrapper implements Serializable {
     private double wrapperMCTS_PUCT = DEFAULT_WRAPPER_MCTS_PUCT;
     private int wrapperMCTS_depth = DEFAULT_WRAPPER_MCTS_DEPTH;
     private int wrapperMCTS_exploMode = DEFAULT_WRAPPER_MCTS_EXPLOMODE;
-    private double wrapperMCTS_epsInit = DEFAULT_WRAPPER_MCTS_EPSINIT;
-    private double wrapperMCTS_epsFinal = DEFAULT_WRAPPER_MCTS_EPSFINAL;
+    private double wrapperMCTS_epsInit = DEFAULT_WRAPPER_MCTS_EPSINIT;      // the effective m_epsilon is set in
+    private double wrapperMCTS_epsFinal = DEFAULT_WRAPPER_MCTS_EPSFINAL;    // MCTSWrapperAgent.adjustEpsilon()
     private boolean useSoftMax = DEFAULT_USESOFTMAX;
     private boolean useLastMCTS = DEFAULT_USELASTMCTS;
 

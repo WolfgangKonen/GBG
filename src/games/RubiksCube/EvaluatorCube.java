@@ -40,13 +40,13 @@ public class EvaluatorCube extends Evaluator {
 //	public EvaluatorCube(PlayAgent pa, GameBoard gb, int stopEval, int mode) {
 //		super(pa, gb, mode, stopEval);
 //		initEvaluator(gb);			// might change CubeConfig.pMin and .pMax
-//		ecp = new EvalCubeParams(pa);		// construct with actual CubeConfig.pMax
+//		ecp = new EvalCubeParams(pa);		// construct with actual CubeConfig.pMax and with epiLength = pa.getParOther().getStopEval()
 //	}
 
 	public EvaluatorCube(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
 		super(pa, gb, mode, stopEval, verbose);
 		initEvaluator(gb);			// might change CubeConfig.pMin and .pMax
-		ecp = new EvalCubeParams(pa);		// construct with actual CubeConfig.pMax
+		ecp = new EvalCubeParams(pa);		// construct with actual CubeConfig.pMax and with epiLength = pa.getParOther().getStopEval()
 	}
 
 	public EvaluatorCube(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose,

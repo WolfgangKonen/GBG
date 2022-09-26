@@ -9,7 +9,7 @@ library(scales)     # needed for 'labels=percent'
 source("summarySE.R")
 
 TWISTTYPE="QTM"
-pdffile=paste0("Rubiks-nsym-ptwist-",TWISTTYPE,"-ET16.pdf")
+pdffile=paste0("Rubiks-nsym-ptwist-",TWISTTYPE,"-ET16-beyond.pdf")
 
 filenames=c()
 cubeWidthCol=c()
@@ -37,6 +37,8 @@ for (CUBEW in c(3)) {        # cube width, either 2 or 3, currently only 3
   filenames = c(filenames,filename)
   cubeWidthCol = c(cubeWidthCol,cubewww)
 }
+filenames = c(filenames,paste0(path,"symmIterSingle-p13trained-p14-26tested.csv"))
+cubeWidthCol = c(cubeWidthCol,cubewww)
 
 
 wfac = 1;
@@ -59,7 +61,7 @@ for (k in 1:length(filenames)) {
   dfBoth <- rbind(dfBoth,cbind(df,cubeWidth=cubeWidthCol[k]))
 }
 
-dfBoth <- dfBoth[dfBoth$iterMWrap %in% c(0,50,100,200,400,800),]
+#dfBoth <- dfBoth[dfBoth$iterMWrap %in% c(0,50,100,200,400,800),]
 #-- if only a subset of iterMWrap shall be shown: --
 dfBoth <- dfBoth[dfBoth$iterMWrap %in% c(0,100,800),]
 #dfBoth <- dfBoth[dfBoth$iterMWrap %in% c(0,200),]
@@ -71,7 +73,7 @@ colnames(dfBoth)[colnames(dfBoth) %in% c("pMaxEval", "evalQ")] <- c("pTwist", "w
 #dfBoth <- dfBoth[dfBoth$pTwist > 9,]
 
 #dfBoth <- dfBoth[dfBoth$nSym %in% c(0,16,24),];  NSYM = "nSym=0,16,24"
-dfBoth <- dfBoth[dfBoth$nSym %in% c(0,8,16),];  NSYM = "nSym=0,8,16"
+#dfBoth <- dfBoth[dfBoth$nSym %in% c(0,8,16),];  NSYM = "nSym=0,8,16"
 NSYM = "3x3x3"
 
 # summarySE is a very useful script from www.cookbook-r.com/Graphs/Plotting_means_and_error_bars_(ggplot2)
@@ -88,7 +90,7 @@ q <- q+geom_errorbar(aes(ymin=winrate-se, ymax=winrate+se), width=0.3) #, positi
 q <- q+geom_line(size=1.0) + geom_point(size=3.0)
 q <- q+scale_y_continuous(limits=Ylimits, labels=percent) 
 q <- q+ylab(evalStr)
-q <- q+scale_x_continuous(limits=c(1,ifelse(TWISTTYPE=="HTM",13,14)), breaks=c(1,3,5,7,9,11,13)) 
+q <- q+scale_x_continuous(limits=c(1,ifelse(TWISTTYPE=="HTM",13,15)), breaks=c(1,3,5,7,9,11,13,15,17)) 
 q <- q+xlab("scrambling twists") +
   annotate("text",x=ifelse(TWISTTYPE=="HTM",11,11),y=0.05,label=paste0(TWISTTYPE,""), size=5) +
   annotate("text",x=3,y=0.05,label=NSYM, size=5)

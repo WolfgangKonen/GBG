@@ -138,31 +138,34 @@ public class CubeState2x2 extends CubeState {
         // 2) apply the color trafo to sloc:
         applyCT_sloc(cT,doAssert);
 
-        // 3) locate the ygr-cubie and its forward whole-cube rot:
-        CubieTriple where = this.locate(ygrCubie);
-        Integer iWholeCubeRot = CubeStateMap.map_ygr_wholeKey.get(where.loc[0]);
-        // --- only debug-printout: ---
+//        boolean DO_NORMALIZE=false;       // this branch *ONLY* for DistinctColorTrafos.examplePocket_CT in order to
+//        if (DO_NORMALIZE) {               // generate Fig. 8 in TR_Rubiks (color trafo before normalization)
+
+            // 3) locate the ygr-cubie and its forward whole-cube rot:
+            CubieTriple where = this.locate(ygrCubie);
+            Integer iWholeCubeRot = CubeStateMap.map_ygr_wholeKey.get(where.loc[0]);
+            // --- only debug-printout: ---
 //            DecimalFormat form = new DecimalFormat("00");
 //            System.out.println("key: "+form.format(entry.getKey())
 //                    + ", y-sticker: "+form.format(where.loc[0])
 //                    + ", iWholeCubeRot: "+form.format(iWholeCubeRot));
 
-        // 4) apply the corresponding whole-cube rotation that brings the ygr-cubie 'home':
-        CubeState trafo = CubeStateMap.allWholeCubeRots.get(iWholeCubeRot);
-        //applyWholeCubeRot(iWholeCubeRot,tS);      // 3.a: WRONG! (and no longer needed)
-        this.apply(trafo,doAssert);                 // 3.b: works now, with repaired apply_sloc in apply
-//      tmp = this.fcol.clone();                    // 3.c: not needed: is the same as 3.b. with apply_sloc
-//      for (int i=0; i<fcol.length; i++)           //      and is slow with apply_sloc_slow
-//          this.fcol[i] = tmp[trafo.fcol[i]];      //
-//      //apply_sloc_slow(trafo,doAssert);          //
-//      apply_sloc(trafo,doAssert);                 //
+            // 4) apply the corresponding whole-cube rotation that brings the ygr-cubie 'home':
+            CubeState trafo = CubeStateMap.allWholeCubeRots.get(iWholeCubeRot);
+            //applyWholeCubeRot(iWholeCubeRot,tS);      // 3.a: WRONG! (and no longer needed)
+            this.apply(trafo, doAssert);                 // 3.b: works now, with repaired apply_sloc in apply
+//          tmp = this.fcol.clone();                    // 3.c: not needed: is the same as 3.b. with apply_sloc
+//          for (int i=0; i<fcol.length; i++)           //      and is slow with apply_sloc_slow
+//              this.fcol[i] = tmp[trafo.fcol[i]];      //
+//          //apply_sloc_slow(trafo,doAssert);          //
+//          apply_sloc(trafo,doAssert);                 //
 
-        if (doAssert) {
-            CubeState2x2 cs2 = new CubeState2x2(this);
-            cs2.apply_sloc_slow(trafo, doAssert);
-            assert (cs2.isEqual(this)) : "sloc_slow check: cs2 and this differ!";
-        }
-
+            if (doAssert) {
+                CubeState2x2 cs2 = new CubeState2x2(this);
+                cs2.apply_sloc_slow(trafo, doAssert);
+                assert (cs2.isEqual(this)) : "sloc_slow check: cs2 and this differ!";
+            }
+//      }
         return this;
     }
 

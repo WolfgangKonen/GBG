@@ -5,10 +5,10 @@ import games.StateObservation;
 import params.ParWrapper;
 
 /**
- * This class is now now longer in direct use, we have the relevant parameters now in {@link ParWrapper} such
+ * This class is now no longer in direct use, we have the relevant parameters now in {@link ParWrapper} such
  * that they are stored together with the agent.
  * <p>
- * {@link ConfigWrapper} serves now only as the DEFAULT-setter in {@link ParWrapper} and as documentation
+ * {@link ConfigWrapper} serves now only as the DEFAULT-setter in {@link ParWrapper} and for documentation of parameters
  */
 public class ConfigWrapper {
 
@@ -48,7 +48,9 @@ public class ConfigWrapper {
     public static int EXPLORATION_MODE = 0;
 
     /**
-     * a quick hack to set epsilon for ConfigWrapper.EXPLORATION_MODE=2 (eps-greedy)
+     * Default epsilonInit and epsilonFinal for ConfigWrapper.EXPLORATION_MODE=2 (eps-greedy). The effective epsilon
+     * parameter {@code m_epsilon} is set in {@link MCTSWrapperAgent#adjustEpsilon()} as linear interpolation between
+     * epsilonInit and epsilonFinal, depending on {@code gameNum}.
      */
     public static double epsilon = 0.15;
 

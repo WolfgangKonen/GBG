@@ -273,8 +273,7 @@ abstract public class CubeState implements Serializable {
 			tforB[invB[i]]=i;
 		}
 
-		boolean DOASSERT = true;
-		if (DOASSERT) assertForwardTs();
+		assertForwardTs();
 	}
 
 	private static void assertForwardTs() {
@@ -286,7 +285,7 @@ abstract public class CubeState implements Serializable {
 		int[] tf2D = new int[invF.length];
 		int[] tf2R = new int[invF.length];
 		int[] tf2B = new int[invF.length];
-		// Since 3x applying F is F^3 = F^{-1}, it also holds that 3x applying F^{-1} gives F^9 = F.
+		// Since 3x applying F is F^3 = F^{-1}, it also holds that 3x applying F^{-1} gives F^{-3} = F.
 		// So we can calculate tforF by 3x applying invF:
 		for (int i=0; i<tf2U.length; i++) {
 			tf2U[i] = invU[invU[invU[i]]];
@@ -763,8 +762,23 @@ abstract public class CubeState implements Serializable {
 		}
 		return sb.toString();
 	}
-	
-	/** 
+
+	public String print_inv_sloc() {
+		int[] invs = sloc.clone();
+		for (int i=0; i<sloc.length; i++) {
+			invs[sloc[i]]=i;
+		}
+		int isep = (this.type==Type.COLOR_P) ? 4 : 8;
+		DecimalFormat form = new DecimalFormat("00");
+		StringBuilder sb = new StringBuilder();
+		for (int i=0; i<sloc.length; i++) {
+			if (i%isep==0) sb.append("|"); else sb.append(",");
+			sb.append(form.format(invs[i]));
+		}
+		return sb.toString();
+	}
+
+	/**
 	 * @return a one-line string representing this object: This string is a representation of {@link #fcol}.
 	 */
 	public String toString() {

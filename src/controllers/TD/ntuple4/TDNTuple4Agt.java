@@ -969,7 +969,8 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 		m_Net.setHorizon();
 		String cs = getClass().getSimpleName();
 		return       cs + ": USESYM:" + (m_ntPar.getUSESYMMETRY()?"true":"false")
-				+ ", P:" + (m_Net.getXnf().getNumPositionValues())
+				+ ", nSym:" + m_ntPar.getNSym()
+				+ ", P:" + m_Net.getXnf().getNumPositionValues()
 				+ ", NORMALIZE:" + (m_tdPar.getNormalize()?"true":"false")
 				+ ", sigmoid:"+(m_Net.hasSigmoid()? "tanh":"none")
 				+ ", lambda:" + m_Net.getLambda()

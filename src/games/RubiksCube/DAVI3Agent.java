@@ -237,7 +237,9 @@ public class DAVI3Agent extends NTuple4Base implements PlayAgent {
      */
     @Override
 	public boolean trainAgent(StateObservation so) {
-		return (CubeConfig.REPLAYBUFFER) ? trainAgent_replayBuffer(so) : trainAgent_baseline(so);
+		return (CubeConfig.REPLAYBUFFER) ?
+				trainAgent_replayBuffer(so) :
+				trainAgent_baseline(so);
 	}
 
 	/**
@@ -429,7 +431,8 @@ public class DAVI3Agent extends NTuple4Base implements PlayAgent {
 		m_Net.setHorizon();
 		String cs = getClass().getSimpleName();
 		return cs + ": USESYM:" + (m_ntPar.getUSESYMMETRY()?"true":"false")
-				+ ", P:" + (m_Net.getXnf().getNumPositionValues())
+				+ ", nSym:" + m_ntPar.getNSym()
+				+ ", P:" + m_Net.getXnf().getNumPositionValues()
 				+ ", NORMALIZE:" + (m_tdPar.getNormalize()?"true":"false")
 				+ ", sigmoid:"+(m_Net.hasSigmoid()? "tanh":"none")
 				+ ", alpha:" + m_Net.getAlpha()

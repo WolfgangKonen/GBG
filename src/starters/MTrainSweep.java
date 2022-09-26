@@ -35,6 +35,7 @@ public class MTrainSweep {
      * </ul>
      *
      * @param n			index of agent to train (usually n=0)
+     * @param agtFile	agent file name
      * @param xab		used for reading parameter values from members *_par and for fetching the name
      * 					of agent <b>n</b>
      * @param gb		the game board, needed for evaluators and start state selection
@@ -64,7 +65,8 @@ public class MTrainSweep {
         String subDir = t_Game.getGameBoard().getSubDir();
         if (subDir != null) strDir += "/" + subDir;
         tools.Utils.checkAndCreateFolder(strDir+"/multiTrain");
-        String agtBase = agtFile.split("\\.")[0];
+        String agtBase = agtFile.split("\\.")[0];   // filename w/o suffix
+        agtBase = removeSubstr(agtBase, "-stub");   // remove "-stub", if it appears
 
         for (int i=0; i<trainNum; i++) {
 
@@ -115,6 +117,13 @@ public class MTrainSweep {
         return pa;
 
     } // multiTrain_M
+
+    private String removeSubstr(String agtBase, String substr) {
+        String[] arr = agtBase.split(substr);
+        StringBuilder out= new StringBuilder();
+        for (String s : arr) out.append(s);
+        return out.toString();
+    }
 
     /**
      * Perform {@code trainNum * alphaArr.length} cycles of training and evaluation for PlayAgent, and perform
