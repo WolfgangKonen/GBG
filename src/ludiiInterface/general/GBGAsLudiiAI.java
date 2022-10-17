@@ -3,12 +3,15 @@ package ludiiInterface.general;
 import controllers.PlayAgent;
 import game.Game;
 import games.Hex.HexConfig;
+import games.Nim.NimConfig;
 import games.Othello.ArenaOthello;
 import ludiiInterface.Util;
 import ludiiInterface.games.CFour.StateObserverC4TranslationLayer;
 import ludiiInterface.games.CFour.SystemConversionC4;
 import ludiiInterface.games.Hex.StateObserverHexTranslationLayer;
 import ludiiInterface.games.Hex.SystemConversionHex;
+import ludiiInterface.games.Nim.StateObserverNimTranslationLayer;
+import ludiiInterface.games.Nim.SystemConversionNim;
 import ludiiInterface.games.othello.StateObserverOthelloTranslationLayer;
 import ludiiInterface.games.othello.SystemConversionOthello;
 import ludiiInterface.games.yavalath.StateObserverYavalathTranslationLayer;
@@ -19,6 +22,8 @@ import other.context.Context;
 import other.move.Move;
 import tools.Types;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
@@ -31,8 +36,9 @@ public class GBGAsLudiiAI extends AI {
     private String gbgAgentPathYavalath = "C:\\Users\\Ann\\IdeaProjects\\GBG\\agents\\Yavalath\\yavAgent.agt.zip";
     private final String gbgAgentPathOthello = "C:\\Users\\Ann\\IdeaProjects\\GBG\\agents\\Othello\\TCL3-100_7_250k-lam05_P4_nPly2-FAm_A.agt.zip";
     private final String gbgAgentPathHex = "C:\\Users\\Ann\\IdeaProjects\\GBG\\agents\\Hex\\06\\TDNT3-TCLid-25_6-300k-eps02.agt.zip";
-    private final String[] games = {"Othello", "Yavalath", "Hex", "Connect Four"};
+    private final String[] games = {"Othello", "Yavalath", "Hex", "Connect Four", "Nim"};
     private String agentPath;
+    private List<Move> movesNim;
 
     public GBGAsLudiiAI(){
         friendlyName = getClass().getSimpleName();
@@ -42,6 +48,7 @@ public class GBGAsLudiiAI extends AI {
         this.size = size;
         this.players = players;
         friendlyName = getClass().getSimpleName();
+        this.movesNim = new ArrayList<>();
     }
 
     /**
@@ -105,6 +112,12 @@ public class GBGAsLudiiAI extends AI {
             }
             case "Connect Four" -> {
                 move = selectActionC4(game,context,maxSeconds,maxIterations,maxDepth);
+            }
+            case "Nim" -> {
+                if(movesNim.isEmpty()) selectActionNim(game, context, maxSeconds, maxIterations, maxDepth);
+
+                move = Optional.ofNullable(movesNim.get(0));
+                movesNim.remove(0);
             }
 
             default -> {
@@ -196,6 +209,10 @@ public class GBGAsLudiiAI extends AI {
         return returnMove;
     }
 
+    /**
+     * Translates the current Ludii context into a StateObserverC4 that the agent then uses to choose its next action.
+     * Then translates that action back into a list of Ludii moves.
+     */
     private Optional<Move> selectActionC4(Game game, Context context, double maxSeconds, int maxIterations, int maxDepth){
         Optional<Move> returnMove = Optional.empty();
         SystemConversionC4 conversion = new SystemConversionC4();
@@ -210,6 +227,63 @@ public class GBGAsLudiiAI extends AI {
         return returnMove;
     }
 
+    /**
+     * Translates the current Ludii context into a StateObserverNim that the agent then uses to choose its next action.
+     * Then translates that action back into a list of Ludii moves.
+     */
+    private void selectActionNim(Game game, Context context, double maxSeconds, int maxIterations, int maxDepth) {
 
+        int numberHeaps = 0;
+
+        //Detects and sets number of heaps
+        for (String s : game.getOptions()) {
+            if (s.contains("Number Piles")) {
+
+                numberHeaps = Character.getNumericValue(s.charAt(13));
+
+                // checking if number of heaps has two digits and the second digit was cut off by charAt()
+                if (numberHeaps == 1)
+                    numberHeaps = Integer.parseInt(s.substring(13, 15)); // if so, replace numberHeaps with correct two digit integer
+
+                NimConfig.NUMBER_HEAPS = numberHeaps;
+                NimConfig.HEAP_SIZE = -1;
+                NimConfig.MAX_MINUS = numberHeaps;
+            }
+        }
+
+        SystemConversionNim conversion = new SystemConversionNim(numberHeaps);
+        StateObserverNimTranslationLayer sobTNim = new StateObserverNimTranslationLayer(context, playerID, numberHeaps);
+        FastArrayList<Move> moves = game.moves(context).moves();
+
+        Types.ACTIONS gbgAction = gbgAgent.getNextAction2(sobTNim.partialState(), false, true);
+        int moveRep = (gbgAction.toInt() % NimConfig.MAX_MINUS) + 1;  // calculates how many objects are taken off heap
+
+        for (Move move : moves) {
+            if (move.to() == ((gbgAction.toInt() - (gbgAction.toInt() % numberHeaps)) / numberHeaps)) {
+                try {
+                    if (move.to() == conversion.getLudiiIndexFromGBG(gbgAction.toInt())) { // check if a mapping is available for the GBG move, i.e. if GBG player wants to take only one item off heap
+                        movesNim.add(move);
+                    }
+                } catch (Exception e) { // if no mapping available, then add move as many times as necessary to take wanted amount off heap
+                    for (int i = 0; i < moveRep; i++) {
+                        movesNim.add(move);
+                    }
+                }
+            }
+        }
+
+        int[] testHeap = sobTNim.getHeaps();
+
+        int j = gbgAction.toInt()%NimConfig.MAX_MINUS;
+        int heap = (gbgAction.toInt()-j)/NimConfig.MAX_MINUS;
+        int subtractor = j+1;
+
+        testHeap[heap] -= subtractor;
+
+        if(testHeap[heap] != 0) // checks if heap will be empty after action is performed, if it's empty, Ludii ends GBG players turn on its own
+            movesNim.add(Game.createPassMove(context, true)); // if not, add pass move at end of the list to signal end of the GBG player's turn after move is complete
+
+        assert !movesNim.isEmpty() : "List is Empty!!";
+    }
 
 }

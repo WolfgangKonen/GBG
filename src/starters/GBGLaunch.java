@@ -322,7 +322,7 @@ public class GBGLaunch extends SetupGBG {
 			scaPar0_L.setText("Heaps");
 			scaPar1_L.setText("Heap Size");
 			setScaPar0List(new int[]{2,3,4,5});				// int values are converted to 
-			setScaPar1List(new int[]{3,5,6,7,8,9,10,20,50});// Strings in ChoiceBoxes 
+			setScaPar1List(new int[]{-1,3,5,6,7,8,9,10,20,50});// Strings in ChoiceBoxes
 			choiceScaPar0.setSelectedItem("3");		// 
 			choiceScaPar1.setSelectedItem("5");		// the initial (recommended) values
 			if (selectedGame.equals("Nim")) {

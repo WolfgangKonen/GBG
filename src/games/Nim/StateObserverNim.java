@@ -37,9 +37,28 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 	 * {@link NimConfig#HEAP_SIZE} items. Player 0 is the starting player.
 	 */
 	public StateObserverNim() {
-		m_heap = new int[NimConfig.NUMBER_HEAPS]; 
-		for (int i=0;i<NimConfig.NUMBER_HEAPS;i++) 
-			m_heap[i] = NimConfig.HEAP_SIZE;
+		m_heap = new int[NimConfig.NUMBER_HEAPS];
+
+		//if HEAP_SIZE is set to -1, infer different heap sizes from NUMBER_HEAPS
+		//e.g. NUMBER_HEAPS is 5, then heap sizes in order would be 3,4,5,4,3
+		if(NimConfig.HEAP_SIZE == -1){
+
+			NimConfig.MAX_MINUS = NimConfig.NUMBER_HEAPS;
+			int k = NimConfig.NUMBER_HEAPS/2;
+
+			for (int i=0; i<NimConfig.NUMBER_HEAPS; i++){
+				if(k>0 || k==0){
+					m_heap[i] = NimConfig.NUMBER_HEAPS - k;
+				} else {
+					m_heap[i] = NimConfig.NUMBER_HEAPS + k;
+				}
+				k--;
+			}
+		}
+		else { // else every heap has the same amount items equaling Heap Size
+			for (int i = 0; i < NimConfig.NUMBER_HEAPS; i++)
+				m_heap[i] = NimConfig.HEAP_SIZE;
+		}
 		m_player = 0;
 		setAvailableActions();
 	}
