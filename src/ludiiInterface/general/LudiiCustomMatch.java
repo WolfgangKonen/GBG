@@ -19,7 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class LudiiCustomMatch {
-    static String[] games = { "Othello", "Yavalath", "Hex", "ConnectFour"};
+    static String[] games = { "Othello", "Yavalath", "Hex", "ConnectFour", "Nim"};
     static final AI PLAYER_1 = new LudiiAI();
     static AI PLAYER_2;
     static Game ludiiGame;
@@ -89,6 +89,20 @@ public class LudiiCustomMatch {
                 PLAYER_2 = new GBGAsLudiiAI();
                 ludiiGame = GameLoader.loadGameFromName("Connect Four.lud");
             }
+            case "Nim" -> {
+                String[] sizes = {"3", "5", "7", "9", "11", "13", "15", "17", "19"};
+                JComboBox nimSize = new JComboBox(sizes);
+                JOptionPane.showMessageDialog(null,nimSize,"Choose the number of heaps", JOptionPane.QUESTION_MESSAGE);
+                int size = Integer.parseInt((String) nimSize.getSelectedItem());
+
+                List<String> options;
+
+                String piles = "Number Piles/" + size;
+                options = Arrays.asList(piles, "End Rules/Last Mover Wins");
+
+                PLAYER_2 = new GBGAsLudiiAI(size, 2);
+                ludiiGame = GameLoader.loadGameFromName("Nim.lud", options);
+            }
 
         }
 
@@ -111,6 +125,11 @@ public class LudiiCustomMatch {
 
         for (int gameCounter = 0; gameCounter < gamesNumber; gameCounter++) {
             ludiiGame.start(context);
+
+            if(game.equals("Nim"))
+            {
+                context.trial().reset(ludiiGame); // needed because context makes moves on its own after being initialized
+            }
 
             //Initialize the AIs
             for (int i = 1; i < ais.size(); i++) {

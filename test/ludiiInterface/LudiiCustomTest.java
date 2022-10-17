@@ -304,6 +304,77 @@ public class LudiiCustomTest extends GBGBatch {
 
     }
 
+    /**
+     * Play {@link #GAMESNUMBER} Nim episodes {@link #PLAYER_1}( {@code = }{@link LudiiAI}) vs.
+     * {@link #PLAYER_2}( {@code = }{@link GBGAsLudiiAI}), where the GBG agent is loaded from {@code agtFile}
+     * as specified in source code.
+     * <p>
+     * If {@link #LOGS}{@code = true}, then append
+     * <pre>
+     *    timestamp | Winner : Moves: ...  </pre>
+     * as one-liner to log file {@code logs/<gameName>[/<subdir]/logs.ludiilog}.
+     */
+    @Test
+    public void customNimGame(){
+        PlayAgent pa;
+        int winsPlayer1 = 0, winsPlayer2 = 0, ties = 0;
+        int heapSize = 3; // test only possible for 3 and 5 right now
+
+        selectedGame ="Nim";
+        scaPar = new String[]{""+heapSize,"-1",""+heapSize};
+        agtFile= "Bouton.agt.zip";
+        arenaTrain = SetupGBG.setupSelectedGame(selectedGame,scaPar,"",false,true);
+        pa = arenaTrain.loadAgent(agtFile);
+        System.out.println(pa.getName()+"\n"+pa.stringDescr());
+
+        PLAYER_2 = new GBGAsLudiiAI(heapSize,2);
+
+        List<String> options = Arrays.asList("Number Piles/"+heapSize, "End Rules/Last Mover Wins");
+        ludiiGame = GameLoader.loadGameFromName("Nim.lud", options);
+
+        final other.context.Context context = new Context(ludiiGame, new Trial(ludiiGame));
+
+        final List<AI> ais = new ArrayList<>();
+        ais.add(null); //Need to add a null entry, because Ludii starts player numbering on 1
+        ais.add(PLAYER_1);
+        ais.add(PLAYER_2);
+
+        for(int gameCounter = 0; gameCounter < GAMESNUMBER; gameCounter++){
+            ludiiGame.start(context);
+            context.trial().reset(ludiiGame); // needed because context makes moves on its own after being initialized
+
+            // Initialize the AIs
+            ais.get(1).initAI(ludiiGame,1);
+            //ais.get(2).initAI(ludiiGame,2);
+            ((GBGAsLudiiAI)ais.get(2)).initAI(ludiiGame,2,pa);
+
+            final Model model = context.model();
+
+            while(!context.trial().over()){
+                model.startNewStep(context,ais,MAX_SECONDS);
+            }
+
+            if(context.trial().status().winner() == 0){
+                System.out.println("Tie.");
+                ties++;
+            }else {
+                System.out.println("Winner Game " + ": " + ais.get(context.trial().status().winner()).friendlyName());
+                if(context.trial().status().winner() == 1){
+                    winsPlayer1++;
+                }else winsPlayer2++;
+            }
+
+            if(LOGS){
+                String logFullFilePath = getLogPath(arenaTrain);
+                logGame(context,logFullFilePath, ais);
+            }
+            System.out.println("Wins Player 1 ("+ ais.get(1).friendlyName() + "): " + winsPlayer1);
+            System.out.println("Wins Player 2 ("+ ais.get(2).friendlyName() + "): " + winsPlayer2);
+            System.out.println("Ties: " + ties);
+        }
+
+    }
+
     private String getLogPath(Arena arena) {
         String logFullFilePath;
         String logFile="logs.ludiilog";

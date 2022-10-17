@@ -1,7 +1,6 @@
 package ludiiInterface;
 
-import game.Game;
-import gnu.trove.list.array.TIntArrayList;
+
 import ludiiInterface.games.CFour.StateObserverC4TranslationLayer;
 import ludiiInterface.games.CFour.SystemConversionC4;
 import main.collections.FastArrayList;
