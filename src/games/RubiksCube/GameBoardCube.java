@@ -51,7 +51,7 @@ public class GameBoardCube implements GameBoard {
 //		rand 		= new Random(seed);
         rand 		= new Random(System.currentTimeMillis());	
         rand2 		= new Random(2*System.currentTimeMillis());	
-		m_so		= new StateObserverCube();	// empty table
+		m_so		= new StateObserverCube();	// solved cube
 		
         if (m_Arena.hasGUI() && m_gameGui==null) {
 			switch (CubeConfig.cubeSize) {
@@ -61,7 +61,9 @@ public class GameBoardCube implements GameBoard {
 
         }
         getPMax();		// actualize CubeConfig.pMin and CubeConfig.pMax, if GUI present
-        
+
+		//CubeConfig.setStepReward();	// actualize CubeConfig.stepReward according to current CubeConfig.cubeSize (from scalable params)
+
 	}
 	
 	public int getPMax() {

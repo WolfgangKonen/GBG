@@ -117,7 +117,7 @@ public class MCompeteSweep {
      *     <li> agent files {@code <agtBase>_<i+k>.agt.zip} where {@code i} it the number of the run and k is selected
      *          in such a way that a yet unused filename is taken (see code around {@code agtPath} below). This for
      *          multiple concurrent jobs which should not write to a filename already written by another job.
-     *     <li> train csv file {@code <agtBase>.csv}
+     *     <li> train csv file {@code <agtBase>*.csv}
      * </ul>
      * The train csv file may be visualized with R-scripts found in {@code resources\R_plotTools}.
      * <p>

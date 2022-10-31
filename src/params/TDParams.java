@@ -49,6 +49,8 @@ public class TDParams extends Frame implements Serializable
 	private static final String TIPSTOPONROUNDL = "stop training episode on round over";
 	private static final String TIPNETTYPEL = "(only TDS)";
 	private static final String TIPFEATTDSL = "(only TDS) select feature mode";
+	private static final String TIPSTEPREWL = "step reward (negative cost-to-go)";
+	private static final String TIPREWPOSL = "reward for positive final state";
 
 	
 	private final static String[] lrnTypeString = { "backprop","RPROP" };
@@ -71,6 +73,8 @@ public class TDParams extends Frame implements Serializable
 	JLabel horcutL;
 	JLabel gammaL;
 	JLabel epochL;
+	JLabel steprL;
+	JLabel rewposL;
 	JPanel tdPanel;
 	private final JTextField alphaT;
 	private final JTextField alfinT;
@@ -80,6 +84,8 @@ public class TDParams extends Frame implements Serializable
 	private final JTextField horcutT;
 	private final JTextField gammaT;
 	private final JTextField epochT;
+	private final JTextField steprT;
+	private final JTextField rewposT;
 //	private final JTextField tNply_T;
 
 	JLabel SigTypeL;
@@ -97,10 +103,14 @@ public class TDParams extends Frame implements Serializable
 	JLabel FeatTDS_L;
 	public JComboBox<String> choiceFeatTDS;
 
-	public TDParams() {
+	Arena m_arena;			// needed to infer the game name
+
+	public TDParams(Arena m_arena) {
 		super("TD Parameter");
-		
-		// These are the initial defaults 
+
+		this.m_arena = m_arena;
+
+		// These are the initial defaults
 		// (Other game- and agent-specific defaults are in setParamDefaults, which is called
 		// whenever one of the agent choice boxes changes to an agent requiring TDParams)
 		//
@@ -113,6 +123,8 @@ public class TDParams extends Frame implements Serializable
 		gammaT = new JTextField(ParTD.DEFAULT_GAMMA+"");			//
 		epochT = new JTextField(ParTD.DEFAULT_EPOCHS+"");			//
 //		tNply_T = new JTextField(ParTD.DEFAULT_NPLY+"");			//
+		steprT = new JTextField(ParTD.DEFAULT_STEP_REWARD+"");		//
+		rewposT = new JTextField(ParTD.DEFAULT_REWARD_POSITIVE+"");	//
 		alphaL = new JLabel("Alpha init");
 		alfinL = new JLabel("Alpha final");
 		epsilL = new JLabel("Epsilon init");
@@ -121,6 +133,8 @@ public class TDParams extends Frame implements Serializable
 		horcutL = new JLabel("Horizon cut");
 		gammaL = new JLabel("Gamma");
 		epochL = new JLabel("Epochs");
+		steprL = new JLabel("Step reward");
+		rewposL = new JLabel("Reward pos");
 		FeatTDS_L = new JLabel("Feature set");
 		alphaL.setToolTipText(TIPALPHA1L);
 		alfinL.setToolTipText(TIPALPHA2L);
@@ -130,6 +144,8 @@ public class TDParams extends Frame implements Serializable
 		epfinL.setToolTipText(TIPEPSIL2L);
 		gammaL.setToolTipText(TIPGAMMAL);
 		epochL.setToolTipText(TIPEPOCHL);
+		steprL.setToolTipText(TIPSTEPREWL);
+		rewposL.setToolTipText(TIPREWPOSL);
 
 		withSigType = new JCheckBox();
 		normalize = new JCheckBox();
@@ -202,6 +218,13 @@ public class TDParams extends Frame implements Serializable
 		tdPanel.add(choiceFeatTDS);
 		tdPanel.add(StopOnRoundL);
 		tdPanel.add(cbStopOnRoundOver);
+
+		if (m_arena.getGameName().equals("RubiksCube")) {
+			tdPanel.add(steprL);
+			tdPanel.add(steprT);
+			tdPanel.add(rewposL);
+			tdPanel.add(rewposT);
+		}
 
 //		tdPanel.add(new Canvas());					// fill one grid place with empty canvas
 //		tdPanel.add(new Canvas());					// fill one grid place with empty canvas
@@ -290,6 +313,12 @@ public class TDParams extends Frame implements Serializable
 	public double getEpsilonFinal() {
 		return Double.parseDouble(epfinT.getText());
 	}
+	public double getStepReward() {
+		return Double.parseDouble(steprT.getText());
+	}
+	public double getRewardPositive() {
+		return Double.parseDouble(rewposT.getText());
+	}
 	public double getLambda() {
 		return Double.parseDouble(lambdaT.getText());
 	}
@@ -359,6 +388,12 @@ public class TDParams extends Frame implements Serializable
 	public void setEpochs(int value) {
 		epochT.setText(value+"");
 	}
+	public void setStepReward(double value) {
+		steprT.setText(value+"");
+	}
+	public void setRewardPositive(double value) {
+		rewposT.setText(value+"");
+	}
 	public void setFeatmode(int featmode) {
 		//If the feature list has not been initialized, add the selected featmode to the list
 		if (choiceFeatTDS.getItemCount() == 0){
@@ -419,11 +454,12 @@ public class TDParams extends Frame implements Serializable
 		setRprop(tp.hasRpropLrn());
 //		setNPly(tp.getNPly());
 //		setMode3P(tp.getMode3P());
-		
+		setStepReward(tp.getStepReward());
+		setRewardPositive(tp.getRewardPositive());
+
 		enableLambdaPart();
 		if (agentName!=null) 
 			enableAgentPart(agentName);
 	}
-
 
 } // class TDParams

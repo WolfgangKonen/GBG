@@ -191,7 +191,8 @@ public class ParOther implements Serializable {
 		return stopEval;
 	}
 
-	// deprecated, use these getters only for older agents. Otherwise, use the new getters in ParWrapper
+	// deprecated, use these getters only for older agents (at the time when ParWrapper was not yet present).
+	// Otherwise, use the new getters in ParWrapper
 	public int getWrapperNPly() { return wrapperNply; }
 	public int getWrapperMCTSIterations() { return wrapperMCTSIterations; }
 	public double getWrapperMCTS_PUCT() { return wrapperMCTS_PUCT; }
@@ -203,16 +204,16 @@ public class ParOther implements Serializable {
 
 	public double getIncAmount() { return incAmount; }
 
+	public boolean getReplayBuffer() {
+		return bReplayBuf;
+	}
+
 	public boolean getChooseStart01() {
 		return chooseStart01;
 	}
 
 	public boolean getLearnFromRM() {
 		return learnFromRM;
-	}
-
-	public boolean getReplayBuffer() {
-		return bReplayBuf;
 	}
 
 	public boolean getRewardIsGameScore() {

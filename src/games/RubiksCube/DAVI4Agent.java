@@ -1,7 +1,6 @@
 package games.RubiksCube;
 
 import controllers.PlayAgent;
-import controllers.TD.ntuple4.TDNTuple4Agt;
 import games.Arena;
 import games.StateObsWithBoardVector;
 import games.StateObservation;
@@ -116,7 +115,7 @@ public class DAVI4Agent extends DAVI3Agent implements PlayAgent {
 
 			// value is the r + V(s) for taking action i in state s='so'. Action i leads to state newSO.
 			value = vTable[i] = newSO.getRewardTuple(rgs).scTup[0] +
-					newSO.getStepRewardTuple().scTup[0] + daviValue(newSO);
+					newSO.getStepRewardTuple(null).scTup[0] + daviValue(newSO);
 			// this is a bit complicated for saying "stepReward
 			// ( + REWARD_POSITIVE, if it's the solved cube)' but
 			// in this way we have a common interface valid for all games:
@@ -188,7 +187,7 @@ public class DAVI4Agent extends DAVI3Agent implements PlayAgent {
 			curPlayer = s_t.getPlayer();
 			vLast = m_Net.getScoreI(curSOWB,curPlayer);
 			m_Net.updateWeightsTD(curSOWB, curPlayer, vLast, target,
-					s_t.getStepRewardTuple().scTup[0],s_t);
+					s_t.getStepRewardTuple(null).scTup[0],s_t);
 
 			//System.out.println(s_t.stringDescr()+", "+a_t.getVBest());
 
@@ -247,7 +246,7 @@ public class DAVI4Agent extends DAVI3Agent implements PlayAgent {
 //			m_Net.w_updateWeightsTD(curSOWB, curPlayer, 1.0/s_t.getMoveCounter(),vLast, target,
 //					s_t.getStepRewardTuple().scTup[0],s_t);
 			m_Net.updateWeightsTD(curSOWB, curPlayer, vLast, target,
-					s_t.getStepRewardTuple().scTup[0],s_t);
+					s_t.getStepRewardTuple(null).scTup[0],s_t);
 
 			//System.out.println(s_t.stringDescr()+", "+a_t.getVBest());
 
@@ -298,7 +297,7 @@ public class DAVI4Agent extends DAVI3Agent implements PlayAgent {
 			curPlayer = s_t.getPlayer();
 			vLast = m_Net.getScoreI(curSOWB,curPlayer);
 			m_Net.w_updateWeightsTD(curSOWB, curPlayer, 1.0/p,vLast, target,
-					s_t.getStepRewardTuple().scTup[0],s_t);
+					s_t.getStepRewardTuple(null).scTup[0],s_t);
 
 			//System.out.println(s_t.stringDescr()+", "+a_t.getVBest());
 
@@ -389,7 +388,7 @@ public class DAVI4Agent extends DAVI3Agent implements PlayAgent {
 				curPlayer = item.sowb.getStateObservation().getPlayer();
 				vLast = m_Net.getScoreI(item.sowb, curPlayer);
 				m_Net.updateWeightsTD(item.sowb, curPlayer, vLast, item.target,
-						s_t.getStepRewardTuple().scTup[0], item.sowb.getStateObservation());
+						s_t.getStepRewardTuple(null).scTup[0], item.sowb.getStateObservation());
 			}
 		} else {
 			// ... with batchSize random samples
@@ -399,7 +398,7 @@ public class DAVI4Agent extends DAVI3Agent implements PlayAgent {
 				s_t = item.sowb.getStateObservation();
 				vLast = m_Net.getScoreI(item.sowb,s_t.getPlayer());
 				m_Net.updateWeightsTD(item.sowb, s_t.getPlayer(), vLast, item.target,
-						s_t.getStepRewardTuple().scTup[0], s_t);
+						s_t.getStepRewardTuple(null).scTup[0], s_t);
 			}
 		}
 

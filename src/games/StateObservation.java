@@ -173,8 +173,9 @@ public interface StateObservation extends PartialState, Serializable{
 	 * method, because MaxN2Wrapper needs the separate step reward when returning from recursion
 	 *
 	 * @return	a score tuple
+	 * @param pa
 	 */
-	ScoreTuple getStepRewardTuple();
+	ScoreTuple getStepRewardTuple(PlayAgent pa);
 
 	double getMinGameScore();
 	double getMaxGameScore();

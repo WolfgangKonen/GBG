@@ -1,9 +1,10 @@
 package games.RubiksCube;
 
+import games.StateObservation;
 import params.ParOther;
 
 public class CubeConfig {
-	
+
 	/**
 	 * What is the cube size?
 	 * <ul>
@@ -77,10 +78,27 @@ public class CubeConfig {
 	public static int pMin = 7;
 
 	/**
-	 * The cost-to-go for a transition from one state s to the next state s'. Used as part of the reward in
-	 * DAVI2Agent, DAVI3Agent, DAVI4Agent, TDNTuple3Agt, TDNTuple4Agt (through {@link StateObserverCube#getStepRewardTuple()}).
+	 * The cost-to-go for a transition from one state s to the next state s'. Used as part of the reward via
+	 * {@link StateObservation#getStepRewardTuple(controllers.PlayAgent)} (agents DAVI2Agent, DAVI3Agent, DAVI4Agent, TDNTuple3Agt, TDNTuple4Agt).
 	 */
-	public static double stepReward = (CubeConfig.cubeSize == CubeSize.POCKET) ? -0.04 : -0.1;  //-0.01;
+//	public static double stepReward = (CubeConfig.cubeSize == CubeSize.POCKET) ? -0.04 : -0.1;  // setting before 2022-09-29
+	public static double stepReward = (CubeConfig.cubeSize == CubeSize.POCKET) ? -1.0 : -0.5;  //-0.01;
+
+	/**
+	 * This method needs to be called from {@link GameBoardCube#initialize()} in order to adjust {@link #stepReward}
+	 * according to the current {@link #cubeSize} (which may have changed through scalable parameters (!))
+	 */
+	public static void setStepReward() {
+		stepReward = (CubeConfig.cubeSize == CubeSize.POCKET) ? -1.0 : -0.1;
+	}
+
+	/**
+	 * The reward for the solved cube. <br>
+	 * Used in {@link StateObserverCube#getGameScore(int) StateObserverCube#getGameScore} and in
+	 * {@link StateObserverCube#getReward(int,boolean) StateObserverCube#getReward}
+	 */
+//    public static double REWARD_POSITIVE =  1.0; // setting before 2022-09-29
+	public static double REWARD_POSITIVE =  10.0;
 
 	/**
 	 * whether a replay buffer with certain capacity and batch size is used or not

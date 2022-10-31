@@ -33,7 +33,7 @@ public class GBGBatch extends SetupGBG {
 	 */
 	public static String[] csvNameDef = {"multiTrain.csv","multiTrainAlphaSweep.csv"
 			,"multiTrainLambdaSweep.csv","multiTrainIncAmountSweep.csv"
-			,"multiTrainOthello.csv","multiCompeteOthelloSweep.csv","multiCompeteOthello.csv","symmIterCube.csv"};
+			,"multiTrainOthello.csv","multiCompeteOthelloSweep.csv","multiCompeteOthello.csv","symmIterCube.csv","multiTrainCube.csv"};
 	private static GBGBatch t_Batch = null;
 	protected static Arena arenaTrain;
 	protected static String filePath = null;
@@ -54,17 +54,18 @@ public class GBGBatch extends SetupGBG {
 	 * @param args <br>
 	 * 			[0] {@code gameName}: name of the game, suitable as subdirectory name in the 
 	 *         		{@code agents} directory <br>
-	 *          [1] {@code n}: 0,1,2,3,...,7,8  to call either
-	 *          	{@link #batch1_OLD(int, int, String, XArenaButtons, GameBoard, String) batch1} (multiTrain) or
-	 *              {@link #batch1(int, int, int, String, String, XArenaButtons, GameBoard, String)}  batch1} (multiTrain_M) or
-	 * 	 *          {@link #batch2(int, int, String, XArenaButtons, GameBoard, String) batch2} (multiTrainAlphaSweep) or
-	 *              {@link #batch3(int, int, String, XArenaButtons, GameBoard, String) batch3} (multiTrainLambdaSweep) or
-	 *              {@link #batch4(int, int, String, XArenaButtons, GameBoard, String) batch4} (multiTrainIncAmountSweep) or
-	 *              {@link #batch5(int, int, String, String, XArenaButtons, GameBoard) batch5} (multiTrainSweep) or
-	 *              {@link #batch6(int, String, GameBoard, String) batch6} (multiCompeteSweep) or
-	 *              {@link #batch7(int, String, GameBoard, String) batch7} (multiCompete) or
-	 *              {@link #batch8(String, String, int, double) batch8} ({@link MCubeIterSweep}).<br>
-	 *              The values 5,6,7 are only for game Othello, value 8 is only for game RubiksCube.
+	 *          [1] {@code n}: 0,1,2,3,...,7,8,9  to call either
+	 *          	{@link #batch1_OLD(int, int, String, XArenaButtons, GameBoard, String) batch1_OLD} (multiTrain) or <br>
+	 *              {@link #batch1(int, int, int, String, String, XArenaButtons, GameBoard, String)  batch1} (multiTrain_M) or <br>
+	 * 	            {@link #batch2(int, int, String, XArenaButtons, GameBoard, String) batch2} (multiTrainAlphaSweep) or <br>
+	 *              {@link #batch3(int, int, String, XArenaButtons, GameBoard, String) batch3} (multiTrainLambdaSweep) or <br>
+	 *              {@link #batch4(int, int, String, XArenaButtons, GameBoard, String) batch4} (multiTrainIncAmountSweep) or <br>
+	 *              {@link #batch5(int, int, String, String, XArenaButtons, GameBoard) batch5} (multiTrainSweep) or <br>
+	 *              {@link #batch6(int, String, GameBoard, String) batch6} (multiCompeteSweep) or <br>
+	 *              {@link #batch7(int, String, GameBoard, String) batch7} (multiCompete) or <br>
+	 *              {@link #batch8(String, String, int, double) batch8} ({@link MCubeIterSweep}) <br>
+	 *              {@link #batch9(int, int, String, String, XArenaButtons, GameBoard) batch9} (multiTrainSweep).<br>
+	 *              The values 5,6,7 are only for game Othello, values 8,9 are only for game RubiksCube.
 	 *              <br>
 	 *          [2] {@code agentFile}: e.g. "tdntuple3.agt.zip". This agent is loaded from
 	 *          	{@code agents/}{@link Types#GUI_DEFAULT_DIR_AGENT}{@code /gameName/}  (+ a suitable subdir, if 
@@ -84,16 +85,20 @@ public class GBGBatch extends SetupGBG {
 	 *          [6] (optional) {@code scaPar0}: scalable parameter 0 <br>
 	 *          [7] (optional) {@code scaPar1}: scalable parameter 1 <br>
 	 *          [8] (optional) {@code scaPar2}: scalable parameter 2 <br>
+	 *          [9] (optional) {@code extraPar}
 	 *          <p>
 	 *          
 	 * If {@code nruns} or {@code maxGameNum} are -1, their respective values stored in {@code agentFile} are taken.
 	 * <p>
 	 * Side effect: the last trained agent is stored to {@code <csvName>.agt.zip}, where
-	 * {@code <csvname>} is {@code args[5]} w/o {@code .csv}
+	 * {@code <csvname>} is {@code args[5]} w/o {@code .csv}.
 	 * <p>
 	 * {@code scaPar0,1,2} contain the scalable parameters of a game (if a game supports such parameters). Example: The game
 	 * Hex has the board size (4,5,6,...) as scalable parameter {@code scaPar0}. If no scalable parameter is given as
 	 * command line argument, the defaults from {@link #setDefaultScaPars(String)} apply.
+	 * <p>
+	 * {@code extraPar} is only relevant for {@code batch1} (param {@code numEval}), {@code batch8}
+	 * (param {@code c_puct}) and {@code batch9} (param {@code numEval}).
 	 * 
 	 * @throws IOException if s.th. goes wrong when loading the agent or saving the csv file.
 	 */
@@ -152,6 +157,9 @@ public class GBGBatch extends SetupGBG {
 		if (args[1].equals("5") || args[1].equals("6") || args[1].equals("7"))
 			assert(selectedGame.equals("Othello")) : "batch5,6,7 only allowed for game Othello (uses Edax2)";
 
+		if (args[1].equals("8") || args[1].equals("9"))
+			assert(selectedGame.equals("RubiksCube")) : "batch8,9 only allowed for game RubiksCube";
+
 		// start a batch run without any GUI elements
 		switch (args[1]) {
 			case "0" -> t_Batch.batch1_OLD(nruns, maxGameNum, filePath, arenaTrain.m_xab, arenaTrain.getGameBoard(), csvName);
@@ -163,6 +171,7 @@ public class GBGBatch extends SetupGBG {
 			case "6" -> t_Batch.batch6(nruns, agtFile, arenaTrain.getGameBoard(), csvName);
 			case "7" -> t_Batch.batch7(nruns, agtFile, arenaTrain.getGameBoard(), csvName);
 			case "8" -> t_Batch.batch8(agtFile, csvName, nruns, c_puct);
+			case "9" -> t_Batch.batch9(nruns, maxGameNum, agtFile, filePath, arenaTrain.m_xab, arenaTrain.getGameBoard());
 			default -> {
 				System.err.println("[GBGBatch.main] args[1]=" + args[1] + " not allowed.");
 				System.exit(1);
@@ -227,13 +236,14 @@ public class GBGBatch extends SetupGBG {
 	 * Perform multi-training. Write results to file {@code csvName}.
 	 * @param trainNum		how many agents to train
 	 * @param maxGameNum	maximum number of training games
+	 * @param numEval		maximum episode length in evaluation
 	 * @param agtFile		agent file name
 	 * @param filePath		full path of the agent file
 	 * @param xab			arena buttons object, to assess parameters
 	 * @param gb			game board object, needed by multiTrain for evaluators and start state selection
 	 * @param csvName		filename for CSV results
 	 * <p>
-	 * If trainNum or maxGameNum are -1, the values stored in {@code xab} are taken.
+	 * If {@code trainNum}, {@code maxGameNum} or {@code numEval} are -1, the values stored in {@code xab} are taken.
 	 */
 	public void batch1(int trainNum, int maxGameNum, int numEval, String agtFile, String filePath,
 						   XArenaButtons xab, GameBoard gb, String csvName) {
@@ -386,16 +396,17 @@ public class GBGBatch extends SetupGBG {
 	} // batch4
 
 	/**
-	 * Perform <strong>Othello</strong> multi-training. In each run, agent {@code pa} is constructed anew (to get different random tuples)
-	 * and then trained.
+	 * Perform <strong>Othello</strong> multi-training. In each run, agent {@code pa} is constructed anew (to get
+	 * different random tuples) and then trained.
 	 * <p>
-	 * If {@code batchSizeArr} (in source code) is non-null, sweep additionally replay buffer's parameter {@code batchSize}
-	 * over all values given in {@code batchSizeArr}.
+	 * If {@code batchSizeArr} (in source code) is non-null, sweep additionally replay buffer's parameter
+	 * {@code batchSize} (see {@code m_xab.rbPar[0].batchSize}) over all values given in {@code batchSizeArr}.
 	 * <p>
-	 * Write results to directory {@code agents/Othello/multiTrain}.
+	 * Write results to directory {@code agents/Othello/multiTrain}: (a) trained agents and (b) CSV-file
+	 * <agtBase>*.csv with training curves.
 	 * @param nruns			number of training runs
 	 * @param maxGameNum	maximum number of training games. If -1, take maxGameNum from loaded agent
-	 * @param agtFile		agent filename
+	 * @param agtFile		agent filename with parameters (may be stub)
 	 * @param filePath		full file path to agent
 	 * @param xab			arena buttons object, to assess parameters
 	 * @param gb			game board object, needed for start state selection
@@ -479,13 +490,14 @@ public class GBGBatch extends SetupGBG {
 	} // batch7
 
 	/**
-	 * Perform RubiksCube evaluation for all agents found in directory {@code agents/RubiksCube/<subDir>/<agtDir>}.
-	 * Each agent is wrapped by MCTSWrapperAgent with iterMWrapArr iterations.
+	 * Perform RubiksCube evaluation for all agents found in directory {@code agents/RubiksCube/<subDir>/<agtDir>}. <br>
+	 * Each agent is wrapped by MCTSWrapperAgent with {@code iter} iterations for all {@code iter} : {@code iterMWrapArr}.
 	 * <p>
 	 * Write results to file {@code csvName}.
 	 * @param agtDir		directory with RubikCube agents
 	 * @param csvName		filename for CSV results
 	 * @param pMode			switch for pTwist level
+	 * @param c_puct		parameter for PUCT equation
 	 */
 	public void batch8(String agtDir, String csvName, int pMode, double c_puct) {
 
@@ -502,5 +514,43 @@ public class GBGBatch extends SetupGBG {
 		double elapsedTime = (System.currentTimeMillis() - startTime)/1000.0;
 		System.out.println("[GBGBatch.batch8] symmIterTest3x3x3 finished in "+elapsedTime+" sec: Results written to "+csvName);
 	} // batch8
+
+	/**
+	 * Perform <strong>Rubik's Cube</strong> multi-training. In each run, agent {@code pa} is constructed anew (to get
+	 * different random tuples) and then trained.
+	 * <p>
+	 * <p>
+	 * Write results to directory {@code agents/RubiksCube/multiTrain}: (a) trained agents and (b) CSV-file
+	 * <agtBase>*.csv with training curves.
+	 * @param nruns			number of training runs
+	 * @param maxGameNum	maximum number of training games. If -1, take maxGameNum from loaded agent
+	 * @param agtFile		agent filename with parameters (may be stub)
+	 * @param filePath		full file path to agent
+	 * @param xab			arena buttons object, to assess parameters
+	 * @param gb			game board object, needed for start state selection
+	 *
+	 * @see MCompeteSweep#multiTrainSweepOthello(PlayAgent, String, int, int, Arena, GameBoard, int[])  MCompeteMWrap.multiTrainSweepOthello
+	 */
+	public void batch9(int nruns, int maxGameNum, String agtFile, String filePath,
+					   XArenaButtons xab, GameBoard gb) {
+
+		// load an agent to fill xab with the appropriate parameter settings
+		boolean res = arenaTrain.loadAgent(0, filePath);
+		if (!res) {
+			System.err.println("\n[GBGBatch.batch9] Aborted (no agent found).");
+			return;
+		}
+		PlayAgent pa = arenaTrain.m_xfun.m_PlayAgents[0];
+		PlayAgent qa = arenaTrain.m_xfun.wrapAgent(pa, pa.getParOther(), pa.getParWrapper(), null, gb.getDefaultStartState());
+		pa.setWrapperParamsO(xab.oPar[0]);
+
+		long startTime = System.currentTimeMillis();
+
+		MCubeIterSweep mcis = new MCubeIterSweep();
+		mcis.multiTrainSweepCube(qa,agtFile,maxGameNum,nruns,arenaTrain,gb);
+
+		double elapsedTime = (System.currentTimeMillis() - startTime)/1000.0;
+		System.out.println("[GBGBatch.batch9] multiTrainSweep finished in "+elapsedTime+" sec. ");
+	} // batch9
 
 }

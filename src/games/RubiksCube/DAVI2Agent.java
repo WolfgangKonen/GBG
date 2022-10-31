@@ -85,7 +85,7 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
         	
         	// value is the V(s) for for taking action i in state s='so'. Action i leads to state newSO.
         	value = vTable[i] = newSO.getRewardTuple(false).scTup[0] +
-								newSO.getStepRewardTuple().scTup[0] + daviValue(newSO);
+								newSO.getStepRewardTuple(null).scTup[0] + daviValue(newSO);
         	// Always *maximize* 'value' 
         	if (value==maxValue) bestActions.add(acts.get(i));
         	if (value>maxValue) {

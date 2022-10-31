@@ -38,7 +38,7 @@ for (TWISTTYPE in c("QTM")) {
 
 wfac = 1;
 errWidth=20/wfac;
-titleStr = substr(fname,12,nchar(fname))
+#titleStr = substr(fname,12,nchar(fname))
 evalStr = "percentage solved"
 evalStr = "percentage solved"
 Ylimits=c(0.5,0.9); 

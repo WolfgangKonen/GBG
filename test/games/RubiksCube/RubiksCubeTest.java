@@ -30,9 +30,7 @@ public class RubiksCubeTest extends PocketCubeTest {
     }
 
     @Test
-    public void test_colorTrafo() {
-        super.test_colorTrafo();
-    }
+    public void test_colorTrafo() { super.test_colorTrafo(); }
 
     @Test
     public void test_sloc() {
@@ -75,7 +73,6 @@ public class RubiksCubeTest extends PocketCubeTest {
      */
     @Test
     public void test_DTw_RTw_BTw() {
-
         init();
 
         CubeState def = csFactory.makeCubeState();

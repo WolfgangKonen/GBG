@@ -366,8 +366,9 @@ abstract public class ObserverBase extends PartialPerfect implements StateObserv
 	 * they override this method.
 	 *
 	 * @return	a score tuple with 0.0 for all elements
+     * @param pa
 	 */
-	public ScoreTuple getStepRewardTuple() {
+	public ScoreTuple getStepRewardTuple(PlayAgent pa) {
 		int N = this.getNumPlayers();
 		ScoreTuple sc = new ScoreTuple(N);
 		for (int i=0; i<N; i++) sc.scTup[i] = 0.0;

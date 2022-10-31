@@ -11,8 +11,7 @@ import java.util.Map;
 import java.util.Random;
 
 /**
- * Test how many distinct states appear on average, if we take a t-twisted cube and apply all 24 color trafos
- * to it. The minimum is 1, the maximum is 24.
+ * Several test methods related to Rubik's Cube color transformations
  */
 public class DistinctColorTrafos {
     int TWISTMAX = 20;
@@ -26,6 +25,10 @@ public class DistinctColorTrafos {
 
     public static Hashtable<Integer,Double> meanDistinct = new Hashtable<>();
 
+    /**
+     * Test how many distinct states appear on average, if we take a t-twisted cube and apply all 24 color trafos
+     * to it. The minimum is 1, the maximum is 24.
+     */
     @Test
     public void countDistinct_Pocket() {
         //scaPar = SetupGBG.setDefaultScaPars(selectedGame);    // "2x2x2", "STICKER2", "HTM"
@@ -71,6 +74,9 @@ public class DistinctColorTrafos {
 
     }
 
+    /**
+     * Generate an example color transformation for printing the right
+     */
     @Test
     public void examplePocket_CT() {
         String[] scaPar = new String[] {"2x2x2", "STICKER2", "HTM"};

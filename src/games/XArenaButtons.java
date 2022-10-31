@@ -84,7 +84,7 @@ public class XArenaButtons //extends JPanel
 		for (int n=numPlayers-1; n>=0; n--) {
 			selectedAgents[n] = Types.GUI_AGENT_INITIAL[n];
 			
-			tdPar[n] = new ParTD(m_arena.hasGUI());
+			tdPar[n] = new ParTD(m_arena.hasGUI(),m_arena);
 			ntPar[n] = new ParNT(m_arena.hasGUI());
 			oPar[n] = new ParOther(m_arena.hasGUI(),m_arena);
 			maxnPar[n] = new ParMaxN(m_arena.hasGUI());

@@ -165,6 +165,7 @@ public class XArenaFuncs {
 				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
 				pa = new TDNTuple4Agt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
 						m_xab.oPar[n],m_xab.rbPar[n], m_xab.wrPar[n], nTuples, xnf, maxGameNum);
+				((TDNTuple4Agt) pa).setRewardParsFromParTD();
 			} else if (sAgent.equals("Sarsa")) {
 				XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
 				NTupleFactory ntupfac = new NTupleFactory();
@@ -372,6 +373,9 @@ public class XArenaFuncs {
 					default:
 						throw new RuntimeException("Not supported AgentState");
 				}
+				if (pa instanceof NTuple4Base) {
+					((NTuple4Base) pa).setRewardParsFromParTD();
+				}
 			}
 		}
 		if (pa == null)
@@ -406,6 +410,7 @@ public class XArenaFuncs {
 				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
 				pa = new TDNTuple4Agt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
 						m_xab.oPar[n],m_xab.rbPar[n], m_xab.wrPar[n], nTuples, xnf, maxGameNum);
+				((TDNTuple4Agt) pa).setRewardParsFromParTD();
 			} catch (Exception e) {
 				m_Arena.showMessage(e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
 				// e.printStackTrace();

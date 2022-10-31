@@ -308,7 +308,7 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 				sc.scTup[player] = this._getScore4Player(so);
 				// return MCTS' estimate of the so's value for the player to move in so
 			// add the step reward for moving into state so:
-			sc.combine(so.getStepRewardTuple(), ScoreTuple.CombineOP.SUM,0,0);
+			sc.combine(so.getStepRewardTuple(null), ScoreTuple.CombineOP.SUM,0,0);
 		}
     	return sc;
 	}

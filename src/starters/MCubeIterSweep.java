@@ -6,15 +6,25 @@ import controllers.PlayAgent;
 import controllers.TD.ntuple4.TDNTuple4Agt;
 import games.Arena;
 import games.Evaluator;
+import games.GameBoard;
 import games.RubiksCube.ArenaCube;
 import games.RubiksCube.GameBoardCube;
+import games.RubiksCube.StateObserverCube;
+import games.RubiksCube.ValueContainer;
+import games.StateObservation;
 import params.ParNT;
 import params.ParOther;
 import params.ParWrapper;
+import tools.ScoreTuple;
 import tools.Types;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Objects;
 
 public class MCubeIterSweep extends GBGBatch {
@@ -145,5 +155,178 @@ public class MCubeIterSweep extends GBGBatch {
         }
         if (s!=null) System.out.println("Results written to "+s);
     }
+
+    /**
+     * Perform Rubik's Cube multi-training. In each run, agent {@code pa} is constructed anew (to get different random tuples)
+     * and then trained.
+     * <p>
+     * Side effect: writes results to directory {@code agents/Othello/multiTrain/}: <ul>
+     *     <li> agent files {@code <agtBase>_<i+k>.agt.zip} where {@code i} it the number of the run and k is selected
+     *          in such a way that a yet unused filename is taken (see code around {@code agtPath} below). This for
+     *          multiple concurrent jobs which should not write to a filename already written by another job.
+     *     <li> train csv file {@code <agtBase>*.csv}
+     * </ul>
+     * The train csv file may be visualized with R-scripts found in {@code resources\R_plotTools}.
+     * <p>
+     * Why do we separate training and competition in different batch runs? - Training can be done on all kind of JVMs
+     * (including Unix machines), but competition against Edax can only be done on Windows-based JVMs, because Edax
+     * in GBG comes (currently) only in the form of a Windows program ({@code .exe}).
+     * <p>
+     * <strong>NEW</strong>: If {@code batchSizeArr == null} then do {@code nruns} training runs with agent {@code pa}.<br>
+     * If {@code != null} then sweep replay buffer's parameter {@code batchSize} over all values given in {@code batchSizeArr}
+     * and do {@code nruns} training runs for each value.
+     *
+     * @param pa		    loaded agent (maybe stub) from which all training params are inherited
+     * @param agtFile       agent filename, we use its {@code agtBase} (part w/o ".agt.zip") to form the new filenames
+     * @param maxGameNum    number of training episodes in each run
+     * @param nruns	        number of training runs
+     * @param arenaTrain    Arena object with train rights
+     * @param gb		    the game board, needed for start state selection
+     * @return the last trained agent
+     */
+    public PlayAgent multiTrainSweepCube(
+            PlayAgent pa, String agtFile, int maxGameNum, int nruns,
+            Arena arenaTrain, GameBoard gb)
+    {
+        double[] rewardPosArr = {0.0001, 1.0, 10.0}; //{0.1, 1.0, 10.0};  {9.0};
+        double[] stepRewardArr = {-0.04, -0.1, -1.0};// {-0.9}; {-0.04, -0.1, -1.0};
+        DecimalFormat frm1 = new DecimalFormat("000");
+        DecimalFormat frm2 = new DecimalFormat("00");
+        double userValue1, userValue2;
+        long startTime;
+        double elapsedTime=0,deltaTime;
+        int pMaxEval = 16;   // max number of twists during predict_value
+        int nump = 200;      // number of cubes in predict_value
+
+        SingleTrainer sTrainer = new SingleTrainer();
+
+        String strDir = Types.GUI_DEFAULT_DIR_AGENT + "/" + arenaTrain.getGameName();
+        String subDir = arenaTrain.getGameBoard().getSubDir();
+        if (subDir != null) strDir += "/" + subDir;
+        tools.Utils.checkAndCreateFolder(strDir+"/multiTrain");
+        String agtBase = agtFile.split("\\.")[0];       // agtBase = agtFile w/o .agt.zip
+
+        String fCsvName="";
+        String userTitle1 = "rewardPos";
+        String userTitle2 = "stepReward";
+        String trainCsvName = "../multiTrain/" + agtBase + ".csv";
+        // we use "../" because we do not want to store in subdir "csv/" as printMultiTrainList usually does
+
+        PrintWriter mtWriter = null;
+        String vcCsvName="multiTrain/vcResults.txt";
+        try {
+            mtWriter = new PrintWriter(new FileWriter(strDir+"/"+vcCsvName,false));
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+        mtWriter.println("Start");
+        mtWriter.close();
+
+        for (double r : rewardPosArr)
+        for (double s : stepRewardArr) {
+            arenaTrain.m_xab.tdPar[0].setStepReward(s);
+            arenaTrain.m_xab.tdPar[0].setRewardPositive(r);
+            userValue1 = r;
+            userValue2 = s;
+
+            for (int i=0; i<nruns; i++) {
+
+                startTime = System.currentTimeMillis();
+
+                // train pa, adjust doTrainEvaluation, and add elements to mtList (evaluation results during train)
+                pa = sTrainer.doSingleTraining(0, i, pa, arenaTrain, arenaTrain.m_xab, gb, maxGameNum, userValue1, userValue2);
+                arenaTrain.m_xab.setOParFrom(0,pa.getParOther());  // /WK/ Bug fix 2022-04-12
+
+                // save pa to a yet unused filename. This for multiple concurrent jobs which should not write to a
+                // filename already written by another job. For single-threaded jobs (and no similar files present in
+                // dir multiTrain/), k=0 will be used.
+                int k=-1;
+                String agtPath;
+                File file;
+                do {
+                    k++;    // start with k=0
+                    agtPath = strDir + "/multiTrain/" + agtBase + "_sr" + frm1.format(s*100)
+                            + "_rp" + frm1.format(r*10)+ "_" + frm2.format(i+k) + ".agt.zip";
+                    file = new File(agtPath);
+                } while (file.exists());
+                arenaTrain.saveAgent(pa,agtPath);
+
+                // print the full list mtList after finishing training run i
+                fCsvName=MTrain.printMultiTrainList(trainCsvName, sTrainer.getMtList(), pa, arenaTrain, userTitle1, userTitle2);
+
+                try {
+                    mtWriter = new PrintWriter(new FileWriter(strDir+"/"+vcCsvName,true));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                mtWriter.println("\n*** run="+i+", stepReward="+s+", rewardPos="+r+" ***");
+                predict_value(pa, pMaxEval, nump, (GameBoardCube) arenaTrain.getGameBoard(), mtWriter);
+                mtWriter.close();
+
+                deltaTime = (double) (System.currentTimeMillis() - startTime) / 1000.0;
+                elapsedTime += deltaTime;
+            }
+
+        } // for r,s
+        if (fCsvName!=null) System.out.println("[multiTrainSweepCube] Results saved to "+fCsvName+".");
+        System.out.println("[multiTrainSweepCube] "+elapsedTime+" sec.");
+        return pa;
+    } // multiTrainSweepCube
+
+    /**
+     * Let the agent {@code pa} predict values for p-twisted cubes. <br>
+     * For each cube we determine with
+     * {@link StateObserverCube#solveCube(PlayAgent, StateObservation, double, int, boolean) solveCube}
+     * the solution length (-1 if not solved)
+     * @param pa    the agent
+     * @param pMax  the number of twists is 1,...,pMax
+     * @param nump  number of cubes for each p
+     * @param gb    the game board
+     * @param mtWriter  a Writer for diagnostic output
+     * @return a HashMap with a ValueContainer for every key p = {1,...,pMax} (number of twists)
+     */
+    public HashMap<Integer, ValueContainer> predict_value(PlayAgent pa, int pMax, int nump, GameBoardCube gb,
+                                                             PrintWriter mtWriter) {
+        HashMap<Integer,ValueContainer> hmSolved = new HashMap<>();
+        HashMap<Integer,ValueContainer> hmUnsolved = new HashMap<>();
+        int epiLengthEval=30;
+
+        for (int p=1; p<=pMax; p++) {
+            ValueContainer vc = new ValueContainer(nump);
+
+            for (int n=0; n<nump; n++) {
+                double val;
+                int length;
+                StateObservation so;
+
+//                // accept only states so where the 'true' length found by solveCube is not smaller than p
+//                // (in order to avoid pollution of vc.values with seemingly large values from lower-twist cubes)
+//                while (length<p) {
+//                    so = gb.chooseStartState(p);
+//                    val = pa.getScoreTuple(so,new ScoreTuple(1)).scTup[0];
+//                    length = solveCube(pa,so,val,20,gb,false);  // questionable, if we now return -1 if unsolved
+//                    //length=p;     // alternative: skip acceptance policy
+//                }
+                // alternative: choose p-twist state just once and record solution length (-1 if unsolved)
+                so = gb.chooseStartState(p);
+                val = pa.getScoreTuple(so,new ScoreTuple(1)).scTup[0];
+                length = StateObserverCube.solveCube(pa,so,val,epiLengthEval,false);
+
+                vc.cubes[n] = so;
+                vc.values[n] = val;
+                vc.pSolve[n] = length;
+            }
+            ValueContainer vcSolved = vc.takeSolvedCubes();
+            hmSolved.put(p,vcSolved);
+            ValueContainer vcUnsolved = vc.takeUnsolvedCubes();
+            hmUnsolved.put(p,vcUnsolved);
+        }
+        mtWriter.println("Value container solved cubes:");
+        ValueContainer.printHMapVC(hmSolved,mtWriter);
+        mtWriter.println("Value container unsolved cubes:");
+        ValueContainer.printHMapVC(hmUnsolved,mtWriter);
+        return hmSolved;
+    }  // predict_value
 
 }

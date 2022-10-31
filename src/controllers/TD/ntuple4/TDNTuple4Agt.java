@@ -280,7 +280,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 				// but they usually differ for nondeterministic games.
 
 				rtilde  = (NewSO.getRewardTuple(rgs).scTup[so.getPlayer()]-otilde)
-						+ so.getStepRewardTuple().scTup[so.getPlayer()];
+						+ so.getStepRewardTuple(this).scTup[so.getPlayer()];
 				if (TERNARY) {
 					value = NewSO.isGameOver() ? rtilde : getGamma()*value;
 				} else {
@@ -520,7 +520,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 		// then add sob.getRewardTuple(rgs): the reward obtained so far, since the net predicts
 		// with getScoreI only the expected future reward.
 		sc.combine(sob.getRewardTuple(rgs), ScoreTuple.CombineOP.SUM,0,0);
-		sc.combine(sob.getStepRewardTuple(), ScoreTuple.CombineOP.SUM,0,0);
+		sc.combine(sob.getStepRewardTuple(this), ScoreTuple.CombineOP.SUM,0,0);
 
 		// old version (2019), not recommended:
 //		boolean rgs = m_oPar.getRewardIsGameScore();
@@ -579,7 +579,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 			// delta reward from curPlayer's perspective when moving into s_next
 			double r_next;
 			r_next  = (R.scTup[curPlayer] - rLast.scTup[curPlayer])
-					+ s_next.getStepRewardTuple().scTup[curPlayer];
+					+ s_next.getStepRewardTuple(this).scTup[curPlayer];
 			if (TERNARY) {
 				target = s_next.isGameOver() ? r_next : getGamma()*v_next;
 			} else {
@@ -684,7 +684,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 				//
 				if (sLast[n]!=null ) {
 					target  = (R.scTup[n] - rLast.scTup[n]) 		// delta reward
-							+ s_next.getStepRewardTuple().scTup[n];
+							+ s_next.getStepRewardTuple(this).scTup[n];
 					StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(sLast[n], m_Net.xnf);
 					vLast = m_Net.getScoreI(curSOWB,n);
 
@@ -914,7 +914,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 			StateObservation s_after = t.getNextState4().getAfterState();
 			double v_next = calculate_v_next(s_next,s_after,player);
 			r_next  = (t.getR().scTup[player] - t.getRLast().scTup[player])
-					+ s_next.getStepRewardTuple().scTup[player];
+					+ s_next.getStepRewardTuple(this).scTup[player];
 			switch(t.isFinalTransition()){
 				case 0:{
 					if (TERNARY) {
@@ -983,10 +983,11 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	public String stringDescr2() {
 		String cs = getClass().getSimpleName();
 		return       cs + ": alpha_init->final:" + m_tdPar.getAlpha() + "->" + m_tdPar.getAlphaFinal()
-				+ ", epsilon_init->final:" + m_tdPar.getEpsilon() + "->" + m_tdPar.getEpsilonFinal()
+				+ ", eps_init->final:" + m_tdPar.getEpsilon() + "->" + m_tdPar.getEpsilonFinal()
 				+ ", gamma: " + m_tdPar.getGamma()
 				+ ", "+stringDescrNTuple()		// see NTupleBase
-				+ ", evalQ: " + m_oPar.getQuickEvalMode() + ", evalT: " + m_oPar.getTrainEvalMode();
+				+ ", evalQ: " + m_oPar.getQuickEvalMode() + ", evalT: " + m_oPar.getTrainEvalMode()
+				+ ", stepRew: " + m_tdPar.getStepReward() + ", rewPos: " + m_tdPar.getRewardPositive();
 	}
 
 	// Callback function from constructor NextState4(NTupleAgt,StateObservation,ACTIONS).

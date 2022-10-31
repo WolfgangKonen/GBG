@@ -1,19 +1,21 @@
 package games.RubiksCube;
 
+import controllers.MC.MCAgentN;
 import controllers.PlayAgent;
-import games.*;
-import starters.MTrain;
+import controllers.TD.ntuple4.TDNTuple4Agt;
+import games.Arena;
+import games.Evaluator;
+import games.StateObservation;
+import params.MCParams;
+import params.ParMC;
+import starters.MCubeIterSweep;
 import starters.SetupGBG;
 import org.junit.Test;
-import tools.ScoreTuple;
 import tools.Types;
 
-import java.io.*;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.util.HashMap;
-import java.util.OptionalDouble;
 
 public class CubeTrain_Test {
     protected static Arena arenaTrain;
@@ -23,17 +25,19 @@ public class CubeTrain_Test {
 
     /**
      * An exemplary cube train and evaluation / analysis program:
-     *      1) load an existing agent from agtFile and re-train it (if maxGameNum!=0) with CubeConfig.pMax=pMaxTrain
-     *      2) evaluate agent with quick-eval-mode 1
-     *      3) predict the value for a large number of states with given pTwist and collect results in HashMap hm.
-     *         We want to know if states s with a true solution length larger than pMaxTrain (which were not seen during
-     *         training) have automatically a predicted value V(s) smaller than for the trained levels.
-     *         We accept in predict_value only states 'so' where the true length found by solveCube is not smaller than
-     *         pTwist (in order to avoid pollution of vc.values with seemingly large values from lower-twisted cubes)
-     *      4) for a given pTwist=6 we check the HashMap entry: Do the cubes with value>0.5 have actually a solution
-     *         length of 6 or larger (as it should with the acceptance policy in step 3)? - We find that this is true.
-     *         (If we skip the acceptance policy in step 3, there are quite a number of states with solution length
-     *         5 or smaller)
+     * <ol>
+     *     <li> load an existing agent from agtFile and re-train it (if maxGameNum&gt;0) with CubeConfig.pMax=pMaxTrain
+     *     <li> evaluate agent with quick-eval-mode 1
+     *     <li> predict the value for a large number of states with given pTwist and collect results in HashMap hm.
+     *      We want to know if states s with a true solution length larger than pMaxTrain (which were not seen during
+     *      training) have automatically a predicted value V(s) smaller than for the trained levels.
+     *      We accept in predict_value only states 'so' where the true length found by solveCube is not smaller than
+     *      pTwist (in order to avoid pollution of vc.values with seemingly large values from lower-twisted cubes)
+     *     <li> for a given pTwist=6 we check the HashMap entry: Do the cubes with value>0.5 have actually a solution
+     *      length of 6 or larger (as it should with the acceptance policy in step 3)? - We find that this is true.
+     *      (If we skip the acceptance policy in step 3, there are quite a number of states with solution length
+     *      5 or smaller)
+     * </ol>
      */
     @Test
     public void DAVI3Test() {
@@ -63,7 +67,9 @@ public class CubeTrain_Test {
         // Step 3
         int pMax=8;
         int nump=200;
-        HashMap<Integer,ValueContainer> hm = predict_value(pa,pMax,nump,gb);
+        MCubeIterSweep mcis = new MCubeIterSweep();
+        PrintWriter mtWriter = new PrintWriter(new OutputStreamWriter(System.out));
+        HashMap<Integer, ValueContainer> hm = mcis.predict_value(pa,pMax,nump,gb,mtWriter);
 
         // Step 4
         int pTwist=6;
@@ -72,20 +78,86 @@ public class CubeTrain_Test {
         for (int n=0; n<vc.values.length; n++) {
             //if (vc.values[n]==vc.max.orElse(0)) {
             if (vc.values[n] >= 0.5) {
-                solveCube(pa,vc.cubes[n],vc.values[n],epiLength,gb,true);
+                StateObserverCube.solveCube(pa,vc.cubes[n],vc.values[n],epiLength,true);
             }
         }
 
     }
 
     /**
-     * Load agent {@code pa} from {@code filePath}, adjust its parameters {@code maxGameNum, pMax}, re-train agent.
+     * Another exemplary cube train and evaluation / analysis program:
+     * <ol>
+     *     <li> For existing agent from agtFile: only load (if maxGameNum==0) or load-and-retrain it (if maxGameNum&gt;0)
+     *      with CubeConfig.pMax=pMaxTrain
+     *     <li> evaluate agent with quick-eval-mode 1
+     *     <li> predict the value for a large number of states with given pTwist and collect results in HashMap hm.
+     *      We want to know if states s with a true solution length larger than pMaxTrain (which were not seen during
+     *      training) have automatically a predicted value V(s) smaller than for the trained levels.
+     *      We accept in predict_value only states 'so' where the true length found by solveCube is not smaller than
+     *      pTwist (in order to avoid pollution of vc.values with seemingly large values from lower-twisted cubes)
+     *     <li> for a given pTwist=6 we check the HashMap entry: Do the cubes with value>0.5 have actually a solution
+     *      length of 6 or larger (as it should with the acceptance policy in step 3)? - We find that this is true.
+     *      (If we skip the acceptance policy in step 3, there are quite a number of states with solution length
+     *      5 or smaller)
+     * </ol>
+     */
+    @Test
+    public void valueFuncTest() {
+        int maxGameNum= 0;   // 0; 100000;	3000000; 	// number of training episodes [0: no training, just load]
+        int pMaxTrain =13;   // max number of twists during training
+        int pMaxEval = 16;   // max number of twists during evaluation
+        int epiLengthTrain=10;
+        String selectedGame = "RubiksCube";
+        String[] scaPar = SetupGBG.setDefaultScaPars(selectedGame);    // "2x2x2", "STICKER2", "HTM"
+        scaPar[0] = "3x3x3"; // "2x2x2" or "3x3x3"
+        scaPar[2] = "QTM";
+        arenaTrain = SetupGBG.setupSelectedGame(selectedGame, scaPar,"",false,true);
+        GameBoardCube gb = (GameBoardCube) arenaTrain.getGameBoard();
+
+        String csvName = "mRubiks";
+        String agtFile;
+        if (scaPar[0].equals("2x2x2")) {
+            agtFile = "TCL4-p16-3000k-60-7t-lam05.agt.zip";
+        } else {
+            agtFile = "TCL4-p13-3000k-120-7t.agt.zip";
+            //agtFile = "TCL4-p13-ET16-3000k-120-7t-stub.agt.zip";
+        }
+        setupPaths(agtFile,csvName);		// builds filePath
+
+        // Step 1: only load (maxGameNum==0) or load-and-retrain agent (if maxGameNum>0)
+        PlayAgent pa;
+        if (maxGameNum>0) System.out.println("Retrain agent for "+maxGameNum+" episodes ...");
+        pa = trainCube(agtFile,filePath,maxGameNum, pMaxTrain, gb);
+
+        // Step 2: evaluate agent
+        int qem = 1;
+        arenaTrain.m_xab.oPar[0].setpMaxRubiks(pMaxEval);
+        arenaTrain.m_xab.oPar[0].setEpisodeLength(epiLengthTrain);
+        m_evaluatorQ = arenaTrain.makeEvaluator(pa,gb,30,qem,1);
+        m_evaluatorQ.eval(pa);
+
+        // Step 3: check value function
+        int nump=200;
+        MCubeIterSweep mcis = new MCubeIterSweep();
+        PrintWriter mtWriter = new PrintWriter(new OutputStreamWriter(System.out));
+        if (pa instanceof TDNTuple4Agt) {
+            TDNTuple4Agt ta = (TDNTuple4Agt) pa;
+            mtWriter.println("\nValues for stepReward="+ta.getParTD().getStepReward()
+                             +" and rewardPos="+ta.getParTD().getRewardPositive()+":\n");
+        }
+        //HashMap<Integer, ValueContainer> hm =
+        mcis.predict_value(pa,pMaxEval,nump,gb,mtWriter);
+        mtWriter.close();
+    }
+
+    /**
+     * Load agent {@code pa} from {@code filePath}, adjust its parameters {@code maxGameNum, pMax}, retrain agent.
      * <p>
      *     WARNING: Agent {@code pa} is not re-constructed, training continues on the loaded agent!
      *
      * @param agtFile   the agent filename
      * @param filePath  full file path
-     * @param maxGameNum how many episodes to train
+     * @param maxGameNum how many episodes to train (if 0: do not retrain)
      * @param pMax      max. number of twists
      * @param gb        the game board, needed for chooseStartState
      * @return the trained agent
@@ -104,12 +176,12 @@ public class CubeTrain_Test {
     }
 
     /**
-     * Take agent {@code pa}, adjust its parameters {@code maxGameNum, pMax} and re-train it
+     * Take agent {@code pa}, adjust its parameters {@code maxGameNum, pMax} and retrain it
      * <p>
      *     WARNING: Agent {@code pa} is not re-constructed, training continues on the agent passed in!
      *
      * @param pa        the agent
-     * @param maxGameNum how many episodes to train
+     * @param maxGameNum how many episodes to train (if 0: do not train)
      * @param pMax      max. number of twists
      * @param gb        the game board, needed for chooseStartState
      * @return the trained agent
@@ -142,115 +214,6 @@ public class CubeTrain_Test {
         return pa;
     } // trainCube
 
-    /**
-     * Let the agent {@code pa} predict values for p-twisted cubes. <br>
-     * For each cube we check with {@link #solveCube(PlayAgent, StateObservation, double, int, GameBoardCube, boolean) solveCube}
-     * whether the solution length is really p and do not accept cubes with smaller solution length.
-     * @param pa    the agent
-     * @param pMax  the number of twists is 1,...,pMax
-     * @param nump  number of cubes for each p
-     * @param gb    the game board
-     * @return a HashMap with a ValueContainer for every key p = {1,...,pMax} (number of twists)
-     */
-    protected HashMap<Integer,ValueContainer> predict_value(PlayAgent pa, int pMax, int nump, GameBoardCube gb) {
-        HashMap<Integer,ValueContainer> hm = new HashMap<>();
-        for (int p=1; p<=pMax; p++) {
-            ValueContainer vc = new ValueContainer(nump);
-
-            for (int n=0; n<nump; n++) {
-                double val=1.0;
-                int length = 0;
-                StateObservation so=null;
-
-                // accept only states so where the 'true' length found by solveCube is not smaller than p
-                // (in order to avoid pollution of vc.values with seemingly large values from lower-twist cubes)
-                while (length<p) {
-                    so = gb.chooseStartState(p);
-                    val = pa.getScoreTuple(so,new ScoreTuple(1)).scTup[0];
-                    length = solveCube(pa,so,val,20,gb,false);
-                    //length=p;     // alternative: skip acceptance policy
-                }
-                vc.cubes[n] = so;
-                vc.values[n] = val;
-                vc.pSolve[n] = length;
-            }
-            vc.calcMeanStd();
-            hm.put(p,vc);
-        }
-        printHMapVC(hm);
-        return hm;
-    }
-
-    /**
-     * A set of {@code cubes} with their predicted {@code values} and solution length {@code pSolve}. <br>
-     * This object is also capable to calculate mean, std, min and max of array {@code values}
-     */
-    static class ValueContainer {
-        public double[] values;
-        private final double[] sq_dev;
-        public StateObservation[] cubes;
-        public int[] pSolve;
-        public double mean;
-        public double std;
-        public OptionalDouble min;
-        public OptionalDouble max;
-
-        ValueContainer(int nump) {
-            values=new double[nump];
-            sq_dev = new double[nump];
-            cubes = new StateObservation[nump];
-            pSolve = new int[nump];
-        }
-
-        public void calcMeanStd() {
-            mean = Arrays.stream(values).sum()/ values.length;
-            for (int n=0; n<values.length; n++) sq_dev[n] = Math.pow(values[n]-mean,2);
-            std = Math.sqrt(Arrays.stream(sq_dev).sum()/(sq_dev.length-1));
-            min = Arrays.stream(values).min();
-            max = Arrays.stream(values).max();
-
-        }
-    }
-
-    public static void printHMapVC(HashMap<Integer,ValueContainer> hm) {
-        DecimalFormat form = new DecimalFormat("000");
-        DecimalFormat form2 = new DecimalFormat("0000");
-        DecimalFormat fper = new DecimalFormat("00.0000");
-        System.out.println("  p,  num:     mean    stdev      min      max");
-        for (Integer p : hm.keySet()) {
-            ValueContainer vc = hm.get(p);
-            System.out.println(form.format(p) + ", " + form2.format(vc.values.length) + ":  "
-                    + fper.format(vc.mean) + ", "
-                    + fper.format(vc.std) + ", "
-                    + fper.format(vc.min.orElse(Double.NaN)) + ", "
-                    + fper.format(vc.max.orElse(Double.NaN))
-            );
-        }
-    }
-
-    protected int solveCube(PlayAgent pa, StateObservation so_in,
-                             double value, int epiLength,
-                             GameBoardCube gb, boolean verbose)
-    {
-        StateObservation so = so_in.copy();
-        so.resetMoveCounter();
-
-        pa.resetAgent();			// needed if pa is MCTSWrapperAgent
-
-        while (!so.isGameOver() && so.getMoveCounter()<epiLength) {
-            so.advance(pa.getNextAction2(so.partialState(), false, true));
-        }
-
-        if (verbose) {
-            if (so.isGameOver())
-                System.out.print("Solved cube with value " +value+  " in  " + so.getMoveCounter() + " twists.\n");
-            else
-                System.out.print("Could not solve cube with value " +value+  " in  " + epiLength + " twists.\n");
-        }
-
-        return so.getMoveCounter();
-    } // solveCube
-
     protected static void setupPaths(String agtFile, String csvName){
         String strDir = Types.GUI_DEFAULT_DIR_AGENT + "/" + arenaTrain.getGameName();
         String subDir = arenaTrain.getGameBoard().getSubDir();
@@ -271,5 +234,15 @@ public class CubeTrain_Test {
         assert(vc.mean==2);
         assert(vc.std==myStd);
     }
+
+    @Test
+    public void TestInstanceOf() {
+        PlayAgent pa = null; //new MCAgentN(new ParMC());
+        if (pa instanceof MCAgentN)
+            System.out.println("instanceof MCAgentN");
+        else
+            System.out.println("a null pointer yields 'not instanceof'");
+    }
+
 
 }

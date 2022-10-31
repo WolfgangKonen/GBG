@@ -1,13 +1,14 @@
 package games.RubiksCube;
 
 import java.io.Serial;
-import java.util.ArrayList;
-import java.util.Random;
+import java.util.*;
 
-import controllers.TD.ntuple2.TDNTuple3Agt;
+import controllers.PlayAgent;
+import controllers.TD.ntuple4.NTuple4Base;
 import games.BoardVector;
 import games.ObserverBase;
 import games.StateObservation;
+import params.ParTD;
 import tools.ScoreTuple;
 import tools.Types;
 import tools.Types.ACTIONS;
@@ -23,8 +24,8 @@ import tools.Types.ACTIONS;
  * <li> copying the current state
  * <li> signaling end, score and winner of the game
  * </ul>
- * The private member {@link CubeState} {@code m_state} has most part of the state logic for 
- * Rubik's Cube. Via {@link CubeStateFactory} the right cube state objects can be generated at runtime.
+ * The private member {@link CubeState} {@code m_state} has most part of the state logic for Rubik's Cube.
+ * Via {@link CubeStateFactory} the right cube state objects can be generated at runtime.
  *
  * @see CubeConfig
  */
@@ -72,18 +73,11 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	private static final CubeStateFactory csFactory = new CubeStateFactory();
 	private static final CubeState def = csFactory.makeCubeState(); // a solved cube as reference
 	private static final StateObserverCube sdef = new StateObserverCube();
-	/**
-	 * The reward for the solved cube is 1.5. It is higher than the usual game-won reward 1.0, because some agents (e.g.
-	 * {@link TDNTuple3Agt}) produce game values a bit higher than 1.0 for non-solved cube states. REWARD_POSITIVE should 
-	 * be well higher than this, so that even with the {@code m_counter}-subtraction in {@link #getGameScore(int)
-	 * getGameScore} there remains a game score higher than for any non-solved cube state.
-	 */
-    public static final double REWARD_POSITIVE =  1.0; //see daviValue. Earlier it was 1.5;
-	/**
-	 * The game score as long as the solved cube is not found
-	 */
-    public static final double REWARD_NEGATIVE = -1.0;
 	private final ArrayList<ACTIONS> acts = new ArrayList<>();	// holds all available actions
+
+	// deprecated, we have now negative cost-to-go (stepReward)
+	@Deprecated
+    public static final double REWARD_NEGATIVE = -1.0;
 
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -122,7 +116,7 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 		m_action = new ACTIONS(iActUnknown);		// iActUnknown (9 or 18) codes 'unknown' (for the generating last action)
 		setAvailableActions();
 	}
-	
+
 	public StateObserverCube copy() {
 		return new StateObserverCube(this);
 	}
@@ -206,16 +200,16 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	 * @param player only needed for the interface, not relevant in this 1-person game
 	 * @return 	the game score, i.e. the sum of rewards for the current state. 
 	 * 	
-	 * @see #REWARD_POSITIVE		
+	 * @see CubeConfig#REWARD_POSITIVE
 	 */
 	public double getGameScore(int player) {
-		if(isGameOver()) return REWARD_POSITIVE; // + this.m_counter * CubeConfig.stepReward;
-//		return this.m_counter * CubeConfig.stepReward; // after 2020-09-15
-		return  0; //REWARD_NEGATIVE;		// earlier version
+		if(isGameOver()) return CubeConfig.REWARD_POSITIVE;
+//		return this.m_counter * CubeConfig.stepReward; // after 2020-09-15, before 2021-10
+		return  0; //REWARD_NEGATIVE; // before 2020-09-15
 	}
 
 	public double getMinGameScore() { return REWARD_NEGATIVE; }
-	public double getMaxGameScore() { return REWARD_POSITIVE; }
+	public double getMaxGameScore() { return CubeConfig.REWARD_POSITIVE; }
 
 //	/**
 //	 * *** This method is deprecated, use instead getReward(referringState.getPlayer(), rgs) ***
@@ -244,7 +238,19 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	 * @return  the cumulative reward from the perspective of {@code player}
 	 */
 	public double getReward(int player, boolean rewardIsGameScore) {
-		return (this.getCubeState().isEqual(def)) ?  REWARD_POSITIVE : 0.0;
+		return (this.getCubeState().isEqual(def)) ?  CubeConfig.REWARD_POSITIVE : 0.0;
+	}
+
+	/**
+	 * The tuple of rewards given by the game environment (excluding step reward).<br>
+	 *
+	 * @param rewardIsGameScore just for the interface, not relevant here
+	 * @return	a score tuple of rewards (excluding step reward)
+	 */
+	public ScoreTuple getRewardTuple(boolean rewardIsGameScore) {
+		//double val = (this.getCubeState().isEqual(def)) ?  CubeConfig.REWARD_POSITIVE : 0.0;
+		double val = getReward(0,true);
+		return new ScoreTuple(new double[]{val});
 	}
 
 	/**
@@ -255,24 +261,13 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	 * (fewer step rewards) has the higher reward. This is important for tree-based agents, which may completely fail if
 	 * they always select the ones with the longer path and never come to an end!
 	 *
-	 *
+	 * @param pa if it is of type {@link NTuple4Base} then take stepReward from its element {@link ParTD} {@code m_tdPar}
 	 * @return	a score tuple
 	 */
-	public ScoreTuple getStepRewardTuple() {
-		double val = CubeConfig.stepReward;
-//		if (this.getCubeState().isEqual(def))
-//			val += REWARD_POSITIVE;
-		return new ScoreTuple(new double[]{val});
-	}
+	public ScoreTuple getStepRewardTuple(PlayAgent pa) {
+		double val = (pa instanceof NTuple4Base) ?
+			  		 ((NTuple4Base) pa).getParTD().getStepReward() : CubeConfig.stepReward;
 
-	/**
-	 * The tuple of rewards given by the game environment (excluding step reward).<br>
-	 *
-	 * @param rewardIsGameScore just for the interface, not relevant here
-	 * @return	a score tuple of rewards (excluding step reward)
-	 */
-	public ScoreTuple getRewardTuple(boolean rewardIsGameScore) {
-		double val = (this.getCubeState().isEqual(def)) ?  REWARD_POSITIVE : 0.0;
 		return new ScoreTuple(new double[]{val});
 	}
 
@@ -436,5 +431,39 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 		return so;
 	}
 
+
+	/**
+	 * Try to solve cube in {@code so_in} with agent {@code pa}. Return number of moves if solved, -1 if not solved.
+	 * @param pa
+	 * @param so_in
+	 * @param value     the value V({@code so_in}) (only for optional printout)
+	 * @param epiLength maximum length of episode (1)number of moves
+	 * @param verbose   whether to do optional printout
+	 * @return the solution length (# of moves). -1 if not solved in {@code epiLength} moves.
+	 */
+	public static int solveCube(PlayAgent pa, StateObservation so_in,
+								double value, int epiLength, boolean verbose)
+	{
+		StateObservation so = so_in.copy();
+		so.resetMoveCounter();
+
+		pa.resetAgent();			// needed if pa is MCTSWrapperAgent
+
+		while (!so.isGameOver() && so.getMoveCounter()<epiLength) {
+			so.advance(pa.getNextAction2(so.partialState(), false, true));
+		}
+
+		int plength = so.getMoveCounter();
+		if (so.isGameOver()) {
+			if (verbose)
+				System.out.print("Solved cube with value " + value + " in  " + so.getMoveCounter() + " twists.\n");
+		} else {
+			plength=-1;
+			if (verbose)
+				System.out.print("Could not solve cube with value " + value + " in  " + epiLength + " twists.\n");
+		}
+
+		return plength;
+	} // solveCube
 
 }

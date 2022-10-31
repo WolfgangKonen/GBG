@@ -1,9 +1,6 @@
 package controllers.TD.ntuple4;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.Serializable;
+import java.io.*;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Locale;
@@ -14,6 +11,7 @@ import controllers.RandomAgent;
 import games.Arena;
 import games.StateObsWithBoardVector;
 import games.StateObservation;
+import games.RubiksCube.CubeConfig;
 import params.*;
 
 /**
@@ -30,6 +28,7 @@ abstract public class NTuple4Base extends AgentBase implements NTuple4Agt, Seria
 	 * compatible with an older one (older .agt.zip will become unreadable or you have
 	 * to provide a special version transformation)
 	 */
+	@Serial
 	private static final long  serialVersionUID = 13L;
 
 	/**
@@ -58,7 +57,7 @@ abstract public class NTuple4Base extends AgentBase implements NTuple4Agt, Seria
 	protected NTuple4ValueFunc m_Net;
 
 	/**
-	 * Members {@link #m_tdPar}, {@link #m_ntPar}, {@link AgentBase#m_oPar} are needed for 
+	 * Members {@code #m_tdPar}, {@link #m_ntPar}, {@link AgentBase#m_oPar} are needed for
 	 * saving and loading the agent (to restore the agent with all its parameter settings)
 	 */
 	protected ParTD m_tdPar;
@@ -109,7 +108,28 @@ abstract public class NTuple4Base extends AgentBase implements NTuple4Agt, Seria
 
 	public boolean instantiateAfterLoading() {
 		super.instantiateAfterLoading();
+		this.instantiateParTD();
 		return true;
+	}
+
+	/**
+	 * Instantiate parameters stepReward and rewardPositive.
+	 * If they are 0.0, i.e. not present in older agents, instantiate them to
+	 * those values that were effective before 2022-09-29 (see {@link CubeConfig})
+	 */
+	public void instantiateParTD() {
+		if (m_tdPar.getStepReward()==0.0) m_tdPar.setStepReward(-0.04);
+		if (m_tdPar.getRewardPositive()==0.0) m_tdPar.setRewardPositive(1.0);
+		setRewardParsFromParTD();
+	}
+
+	public void setRewardParsFromParTD() {
+		// These two parameter stepReward and rewardPositive are currently only needed by RubiksCube.
+		// It is a bit awkward that we use them to set the global CubeConfig.stepReward and CubeConfig.REWARD_POSITIVE.
+		// This is because at the point where we need them (e.g. StateObservation.getStepRewardTuple()), the agent and
+		// its m_tdPar is not available.
+		CubeConfig.stepReward = m_tdPar.getStepReward();
+		CubeConfig.REWARD_POSITIVE = m_tdPar.getRewardPositive();
 	}
 
 	/**
@@ -215,6 +235,7 @@ abstract public class NTuple4Base extends AgentBase implements NTuple4Agt, Seria
 //		NORMALIZE=tdPar.getNormalize();
 		m_epsilon = tdPar.getEpsilon();
 		m_EpsilonChangeDelta = (m_epsilon - tdPar.getEpsilonFinal()) / maxGameNum;
+
 	}
 
 	public void setNTParams(ParNT ntPar) {
@@ -307,8 +328,8 @@ abstract public class NTuple4Base extends AgentBase implements NTuple4Agt, Seria
 		if (reward==0.0) tieCounter++;
 		if (reward==-1.0 & ns.refer.getPlayer()==0) winXCounter++;		// ns.refer = s_{t}
 		if (reward==-1.0 & ns.refer.getPlayer()==1) winOCounter++;
-		if (reward==+1.0 & ns.refer.getPlayer()==0) winOCounter++;
-		if (reward==+1.0 & ns.refer.getPlayer()==1) winXCounter++;
+		if (reward== 1.0 & ns.refer.getPlayer()==0) winOCounter++;
+		if (reward== 1.0 & ns.refer.getPlayer()==1) winXCounter++;
 	}
 	
 	/**
