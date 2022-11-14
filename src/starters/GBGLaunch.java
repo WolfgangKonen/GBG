@@ -273,9 +273,18 @@ public class GBGLaunch extends SetupGBG {
 								// where choiceScaPar1 is still empty
 								int iHeapSize = Integer.parseInt(heapSize);
 								choiceScaPar2.removeAllItems();
-								if (iHeapSize==3) {
+								if (iHeapSize == -1) {			// the triangle-shaped sizes for the Ludii case
+									setScaPar0List(new int[]{3,5,7,9,11});
+									setScaPar2List(new int[]{3,5,7,9,11});
+									choiceScaPar0.setSelectedItem("5");		// the initial (recommended) values
+									choiceScaPar2.setSelectedItem("5");		// the initial (recommended) values
+								} else if (iHeapSize==3) {
+									setScaPar0List(new int[]{2,3,4,5});
+									choiceScaPar0.setSelectedItem("3");		// the initial (recommended) values
 									setScaPar2List(new int[]{2,3});
 								} else {
+									setScaPar0List(new int[]{2,3,4,5});
+									choiceScaPar0.setSelectedItem("3");		// the initial (recommended) values
 									setScaPar2List(new int[]{2,3,4,5});
 									if (iHeapSize>5) choiceScaPar2.addItem(heapSize);
 								}
@@ -327,7 +336,9 @@ public class GBGLaunch extends SetupGBG {
 			choiceScaPar1.setSelectedItem("5");		// the initial (recommended) values
 			if (selectedGame.equals("Nim")) {
 				scaPar2_L.setText("Max Minus");
-				setScaPar2List(new int[]{2,3,4,5});			
+				setScaPar0List(new int[]{2,3,4,5});
+				choiceScaPar0.setSelectedItem("3");
+				setScaPar2List(new int[]{2,3,4,5});
 				choiceScaPar2.setSelectedItem("5");					
 			} else { // i.e. "Nim3P"
 				scaPar2_L.setText("Extra Rule");

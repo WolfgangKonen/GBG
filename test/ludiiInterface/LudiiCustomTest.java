@@ -318,7 +318,7 @@ public class LudiiCustomTest extends GBGBatch {
     public void customNimGame(){
         PlayAgent pa;
         int winsPlayer1 = 0, winsPlayer2 = 0, ties = 0;
-        int heapSize = 3; // test only possible for 3 and 5 right now
+        int heapSize = 7; // test only possible for 3 and 5 right now
 
         selectedGame ="Nim";
         scaPar = new String[]{""+heapSize,"-1",""+heapSize};

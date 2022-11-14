@@ -17,6 +17,7 @@ games/Logs/*
 logs/*
 Pokerlogs/*
 agents/temp/*
+agents/P078*
 
 #Files not for the public GitHub version:
 myDocs/*
