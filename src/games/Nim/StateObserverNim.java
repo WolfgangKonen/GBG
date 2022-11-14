@@ -39,13 +39,15 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 	public StateObserverNim() {
 		m_heap = new int[NimConfig.NUMBER_HEAPS];
 
-		//if HEAP_SIZE is set to -1, infer different heap sizes from NUMBER_HEAPS
+		//if HEAP_SIZE is set to -1, infer different heap sizes from NUMBER_HEAPS (as used in Ludii)
 		//e.g. NUMBER_HEAPS is 5, then heap sizes in order would be 3,4,5,4,3
 		if(NimConfig.HEAP_SIZE == -1){
 
-			NimConfig.MAX_MINUS = NimConfig.NUMBER_HEAPS;
-			int k = NimConfig.NUMBER_HEAPS/2;
+			//NimConfig.MAX_MINUS = NimConfig.NUMBER_HEAPS;	// /WK/ commented out. This setting for MAX_MINUS is the
+															// preconfigured one in GBGLaunch, but the user may decide
+															// at launch time to set it to another (smaller) value.
 
+			int k = NimConfig.NUMBER_HEAPS/2;
 			for (int i=0; i<NimConfig.NUMBER_HEAPS; i++){
 				if(k>0 || k==0){
 					m_heap[i] = NimConfig.NUMBER_HEAPS - k;

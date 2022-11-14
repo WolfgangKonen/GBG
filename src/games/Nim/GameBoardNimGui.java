@@ -35,7 +35,7 @@ import tools.Types.ACTIONS;
  */
 public class GameBoardNimGui extends JFrame {
 
-	private int TICGAMEHEIGHT=280;
+	private int TICGAMEHEIGHT=580;
 	private JPanel BoardPanel;
 	private JLabel leftInfo=new JLabel("");
 	private JLabel rightInfo=new JLabel(""); 
@@ -125,7 +125,7 @@ public class GameBoardNimGui extends JFrame {
 	private JPanel InitBoard()
 	{
 		JPanel panel=new JPanel();
-		panel.setLayout(new GridLayout(1,NimConfig.NUMBER_HEAPS,15,15));
+		panel.setLayout(new GridLayout(3,(int)(NimConfig.NUMBER_HEAPS/3)+1,15,15));
 		panel.setBackground(Types.GUI_BGCOLOR);
 		int buSize = (int)(30*Types.GUI_SCALING_FACTOR_X);
 		Dimension minimumSize = new Dimension(buSize,buSize); //controls the button sizes

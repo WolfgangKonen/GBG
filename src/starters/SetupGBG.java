@@ -104,6 +104,11 @@ public class SetupGBG {
                 return new ArenaBlackJack(title,withUI,withTrainRights);
             case "ConnectFour":
                 return new ArenaC4(title, withUI,withTrainRights);
+            case "EWN":
+                ArenaEWN.setConfig(scaPar[0]);
+                ArenaEWN.setCellCoding(scaPar[1]);
+                ArenaEWN.setRandomStartingPosition(scaPar[2]);
+                return new ArenaEWN(title, withUI,withTrainRights);
             case "Hex":
                 ArenaHex.setBoardSize(Integer.parseInt(scaPar[0]));
                 return new ArenaHex(title, withUI,withTrainRights);
@@ -136,11 +141,6 @@ public class SetupGBG {
                 return new ArenaSim(title, withUI,withTrainRights);
             case "TicTacToe":
                 return new ArenaTTT(title, withUI,withTrainRights);
-            case "EWN":
-                ArenaEWN.setConfig(scaPar[0]);
-                ArenaEWN.setCellCoding(scaPar[1]);
-                ArenaEWN.setRandomStartingPosition(scaPar[2]);
-                return new ArenaEWN(title, withUI,withTrainRights);
             case "Yavalath":
                 ArenaYavalath.setPlayerNumber(Integer.parseInt(scaPar[0]));
                 ArenaYavalath.setBoardSize(Integer.parseInt(scaPar[1]));

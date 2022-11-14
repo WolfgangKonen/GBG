@@ -258,7 +258,29 @@ public class GBGLaunch extends SetupGBG {
 					}
 				}	
 		);
-		
+
+		choiceScaPar0.addActionListener(
+				new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						selectedGame = (String)choiceGame.getSelectedItem();
+						if (selectedGame!=null) {
+							if (selectedGame.equals("Nim")) {
+								String heapSize = (String)choiceScaPar1.getSelectedItem();
+								try {
+									int iHeapSize = Integer.parseInt(heapSize);
+									if (iHeapSize == -1) {			// the triangle-shaped sizes for the Ludii case
+										choiceScaPar2.setSelectedItem(choiceScaPar0.getSelectedItem());
+									}
+								} catch(NumberFormatException ne) {
+									// do nothing, if heapSize is not number
+								}
+							}
+						}
+					}
+				}
+		);
 		choiceScaPar1.addActionListener(
 				new ActionListener()
 				{
