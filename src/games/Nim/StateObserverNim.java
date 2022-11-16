@@ -61,6 +61,7 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 			for (int i = 0; i < NimConfig.NUMBER_HEAPS; i++)
 				m_heap[i] = NimConfig.HEAP_SIZE;
 		}
+		if (SORT_IT) Arrays.sort(m_heap);	// still experimental
 		m_player = 0;
 		setAvailableActions();
 	}
@@ -68,6 +69,7 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 	public StateObserverNim(int[] heaps, int player) {
 		m_heap = heaps.clone(); 
 		m_player = player;
+		if (SORT_IT) Arrays.sort(m_heap);	// still experimental
 		setAvailableActions();
 	}
 

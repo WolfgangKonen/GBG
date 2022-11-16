@@ -7,7 +7,6 @@ import games.BoardVector;
 import games.StateObservation;
 import games.XNTupleBase;
 import games.XNTupleFuncs;
-import controllers.TD.ntuple2.NTupleFactory;
 
 public class XNTupleFuncsNim2P extends XNTupleBase implements XNTupleFuncs, Serializable {
 
@@ -42,11 +41,18 @@ public class XNTupleFuncsNim2P extends XNTupleBase implements XNTupleFuncs, Seri
 	
 	/**
 	 * @return the number P of position values 0, 1, 2,..., P-1 that each board cell 
-	 * can have. For Nim: P=HEAP_SIZE+1, coding 0,1,2,...,HEAP_SIZE items on the heap 
+	 * can have. For Nim: P=HEAP_SIZE+1, coding 0,1,2,...,{@link NimConfig#HEAP_SIZE HEAP_SIZE} items on the heap.
+	 * <p>
+	 * If {@link NimConfig#HEAP_SIZE HEAP_SIZE}==-1, we have the special Ludii variant of Nim where the heap sizes
+	 * are of triangular shape. In this case, the middle heap has the largest heap size
+	 * which is equal to {@link NimConfig#NUMBER_HEAPS}
 	 */
 	@Override
 	public int getNumPositionValues() {
-		return NimConfig.HEAP_SIZE+1; 
+		if (NimConfig.HEAP_SIZE==-1)
+			return NimConfig.NUMBER_HEAPS+1;
+		else
+			return NimConfig.HEAP_SIZE+1;
 	}
 	
 	/**
@@ -85,11 +91,13 @@ public class XNTupleFuncsNim2P extends XNTupleBase implements XNTupleFuncs, Seri
 	 * <li> the other rows are the board vectors when transforming {@code boardVector}
 	 * 		according to the s-1 other symmetries (e. g. rotation, reflection, if applicable).
 	 * </ul>
-	 * In the case of Nim there are no symmetries.<br>
-	 * (There are for N heaps the N-permutation symmetries, but it is too costly to code them as 
-	 * equivalent states. It is better to sort always the heaps in decreasing order. That is, 
-	 * when a move is made, we check the modified heap, if it is in the right position. If not, 
-	 * we exchange it with a heap to the right.)
+	 * In the case of Nim there are no symmetries. So, we return here only a board vector array of length 1
+	 * just containing the given board vector itself.
+	 * <p>
+	 * [There are for N heaps the N-permutation symmetries, but it is too costly to code them as
+	 * equivalent states. It is better to always sort the heaps. That is, at episode start and
+	 * whenever a move is made, we re-sort the heaps in ascending order. This is done if the switch
+	 * {@code SORT_IT} is set to {@code true} (still experimental and not compatible with Ludii interface)]
 	 * 
 	 * @param boardVector
 	 * @return boardArray
@@ -176,7 +184,6 @@ public class XNTupleFuncsNim2P extends XNTupleBase implements XNTupleFuncs, Seri
 	 * @return a set of all cells adjacent to {@code iCell} (referring to the coding in 
 	 * 		a board vector) 
 	 * 
-	 * @see NTupleFactory#generateRandomWalkNTuples(int,int,int,XNTupleFuncs)
 	 */
 	public HashSet adjacencySet(int iCell) {
 		HashSet adjSet = new HashSet();
