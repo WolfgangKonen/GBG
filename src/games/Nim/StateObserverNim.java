@@ -23,7 +23,8 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 	protected int[] m_heap;		// has for each heap the count of items in it
 	protected int m_player;		// player who makes the next move (0 or 1)
 	protected ArrayList<Types.ACTIONS> availableActions = new ArrayList<>();	// holds all available actions
-	protected boolean SORT_IT = false;		// experimental
+
+	protected boolean SORT_IT = false;		// deprecated, use project() instead
     
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -71,6 +72,16 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 		m_player = player;
 		if (SORT_IT) Arrays.sort(m_heap);	// still experimental
 		setAvailableActions();
+	}
+
+	/**
+	 * Project {@code this} into its canonical form: This has for Nim the list of heaps sorted in ascending order
+	 * @return a projected copy of {@code this}
+	 */
+	public StateObservation project() {
+		StateObserverNim p_so = this.copy();
+		Arrays.sort(p_so.m_heap);
+		return p_so;
 	}
 
 	public StateObserverNim(StateObserverNim other) {

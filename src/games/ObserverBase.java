@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import TournamentSystem.TSTimeStorage;
 import controllers.PlayAgent;
 import controllers.PlayAgtVector;
+import games.Nim.StateObserverNim;
 import tools.ScoreTuple;
 import tools.Types;
 import tools.Types.ACTIONS;
@@ -62,6 +63,8 @@ abstract public class ObserverBase extends PartialPerfect implements StateObserv
 	public StateObservation clearedCopy() {
     	return this.copy();
 	}
+
+	public StateObservation project() { return this; }
 
 	/**
 	 * Given the current state, store some useful information for inspecting the  
