@@ -3,6 +3,7 @@ package games.Nim;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import controllers.TD.ntuple4.TDNTuple4Agt;
 import games.ObserverBase;
 import games.StateObservation;
 import tools.Types;
@@ -77,6 +78,8 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 	/**
 	 * Project {@code this} into its canonical form: This has for Nim the list of heaps sorted in ascending order
 	 * @return a projected copy of {@code this}
+	 *
+	 * @see TDNTuple4Agt
 	 */
 	public StateObservation project() {
 		StateObserverNim p_so = this.copy();

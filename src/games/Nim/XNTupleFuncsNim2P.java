@@ -7,6 +7,7 @@ import games.BoardVector;
 import games.StateObservation;
 import games.XNTupleBase;
 import games.XNTupleFuncs;
+import org.apache.commons.math3.exception.OutOfRangeException;
 
 public class XNTupleFuncsNim2P extends XNTupleBase implements XNTupleFuncs, Serializable {
 
@@ -149,11 +150,27 @@ public class XNTupleFuncsNim2P extends XNTupleBase implements XNTupleFuncs, Seri
 	 */
 	@Override
 	public int[][] fixedNTuples(int mode) {
-		int nTuple[][]=new int[1][NimConfig.NUMBER_HEAPS];	
-		
-		for (int i=0; i<nTuple[0].length; i++) nTuple[0][i] = i;
-								// i.e. one n-tuple {0,1,...,NUMBER_HEAPS-1} (covers all heaps)
-		return nTuple;				
+		switch(mode) {
+			case 1:
+				if (NimConfig.NUMBER_HEAPS<9) {
+					// one n-tuple {0,1,...,NUMBER_HEAPS-1} that covers all heaps
+					int nTuple[][] = new int[1][NimConfig.NUMBER_HEAPS];
+					for (int i = 0; i < nTuple[0].length; i++) nTuple[0][i] = i;
+					return nTuple;
+				} else {
+					// since one n-tuple had too high mem requirements (e.g. 10^9 LUT weights --> out-of-mem error),
+					// we form 3 n-tuples, each of length NUMBER_HEAPS/3, covering different parts of the heaps:
+					int nsz = NimConfig.NUMBER_HEAPS/3;
+					int nTuple[][] = new int[3][nsz];
+					for (int j = 0, k = 0; j< 3; j++)
+						for (int i = 0; i < nTuple[0].length; i++,k++) {
+							nTuple[j][i] = k;
+							k = k%NimConfig.NUMBER_HEAPS;
+						}
+					return nTuple;
+				}
+			default: throw new OutOfRangeException(mode, 1, 1);
+		}
 	}
 
 	@Override
