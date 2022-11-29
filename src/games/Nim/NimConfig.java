@@ -18,7 +18,10 @@ public class NimConfig {
     public static int NUMBER_HEAPS = 3;
 
     /**
-     * Initial heap size (maximum number of items in each heap)
+     * Initial heap size (maximum number of items in each heap).
+     * If == -1, then unique heap structure is used in which HEAP_SIZE == NUMBER_HEAPS for the middle heap and
+     * decreases by 1 on each side.
+     * (e.g. for NUMBER_HEAPS == 5, heap structure would be (3 4 5 4 3))
      */
     public static int HEAP_SIZE = 5; // 50
 

@@ -318,35 +318,49 @@ public class LudiiCustomTest extends GBGBatch {
     public void customNimGame(){
         PlayAgent pa;
         int winsPlayer1 = 0, winsPlayer2 = 0, ties = 0;
-        int heapSize = 7; // test only possible for 3 and 5 right now
+        int numberHeaps = 5 ;
+
+        boolean firstMoveLudii = true; // to decide whether Ludii or the GBG AI makes the first move
 
         selectedGame ="Nim";
-        scaPar = new String[]{""+heapSize,"-1",""+heapSize};
+        scaPar = new String[]{""+numberHeaps,"-1",""+numberHeaps};
         agtFile= "Bouton.agt.zip";
         arenaTrain = SetupGBG.setupSelectedGame(selectedGame,scaPar,"",false,true);
         pa = arenaTrain.loadAgent(agtFile);
         System.out.println(pa.getName()+"\n"+pa.stringDescr());
 
-        PLAYER_2 = new GBGAsLudiiAI(heapSize,2);
+        PLAYER_2 = new GBGAsLudiiAI(numberHeaps,2);
 
-        List<String> options = Arrays.asList("Number Piles/"+heapSize, "End Rules/Last Mover Wins");
+        List<String> options = Arrays.asList("Number Piles/"+numberHeaps, "End Rules/Last Mover Wins");
         ludiiGame = GameLoader.loadGameFromName("Nim.lud", options);
 
         final other.context.Context context = new Context(ludiiGame, new Trial(ludiiGame));
 
         final List<AI> ais = new ArrayList<>();
         ais.add(null); //Need to add a null entry, because Ludii starts player numbering on 1
-        ais.add(PLAYER_1);
-        ais.add(PLAYER_2);
+
+        if(firstMoveLudii){ // if Ludii AI makes the first move, it needs to be first in ais list
+            ais.add(PLAYER_1);
+            ais.add(PLAYER_2);
+        } else { // i.e. GBG AI makes first move and is first in the list
+            ais.add(PLAYER_2);
+            ais.add(PLAYER_1);
+        }
+
+        // whoever makes the first move is Player 1 in AI List, so index needs to be passed accordingly to initAI()
+        int ludiiIndex = firstMoveLudii? 1 : 2;
+        int gbgIndex = firstMoveLudii? 2 : 1;
 
         for(int gameCounter = 0; gameCounter < GAMESNUMBER; gameCounter++){
             ludiiGame.start(context);
             context.trial().reset(ludiiGame); // needed because context makes moves on its own after being initialized
 
+            //MovesList should be empty before the game start
+            assert context.trial().generateCompleteMovesList().isEmpty() : "Invalid context!!";
+
             // Initialize the AIs
-            ais.get(1).initAI(ludiiGame,1);
-            //ais.get(2).initAI(ludiiGame,2);
-            ((GBGAsLudiiAI)ais.get(2)).initAI(ludiiGame,2,pa);
+            ais.get(ludiiIndex).initAI(ludiiGame,ludiiIndex);
+            ((GBGAsLudiiAI)ais.get(gbgIndex)).initAI(ludiiGame,gbgIndex,pa);
 
             final Model model = context.model();
 
@@ -366,7 +380,7 @@ public class LudiiCustomTest extends GBGBatch {
 
             if(LOGS){
                 String logFullFilePath = getLogPath(arenaTrain);
-                logGame(context,logFullFilePath, ais);
+                logGameWithPass(context,logFullFilePath, ais);
             }
             System.out.println("Wins Player 1 ("+ ais.get(1).friendlyName() + "): " + winsPlayer1);
             System.out.println("Wins Player 2 ("+ ais.get(2).friendlyName() + "): " + winsPlayer2);
@@ -414,6 +428,33 @@ public class LudiiCustomTest extends GBGBatch {
             if(move.to() != -1) {
                 logMessage.append(move.to()).append(", ");
             }
+        }
+        logMessage.append("\n");
+        System.out.println(logMessage);
+
+        try {
+            final var fos = new FileOutputStream(logfilePath, true);
+            fos.write(logMessage.toString().getBytes());
+            fos.close();
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void logGameWithPass(Context context, String logfilePath, List<AI> ais){
+        StringBuilder logMessage = new StringBuilder();
+        logMessage.append(getCurrentTimeStamp()+" | ");
+
+        if(context.trial().status().winner() == 0){
+            logMessage.append("Tie: ");
+        }else {
+            logMessage.append("Winner: ").append(ais.get(context.trial().status().winner()).friendlyName()).append(": ");
+        }
+        logMessage.append(" Moves: ");
+        for(Move move : context.trial().generateCompleteMovesList()) {
+            logMessage.append(move.to()).append(", ");
         }
         logMessage.append("\n");
         System.out.println(logMessage);
