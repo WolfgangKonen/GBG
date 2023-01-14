@@ -126,8 +126,8 @@ public class MCompeteSweep {
      * in GBG comes (currently) only in the form of a Windows program ({@code .exe}).
      * <p>
      * <strong>NEW</strong>: If {@code batchSizeArr == null} then do {@code nruns} training runs with agent {@code pa}.<br>
-     * If {@code != null} then sweep replay buffer's parameter {@code batchSize} over all values given in {@code batchSizeArr}
-     * and do {@code nruns} training runs for each value.
+     * If {@code batchSizeArr != null} then sweep replay buffer's parameter {@code batchSize} over all values given in
+     * {@code batchSizeArr} and do {@code nruns} training runs for each value.
      *
      * @param pa		    loaded agent (maybe stub) from which all training params are inherited
      * @param agtFile       agent filename, we use its {@code agtBase} (part w/o ".agt.zip") to form the new filenames

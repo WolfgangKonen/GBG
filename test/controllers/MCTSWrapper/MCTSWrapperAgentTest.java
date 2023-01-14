@@ -28,6 +28,7 @@ import tools.ScoreTuple;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Properties;
 
 /**
  * This class tests the performance of MCTSWrapper in various games. There are certain evaluation expectations coded
@@ -41,23 +42,29 @@ public class MCTSWrapperAgentTest extends GBGBatch {
     String[] agtFiles;
 
     /**
+     * --- Deprecated, better use {@link GBGBatch#batch10(int, Properties, String[], String, String, XArenaButtons, GameBoard, String) batch10}
+     *     from {@link GBGBatch} ---
+     * <p>
      * Test the performance of MCTSWrapperAgent on RubiksCube: We run 200 evaluations for each p=1,2,...,9
      * and for MCTSWrapper wrapped around 3x3x3_STICKER2_AT/TCL4-p9-2000k-120-7t.agt.zip with nPly=0.
      * The %-solved rates are reported like in QuickEval.
      * Results are written to console and to {@code csvFile}.
-     * Results (%-solved rates) for EPS=1e-08, c_puct=1.0 are tested against certain expectations, see HashMap hm.
+     * Results (%-solved rates) for EPS=1e-08, c_puct=1.0 are tested against certain expectations, see {@code HashMap hm}.
      * <p>
      * Note that pMax=9 (HTM) or 13 (QTM). This is still far away from God's number = 20 (HTM) or 26 (QTM) for the 3x3x3 cube.
-     * hus, the evaluation results are not yet very satisfactorily (we get not much better than a 65% solved-rate).
+     * The evaluation results are not yet very satisfactorily (we get not much better than a 65% solved-rate).
      * <p>
-     * Computation time depends on iterMCTSWrap and the number of for-loop-passes in rubiksCubeTest. For a single pass
-     * with iterMCTSWrap=1000, EPS=1e-08, maxDepth=50 the time is about 550 sec. But it can last also much longer (up to
-     * 1500 sec, if the perc-solved-rate goes down (unsuccessful searches take longer)). So be aware that the total
-     * test may take considerable time, depending on the settings.
+     * Computation time depends on iterMCTSWrap and the number of for-loop-passes in {@code innerRubiksCubeTest}. For a
+     * single pass with iterMCTSWrap=1000, EPS=1e-08, maxDepth=50 the time is about 550 sec. But it can last also much
+     * longer (up to 1500 sec, if the perc-solved-rate goes down (unsuccessful searches take longer)). So be aware that
+     * the total test may take considerable time, depending on the settings.
      */
     @Test
+    @Deprecated
     public void rubiksCube3x3Test() {
         int pMin=1, pMax;
+        int nruns = 4;
+        String csvFile = "mRubiks3x3.csv";
         scaPar=new String[]{"3x3x3", "STICKER2", "QTM"};    // select here between "HTM" and "QTM"
         switch (scaPar[2]) {
             case "HTM" -> {
@@ -84,26 +91,33 @@ public class MCTSWrapperAgentTest extends GBGBatch {
         hm.put( 500,fact*0.65);
         hm.put( 800,fact*0.65);
         hm.put(1000,fact*0.65);
-        int nTrial = 4;
-        String csvFile = "mRubiks3x3.csv";
 
-//      innerRubiksTest(scaPar,agtFiles,iterMCTSWrapArr,hm,1,9, nTrial, csvFile); // for Rubiks-both-cubes-ptwist.pdf
-        innerRubiksTest(scaPar,agtFiles,iterMCTSWrapArr,hm,pMin,pMax, nTrial, csvFile); // for Rubiks-both-cubes-iter.pdf
+        selectedGame = "RubiksCube";
+        arenaTrain = SetupGBG.setupSelectedGame(selectedGame,scaPar,"",false,true);
+
+//      innerRubiksTest(scaPar,agtFiles,iterMCTSWrapArr,hm,1,9, nruns, csvFile); // for Rubiks-both-cubes-ptwist.pdf
+        innerRubiksTest(scaPar,agtFiles,iterMCTSWrapArr,hm,pMin,pMax, nruns, csvFile); // for Rubiks-both-cubes-iter.pdf
     }
 
     /**
+     * --- Deprecated, better use {@link GBGBatch#batch10(int, Properties, String[], String, String, XArenaButtons, GameBoard, String) batch10}
+     *     from {@link GBGBatch} ---
+     * <p>
      * Same as {@link #rubiksCube3x3Test()}, but for 2x2x2 cube. <br>
      * Note that pMax=13 for HTM and pMax=16 for QTM. <br>
      * (Since for the 2x2x2 cube God's number is 11 in the HTM- and 14 in the QTM-case, a successful test shows that MCTSWrapper
      * solves the 2x2x2 cube.)
      * <p>
      * Computation time depends on iterMCTSWrap and the number of for-loop-passes in {@code innerRubiksCubeTest}.
-     * Example for iterMCTSWrapArr={0,50,100,200,300}, nTrial=4, epsArr = {1e-8, 0.0, -1e-8}, one agtFile:
+     * Example for iterMCTSWrapArr={0,50,100,200,300}, nruns=4, epsArr = {1e-8, 0.0, -1e-8}, one agtFile:
      * 60 for-loop-passes, in total 2700 sec.
      */
     @Test
+    @Deprecated
     public void rubiksCube2x2Test() {
         int pMin=1, pMax;
+        int nruns = 4;
+        String csvFile = "mRubiks2x2.csv";
         scaPar=new String[]{"2x2x2", "STICKER2", "QTM"};    // select here between "HTM" and "QTM"
         switch (scaPar[2]) {
             case "HTM" -> {
@@ -131,32 +145,34 @@ public class MCTSWrapperAgentTest extends GBGBatch {
         hm.put( 500,fact*0.99);
         hm.put( 800,fact*0.99);
         hm.put(1000,fact*0.99);
-        int nTrial = 4;
-        String csvFile = "mRubiks2x2.csv";
 
-        innerRubiksTest(scaPar,agtFiles,iterMCTSWrapArr,hm,pMin,pMax, nTrial, csvFile);
+        selectedGame = "RubiksCube";
+        arenaTrain = SetupGBG.setupSelectedGame(selectedGame,scaPar,"",false,true);
+
+        innerRubiksTest(scaPar,agtFiles,iterMCTSWrapArr,hm,pMin,pMax, nruns, csvFile);
     }
 
     /**
      * @param scaPar    scalable parameters
      * @param agtFiles  the agent(s) to wrap
      * @param iterMCTSWrapArr the iterations for MCTS wrapper
-     * @param hm        hash map with expected lower bounds on %-solved-rate as a fct of iterMCTSWrap
+     * @param hm        hash map with lower bounds on %-solved-rate as a fct of iterMCTSWrap. Throws an assertion if
+     *                  solved-rate does not surpass lower bound. Currently only invoked for
+     *                  <pre>{@code EPS = 1e-8 && c_puct = 1.0}</pre>
      * @param pMin      min number of scrambling twists
      * @param pMax      max number of scrambling twists
-     * @param nTrial    number of runs
+     * @param nruns    number of runs
      * @param csvFile   result file
      */
     public void innerRubiksTest(String[] scaPar,
                                 String[] agtFiles,
                                 int[] iterMCTSWrapArr,
                                 HashMap<Integer,Double> hm,
-                                int pMin, int pMax, int nTrial,
+                                int pMin, int pMax, int nruns,
                                 String csvFile) {
         long startTime;
         double elapsedTime=0,deltaTime;
 
-        selectedGame = "RubiksCube";
         PlayAgent pa;
         PlayAgent qa;
         double[] epsArr = {1e-8}; // {1e-8, 0.0, -1e-8}; // {1e-8, 0.0};    //
@@ -169,12 +185,11 @@ public class MCTSWrapperAgentTest extends GBGBatch {
         MCompeteMWrap mCompete;
         ArrayList<MCompeteMWrap> mcList = new ArrayList<>();
 
-        arenaTrain = SetupGBG.setupSelectedGame(selectedGame,scaPar,"",false,true);
         GameBoardCube gb = new GameBoardCube(arenaTrain);		// needed for chooseStartState()
 
-        for (int run=0; run<nTrial; run++) {
+        for (int run=0; run<nruns; run++) {
             for (String agtFile : agtFiles) {
-                System.out.println("*** Starting run "+run+"/"+(nTrial-1) +
+                System.out.println("*** Starting run "+run+"/"+(nruns-1) +
                         " of innerRubiksCubeTest for " + agtFile + " (scaPar={" + scaPar[0] + "," + scaPar[1] + "," + scaPar[2] +
                         "}) ***");
                 pa = arenaTrain.loadAgent(agtFile);
@@ -184,8 +199,8 @@ public class MCTSWrapperAgentTest extends GBGBatch {
                 wrPar.setWrapperNPly(0);     // or >0 together with iterMCTSWrapArr={0}, if testing MaxNWrapper
                 pa.setWrapperParamsOfromWr(wrPar);
 
-                for (double EPS : epsArr) {
-                    ConfigWrapper.EPS = EPS;
+                for (double eps : epsArr) {
+                    ConfigWrapper.EPS = eps;
                     for (int iterMCTSWrap : iterMCTSWrapArr) {
                         if (iterMCTSWrap == 0) qa = pa;
                         else qa = new MCTSWrapperAgent(iterMCTSWrap, c_puct,
@@ -207,13 +222,13 @@ public class MCTSWrapperAgentTest extends GBGBatch {
                             percSolved = m_eval.getLastResult();
                             System.out.println(m_eval.getMsg());
                             mCompete = new MCompeteMWrap(run, agtFile, 1, 0, iterMCTSWrap,
-                                    EPS, 0, c_puct, percSolved,
+                                    eps, 0, c_puct, percSolved,
                                     p, ee);
                             mcList.add(mCompete);
                             avgPercSolved += percSolved;
                         }
                         avgPercSolved /= (pMax-pMin+1);
-                        if (EPS == 1e-8 && c_puct == 1.0) {     // test thresholds currently only available for this setting
+                        if (eps == 1e-8 && c_puct == 1.0) {     // test thresholds currently only available for this setting
                             if (hm.get(iterMCTSWrap)==null) {
                                 System.err.println("[innerRubiksTest] Warning: Assertion skipped because hm has no threshold entry for iter="+iterMCTSWrap);
                             } else
@@ -225,7 +240,7 @@ public class MCTSWrapperAgentTest extends GBGBatch {
 
                         deltaTime = (double) (System.currentTimeMillis() - startTime) / 1000.0;
                         elapsedTime += deltaTime;
-                        System.out.println("... for EPS=" + EPS + ", iter=" + iterMCTSWrap + ", " + deltaTime + " sec");
+                        System.out.println("... for EPS=" + eps + ", iter=" + iterMCTSWrap + ", " + deltaTime + " sec");
                     }
 
                     // print the full list mcList after finishing each  (iterMCTSWrap)

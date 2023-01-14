@@ -1,0 +1,35 @@
+### Properties for GBGBatch
+
+### batch01 parameters
+###
+numEval = -1
+trainOutDir = multiTrain2
+
+### batch08 parameters
+###
+# number of iterations in MCTS Wrapper
+iterMWrapArr = 0 100 800		
+c_puct = 1.0
+pMinEval_single = 1
+pMaxEval_single = 18
+pMinEval_avg = 10
+pMaxEval_avg = 13
+
+### batch09 parameters
+###
+rewardPosArr = 0.0001 1.0 10.0
+stepRewardArr = -0.04 -0.1 -1.0
+trainOutDir_09 = multiTrain09
+
+### batch10 parameters
+###
+iterMWrapArr_10 = 0 100 800
+cPuctArr = 1.0 10.0
+maxDepth = 50
+# evaluation episode length:
+ee = 50
+pMinEval_10 = 1
+pMaxEval_HTM_2x2x2 = 13
+pMaxEval_QTM_2x2x2 = 16
+pMaxEval_HTM_3x3x3 =  9
+pMaxEval_QTM_3x3x3 = 13

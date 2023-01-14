@@ -1,0 +1,24 @@
+TDNTuple4Agt: USESYM:false, nSym:0, P:12, NORMALIZE:false, sigmoid:none, lambda:0.0, horizon:1, AFTERSTATE:false, learnFromRM: true
+TDNTuple4Agt: alpha_init->final:0.25->0.25, eps_init->final:0.0->0.0, gamma: 1.0, random 120 7-tuple, evalQ: 1, evalT: -1, stepRew: -0.04, rewPos: 1.0
+from: multiTrain2/TCL4-p13-ET16-3000k-120-7t_02.agt.zip
+run; agtFile; gameNum; nSym; pMinEval; pMaxEval; evalQ; evalT; totalSec; iterMWrap; userVal2
+0; multiTrain2/TCL4-p13-ET16-3000k-120-7t_02.agt.zip; 300; 0; 1; 1; 1.0; 0.0; 0.07; 0.0; 0.0
+1; multiTrain2/TCL4-p13-ET16-3000k-120-7t_02.agt.zip; 300; 0; 1; 1; 1.0; 0.0; 0.165; 100.0; 0.0
+2; multiTrain2/TCL4-p13-ET16-3000k-120-7t_02.agt.zip; 300; 0; 1; 1; 1.0; 0.0; 1.107; 800.0; 0.0
+0; multiTrain2/TCL4-p13-ET16-3000k-120-7t_02.agt.zip; 300; 0; 2; 2; 1.0; 0.0; 0.022; 0.0; 0.0
+1; multiTrain2/TCL4-p13-ET16-3000k-120-7t_02.agt.zip; 300; 0; 2; 2; 1.0; 0.0; 0.415; 100.0; 0.0
+2; multiTrain2/TCL4-p13-ET16-3000k-120-7t_02.agt.zip; 300; 0; 2; 2; 1.0; 0.0; 2.375; 800.0; 0.0
+0; multiTrain2/TCL4-p13-ET16-3000k-120-7t_02.agt.zip; 300; 0; 3; 3; 0.935; 0.0; 0.059; 0.0; 0.0
+1; multiTrain2/TCL4-p13-ET16-3000k-120-7t_02.agt.zip; 300; 0; 3; 3; 1.0; 0.0; 0.469; 100.0; 0.0
+2; multiTrain2/TCL4-p13-ET16-3000k-120-7t_02.agt.zip; 300; 0; 3; 3; 1.0; 0.0; 4.147; 800.0; 0.0
+0; multiTrain2/TCL4-p13-ET16-3000k-120-7t_02.agt.zip; 300; 0; 4; 4; 0.6950000000000001; 0.0; 0.171; 0.0; 0.0
+1; multiTrain2/TCL4-p13-ET16-3000k-120-7t_02.agt.zip; 300; 0; 4; 4; 0.99; 0.0; 1.405; 100.0; 0.0
+2; multiTrain2/TCL4-p13-ET16-3000k-120-7t_02.agt.zip; 300; 0; 4; 4; 1.0; 0.0; 4.999; 800.0; 0.0
+0; multiTrain2/TCL4-p13-ET16-3000k-120-7t_02.agt.zip; 300; 0; 5; 5; 0.45999999999999996; 0.0; 0.276; 0.0; 0.0
+1; multiTrain2/TCL4-p13-ET16-3000k-120-7t_02.agt.zip; 300; 0; 5; 5; 0.9299999999999999; 0.0; 4.915; 100.0; 0.0
+2; multiTrain2/TCL4-p13-ET16-3000k-120-7t_02.agt.zip; 300; 0; 5; 5; 0.995; 0.0; 9.41; 800.0; 0.0
+0; multiTrain2/TCL4-p13-ET16-3000k-120-7t_02.agt.zip; 300; 0; 6; 6; 0.31000000000000005; 0.0; 0.325; 0.0; 0.0
+1; multiTrain2/TCL4-p13-ET16-3000k-120-7t_02.agt.zip; 300; 0; 6; 6; 0.675; 0.0; 19.179; 100.0; 0.0
+2; multiTrain2/TCL4-p13-ET16-3000k-120-7t_02.agt.zip; 300; 0; 6; 6; 0.945; 0.0; 36.574; 800.0; 0.0
+0; multiTrain2/TCL4-p13-ET16-3000k-120-7t_02.agt.zip; 300; 0; 7; 7; 0.235; 0.0; 0.363; 0.0; 0.0
+1; multiTrain2/TCL4-p13-ET16-3000k-120-7t_02.agt.zip; 300; 0; 7; 7; 0.515; 0.0; 28.144; 100.0; 0.0

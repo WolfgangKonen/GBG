@@ -84,7 +84,7 @@ agents/RubiksCube/2x2x2_STICKER2_QT/TCL4-p16-3000k-60-7t.agt.zip
 agents/RubiksCube/3x3x3_STICKER2_AT/multiTrain*/*.zip
 agents/RubiksCube/3x3x3_STICKER2_AT/TCL4-p5-1000k-120-7t.agt.zip
 agents/RubiksCube/3x3x3_STICKER2_AT/TCL4-p9-2000k-120-7t.agt.zip
-agents/RubiksCube/3x3x3_STICKER2_QT/*.zip
+agents/RubiksCube/3x3x3_STICKER2_QT/stubs/*.zip
 agents/RubiksCube/3x3x3_STICKER2_QT/multiEval/*.zip
 agents/RubiksCube/3x3x3_STICKER2_QT/multiTrain/*.zip
 agents/TicTacToe/test.agt.zip
@@ -151,3 +151,15 @@ Desktop.ini
 *.lnk
 /bin/
 /experiments/
+agents/RubiksCube/3x3x3_STICKER2_QT/TCL4-p13-3000k-120-7t-nSym08.agt.zip
+agents/RubiksCube/3x3x3_STICKER2_QT/TCL4-p13-3000k-120-7t-nSym16.agt.zip
+agents/RubiksCube/3x3x3_STICKER2_QT/TCL4-p13-3000k-120-7t.agt.zip
+agents/RubiksCube/3x3x3_STICKER2_QT/TCL4-p9-3000k-120-7t-nSym08.agt.zip
+agents/RubiksCube/3x3x3_STICKER2_QT/TCL4-p9-3000k-120-7t.agt.zip
+agents/RubiksCube/3x3x3_STICKER2_QT/multiEval-BCKUP/TCL4-p13-ET16-3000k-120-7t_02.agt.zip
+agents/RubiksCube/3x3x3_STICKER2_QT/TCL4-p13-ET16-3000k-120-7t_00.agt.zip
+agents/RubiksCube/3x3x3_STICKER2_QT/TCL4-p13-ET16-3000k-120-7t_01.agt.zip
+agents/RubiksCube/3x3x3_STICKER2_QT/TCL4-p13-ET16-3000k-120-7t_02.agt.zip
+agents/RubiksCube/3x3x3_STICKER2_QT/TCL4-p13-ET16-3000k-120-7t-nSym08_00.agt.zip
+agents/RubiksCube/3x3x3_STICKER2_QT/TCL4-p13-ET16-3000k-120-7t-nSym08_01.agt.zip
+agents/RubiksCube/3x3x3_STICKER2_QT/TCL4-p13-ET16-3000k-120-7t-nSym08_02.agt.zip

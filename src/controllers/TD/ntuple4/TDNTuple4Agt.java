@@ -219,7 +219,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 		bestValue = -Double.MAX_VALUE;
 		double[] VTable;
 
-		otilde = so.getRewardTuple(rgs).scTup[so.getPlayer()];
+		otilde = so.getRewardTuple(rgs).scTup[so.getPlayer()];	// cumulated reward before
 
 		// just debug:
 //        if (so.isGameOver()) {
@@ -267,19 +267,20 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 					//
 					NewSO.advanceDeterministic(thisAct); 	// generate the afterstate
 					value = this.getScore(NewSO.project(),so); // this is V(s') from so-perspective
-							// .project() projects the state into its canonical form (e.g. sorted heaps in case Nim)
+							// .project() projects the state into its canonical form (e.g. sorted heaps in case Nim,
+							// for all other state observers, .project() currently returns just 'this')
 					while (!NewSO.isNextActionDeterministic() && !NewSO.isRoundOver()) {	// /WK/ NEW/03/2021
 						NewSO.advanceNondeterministic();
 					}
 				} else {
 					// the non-afterstate logic for the case of single moves:
-					//System.out.println("NewSO: "+NewSO.stringDescr()+", act: "+act.toInt()); // DEBUG
 					NewSO.advance(acts.get(i));
 					value = this.getScore(NewSO.project(),so); // this is V(s'') from the perspective of so
 				}
 				// both ways of calculating the agent score are the same for deterministic games (s'=s''),
 				// but they usually differ for nondeterministic games.
 
+				// rtilde: delta reward that we get when moving into NewSO:
 				rtilde  = (NewSO.getRewardTuple(rgs).scTup[so.getPlayer()]-otilde)
 						+ so.getStepRewardTuple(this).scTup[so.getPlayer()];
 				if (TERNARY) {
@@ -325,17 +326,10 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 
 		assert actBest != null : "Oops, no best action actBest";
 
-		if (DBG_BJ) {
-			BasicStrategyBlackJackAgent bsbja = new BasicStrategyBlackJackAgent();
-			Types.ACTIONS actBsbja = bsbja.getNextAction2(so,false,true);
-			System.out.print("getNextAction2:  "+StateObserverBlackJack.BlackJackActionDet.values()[actBest.toInt()].name() );
-			System.out.println("  [BSBJA: "+ StateObserverBlackJack.BlackJackActionDet.values()[actBsbja.toInt()].name()+" ]");
-		}
-
-		NewSO = so.copy();
-		NewSO.advance(actBest);
 		if (!silent) {
-			printDebugInfo(so,NewSO,bestValue,VTable);
+			NewSO = so.copy();
+			NewSO.advance(actBest);
+			printDebugInfo(so,NewSO,actBest,bestValue,VTable);
 		}
 
 		// determine the ScoreTuple scBest (needed when we wrap this agent with MCTS(Exp)Wrapper):
@@ -347,7 +341,9 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	}
 
 	// helper for getNextAction2
-	private void printDebugInfo(StateObservation so, StateObservation NewSO, double bestValue, double[] VTable){
+	private void printDebugInfo(StateObservation so, StateObservation NewSO, Types.ACTIONS actBest,
+								double bestValue, double[] VTable){
+
 		System.out.println("---Best Move: " + NewSO.stringDescr() + ", " + (bestValue));
 
 		boolean DBG_SIM = false;        // set to true only for K6 (!!)
@@ -374,10 +370,19 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 			// "% .4f" means: a space before positive numbers, so that negative numbers
 			// (with an additional minus sign) are printed aligned
 			System.out.println(pl[so.getPlayer()]);
-			System.out.print("TDNT3: ");
+			System.out.print("TDNT4: ");
 			for (double v : VTable) System.out.printf("% .4f; ", v);
 			System.out.println(pl[so.getPlayer()]);
 		}
+
+		if (DBG_BJ) {
+			BasicStrategyBlackJackAgent bsbja = new BasicStrategyBlackJackAgent();
+			Types.ACTIONS actBsbja = bsbja.getNextAction2(so,false,true);
+			System.out.print("getNextAction2:  "+StateObserverBlackJack.BlackJackActionDet.values()[actBest.toInt()].name() );
+			System.out.println("  [BSBJA: "+ StateObserverBlackJack.BlackJackActionDet.values()[actBsbja.toInt()].name()+" ]");
+		}
+
+
 	}
 
 
@@ -468,7 +473,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 				int opponent = (player == 0) ? 1 : 0;
 				//			sc.scTup[player] = m_Net.getScoreI(bvec,player);	// wrong before 2019-03-10
 				//			sc.scTup[opponent] = -sc.scTup[player];
-				//
+
 				// This is an important bug fix (2019-03-10) for TDNTuple4Agt:
 				// If we want to get the score tuple for state 'so' where
 				// 'player' has to move, we may *NOT* ask for m_Net.getScoreI(bvec,player),
@@ -523,14 +528,6 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 		sc.combine(sob.getRewardTuple(rgs), ScoreTuple.CombineOP.SUM,0,0);
 		sc.combine(sob.getStepRewardTuple(this), ScoreTuple.CombineOP.SUM,0,0);
 
-		// old version (2019), not recommended:
-//		boolean rgs = m_oPar.getRewardIsGameScore();
-//		ScoreTuple sc = new ScoreTuple(sob);
-//		for (int i=0; i<sob.getNumPlayers(); i++) 
-//			sc.scTup[i] = sob.getReward(i, rgs);
-//			// this is valid, but it may be a bad estimate in games where the reward is only 
-//			// meaningful for game-over-states.
-
 		return sc;
 	}
 
@@ -563,7 +560,6 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	private void adaptAgentV(int curPlayer, ScoreTuple R, NextState4 ns) {
 		StateObservation s_after = ns.getAfterState();
 		StateObservation s_next = ns.getNextSO();
-//		int[] curBoard;
 		double v_next,vLast,vLastNew,target;
 		boolean learnFromRM = m_oPar.getLearnFromRM();
 
@@ -575,12 +571,11 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 			StateObsWithBoardVector nextSOWB = new StateObsWithBoardVector(s_after.project(),m_Net.xnf);
 			v_next = m_Net.getScoreI(nextSOWB,curPlayer);
 		}
-		// SLast is not used yet
+
 		if (sLast[curPlayer]!=null) {
-			// delta reward from curPlayer's perspective when moving into s_next
-			double r_next;
-			r_next  = (R.scTup[curPlayer] - rLast.scTup[curPlayer])
-					+ s_next.getStepRewardTuple(this).scTup[curPlayer];
+			// r_next: delta reward from curPlayer's perspective when moving into s_next
+			double r_next = (R.scTup[curPlayer] - rLast.scTup[curPlayer])
+					      + s_next.getStepRewardTuple(this).scTup[curPlayer];
 			if (TERNARY) {
 				target = s_next.isGameOver() ? r_next : getGamma()*v_next;
 			} else {
@@ -594,10 +589,9 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 //				int dummy=0;
 //			}
 
-			// note that curBoard is NOT the board vector of state ns.getSO(), but of state
+			// note that curSOWB contains NOT the board vector of state ns.getSO(), but of state
 			// sLast[curPlayer] (one round earlier!)
 			StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(sLast[curPlayer].project(), m_Net.xnf);
-//			curBoard = curSOWB.getBoardVector().bvec;
 			vLast = m_Net.getScoreI(curSOWB,curPlayer);
 
 //    		if (randLast[curPlayer] && !learnFromRM && !s_next.isGameOver()) {
@@ -645,14 +639,6 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 
 		}  // if(sLast[..]!=null)
 
-		// --- not needed here, see else-branch in finalAdaptAgents, where we do the same ---
-//		if (s_next.isGameOver()) {
-//			// if s_next is terminal, adapt towards target 0 the afterstate that precedes s_next 
-//			curBoard = m_Net.xnf.getBoardVector(s_after); 
-//        	vLast = m_Net.getScoreI(curBoard,curPlayer);
-//        	target = 0.0;
-//			m_Net.updateWeightsTD(curBoard, curPlayer, vLast, target,R.scTup[curPlayer],ns.getSO());
-//		}
 	}
 
 	/**
@@ -672,7 +658,6 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	 */
 	private void finalAdaptAgents(int curPlayer, ScoreTuple R, NextState4 ns) {
 		double target,vLast,vLastNew;
-//		int[] curBoard, nextBoard;
 		StateObservation s_after = ns.getAfterState();
 		StateObservation s_next = ns.getNextSO();
 
@@ -725,7 +710,6 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 					// epiLengthStop (then the final state has no special meaning and should NOT be adapted towards
 					// target 0
 					StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(s_after.project(), m_Net.xnf);
-//					curBoard = curSOWB.getBoardVector().bvec;
 					vLast = m_Net.getScoreI(curSOWB,curPlayer);
 					m_Net.updateWeightsTD(curSOWB, curPlayer, vLast, 0.0, R.scTup[curPlayer], s_next);
 				}

@@ -20,7 +20,7 @@ public class MTrainSweep {
      * Perform {@code trainNum} cycles of training and evaluation for PlayAgent, and perform
      * each self-play training with maxGameNum training games.
      * Both trainNum and maxGameNum are inferred from {@code xab}. <br>
-     * Write trained agents to {@code <agentDir>/multiTrain/}, see below. <br>
+     * Write trained agents to {@code <agentDir>/<trainDir>/}, see below. <br>
      * Write results to {@code csvName}, see below.
      * <p>
      * Side effects: <ul>
@@ -40,11 +40,13 @@ public class MTrainSweep {
      * 					of agent <b>n</b>
      * @param gb		the game board, needed for evaluators and start state selection
      * @param csvName	results are written to this filename
+     * @param trainDir  trained agent files are written to {@code  agents/<gameDir>/<trainDir>}. Will be created if
+     *                  not existing
      * @return the (last) trained agent
      * @throws IOException if something goes wrong with {@code csvName}, see below
      */
-    public PlayAgent multiTrain_M(int n, String agtFile, Arena t_Game,
-                                  XArenaButtons xab, GameBoard gb, String csvName) throws IOException {
+    public PlayAgent multiTrain_M(int n, String agtFile, Arena t_Game, XArenaButtons xab,
+                                  GameBoard gb, String csvName, String trainDir) throws IOException {
         DecimalFormat frm3 = new DecimalFormat("+0.000;-0.000");
         DecimalFormat frm = new DecimalFormat("#0.000");
         String userTitle1 = "", userTitle2 = "";
@@ -64,7 +66,7 @@ public class MTrainSweep {
         String strDir = Types.GUI_DEFAULT_DIR_AGENT + "/" + t_Game.getGameName();
         String subDir = t_Game.getGameBoard().getSubDir();
         if (subDir != null) strDir += "/" + subDir;
-        tools.Utils.checkAndCreateFolder(strDir+"/multiTrain");
+        tools.Utils.checkAndCreateFolder(strDir+"/"+trainDir);
         String agtBase = agtFile.split("\\.")[0];   // filename w/o suffix
         agtBase = removeSubstr(agtBase, "-stub");   // remove "-stub", if it appears
 
@@ -78,14 +80,14 @@ public class MTrainSweep {
 
             // save pa to a yet unused filename. This for multiple concurrent jobs which should not write to a
             // filename already written by another job. For single-threaded jobs (and no similar files present in
-            // dir multiTrain/), k=0 will be used.
+            // dir trainDir), k=0 will be used.
             int k=-1;
             String agtPath;
             File file;
             DecimalFormat frm2 = new DecimalFormat("00");
             do {
                 k++;
-                agtPath = strDir + "/multiTrain/" + agtBase + "_" + frm2.format(i+k) + ".agt.zip";
+                agtPath = strDir + "/" + trainDir + "/" + agtBase + "_" + frm2.format(i+k) + ".agt.zip";
                 file = new File(agtPath);
             } while (file.exists());
             t_Game.saveAgent(pa,agtPath);
@@ -159,7 +161,7 @@ public class MTrainSweep {
         int maxGameNum=xab.getGameNumber();
         PlayAgent pa = null;
 
-        System.out.println("*** Starting multiTrain with trainNum = "+trainNum+" ***");
+        System.out.println("*** Starting multi-training with trainNum = "+trainNum+" ***");
 
         for (int i=0; i<trainNum; i++) {
             for (int k=0; k<alphaArr.length; k++) {
@@ -239,7 +241,7 @@ public class MTrainSweep {
         int maxGameNum=xab.getGameNumber();
         PlayAgent pa = null;
 
-        System.out.println("*** Starting multiTrain with trainNum = "+trainNum+" ***");
+        System.out.println("*** Starting multi-training with trainNum = "+trainNum+" ***");
 
         for (int i=0; i<trainNum; i++) {
             for (double lambda : lambdaArr) {
