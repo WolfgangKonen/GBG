@@ -5,6 +5,16 @@
 numEval = -1
 trainOutDir = multiTrain2
 
+### batch05 parameters (Othello multi-training)
+###
+# batchSizeArr: optional testing of replay buffers with different sizes. If not given or commented out, do not use replay buffer
+#batchSizeArr = 0 100 200 400
+
+### batch06,batch07 parameters (Othello Edax competition)
+###
+# depthArr: optional Edax depth levels. If not given or commented out, use 1,2,3,4,5,6,7,8,9
+#depthArr = 6 7 8 9
+
 ### batch08 parameters
 ###
 # number of iterations in MCTS Wrapper

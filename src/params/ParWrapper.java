@@ -24,7 +24,9 @@ import games.XArenaFuncs;
  * </ul>
  * The following parameters are only for {@link MCTSWrapperAgent}:
  * <ul>
- * <li><b>wrapperMCTS_iterations</b>: [100] i for MCTSWrapper: wrap the agent with a {@link MCTSWrapperAgent} with i iterations.
+ * <li><b>wrapperMCTS_iterations</b>: [0] i for MCTSWrapper: wrap the agent with a {@link MCTSWrapperAgent} with i iterations.
+ * <li><b>wrapperMCTS_iter_train</b>: [0] i for MCTSWrapper: wrap the agent during training with a
+ *                                    {@link MCTSWrapperAgent} with i iterations.
  * <li><b>wrapperMCTS_PUCT</b>: [1] PUCT parameter from [0,1] for {@link MCTSWrapperAgent}
  * <li><b>wrapperMCTS_depth</b>: [100] Depth parameter for {@link MCTSWrapperAgent}
  * <li><b>wrapperMCTS_exploMode</b>: [0] 0: none, 1: proportional to visit counts, 2: epsilon-greedy, only for {@link MCTSWrapperAgent}
@@ -54,6 +56,7 @@ public class ParWrapper implements Serializable {
     public static int DEFAULT_WRAPPER_MODE = 0;
     public static int DEFAULT_WRAPPER_NPLY = 0;
     public static int DEFAULT_WRAPPER_MCTS_ITERATIONS = 0;
+    public static int DEFAULT_WRAPPER_MCTS_ITER_TRAIN = 0;
     public static double DEFAULT_WRAPPER_MCTS_PUCT = 1;
     public static int DEFAULT_WRAPPER_MCTS_DEPTH = 100;
     public static int DEFAULT_WRAPPER_MCTS_EXPLOMODE = ConfigWrapper.EXPLORATION_MODE; //0;
@@ -65,6 +68,7 @@ public class ParWrapper implements Serializable {
     private int wrapperMode = DEFAULT_WRAPPER_MODE;
     private int wrapperNply = DEFAULT_WRAPPER_NPLY;
     private int wrapperMCTS_iterations = DEFAULT_WRAPPER_MCTS_ITERATIONS;
+    private int wrapperMCTS_iter_train = DEFAULT_WRAPPER_MCTS_ITER_TRAIN;
     private double wrapperMCTS_PUCT = DEFAULT_WRAPPER_MCTS_PUCT;
     private int wrapperMCTS_depth = DEFAULT_WRAPPER_MCTS_DEPTH;
     private int wrapperMCTS_exploMode = DEFAULT_WRAPPER_MCTS_EXPLOMODE;
@@ -107,6 +111,7 @@ public class ParWrapper implements Serializable {
         this.wrapperMode = wp.getWrapperMode();
         this.wrapperNply = wp.getWrapperNPly();
         this.wrapperMCTS_iterations = wp.getWrapperMCTS_iterations();
+        this.wrapperMCTS_iter_train = wp.getWrapperMCTS_iter_train();
         this.wrapperMCTS_PUCT = wp.getWrapperMCTS_PUCT();
         this.wrapperMCTS_depth = wp.getWrapperMCTS_depth();
         this.wrapperMCTS_exploMode = wp.getWrapperMCTS_ExplorationMode();
@@ -123,6 +128,7 @@ public class ParWrapper implements Serializable {
         this.wrapperMode = wp.getWrapperMode();
         this.wrapperNply = wp.getWrapperNPly();
         this.wrapperMCTS_iterations = wp.getWrapperMCTSIterations();
+        this.wrapperMCTS_iter_train = wp.getWrapperMCTSIter_train();
         this.wrapperMCTS_PUCT = wp.getWrapperMCTS_PUCT();
         this.wrapperMCTS_depth = wp.getWrapperMCTS_depth();
         this.wrapperMCTS_exploMode = wp.getWrapperMCTS_ExplorationMode();
@@ -157,9 +163,9 @@ public class ParWrapper implements Serializable {
         return wrapperNply;
     }
 
-    public int getWrapperMCTS_iterations() {
-        return wrapperMCTS_iterations;
-    }
+    public int getWrapperMCTS_iterations() { return wrapperMCTS_iterations; }
+
+    public int getWrapperMCTS_iter_train() { return wrapperMCTS_iter_train; }
 
     public double getWrapperMCTS_PUCT() {
         return wrapperMCTS_PUCT;
@@ -199,6 +205,12 @@ public class ParWrapper implements Serializable {
         this.wrapperMCTS_iterations =iterations;
         if (wrparams !=null)
             wrparams.setWrapperMCTSIterations(iterations);
+    }
+
+    public void setWrapperMCTS_iter_train(final int iterations) {
+        this.wrapperMCTS_iter_train =iterations;
+        if (wrparams !=null)
+            wrparams.setWrapperMCTSIter_train(iterations);
     }
 
     public void setWrapperMCTS_PUCT(final double puct) {

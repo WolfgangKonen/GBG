@@ -8,6 +8,7 @@ import controllers.PlayAgent;
 import controllers.TD.ntuple4.TDNTuple4Agt;
 import games.*;
 import games.RubiksCube.*;
+import params.ParTD;
 import params.ParNT;
 import params.ParOther;
 import params.ParWrapper;
@@ -242,7 +243,7 @@ public class MCubeIterSweep extends GBGBatch {
      * Perform Rubik's Cube multi-training. In each run, agent {@code pa} is constructed anew (to get different random tuples)
      * and then trained.
      * <p>
-     * Side effect: writes results to directory {@code agents/RubiksCube/<subDir>/multiTrain/}: <ul>
+     * Side effect: writes results to directory {@code agents/RubiksCube/<subDir>/<trainOutDir>/}: <ul>
      *     <li> agent files {@code <agtBase>_<i+k>.agt.zip} where {@code i} it the number of the run and k is selected
      *          in such a way that a yet unused filename is taken (see code around {@code agtPath} below). This for
      *          multiple concurrent jobs which should not write to a filename already written by another job.
@@ -250,14 +251,17 @@ public class MCubeIterSweep extends GBGBatch {
      * </ul>
      * The train csv file may be visualized with R-scripts found in {@code resources\R_plotTools}.
      * <p>
-     * <strong>NEW</strong>: Loop over {@code rewardPosArr}  and {@code stepRewardArr} as specified in source code
+     * <strong>NEW</strong>: Loop over {@code rewardPosArr}  and {@code stepRewardArr}
      *
      * @param pa		    loaded agent (maybe stub) from which all training params are inherited
      * @param agtFile       agent filename, we use its {@code agtBase} (part w/o ".agt.zip") to form the new filenames
      * @param maxGameNum    number of training episodes in each run
      * @param nruns	        number of training runs
+     * @param rewardPosArr  values for {@link ParTD#getRewardPositive()}
+     * @param stepRewardArr values for {@link ParTD#getStepReward()}
      * @param arenaTrain    Arena object with train rights
      * @param gb		    the game board, needed for start state selection
+     * @param trainOutDir   where to store trained agents and train csv (e.g. "multiTrain")
      * @return the last trained agent
      */
     public PlayAgent multiTrainSweepCube(
@@ -287,6 +291,7 @@ public class MCubeIterSweep extends GBGBatch {
         String trainCsvName = "../" + trainOutDir + "/" + agtBase + ".csv";
         // we use "../" because we do not want to store in subdir "csv/" as printMultiTrainList usually does
 
+        // vcResults.txt: ValueContainer results, see predict_value below
         PrintWriter mtWriter = null;
         String vcCsvName=trainOutDir + "/vcResults.txt";
         try {
@@ -358,7 +363,7 @@ public class MCubeIterSweep extends GBGBatch {
      * @param pMax  the number of twists is 1,...,pMax
      * @param nump  number of cubes for each p
      * @param gb    the game board
-     * @param mtWriter  a Writer for diagnostic output
+     * @param mtWriter  a Writer for diagnostic output (usually vcResults.txt)
      * @return a {@link HashMap} with a {@link ValueContainer} for every key p = {1,...,pMax} (number of twists)
      */
     public HashMap<Integer, ValueContainer> predict_value(PlayAgent pa, int pMax, int nump, GameBoardCube gb,

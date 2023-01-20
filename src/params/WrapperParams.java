@@ -20,7 +20,9 @@ import controllers.MaxN2Wrapper;
  * </ul>
  * The following parameters are only for {@link MCTSWrapperAgent}:
  * <ul>
- * <li><b>Wrapper MCTS</b>: [100] i for MCTSWrapper: wrap the agent with a {@link MCTSWrapperAgent} with i iterations.
+ * <li><b>Iter MCTS</b>: [0] i for MCTSWrapper: wrap the agent with a {@link MCTSWrapperAgent} with i iterations.
+ * <li><b>Iter MCTS train</b>: [0] i for MCTSWrapper: wrap the agent <b>during training</b> with a
+ *                             {@link MCTSWrapperAgent} with i iterations.
  * <li><b>PUCT for Wrapper MCTS</b>: [1] PUCT parameter from [0,1] for {@link MCTSWrapperAgent}
  * <li><b>Depth for Wrapper MCTS</b>: [100] Depth parameter for {@link MCTSWrapperAgent}
  * <li><b>Exploration Mode</b>: [0] 0: none, 1: proportional to visit counts, 2: epsilon-greedy, only for {@link MCTSWrapperAgent}
@@ -56,6 +58,7 @@ public class WrapperParams extends Frame {
     //JLabel notyetready_L;
     JLabel wNply_L;
     JLabel wMCTSiter_L;
+    JLabel wMCTSiter_train_L;
     JLabel wMCTSpUCT_L;
     JLabel wMCTSdepth_L;
     JLabel wMCTSexplorationMode_L;
@@ -65,6 +68,7 @@ public class WrapperParams extends Frame {
     JLabel wMCTSuseLast_L;
     public JTextField wNply_T;
     public JTextField wMCTSiter_T;
+    public JTextField wMCTSiter_train_T;
     public JTextField wMCTSpUCT_T;
     public JTextField wMCTSdepth_T;
     public JComboBox<String> choiceExplorationMode=new JComboBox<>(exploModeList);
@@ -86,25 +90,27 @@ public class WrapperParams extends Frame {
         //notyetready_L = new JLabel("NOT YET READY!");
         wrapper_L = new JLabel("Wrapper Mode");
         wNply_L = new JLabel("Wrapper nPly");
-        wMCTSiter_L = new JLabel("Wrapper MCTS");
+        wMCTSiter_L = new JLabel("Iter MCTS");
+        wMCTSiter_train_L = new JLabel("Iter MCTS train");
         wMCTSpUCT_L = new JLabel("PUCT for WrapM");
         wMCTSdepth_L = new JLabel("Depth for WrapM");
+        wMCTSuseSoft_L = new JLabel("USESOFTMAX");
+        wMCTSuseLast_L = new JLabel("USELASTMCTS");
         wMCTSexplorationMode_L = new JLabel("Exploration Mode");
         wMCTSepsInit_L = new JLabel("epsilon init");
         wMCTSepsFinal_L = new JLabel("epsilon final");
-        wMCTSuseSoft_L = new JLabel("USESOFTMAX");
-        wMCTSuseLast_L = new JLabel("USELASTMCTS");
         wNply_T = new JTextField("0"); 		//
         wMCTSiter_T = new JTextField("0"); 		//
+        wMCTSiter_train_T = new JTextField("0"); 		//
         wMCTSpUCT_T = new JTextField("1"); 		//
         wMCTSdepth_T = new JTextField("-1"); 		//
-        wMCTSepsInit_T = new JTextField("0.1"); 		//
-        wMCTSepsFinal_T = new JTextField("0.1"); 		//
         wMCTSuseSoftMax = new Checkbox("", false);
         wMCTSuseLastMCTS = new Checkbox("", false);
+        wMCTSepsInit_T = new JTextField("0.1"); 		//
+        wMCTSepsFinal_T = new JTextField("0.1"); 		//
         ok = new Button("OK");
         m_par = this;
-        wPanel = new JPanel();  // put the inner buttons into panel oPanel. This panel
+        wPanel = new JPanel();  // put the inner buttons into panel wPanel. This panel
                                 // can be handed over to a tab of a JTabbedPane
                                 // (see class XArenaTabs)
 
@@ -113,7 +119,9 @@ public class WrapperParams extends Frame {
         wNply_L.setToolTipText(
                 "<html>Wrapper n-ply look ahead <br>(for play, compete, eval). <br>CAUTION: Numbers > 5 <br> can take long!</html>");
         wMCTSiter_L.setToolTipText(
-                "Wrapper MCTS iterations (for play, compete, eval, train)");
+                "Wrapper MCTS iterations (for play, compete, eval)");
+        wMCTSiter_train_L.setToolTipText(
+                "Wrapper MCTS iterations (during train)");
         wMCTSpUCT_L.setToolTipText("PUCT value for MCTS wrapper");
         wMCTSdepth_L.setToolTipText("max depth for MCTS wrapper. -1: no max depth");
         wMCTSexplorationMode_L.setToolTipText(
@@ -140,9 +148,11 @@ public class WrapperParams extends Frame {
         wPanel.add(wrapper_L);
         wPanel.add(choiceWrapper);
 
-        //wPanel.add(notyetready_L);
-        wPanel.add(new Canvas());
-        wPanel.add(new Canvas());
+        //wPanel.add(new Canvas());
+        //wPanel.add(new Canvas());
+
+        wPanel.add(wMCTSiter_train_L);
+        wPanel.add(wMCTSiter_train_T);
 
         wPanel.add(wNply_L);
         wPanel.add(wNply_T);
@@ -192,6 +202,8 @@ public class WrapperParams extends Frame {
         boolean enable = (this.getWrapperMode()==2);
         wMCTSiter_L.setEnabled(enable);
         wMCTSiter_T.setEnabled(enable);
+        wMCTSiter_train_L.setEnabled(enable);
+        wMCTSiter_train_T.setEnabled(enable);
         wMCTSdepth_L.setEnabled(enable);
         wMCTSdepth_T.setEnabled(enable);
         wMCTSpUCT_L.setEnabled(enable);
@@ -226,6 +238,10 @@ public class WrapperParams extends Frame {
 
     public int getWrapperMCTSIterations() {
         return Integer.parseInt(wMCTSiter_T.getText());
+    }
+
+    public int getWrapperMCTSIter_train() {
+        return Integer.parseInt(wMCTSiter_train_T.getText());
     }
 
     public double getWrapperMCTS_PUCT() {
@@ -264,6 +280,10 @@ public class WrapperParams extends Frame {
 
     public void setWrapperMCTSIterations(final int value) {
         wMCTSiter_T.setText(value + "");
+    }
+
+    public void setWrapperMCTSIter_train(final int value) {
+        wMCTSiter_train_T.setText(value + "");
     }
 
     public void setWrapperMCTS_PUCT(final double value) {

@@ -37,7 +37,7 @@ public class SingleTrainer {
         try {
             String sAgent = xab.getSelectedAgent(n);
             pa = arenaTrain.m_xfun.constructAgent(n, sAgent, xab);
-            pa = arenaTrain.m_xfun.wrapAgent(pa, pa.getParOther(), pa.getParWrapper(), null, gb.getDefaultStartState());
+            pa = arenaTrain.m_xfun.wrapAgentTrain(pa, pa.getParOther(), pa.getParWrapper(), null, gb.getDefaultStartState());
             if (pa == null) throw new RuntimeException("Could not construct AgentX = " + sAgent);
         } catch (RuntimeException e) {
             e.printStackTrace(System.err);
