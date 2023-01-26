@@ -252,6 +252,7 @@ public class LudiiCustomTest extends GBGBatch {
     public void customC4Game(){
         PlayAgent pa;
         int winsPlayer1 = 0, winsPlayer2 = 0, ties = 0;
+        boolean firstMoveLudii = true; // to decide whether Ludii or the GBG AI makes the first move
 
         selectedGame ="ConnectFour";
         scaPar = new String[]{"","",""};
@@ -267,15 +268,25 @@ public class LudiiCustomTest extends GBGBatch {
 
         final List<AI> ais = new ArrayList<>();
         ais.add(null); //Need to add a null entry, because Ludii starts player numbering on 1
-        ais.add(PLAYER_1);
-        ais.add(PLAYER_2);
+
+        if(firstMoveLudii){ // if Ludii AI makes the first move, it needs to be first in ais list
+            ais.add(PLAYER_1);
+            ais.add(PLAYER_2);
+        } else { // i.e. GBG AI makes first move and is first in the list
+            ais.add(PLAYER_2);
+            ais.add(PLAYER_1);
+        }
+
+        // whoever makes the first move is Player 1 in AI List, so index needs to be passed accordingly to initAI()
+        int ludiiIndex = firstMoveLudii? 1 : 2;
+        int gbgIndex = firstMoveLudii? 2 : 1;
 
         for(int gameCounter = 0; gameCounter < GAMESNUMBER; gameCounter++){
             ludiiGame.start(context);
 
             // Initialize the AIs
-            ais.get(1).initAI(ludiiGame,1);
-            ((GBGAsLudiiAI)ais.get(2)).initAI(ludiiGame,2,pa);
+            ais.get(ludiiIndex).initAI(ludiiGame,ludiiIndex);
+            ((GBGAsLudiiAI)ais.get(gbgIndex)).initAI(ludiiGame,gbgIndex,pa);
 
             final Model model = context.model();
 
@@ -319,7 +330,6 @@ public class LudiiCustomTest extends GBGBatch {
         PlayAgent pa;
         int winsPlayer1 = 0, winsPlayer2 = 0, ties = 0;
         int numberHeaps = 5 ;
-
         boolean firstMoveLudii = true; // to decide whether Ludii or the GBG AI makes the first move
 
         selectedGame ="Nim";

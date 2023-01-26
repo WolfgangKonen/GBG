@@ -122,7 +122,6 @@ public class LudiiCustomMatch {
         ais.add(PLAYER_2);
 
         int winsPlayer1 = 0, winsPlayer2 =0, ties = 0;
-
         for (int gameCounter = 0; gameCounter < gamesNumber; gameCounter++) {
             ludiiGame.start(context);
 

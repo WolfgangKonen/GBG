@@ -218,10 +218,40 @@ public class GBGAsLudiiAI extends AI {
         SystemConversionC4 conversion = new SystemConversionC4();
 
         FastArrayList<Move> moves = game.moves(context).moves();
-        Types.ACTIONS gbgAction = gbgAgent.getNextAction2(new StateObserverC4TranslationLayer(context, playerID).partialState(),false, true);
+        List<Move> moveList = context.trial().generateCompleteMovesList();
+        int gbgAction = 0;
 
+      /*  try{
+            gbgAction = gbgAgent.getNextAction2(new StateObserverC4TranslationLayer(context, playerID).partialState(), false, true).toInt();
+        } catch (Exception e){
+            if(moveList.get(moveList.size()-1).isPass()){
+                gbgAction = -1;
+            } else{
+                StateObserverC4TranslationLayer obs = new StateObserverC4TranslationLayer(context,playerID);
+                if(obs.isGameOver()){
+                    gbgAction = -1;
+                }
+            }
+        }*/
+
+        // checks if last made move was a pass
+        // needed because of ties/draws; when a draw happens, Ludii requires both players to make a pass move before it ends the game)
+        if(!moveList.isEmpty() && moveList.get(moveList.size()-1).isPass()){
+            gbgAction = -1; // GBG doesn't have pass moves for C4, so just assign it without consulting gbgAgent
+        } else {
+            // gbgAgent might realize there's no available action in case of a draw and throw an exception
+            try{
+                gbgAction = gbgAgent.getNextAction2(new StateObserverC4TranslationLayer(context, playerID).partialState(), false, true).toInt();
+            } catch( Exception e){
+                // check whether exception was caused by a draw and assign a pass move to gbgAction
+                StateObserverC4TranslationLayer obs = new StateObserverC4TranslationLayer(context,playerID);
+                if(obs.isGameOver()){
+                    gbgAction = -1;
+                }
+            }
+        }
         for(Move move : moves){
-            if(move.to() == conversion.getLudiiIndexFromGBG(gbgAction.toInt())) returnMove = Optional.of(move);
+            if(move.to() == conversion.getLudiiIndexFromGBG(gbgAction)) returnMove = Optional.of(move);
         }
 
         return returnMove;

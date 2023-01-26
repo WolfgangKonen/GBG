@@ -10,7 +10,7 @@ public class SystemConversionC4 extends SystemConversion {
 
     public SystemConversionC4() {
         Map<Integer, Integer> map = Stream.of(new Integer[][] {
-                { 0, 0},{ 1, 1},{ 2,2},{ 3,3},{ 4,4},{ 5,5},{ 6,6}
+                {-1,-1},{ 0, 0},{ 1, 1},{ 2,2},{ 3,3},{ 4,4},{ 5,5},{ 6,6}
         }).collect(Collectors.toMap(data -> data[0], data -> data[1]));
         indicesMap.putAll(map);
 

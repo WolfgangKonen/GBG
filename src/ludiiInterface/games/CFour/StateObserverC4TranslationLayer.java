@@ -3,6 +3,7 @@ package ludiiInterface.games.CFour;
 import games.CFour.StateObserverC4;
 import other.context.Context;
 import other.move.Move;
+import tools.Types;
 
 import java.util.List;
 
@@ -26,6 +27,7 @@ public class StateObserverC4TranslationLayer extends StateObserverC4 {
 
         for(Move x : ludiiContextMoves){
             int actionInt = conversion.getGBGIndexFromLudii(x.to()); //x.to() returns position of the placed piece
+            super.advanceBase(Types.ACTIONS.fromInt(actionInt));
 
             gameOver = isWin = m_C4.canWin(actionInt);
             m_C4.putPiece(actionInt);
@@ -35,7 +37,7 @@ public class StateObserverC4TranslationLayer extends StateObserverC4 {
 
             prevCell = getLastCell();
             int lastPlayer = conversion.getGBGPlayerFromLudii(x.mover()); //x.mover() returns the player who made the move
-            lastCell = new StateObserverC4.LastCell(actionInt, m_C4.getColHeight(actionInt)-1, lastPlayer);
+            lastCell = new LastCell(actionInt, m_C4.getColHeight(actionInt)-1, lastPlayer);
             m_Player = (lastPlayer == 0 ? 1 : 0);
         }
 
