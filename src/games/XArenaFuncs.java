@@ -512,7 +512,7 @@ public class XArenaFuncs {
 
 	/**
 	 * Given the selected agents in {@code paVector}, call
-	 * {@link #wrapAgent(PlayAgent, ParOther, ParWrapper, int, ParMaxN, StateObservation)}
+	 * {@link #wrapAgent(PlayAgent, ParOther, ParWrapper, ParMaxN, StateObservation)}
 	 * for every {@code n}.
 	 *
 	 * @param paVector
@@ -740,7 +740,7 @@ public class XArenaFuncs {
 
 			gameNum = pa.getGameNum();
 			int liveSignal = (so instanceof StateObserverCube) ? 10000 :
-					         (!pa.isWrapper()) ? 500 : 10;
+					         (!pa.isWrapper()) ? 500 : 50;
 			if (gameNum % liveSignal == 0) {
 				System.out.println("gameNum: "+gameNum);
 			}

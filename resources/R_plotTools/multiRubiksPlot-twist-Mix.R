@@ -11,7 +11,7 @@ library(scales)       # for 'labels=percent' in ggplot
 source("summarySE.R")
 
 EE=50           # 20 or 50: eval epiLength
-TWISTTYPE="HTM" # QTM or HTM
+TWISTTYPE="QTM" # QTM or HTM
 month="Jan23-"  # "Sep22-" or "Jan23-"
 pdffile=paste0("Rubiks-both-cubes-ptwist-",month,TWISTTYPE,"-Mix.pdf")
 

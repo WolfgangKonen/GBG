@@ -157,7 +157,7 @@ public class MCubeIterSweep extends GBGBatch {
      * @param nruns     number of runs
      * @param csvName   result file
      *
-     * @see GBGBatch#batch10(int, Properties, String[], String, String, XArenaButtons, GameBoard, String) GBGBatch.batch10
+     * @see GBGBatch#batch10(int, Properties, String[], String, String, String) GBGBatch.batch10
      */
     public void evalRubiksCube(String[] scaPar,
                                String agtFile,
@@ -285,10 +285,9 @@ public class MCubeIterSweep extends GBGBatch {
         tools.Utils.checkAndCreateFolder(strDir+"/" + trainOutDir);
         String agtBase = agtFile.split("\\.")[0];       // agtBase = agtFile w/o .agt.zip
 
-        String fCsvName="";
         String userTitle1 = "rewardPos";
         String userTitle2 = "stepReward";
-        String trainCsvName = "../" + trainOutDir + "/" + agtBase + ".csv";
+        String trainCsvName, fCsvName="";
         // we use "../" because we do not want to store in subdir "csv/" as printMultiTrainList usually does
 
         // vcResults.txt: ValueContainer results, see predict_value below
@@ -322,12 +321,14 @@ public class MCubeIterSweep extends GBGBatch {
                 // filename already written by another job. For single-threaded jobs (and no similar files present in
                 // dir trainOutDir), k=0 will be used.
                 int k=-1;
-                String agtPath;
+                String agtPath,agt_w_o_suffix;
                 File file;
                 do {
                     k++;    // start with k=0
-                    agtPath = strDir + "/" + trainOutDir + "/" + agtBase + "_sr" + frm1.format(s*100)
-                            + "_rp" + frm1.format(r*10)+ "_" + frm2.format(i+k) + ".agt.zip";
+                    agt_w_o_suffix = agtBase + "_sr" + frm1.format(s*100)
+                            + "_rp" + frm1.format(r*10)+ "_" + frm2.format(i+k);
+                    trainCsvName = "../" + trainOutDir + "/" + agt_w_o_suffix + ".csv";
+                    agtPath = strDir + "/" + trainOutDir + "/" + agt_w_o_suffix + ".agt.zip";
                     file = new File(agtPath);
                 } while (file.exists());
                 arenaTrain.saveAgent(pa,agtPath);

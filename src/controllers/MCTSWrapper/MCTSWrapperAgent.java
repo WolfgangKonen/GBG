@@ -235,7 +235,8 @@ public final class MCTSWrapperAgent extends AgentBase implements PlayAgent, Seri
             case 1 -> {
                 // case EXPLORATION_MODE==1: sample an action proportional to visit counts
                 lastSelectedAction = selectActionProportional(mctsNode);
-                lastSelectedNode = null;    // do not reuse the tree if random action.
+                lastSelectedNode = mctsNode.childNodes.get(lastSelectedAction);
+                //lastSelectedNode = null;    // do not reuse the tree if random action.
             }
             case 2 -> {
                 // the random case of EXPLORATION_MODE==2:

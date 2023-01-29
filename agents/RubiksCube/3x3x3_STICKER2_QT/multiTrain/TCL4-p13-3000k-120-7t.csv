@@ -1,6 +1,0 @@
-TDNTuple4Agt: USESYM:false, nSym:0, P:12, NORMALIZE:false, sigmoid:none, lambda:0.0, horizon:1, AFTERSTATE:false, learnFromRM: false
-TDNTuple4Agt: alpha_init->final:0.25->0.25, eps_init->final:0.0->0.0, gamma: 1.0, random 120 7-tuple, evalQ: 1, evalT: -1, stepRew: -0.9, rewPos: 9.0
-from: Unknown
-run; gameNum; evalQ; evalT; actionNum; trnMoves; totalTrainSec; movesSecond; rewardPos; stepReward
-0; 50000; 0.565; 0.0; 593062; 593062; 52.65; 11264.235517568852; 9.0; -0.9
-0; 100000; 0.61; 0.0; 1133976; 1133976; 98.197; 11547.969897247369; 9.0; -0.9
