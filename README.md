@@ -31,4 +31,4 @@ For publications and research on GBG see [Research page GBG Wiki](https://github
 ![ArenaTrain](https://github.com/WolfgangKonen/GBG/blob/master/resources/HexGameboard01_w.png)
 
 ## Contributors
-Johannes Kutsch, Markus Thill, Kevin Galitzki, Felix Barsnick, Johannes Scheiermann, Julian Cöln, Yannick Dittmar, Percy Wünsch, Simon Meißner, Tim Zeh, Ann Weitz, Wolfgang Konen
+Johannes Kutsch, Markus Thill, Kevin Galitzki, Felix Barsnick, Johannes Scheiermann, Julian Cöln, Yannick Dittmar, Percy Wünsch, Simon Meißner, Tim Zeh, Ann Weitz, Meltem Seven, Wolfgang Konen
