@@ -47,7 +47,7 @@ public class CFourMatches extends GBGBatch {
     static AI PLAYER_2;
     static Game ludiiGame;
 
-    static boolean opening = false;
+    static boolean opening = true;
     static List<Integer> openingMoves = null;
 
     static double avgEpLengthLudii;
@@ -88,7 +88,7 @@ public class CFourMatches extends GBGBatch {
             // get an opening of random but even amount of moves between 2 and 6 moves
             if(opening) {
                 if (gameCounter == 0 || gameCounter % 2 == 0) {
-                    openingMoves = startPositionsC4.getOpening((new Random().nextInt(1, 4)) * 2);
+                    openingMoves = startPositionsC4.getOpening((new Random().nextInt(3)+1) * 2);
                     System.out.println("New Opening Sequence with length: " + openingMoves.size());
 
                 }

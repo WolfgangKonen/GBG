@@ -43,14 +43,14 @@ public class StartPositionsOthello {
         Path txtfile = Paths.get("src", "ludiiInterface", "matches", "Othello", "XOTOpeningsSmallList.txt");
         //System.out.println(txtfile);
 
-        int line = new Random().nextInt(1, 3623);
-        System.out.println("Opening taken from line "+(line+1));
+        int line = new Random().nextInt(3623)+1;
+        System.out.println("Opening taken from line "+line);
 
         String startPosition = null;
 
         try (BufferedReader br = Files.newBufferedReader(txtfile)) {
 
-            for (int x = 0; x < line; x++) {
+            for (int x = 0; x < (line-1); x++) {
                 br.readLine();
             }
             //System.out.println(br.readLine());
@@ -64,7 +64,7 @@ public class StartPositionsOthello {
 
         for(int i = 0; i < 16; i+=2){
             assert startPosition != null;
-            openings.add(mapPositionsToMoves.get(startPosition.substring(i,i+2))); // könnte auch ohne math.min funktionieren (?)
+            openings.add(mapPositionsToMoves.get(startPosition.substring(i,i+2)));
         }
 
         return openings;
