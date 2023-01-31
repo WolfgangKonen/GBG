@@ -10,6 +10,8 @@ import controllers.MCTSExpWrapper.stateApproximation2.PlayAgentApproximator2;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.MCTSWrapper.MCTSWrapperAgent;
 import controllers.MCTSWrapper.stateApproximation.PlayAgentApproximator;
+import controllers.RHEA.RheaAgent;
+import controllers.RHEA.RheaAgentSI;
 import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.NTupleFactory;
 import controllers.TD.ntuple2.SarsaAgt;
@@ -155,12 +157,18 @@ public class XArenaFuncs {
 			if (sAgent.equals("TDS")) {
 				Feature feat = m_xab.m_arena.makeFeatureClass(m_xab.tdPar[n].getFeatmode());
 				pa = new TDAgent(sAgent, m_xab.tdPar[n], m_xab.oPar[n], feat, maxGameNum);
-//			} else if (sAgent.equals("TD-Ntuple-2")) {
+//			}   else if (sAgent.equals("TD-Ntuple-2")) {
 //				XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
 //				NTupleFactory ntupfac = new NTupleFactory();
 //				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
 //				pa = new TDNTuple2Agt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
 //						m_xab.oPar[n], nTuples, xnf, maxGameNum);
+			} else if (sAgent.equals("RHEA")) {
+				pa = new RheaAgent(sAgent, null,  m_xab.oPar[n]);
+
+			} else if (sAgent.equals("RHEA-SI")) {
+				pa = new RheaAgentSI(sAgent, null);
+
 			} else if (sAgent.equals("TD-Ntuple-3")) {
 				XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
 				NTupleFactory ntupfac = new NTupleFactory();
@@ -313,6 +321,10 @@ public class XArenaFuncs {
 
 		if (sAgent.equals("Max-N")) {
 			pa = new MaxNAgent(sAgent, m_xab.maxnPar[n], m_xab.oPar[n]);
+		} else if (sAgent.equals("RHEA")) {
+			pa = new RheaAgent(sAgent, null,  m_xab.oPar[n]);
+		} else if (sAgent.equals("RHEA-SI")) {
+			pa = new RheaAgentSI(sAgent, null);
 		} else if (sAgent.equals("Expectimax-N")) {
 			pa = new ExpectimaxNAgent(sAgent, m_xab.maxnPar[n], m_xab.oPar[n]);
 		} else if (sAgent.equals("Random")) {

@@ -266,7 +266,7 @@ public class Types {
      * list of available agents = list of choices in Agent Selectors
      */
     public static final String[] GUI_AGENT_LIST 	 
-    	= {"Random", "Max-N", "Expectimax-N", /*"MC",*/ "MC-N", /*"MCTS0",*/ 
+    	= {"Random", "RHEA", "RHEA-SI", "Max-N", "Expectimax-N", /*"MC",*/ "MC-N", /*"MCTS0",*/
     	   "MCTS", "MCTS Expectimax", "Human", /*"TD-Ntuple", "TD-Ntuple-2",*/ "TD-Ntuple-3","TD-Ntuple-4",
     	   "Sarsa", "Sarsa-4", "Qlearn-4","TDS"};
     /**
