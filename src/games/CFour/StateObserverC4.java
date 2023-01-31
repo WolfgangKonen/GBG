@@ -27,14 +27,14 @@ import tools.Types.ACTIONS;
 public class StateObserverC4 extends ObserverBase implements StateObservation {
     private static final double REWARD_NEGATIVE = -1.0;
     private static final double REWARD_POSITIVE =  1.0;
-	private int m_Player;			// Player who makes the next move (0 or 1)
-	private final C4Base m_C4;
+	protected int m_Player;  // Player who makes the next move (0 or 1)
+	protected final C4Base m_C4;
 	private ArrayList<Types.ACTIONS> availableActions = new ArrayList<>();	// holds all available actions
-	private boolean gameOver = false;
-	private boolean isWin = false;
+	protected boolean gameOver = false;
+	protected boolean isWin = false;
 
-	private LastCell lastCell = new LastCell();
-	private LastCell prevCell = new LastCell();
+	protected LastCell lastCell = new LastCell();
+	protected LastCell prevCell = new LastCell();
     
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 

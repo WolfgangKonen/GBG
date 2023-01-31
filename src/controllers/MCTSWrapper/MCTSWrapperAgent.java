@@ -6,25 +6,47 @@ import controllers.MCTSWrapper.passStates.ApplicableAction;
 import controllers.MCTSWrapper.passStates.GameStateIncludingPass;
 import controllers.MCTSWrapper.passStates.PassAction;
 import controllers.MCTSWrapper.stateApproximation.Approximator;
+import controllers.PlayAgent;
 import controllers.PlayAgtVector;
 import games.ObserverBase;
 import games.StateObservation;
 import params.ParOther;
+import params.ParWrapper;
 import tools.ScoreTuple;
 import tools.Types;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Map;
+import java.util.Random;
 
 /**
  * PlayAgent that performs a Monte Carlo Tree Search (MCTS) to calculate the next action to be selected.
  * This agent wraps an approximator, which is used to evaluate game states in MCTS simulations.
  */
-public final class MCTSWrapperAgent extends AgentBase {
+public final class MCTSWrapperAgent extends AgentBase implements PlayAgent, Serializable {
     private final int iterations;
     private final MCTS mcts;
     private final Approximator approximator;
+
+    /**
+     * Controls the amount of exploration moves in case ConfigWrapper.EXPLORATION_MODE==2
+     * during training. <br>
+     * m_epsilon = 0.0: no exploration (random) moves, <br>
+     * m_epsilon = 0.1 (def.): 10% of the moves are random, and so forth
+     * m_epsilon undergoes a linear change from {@code ParWrapper.epsInit}
+     * to {@code ParWrapper.epsFinal}.
+     * This is realized in {@link #adjustEpsilon()}.
+     */
+    protected double m_epsilon = 0.1;
+
+    /**
+     * m_EpsilonChangeDelta is the epsilon change per episode.
+     */
+    protected double m_epsilonChangeDelta = 0.001;
+
+    private final Random rand; // generate random Numbers
 
     /**
      * @param iterations   Number of monte carlo iterations to be performed before the next action is selected.
@@ -33,6 +55,7 @@ public final class MCTSWrapperAgent extends AgentBase {
      * @param name         The name of the agent to be displayed.
      * @param maxDepth     Return from search, if depth==maxDepth. Set to -1, if search should not return because
      *                     of depth. (-1 will be transformed to Integer.MAX_VALUE.)
+     * @param oPar         needed for parent class constructor
      */
     public MCTSWrapperAgent(
         final int iterations,
@@ -45,8 +68,10 @@ public final class MCTSWrapperAgent extends AgentBase {
         super(name,oPar);
         this.iterations = iterations;
         this.approximator = approximator;
+        this.rand = new Random(System.currentTimeMillis()); //(System.currentTimeMillis()); (42);
         mcts = new MCTS(approximator, c_puct, maxDepth);
         setAgentState(AgentState.TRAINED);
+        setWrParams(this.m_wrPar,this.getMaxGameNum());
     }
 
     /**
@@ -72,17 +97,28 @@ public final class MCTSWrapperAgent extends AgentBase {
         this.lastSelectedAction = Integer.MIN_VALUE;
     }
 
+    /**
+     * Get the best next action and return it
+     *
+     * @param sob			current game state (is returned unchanged)
+     * @param random		allow random action selection (exploration)
+     * @param silent		whether to be silent
+     * @return the best action (or random action). If several actions have the same
+     * 		   score, break ties by selecting one of them at random.
+     */
     @Override
     public Types.ACTIONS_VT getNextAction2(
         final StateObservation sob,
         final boolean random,
         final boolean silent
     ) {
+
         MCTSNode mctsNode;
 
-        if (lastSelectedNode == null || !ConfigWrapper.USELASTMCTS || !sob.isDeterministicGame()) {
-            // There is no search tree yet or it is not valid for the current situation.
-            // So a new mcts node is created from the given game state sob.
+        if (lastSelectedNode == null || !getParWrapper().getUseLastMCTS() || !sob.isDeterministicGame()) {
+//      if (lastSelectedNode == null || !ConfigWrapper.USELASTMCTS || !sob.isDeterministicGame()) {
+            // There is no search tree yet, or it is not valid for the current situation.
+            // So a new MCTSNode is created from the given game state sob.
             mctsNode = new MCTSNode(new GameStateIncludingPass(sob));
         } else {
             // There already exists a search-tree, which was built in a previous call to MCTSWrapper in this episode.
@@ -151,7 +187,7 @@ public final class MCTSWrapperAgent extends AgentBase {
             }
         }  // else (lastSelectedNode...)
 
-        // At this point mctsNode represents the current game state's node in the Monte Carlo search tree.
+        // At this point, mctsNode represents the current game state's node in the Monte Carlo search tree.
 
         // /WK/ a possible assertion, which turns out to be violated from time to time in RubiksCube.
         //      It seems always true in the Othello case --> TODO: Clarify the RubiksCube case!
@@ -161,26 +197,69 @@ public final class MCTSWrapperAgent extends AgentBase {
             int dummy = 1;
         }
 
-        mcts.largestDepth=0;
-        // Performs the given number of mcts iterations.
-        for (int i = 0; i < iterations; i++) {
-            mcts.search(mctsNode,0);
+        int exploMode = this.getParWrapper().getWrapperMCTS_ExplorationMode(); //ConfigWrapper.EXPLORATION_MODE;
+        if (!random) exploMode=0;               // always exploit, if random==false
+        if (exploMode==2 && (rand.nextDouble() >= this.m_epsilon /*ConfigWrapper.epsilon*/) ) {
+            exploMode=0;                        // exploit (the greedy case of EXPLORATION_MODE==2)
         }
 
-        // Selects the int value of the action that leads to the child node that maximizes the visit count.
-        // This value is also cached for further calls.
-        if (mctsNode.visitCounts.size()==0) {
-            // As far as we see, this can only happen if iterations==1 (which is not a sensible choice),
-            // but we leave it in as debug check for the moment
-            System.err.println("MCTSWrapperAgent.getNextAction2: *** Warning *** visitCounts.size = 0");
-            System.err.println(mctsNode.gameState.stringDescr());
-            return new Types.ACTIONS_VT(0,false,new double[sob.getNumAvailableActions()],0.0);
-        }
-        lastSelectedAction = mctsNode.visitCounts.entrySet().stream().max(
-            Comparator.comparingDouble(Map.Entry::getValue)
-        ).orElseThrow().getKey();
-        // Caches the child node belonging to the previously selected action.
-        lastSelectedNode = mctsNode.childNodes.get(lastSelectedAction);
+        if (exploMode!=2) {     // in case exploMode==2, we do not need the MCTS search, because we take a random action anyway
+            mcts.largestDepth=0;
+            // Performs the given number of mcts iterations.
+            for (int i = 0; i < iterations; i++) {
+                mcts.search(mctsNode,0);
+            }
+
+            if (mctsNode.visitCounts.size()==0) {
+                // As far as we see, this can only happen if iterations==1 (which is not a sensible choice),
+                // but we leave it in as debug check for the moment.
+                // We return always action 0 (which may or may not be a sensible choice)
+                System.err.println("MCTSWrapperAgent.getNextAction2: *** Warning *** visitCounts.size = 0");
+                System.err.println(mctsNode.gameState.stringDescr());
+                return new Types.ACTIONS_VT(0,false,new double[sob.getNumAvailableActions()],0.0);
+            }
+        } // exploMode!=2
+
+        // Selects the int value of one of the available actions:
+        // If getNextAction2 is called with random==false (eval or play), exploMode is always 0.
+        // If it is called with random==true (during training), exploMode depends on EXPLORATION_MODE (see above).
+        switch (exploMode) {
+            case 0 -> {
+                // case EXPLORATION_MODE==0 or the greedy case of EXPLORATION_MODE==2: exploit, take action with max visit counts
+                lastSelectedAction = mctsNode.visitCounts.entrySet().stream().max(
+                        Comparator.comparingDouble(Map.Entry::getValue)
+                ).orElseThrow().getKey();
+                // Caches the child node belonging to the previously selected action.
+                lastSelectedNode = mctsNode.childNodes.get(lastSelectedAction);
+            }
+            case 1 -> {
+                // case EXPLORATION_MODE==1: sample an action proportional to visit counts
+                lastSelectedAction = selectActionProportional(mctsNode);
+                lastSelectedNode = mctsNode.childNodes.get(lastSelectedAction);
+                //lastSelectedNode = null;    // do not reuse the tree if random action.
+            }
+            case 2 -> {
+                // the random case of EXPLORATION_MODE==2:
+                final var vTable2 = getVTableRandom(mctsNode);
+                final var vBest2 = Arrays.stream(vTable2).max().orElse(Double.NaN);
+                ScoreTuple scBest2 = new ScoreTuple(sob, vBest2);
+                mctsNode.setMoveProbabilities(vTable2);
+                int selectedAction = mctsNode.moveProbabilities.entrySet().stream().max(
+                        Comparator.comparingDouble(Map.Entry::getValue)
+                ).orElseThrow().getKey();
+                lastSelectedNode = null;    // IMPORTANT: we have to reset lastSelectedNode after each random
+                                            // action because the tree is then no longer valid (this reset may
+                                            // affect adversely the quality of training)
+                return new Types.ACTIONS_VT(
+                        selectedAction,
+                        true,
+                        vTable2,
+                        vBest2,
+                        scBest2
+                );
+            }
+            default ->  throw new RuntimeException("[MCTSWrapperAgent] Invalid choice for exploMode");
+        } // switch(exploMode)
 
         // Pass states should not be cached.
         while (lastSelectedNode != null && lastSelectedNode.gameState.lazyMustPass.value()) {
@@ -195,7 +274,7 @@ public final class MCTSWrapperAgent extends AgentBase {
         ScoreTuple scBest = new ScoreTuple(sob,vBest);
         return new Types.ACTIONS_VT(
             lastSelectedAction,
-            false,
+            exploMode==1,
             vTable,
             vBest,
             scBest
@@ -203,7 +282,7 @@ public final class MCTSWrapperAgent extends AgentBase {
     }   // getNextAction2
 
     // just a check whether this is faster than getVTableFor --> see MCTSWrapperAgentTest::getVTableForTest.
-    // getVTable2For is 5x faster than getVTableFor, but it it has only negligible effect on overall performance since
+    // getVTable2For is 5x faster than getVTableFor, but it has only negligible effect on overall performance since
     // it is called seldom.
     public double[] getVTable2For(final MCTSNode mctsNode) {
         ApplicableAction[] arrAction = mctsNode.gameState.getAvailableActionsIncludingPassActions();
@@ -222,9 +301,18 @@ public final class MCTSWrapperAgent extends AgentBase {
     public double[] getVTableFor(final MCTSNode mctsNode) {
         return getDistributionOver(
             Arrays
-                .stream(mctsNode.gameState.getAvailableActionsIncludingPassActions())
-                .mapToDouble(action -> mctsNode.visitCounts.getOrDefault(action.getId(), 0))
-                .toArray()
+                    .stream(mctsNode.gameState.getAvailableActionsIncludingPassActions())
+                    .mapToDouble(action -> mctsNode.visitCounts.getOrDefault(action.getId(), 0))
+                    .toArray()
+        );
+    }
+
+    public double[] getVTableRandom(final MCTSNode mctsNode) {
+        return getDistributionOver(
+            Arrays
+                    .stream(mctsNode.gameState.getAvailableActionsIncludingPassActions())
+                    .mapToDouble(action -> rand.nextDouble())
+                    .toArray()
         );
     }
 
@@ -236,11 +324,49 @@ public final class MCTSWrapperAgent extends AgentBase {
             .toArray();
     }
 
-    @Override
-    public double getScore(final StateObservation sob) {
-        return approximator.getScore(sob);
+    /**
+     * Sample an action proportional to the visit count distribution in {@code mctsNode}.
+     * @param mctsNode the node
+     * @return the selected action id
+     */
+    private int selectActionProportional(final MCTSNode mctsNode) {
+        ApplicableAction[] arrAction = mctsNode.gameState.getAvailableActionsIncludingPassActions();
+        double r = rand.nextDouble();
+        double[] cTab = getCumulTable2For(mctsNode,arrAction);
+        int i=0;
+        for (var action : arrAction) {
+            if (cTab[i]<=r && r<cTab[i+1])
+                return action.getId();  // the normal return (r has to be between 0.0=cTab[0] and 1.0=cTab[n])
+            i++;
+        }
+        throw new RuntimeException("[selectActionProportional] We should not get here!");
     }
-    // /WK/ getScore is needed to make the interface happy, it is probably never really used
+
+    /**
+     * Return the cumulative distribution function for {@code mctsNode}'s visit counts
+     * @param mctsNode the node
+     * @return array of length (numberAvailableActions + 1)
+     */
+    public double[] getCumulTable2For(final MCTSNode mctsNode, ApplicableAction[] arrAction) {
+        double v, sum = 0;
+        int i=1;
+        double[] cTab = new double[arrAction.length+1];
+        cTab[0]=0;
+        for (var action : arrAction) {
+            v = mctsNode.visitCounts.getOrDefault(action.getId(), 0);
+            cTab[i] = cTab[i-1]+v;
+            sum += v;
+            i++;
+        }
+        for (int j=0; j<cTab.length; j++) cTab[j] /= sum;
+        return cTab;
+    }
+
+//    @Override
+//    public double getScore(final StateObservation sob) {
+//        return approximator.getScore(sob);
+//    }
+//    // /WK/ getScore is needed to make the interface happy, it is probably never really used
 
     @Override
     public String stringDescr() {
@@ -258,8 +384,53 @@ public final class MCTSWrapperAgent extends AgentBase {
     @Override
     public String getName() {
         String cs = super.getName();
-        cs = cs + "["+approximator.getName()+","+this.iterations+"]";
+        cs = cs + "["/*+approximator.getName()+","*/+this.iterations+"]";
         return cs;
+    }
+
+    @Override
+    public PlayAgent getWrappedPlayAgent() {
+        return approximator.getWrappedPlayAgent();
+    }
+
+    @Override
+    public boolean isWrapper() { return true; }
+
+    /**
+     * Train this agent for one episode, starting from state {@code so}.
+     * Train the inner (wrapped) agent, but use the outer agent (the wrapper) for selecting the next action.
+     *
+     * @param so    the start state of the episode
+     * @return	true, if agent raised a stop condition (deprecated)
+     */
+    @Override
+    public boolean trainAgent(StateObservation so) {
+        resetAgent();	// do not re-use last MCTS
+        setWrParams(this.m_wrPar,this.getMaxGameNum());     // adjust m_epsilonChangeDelta to the actual maxGameNum
+        return getWrappedPlayAgent().trainAgent(so,this);
+
+    }
+
+    /**
+     * Set the agent parameters {@code m_epsilon} and {@code m_epsilonChangeDelta} from wrPar and maxGameNum
+     * (only relevant for 'MCTS inside training loop' and {@code wrapperMCTS_exploMode==2})
+     *
+     * @param wrPar       the wrapper parameters, we need here epsInit and epsFinal
+     * @param maxGameNum  number of training episodes
+     */
+    public void setWrParams(ParWrapper wrPar, int maxGameNum) {
+        m_epsilon = wrPar.getWrapperMCTS_epsInit();
+        m_epsilonChangeDelta = (m_epsilon - wrPar.getWrapperMCTS_epsFinal()) / maxGameNum;
+    }
+
+    public boolean instantiateAfterLoading() {
+        super.instantiateAfterLoading();
+        setWrParams(this.m_wrPar,this.getMaxGameNum());
+        return true;
+    }
+
+    public void adjustEpsilon() {
+        m_epsilon = m_epsilon - m_epsilonChangeDelta;   // linear decrease of m_epsilon
     }
 
 }

@@ -67,7 +67,7 @@ public class MTrain {
 	public double userValue1;
 	public double userValue2;
 	//DecimalFormat frm1 = new DecimalFormat("#0.0000");
-	static String sep = ", ";
+	static String sep = "; ";
 
 	// --- never used ---
 //	MTrain(int i, int gameNum, double evalQ, double evalT, /*double evalM,*/
@@ -117,8 +117,9 @@ public class MTrain {
 	 * @param ar		needed for game name and {@code subdir}
 	 * @param userTitle1	title of 1st user column
 	 * @param userTitle2	title of 2nd user column
+	 * @return the filename
 	 */
-	public static void printMultiTrainList(String csvName, ArrayList<MTrain> mtList, PlayAgent pa, Arena ar,
+	public static String printMultiTrainList(String csvName, ArrayList<MTrain> mtList, PlayAgent pa, Arena ar,
 			String userTitle1, String userTitle2){
 		PrintWriter mtWriter = null;
 		String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+ar.getGameName();
@@ -149,9 +150,11 @@ public class MTrain {
 		}
 		
 		if (mtWriter!=null) {
+			String agtFile = (pa.getAgentFile()==null)?"Unknown":pa.getAgentFile();
 			mtWriter.println(pa.stringDescr());		
 			mtWriter.println(pa.stringDescr2());
-			
+			mtWriter.println("from: "+agtFile);
+
 			mtWriter.println("run"+sep+"gameNum"+sep+"evalQ"+sep+"evalT"+sep+"actionNum"+sep
 					+"trnMoves"+sep+"totalTrainSec"+sep+"movesSecond"+sep+userTitle1+sep+userTitle2);
 			for (MTrain mTrain : mtList) {
@@ -159,8 +162,10 @@ public class MTrain {
 			}
 
 		    mtWriter.close();
+			return strDir+"/"+csvName;
 		} else {
 			System.out.print("*** Warning *** Could not write "+strDir+"/"+csvName+".");
+			return null;
 		}
 	}
 

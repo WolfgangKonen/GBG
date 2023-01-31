@@ -28,11 +28,11 @@ public class HumanPlayer extends AgentBase implements PlayAgent
 		return null;
 	}
 
-	@Override
-	public double getScore(StateObservation sob) {
-		// dummy stub
-		return 0;
-	}
+//	@Override
+//	public double getScore(StateObservation sob) {
+//		// dummy stub
+//		return 0;
+//	}
 
 	public boolean isTrainable() {
 		return false; 	

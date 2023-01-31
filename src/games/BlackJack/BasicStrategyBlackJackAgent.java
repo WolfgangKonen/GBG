@@ -24,7 +24,7 @@ public class BasicStrategyBlackJackAgent extends AgentBase implements PlayAgent 
      * <p>
      * A game-specific Black Jack agent using the Basic Strategy {@link BasicStrategyChart}
      * to chose his actions, therefore playing "perfect".
-     * <p>
+     *
      * @see MCAgentConfig
      * @see RandomSearch
      * @see ParMC

@@ -1,0 +1,4 @@
+TDNTuple4Agt: USESYM:false, nSym:0, P:12, NORMALIZE:false, sigmoid:none, lambda:0.0, horizon:1, AFTERSTATE:false, learnFromRM: true
+TDNTuple4Agt: alpha_init->final:0.25->0.25, eps_init->final:0.0->0.0, gamma: 1.0, random 120 7-tuple, evalQ: 1, evalT: -1, stepRew: -0.04, rewPos: 1.0
+from: TCL4-p13-ET16-3000k-120-7t-stub.agt.zip
+run; gameNum; evalQ; evalT; actionNum; trnMoves; totalTrainSec; movesSecond; ; 

@@ -2,10 +2,7 @@ package games.RubiksCube;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 import controllers.TD.ntuple4.Sarsa4Agt;
 import controllers.TD.ntuple4.TDNTuple4Agt;
@@ -14,9 +11,7 @@ import games.StateObsWithBoardVector;
 import games.StateObservation;
 import games.XNTupleBase;
 import games.XNTupleFuncs;
-import games.RubiksCube.ColorTrafoMap.ColMapType;
 import games.RubiksCube.CubeConfig.BoardVecType;
-import games.RubiksCube.CubeStateMap.CsMapType;
 
 /**
  * Implementation of methods needed for the n-tuple interface {@link XNTupleFuncs}
@@ -24,8 +19,9 @@ import games.RubiksCube.CubeStateMap.CsMapType;
  */
 public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Serializable {
 
-	private final CubeStateMap hmRots = new CubeStateMap(CsMapType.AllWholeCubeRotTrafos);
-	private final ColorTrafoMap hmCols = new ColorTrafoMap(ColMapType.AllColorTrafos);
+	// --- deprecated, we use CubeStateMap.allWholeCubeRots ---
+//	private final CubeStateMap hmRots = new CubeStateMap(CsMapType.AllWholeCubeRotTrafos);
+//	private final ColorTrafoMap hmCols = new ColorTrafoMap(ColMapType.AllColorTrafos);
 
 	/**
 	 * change the version ID for serialization only if a newer version is no longer
@@ -44,7 +40,7 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	 */
 	@Override
 	public int getNumCells() {
-		return switch (CubeConfig.cubeType) {
+		return switch (CubeConfig.cubeSize) {
 			case POCKET -> this.getNumCells2x2();
 			case RUBIKS -> this.getNumCells3x3();
 		};
@@ -60,7 +56,7 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	 */
 	@Override
 	public int getNumPositionValues() {
-		return switch (CubeConfig.cubeType) {
+		return switch (CubeConfig.cubeSize) {
 			case POCKET -> this.getNumPositionValues2x2();
 			case RUBIKS -> this.getNumPositionValues3x3();
 		};
@@ -74,7 +70,7 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	 */
 	@Override
 	public int[] getPositionValuesVector(){
-		return switch (CubeConfig.cubeType) {
+		return switch (CubeConfig.cubeSize) {
 			case POCKET -> this.getPositionValuesVector2x2();
 			case RUBIKS -> this.getPositionValuesVector3x3();
 		};
@@ -110,38 +106,74 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 
 	/**
 	 * Given a board vector from {@link #getBoardVector(StateObservation)} and given that the
-	 * game has s symmetries, return an array which holds s symmetric board vectors: <ul>
+	 * game has s symmetries, return an array which holds n &le; s symmetric board vectors: <ul>
 	 * <li> the first row {@code boardArray[0]} is the board vector itself
 	 * <li> the other rows are the board vectors when transforming {@code boardVector}
-	 * 		according to the s-1 other symmetries.
+	 * 		according to n-1 other symmetries.
 	 * </ul>
-	 * In the case of the cube we have s=24 color symmetries (6 places 1st color * 4 places 2nd color)
+	 * In the case of the cube we have at most s=24 color symmetries (6 places 1st color * 4 places 2nd color).
+	 * If n &lt; 24, we select id plus (n-1) out of the 23 non-id trafos, randomly selected.
 	 *
 	 * @param curSOWB a state with its board vector
-	 * @return a vector of board vectors
+	 * @param n number of symmetry vectors to return (n=0 meaning 'all')
+	 * @return a vector {@code equiv} of board vectors
 	 */
 	@Override
 	public BoardVector[] symmetryVectors(StateObsWithBoardVector curSOWB, int n) {
 		StateObserverCube so = (StateObserverCube) curSOWB.getStateObservation();
 		CubeState cS1 = so.getCubeState();
-		int i=0;
-		boolean doAssert=true;
+		boolean doAssert=false;		// if true, do assertion checks on color trafo (slower!)
 		BoardVector[] equiv;
-		HashSet<CubeState> set = new HashSet<>();
+
 		//
-		// calculate all color-symmetric states for cS1, collect
-		// in 'set' only the truly different CubeStates
-		CubeStateMap mapColSymm = hmCols.applyColSymm(cS1,hmRots);
-		if (doAssert) assert(mapColSymm.countYgrHomeStates()==mapColSymm.size()) :
-				"not all color-symmetric states have ygr 'home'!";
-		for (Map.Entry<Integer, CubeState> entry : mapColSymm.entrySet()) {
-			set.add(entry.getValue());
+		// select a set of n ColorTrafo objects (or all, if n==0)
+		//
+		ColorTrafoMap allCT = ColorTrafoMap.allCT;
+		ColorTrafoMap myMap = new ColorTrafoMap();
+		assert (n>=0);
+		if (n>0) {
+			myMap.put(0, allCT.get(0));			// put in any case the identity trafo (yielding the state itself)
+			if (n>1) {
+				int nmax = (n <= allCT.size()) ? n-1 : (allCT.size()-1);
+				List<Integer> list = new ArrayList<Integer>();
+				for (int k = 1; k < allCT.size(); k++) list.add(k);
+				java.util.Collections.shuffle(list);
+				for (int k = 0; k < nmax; k++)  myMap.put(list.get(k), allCT.get(list.get(k)));
+			}									// the last line picks nmax random color trafos NOT being 'id'
+		} else {
+			myMap = allCT;						// take all color trafos, if n==0
 		}
 
-		// once we have the truly different CubeStates in 'set',
-		// create and fill 'equiv' accordingly:
-		equiv = new BoardVector[set.size()];
-		for (CubeState cs : set) {
+		CubeStateMap mapColSymm = cS1.applyCT(myMap,doAssert);
+
+// DEPRECATED, use cS1.applyCT	instead
+//		//
+//		// calculate all color-symmetric states for cS1, collect
+//		// in 'set' only the truly different CubeStates
+//		CubeStateMap mapColSymm = hmCols.applyColSymm(cS1,hmRots);
+//		HashSet<CubeState> set = new HashSet<>();
+//		if (doAssert && CubeConfig.cubeSize == CubeConfig.CubeSize.POCKET)
+//			assert(mapColSymm.countYgrHomeStates()==mapColSymm.size()) :
+//				"not all color-symmetric states have ygr 'home'!";
+//		for (Map.Entry<Integer, CubeState> entry : mapColSymm.entrySet()) {
+//			set.add(entry.getValue());
+//		}
+//
+//		// once we have the truly different CubeStates in 'set',
+//		// create and fill 'equiv' accordingly:
+//		equiv = new BoardVector[set.size()];
+//		for (CubeState cs : set) {
+//			equiv[i++] = cs.getBoardVector();
+//		}
+
+		// fill 'equiv'  with all states found in mapColSymm:
+		// (we take here all and not only the distinct ones, because empirically there are in many cases 24 distinct
+		// states for a cube states being more than 5 twists away from the solved cube. See DistinctColorTrafos in
+		// test/games/RubiksCube for the precise numbers
+		equiv = new BoardVector[mapColSymm.size()];
+		int i=0;
+		for (Map.Entry<Integer, CubeState> entry : mapColSymm.entrySet()) {
+			CubeState cs = entry.getValue();
 			equiv[i++] = cs.getBoardVector();
 		}
 
@@ -150,43 +182,47 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 
 	/**
 	 * Given a board vector from {@link #getBoardVector(StateObservation)} and given that the
-	 * game has s symmetries, return an array which holds s symmetric board vectors: <ul>
+	 * game has s symmetries, return an array which holds n &le; s symmetric board vectors: <ul>
 	 * <li> the first row {@code boardArray[0]} is the board vector itself
 	 * <li> the other rows are the board vectors when transforming {@code boardVector}
 	 * 		according to the s-1 other symmetries.
 	 * </ul>
-	 * In the case of the cube we have s=24 color symmetries (6 places 1st color * 4 places 2nd color)
+	 * In the case of the cube we have at most s=24 color symmetries (6 places 1st color * 4 places 2nd color)
 	 *
 	 * @param boardVector the board vector
+	 * @param n number of symmetry vectors to return (n=0 meaning 'all')
 	 * @return boardArray
 	 */
 	@Override
 	@Deprecated
 	public BoardVector[] symmetryVectors(BoardVector boardVector, int n) {
-		CubeStateFactory csFactory = new CubeStateFactory();
-		int i=0;
-		boolean doAssert=true;
-		BoardVector[] equiv;
-		CubeState cS1 = csFactory.makeCubeState(boardVector);
-		HashSet<CubeState> set = new HashSet<>();
-		//
-		// calculate all color-symmetric states for cS1, collect
-		// in 'set' only the truly different CubeStates
-		CubeStateMap mapColSymm = hmCols.applyColSymm(cS1,hmRots);
-		if (doAssert) assert(mapColSymm.countYgrHomeStates()==mapColSymm.size()) :
-				"not all color-symmetric states have ygr 'home'!";
-		for (Map.Entry<Integer, CubeState> entry : mapColSymm.entrySet()) {
-			set.add(entry.getValue());
-		}
-
-		// once we have the truly different CubeStates in 'set',
-		// create and fill 'equiv' accordingly:
-		equiv = new BoardVector[set.size()];
-		for (CubeState cs : set) {
-			equiv[i++] = cs.getBoardVector();
-		}
-
-		return equiv;
+		throw new RuntimeException("Not implemented for XNTupleFuncsCube");
+// OLD and DEPRECATED:
+//		CubeStateFactory csFactory = new CubeStateFactory();
+//		int i=0;
+//		boolean doAssert=true;
+//		BoardVector[] equiv;
+//		CubeState cS1 = csFactory.makeCubeState(boardVector);
+//		HashSet<CubeState> set = new HashSet<>();
+//		//
+//		// calculate all color-symmetric states for cS1, collect
+//		// in 'set' only the truly different CubeStates
+//		CubeStateMap mapColSymm = hmCols.applyColSymm(cS1,hmRots);
+//		if (doAssert && CubeConfig.cubeSize == CubeConfig.CubeSize.POCKET)
+//			assert(mapColSymm.countYgrHomeStates()==mapColSymm.size()) :
+//				"not all color-symmetric states have ygr 'home'!";
+//		for (Map.Entry<Integer, CubeState> entry : mapColSymm.entrySet()) {
+//			set.add(entry.getValue());
+//		}
+//
+//		// once we have the truly different CubeStates in 'set',
+//		// create and fill 'equiv' accordingly:
+//		equiv = new BoardVector[set.size()];
+//		for (CubeState cs : set) {
+//			equiv[i++] = cs.getBoardVector();
+//		}
+//
+//		return equiv;
 	}
 
 	/**
@@ -219,7 +255,7 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	 */
 	@Override
 	public int[][] fixedNTuples(int mode) {
-		return switch (CubeConfig.cubeType) {
+		return switch (CubeConfig.cubeSize) {
 			case POCKET -> this.fixedNTuples2x2(mode);
 			case RUBIKS -> this.fixedNTuples3x3(mode);
 		};
@@ -245,7 +281,7 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	 * Return all neighbors of cell {@code iCell} in the board vector.
 	 */
 	public HashSet<Integer> adjacencySet(int iCell) {
-		return switch (CubeConfig.cubeType) {
+		return switch (CubeConfig.cubeSize) {
 			case POCKET -> adjacencySet2x2(iCell);
 			case RUBIKS -> adjacencySet3x3(iCell);
 		};
@@ -298,7 +334,7 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	}
 
 	private int[][] fixedNTuples2x2(int mode) {
-		// Examples for some n-tuples in case CubeConfig.cubeType==POCKET:
+		// Examples for some n-tuples in case CubeConfig.cubeSize==POCKET:
 		switch (mode) {
 			case 0:
 				switch(CubeConfig.boardVecType) {
@@ -415,17 +451,20 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	}
 
 	/**
-	 * Return all neighbors of {@code iCell} for the 2x2x2 pocket cube.
+	 * Return all neighbors (adjacent cells) of {@code iCell} for the 2x2x2 pocket cube.
 	 * <p>
-	 * If {@link CubeConfig#boardVecType}{@code  =CUBESTATE, CUBEPLUSACTION}:  See {@link CubeState}
-	 * for board coding. 4-point-neighborhoods on the cube with wrap-around.
-	 * <p>
-	 * If {@link CubeConfig#boardVecType}{@code  =STICKER}: Adjacency set on the 7x7 stickers board:
-	 * All cells from the next row, except the cell in the same column as {@code iCell}, are in the adjacency set.
-	 * See {@link CubeState#getBoardVector()} for the stickers board coding.
+	 * This is, depending on {@link CubeConfig#boardVecType}:
+	 * <ul>
+	 *     <li><strong>{@code CUBESTATE, CUBEPLUSACTION}</strong>: See {@link CubeState}
+	 * 	for board coding. 4-point-neighborhoods on the cube with wrap-around.
+	 *     <li><strong>{@code STICKER}</strong>: Adjacency set on the 7x7 stickers board:
+	 * 	 All cells from the next row, except the cell in the same column as {@code iCell}, are in the adjacency set.
+	 * 	 See {@link CubeState#getBoardVector()} for the stickers board coding.
+	 *     <li><strong>{@code STICKER2}</strong>: All cells different from {@code iCell}.
+	 * </ul>
 	 *
 	 * @param iCell	the board cell for which we want the set of adjacent cells
-	 * @return a set of all cells adjacent to {@code iCell} (referring to the coding in
+	 * @return a set of numbers for all cells adjacent to {@code iCell} (referring to the coding in
 	 * 		a board vector)
 	 */
 	private HashSet<Integer> adjacencySet2x2(int iCell) {
@@ -567,19 +606,34 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 
 	private int[][] fixedNTuples3x3(int mode) {
 		// TODO:
-		throw new RuntimeException("[XNTupleFuncsCube::fixedNTuples3x3] Not yet implemented!");
+		throw new RuntimeException("[XNTupleFuncsCube::fixedNTuples3x3]: Not yet implemented!");
 	}
 
+	/**
+	 * Return all neighbors (adjacent cells) of {@code iCell} for the 2x2x2 pocket cube.
+	 * <p>
+	 * This is, depending on {@link CubeConfig#boardVecType}:
+	 * <ul>
+	 *     <li><strong>{@code CUBESTATE, CUBEPLUSACTION}</strong>: -- not yet implemented --
+	 *     <li><strong>{@code STICKER}</strong>: -- not yet implemented --
+	 *     <li><strong>{@code STICKER2}</strong>: For {@code iCell} in {0,...,15} (corner): all other cells in {0,...,15}.
+	 *     For {@code iCell} in {16,...,39} (edge): all other cells in {16,...,39}.
+	 * </ul>
+	 *
+	 * @param iCell	the board cell for which we want the set of adjacent cells
+	 * @return a set of numbers for all cells adjacent to {@code iCell} (referring to the coding in
+	 * 		a board vector)
+	 */
 	private HashSet<Integer> adjacencySet3x3(int iCell) {
 		HashSet<Integer> adjSet = new HashSet<>();
 		switch (CubeConfig.boardVecType) {
 			case CUBESTATE:
 			case CUBEPLUSACTION:
 				// TODO:
-				throw new RuntimeException("[adjacencySet3x3] Case CUBESTATE Not yet implemented!");
+				throw new RuntimeException("[XNTupleFuncsCube::adjacencySet3x3], case CUBESTATE: Not yet implemented!");
 			case STICKER:
 				// TODO:
-				throw new RuntimeException("[XNTupleFuncsCube::adjacencySet3x3] Not yet implemented!");
+				throw new RuntimeException("[XNTupleFuncsCube::adjacencySet3x3], case STICKER: Not yet implemented!");
 			case STICKER2:
 				if (iCell<16) {
 					for (int k=0; k<16; k++) {

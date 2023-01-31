@@ -916,7 +916,7 @@ abstract public class TicTDBase  extends AgentBase implements Serializable {
 			int table[][] = new int[3][3];
 			int player = stringToTable(S_old, table);		// reconstruct player & table
 			StateObserverTTT so = new StateObserverTTT(table,player);
-			double score = referee.getScore(so);
+			double score = referee.getScoreTuple(so,null).scTup[so.getPlayer()];
 			sc = new ScoreC(0,score);
 		}
 		sc.counter++;		// each pass through add_hm_state increments the counter for S_old

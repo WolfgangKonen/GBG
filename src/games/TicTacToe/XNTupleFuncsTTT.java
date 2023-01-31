@@ -1,5 +1,6 @@
 package games.TicTacToe;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.HashSet;
 
@@ -20,17 +21,17 @@ public class XNTupleFuncsTTT extends XNTupleBase implements XNTupleFuncs, Serial
      * [We need this strange number here, because serialVersionUID was not present before, 
      * and the so far stored agents had this automatically created serialVersionUID.]
      */
+	@Serial
     private static final long serialVersionUID = 7556763505414386566L;
     
-    private int[] actionVector = {0,1,2,3,4,5,6,7,8};
-    private transient BoardVector[] newplace;
-    private int[][] actionArray;
+    private final int[][] actionArray;
 
     public XNTupleFuncsTTT() {
     	// calculate actionArray[][]: for a given action with key j, the element
     	// actionArray[i][j] holds the equivalent action when the state is transformed to 
     	// equiv[i] = symmetryVectors(int[] boardVector)[i]
-    	newplace = symmetryVectors(new BoardVector(actionVector),0);
+		int[] actionVector = {0,1,2,3,4,5,6,7,8};
+		BoardVector[] newplace = symmetryVectors(new BoardVector(actionVector),0);
     	actionArray = new int[8][];
     	for (int i=0; i<actionArray.length; i++) {
     		actionArray[i] = new int[9];
@@ -114,15 +115,14 @@ public class XNTupleFuncsTTT extends XNTupleBase implements XNTupleFuncs, Serial
 	 * </ul>
 	 * In the case of TicTacToe we have s=8 symmetries (4 board rotations * 2 board flips)
 	 * 
-	 * @param boardVector
+	 * @param boardVector a certain board in vector representation
 	 * @param n number of symmetry vectors to return (n=0 meaning 'all')
 	 * @return vecOfBvecs
 	 */
 	@Override
 	public BoardVector[] symmetryVectors(BoardVector boardVector, int n) {
 		int i;
-		BoardVector[] equiv = null;
-		equiv = new BoardVector[8];
+		BoardVector[] equiv = new BoardVector[8];
 		equiv[0] = boardVector;
 		for (i = 1; i < 4; i++)
 			equiv[i] = rotate(equiv[i - 1]);
@@ -145,8 +145,8 @@ public class XNTupleFuncsTTT extends XNTupleBase implements XNTupleFuncs, Serial
 	 * @return <b>equivAction</b>
 	 * 				array of the equivalent actions' keys. 
 	 * <p>
-	 * equivAction[i] is the key of the action in the i'th equivalent board vector equiv[i], 
-	 * which is equivalent to actionKey in equiv[0]. <br>
+	 * If actionKey is the key of a certain action in board equiv[0], then equivAction[i] is the key of the equivalent
+	 * action in the i'th equivalent board vector equiv[i]. <br>
 	 * Here, equiv[i] = {@link #symmetryVectors(BoardVector, int)}{@code [i]}.
 	 */
 	public int[] symmetryActions(int actionKey) {
@@ -212,7 +212,7 @@ public class XNTupleFuncsTTT extends XNTupleBase implements XNTupleFuncs, Serial
 				+ "</html>";
 	}
 
-    private static int[] fixedModes = {1,2};
+    private static final int[] fixedModes = {1,2};
     
 	public int[] fixedNTupleModesAvailable() {
 		return fixedModes;
@@ -223,11 +223,11 @@ public class XNTupleFuncsTTT extends XNTupleBase implements XNTupleFuncs, Serial
 	 * Return all neighbors of {@code iCell}. See {@link #getBoardVector(StateObservation)} 
 	 * for board coding.
 	 * 
-	 * @param iCell
+	 * @param iCell cell index
 	 * @return a set of all cells adjacent to {@code iCell} (referring to the coding in 
 	 * 		a board vector) 
 	 */
-	public HashSet adjacencySet(int iCell) {
+	public HashSet<Integer> adjacencySet(int iCell) {
 		int[] aList = new int[4];			// 4-point neighborhood
 		int count=0;
 		
@@ -249,15 +249,15 @@ public class XNTupleFuncsTTT extends XNTupleBase implements XNTupleFuncs, Serial
 //		// bList: the real neighbors of iCell (may be 2,3, or 4
 //		int[] bList = new int[count];
 //		for (int i=0; i<count; i++) bList[i]=aList[i];
-		
-		HashSet adjSet = new HashSet();
+
+		HashSet<Integer> adjSet = new HashSet<>();
 		for (int i=0; i<count; i++) adjSet.add(aList[i]);
 		
 		return adjSet;
 	}
 
 	/**
-	 * Helper for {@link #symmetryVectors(int[])}: 
+	 * Helper for {@link #symmetryVectors(BoardVector, int)}:
 	 * Rotate the given board clockwise by 90 degree. <p>
 	 * 
 	 * The board is represented as a 9-element int vector:
@@ -266,8 +266,8 @@ public class XNTupleFuncsTTT extends XNTupleBase implements XNTupleFuncs, Serial
 	 *    3 4 5   --->   7 4 1   
 	 *    6 7 8          8 5 2
 	 * </pre>
-	 * 
-	 * @param board
+	 *
+	 * @param boardVector a certain board
 	 * @return the rotated board
 	 */
 	private BoardVector rotate(BoardVector boardVector) {
@@ -283,7 +283,7 @@ public class XNTupleFuncsTTT extends XNTupleBase implements XNTupleFuncs, Serial
 	}
 
 	/**
-	 * Helper for {@link #symmetryVectors(int[])}: 
+	 * Helper for {@link #symmetryVectors(BoardVector, int)}:
 	 * Flip the board around the center row. <p>
 	 * 
 	 * The board is represented as a 9-element int vector:
@@ -292,8 +292,8 @@ public class XNTupleFuncsTTT extends XNTupleBase implements XNTupleFuncs, Serial
 	 *    3 4 5   --->   3 4 5   
 	 *    6 7 8          0 1 2
 	 * </pre>
-	 * 
-	 * @param board
+	 *
+	 * @param boardVector a certain board
 	 * @return the mirrored board
 	 */
 	private BoardVector flip(BoardVector boardVector) {

@@ -34,7 +34,7 @@ public class GameBoardGuiEWN extends JFrame {
     private int SelectedTokenPos;
 
     public GameBoardGuiEWN(GameBoardEWN gb){
-        super("Einstein Wuerfelt Nicht");
+        super("Einstein Wuerfelt Nicht!");
         this.m_gb = gb;
         this.selecting = true;
         this.vGameState = new double[ConfigEWN.BOARD_SIZE*ConfigEWN.BOARD_SIZE][3];
@@ -42,7 +42,7 @@ public class GameBoardGuiEWN extends JFrame {
         this.setLayout(new BorderLayout());
         this.boardGui = new BoardGui(gb,so);
         this.add(boardGui,BorderLayout.CENTER);
-        this.legend  = new LegendGui(so.getNumPlayers() ,so.getNextNondeterministicAction().toInt());
+        this.legend  = new LegendGui(so.getNumPlayers() ,so.getNextNondeterministicAction().toInt(), this);
         this.add(legend,BorderLayout.NORTH);
         this.initErrorMessage();
         this.add(errorMessage, BorderLayout.SOUTH);

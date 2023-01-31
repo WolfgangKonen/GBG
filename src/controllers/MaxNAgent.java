@@ -242,18 +242,18 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
     	return sc;
 	}
 	
-	/**
-	 * Return the agent's score for that after state.
-	 * @param sob			the current game state;
-	 * @return				the probability that the player to move wins from that 
-	 * 						state. If game is over: the score for the player who 
-	 * 						*would* move (if the game were not over).
-	 * Each player wants to maximize its score	 
-	 */
-	@Override
-	public double getScore(StateObservation sob) {
-		return getAllScores(sob,sob,0, null).scTup[sob.getPlayer()];
-	}
+//	/**
+//	 * Return the agent's score for that after state.
+//	 * @param sob			the current game state;
+//	 * @return				the probability that the player to move wins from that
+//	 * 						state. If game is over: the score for the player who
+//	 * 						*would* move (if the game were not over).
+//	 * Each player wants to maximize its score
+//	 */
+//	@Override
+//	public double getScore(StateObservation sob) {
+//		return getAllScores(sob,sob,0, null).scTup[sob.getPlayer()];
+//	}
 	@Override
 	public ScoreTuple getScoreTuple(StateObservation sob, ScoreTuple prevTuple) {
 		return getAllScores(sob,sob,0, null);

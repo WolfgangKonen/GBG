@@ -2,20 +2,19 @@ package params;
 
 import java.awt.BorderLayout;
 import java.awt.Button;
-import java.awt.Canvas;
 import java.awt.Checkbox;
 import java.awt.Frame;
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.Serial;
 
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import controllers.PlayAgent.AgentState;
 import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.Arena;
@@ -37,7 +36,7 @@ import games.RubiksCube.GameBoardCube;
  * <li><b>EpiLength Eval</b>: During evaluation: Maximum number of moves in an episode. 
  * If reached, this episode terminates prematurely. -1: never terminate.
  * <li><b>stopTest</b>: [ 0] whether to perform the stop test during training.
- * If {@literal> 0}, then m_evaluator2 is checked during training whether its
+ * If {@literal > 0}, then m_evaluator2 is checked during training whether its
  * goal is reached
  * <li><b>Wrapper nPly</b>: [0] if &gt; 0, wrap the agent in an (Expecti)Max-N wrapper with
  * n plies of look-ahead. CAUTION: n &gt; 5 can dramatically slow down computation. 
@@ -47,20 +46,19 @@ import games.RubiksCube.GameBoardCube;
  * <li><b>Learn from RM</b>: [false] whether to learn from random moves or not
  * </ul>
  * 
- * @see TDAgent
- * @see TDNTuple3Agt
  * @see games.XArenaButtons
  */
 // Deprecated meaning of stopEval:
 // <li><b>stopEval</b>: [100] During training: How many successful evaluator
 // calls are needed to stop training prematurely?
 public class OtherParams extends Frame {
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	JLabel evalQ_L;
-	public JComboBox choiceEvalQ;
+	public JComboBox<String> choiceEvalQ;
 	JLabel evalT_L;
-	public JComboBox choiceEvalT;
+	public JComboBox<String> choiceEvalT;
 
 	JLabel numEval_L;
 	JLabel epiLeng_L;
@@ -70,31 +68,33 @@ public class OtherParams extends Frame {
 	JLabel learnRM_L;
 	JLabel rgs_L;
 	JLabel wNply_L;
-	JLabel wMCTS_L;
+	JLabel wMCTSiter_L;
 	JLabel wMCTSpUCT_L;
 	JLabel wMCTSdepth_L;
 	JLabel pMin_L;
 	JLabel pMax_L;
 	JLabel rBuf_L;
+	JLabel aState_L;
 	public JTextField numEval_T;
 	public JTextField epiLeng_T;
 	public JTextField stopTest_T;
 	public JTextField stopEval_T;
 	public JTextField wNply_T;
-	public JTextField wMCTS_T;
+	public JTextField wMCTSiter_T;
 	public JTextField wMCTSpUCT_T;
 	public JTextField wMCTSdepth_T;
 	public JTextField pMin_T;
 	public JTextField pMax_T;
 	public Checkbox chooseS01;
 	public Checkbox learnRM;
-	public Checkbox replayBuf;
 	public Checkbox rewardIsGameScore;
+	public Checkbox replayBuf;
+	public JLabel agentState;
 
 	Button ok;
 	JPanel oPanel;
 	OtherParams m_par;
-	Arena m_arena;
+	Arena m_arena;			// needed to infer the game name
 
 	public OtherParams(Arena m_arena) {
 		super("Other Parameter");
@@ -102,16 +102,16 @@ public class OtherParams extends Frame {
 		this.m_arena = m_arena;
 
 		evalQ_L = new JLabel("Quick Eval Mode");
-		this.choiceEvalQ = new JComboBox();
+		this.choiceEvalQ = new JComboBox<>();
 		evalT_L = new JLabel("Train Eval Mode");
-		this.choiceEvalT = new JComboBox();
+		this.choiceEvalT = new JComboBox<>();
 
 		numEval_T = new JTextField("500"); 	//
 		epiLeng_T = new JTextField("-1"); 	//
 		stopTest_T = new JTextField("0"); 	//
 		stopEval_T = new JTextField("-1"); 	// the defaults
 		wNply_T = new JTextField("0"); 		//
-		wMCTS_T = new JTextField("0"); 		//
+		wMCTSiter_T = new JTextField("0"); 		//
 		wMCTSpUCT_T = new JTextField("1"); 		//
 		wMCTSdepth_T = new JTextField("-1"); 		//
 		pMin_T = new JTextField("1");		//
@@ -124,22 +124,23 @@ public class OtherParams extends Frame {
 		learnRM_L = new JLabel("Learn from RM");
 		rgs_L = new JLabel("Reward = Score");
 		wNply_L = new JLabel("Wrapper nPly");
-		wMCTS_L = new JLabel("Wrapper MCTS");
+		wMCTSiter_L = new JLabel("Wrapper MCTS");
 		wMCTSpUCT_L = new JLabel("PUCT for WrapM");
 		wMCTSdepth_L = new JLabel("Depth for WrapM");
 		pMin_L = new JLabel("pMin");
 		pMax_L = new JLabel("pMax");
 		rBuf_L = new JLabel("Replay buffer");
+		aState_L = new JLabel("Agent state");
 		chooseS01 = new Checkbox("", false);
 		learnRM = new Checkbox("", false);
 		replayBuf = new Checkbox("", false);
+		agentState = new JLabel("");
 		rewardIsGameScore = new Checkbox("", true);
 		ok = new Button("OK");
 		m_par = this;
-		oPanel = new JPanel(); // put the inner buttons into panel oPanel. This
-								// panel
+		oPanel = new JPanel();  // put the inner buttons into panel oPanel. This panel
 								// can be handed over to a tab of a JTabbedPane
-								// (see class TicTacToeTabs)
+								// (see class XArenaTabs)
 
 		evalQ_L.setToolTipText("'Quick Evaluation' evaluator has this mode");
 		evalT_L.setToolTipText(
@@ -154,9 +155,9 @@ public class OtherParams extends Frame {
 		learnRM_L.setToolTipText("Learn from random moves during training");
 		rgs_L.setToolTipText("Use game score as reward (def.) or use some other, game specific reward");
 		wNply_L.setToolTipText(
-				"Wrapper n-ply look ahead (for play, compete, eval). CAUTION: Numbers >5 can take VERY long!");
-		wMCTS_L.setToolTipText(
-				"Wrapper MCTS look ahead (for play, compete, eval)");
+				"<html>Wrapper n-ply look ahead <br>(for play, compete, eval). <br>CAUTION: Numbers >5 can take long!</html>");
+		wMCTSiter_L.setToolTipText(
+				"<html>Wrapper MCTS iterations <br>(for play, compete, eval tasks)</html>");
 		wMCTSpUCT_L.setToolTipText("PUCT value for MCTS Wrapper");
 		wMCTSdepth_L.setToolTipText("max depth value for MCTS Wrapper. -1: no max depth");
 		pMin_L.setToolTipText(
@@ -169,45 +170,30 @@ public class OtherParams extends Frame {
 		// this.setQuickEvalMode(0);
 		// this.setTrainEvalMode(0);
 
-		ok.addActionListener(new ActionListener()
-			{
-				public void actionPerformed(ActionEvent e) {
-					m_par.setVisible(false);
-				}
-			});
 
-		wMCTS_T.addActionListener(new ActionListener()
-				 {
-					 public void actionPerformed(ActionEvent e)
-					 {
-						 enableWrapMCTSPart();
-					 }
-				 }
-		);
+		// the following lambda's, where e is an ActionEvent, are a simpler replacement for anonymous action listeners:
+
+		ok.addActionListener( e -> m_par.setVisible(false) );
+		wMCTSiter_T.addActionListener(e -> enableWrapMCTSPart() );
 
 		// only for RubiksCube:
-		pMin_T.addActionListener(new ActionListener()
-				 {
-					 public void actionPerformed(ActionEvent e)
-					 {
-						 //if pMin is changed by user, set the corresponding element in GameBoardCubeGUI
-						 if (m_arena.getGameBoard() instanceof GameBoardCube) {
-							 ((GameBoardCube)m_arena.getGameBoard()).setPMin(getpMinRubiks());
-						 }
-					 }
-				 }
-		);
-		pMax_T.addActionListener(new ActionListener()
+		pMin_T.addActionListener( e ->
 				{
-					public void actionPerformed(ActionEvent e)
-					{	
-						//if pMax is changed by user, set the corresponding element in GameBoardCubeGUI
-						if (m_arena.getGameBoard() instanceof GameBoardCube) {
-							((GameBoardCube)m_arena.getGameBoard()).setPMax(getpMaxRubiks());
-						}
-					}
+					//if pMin is changed by user, set the corresponding element in GameBoardCubeGUI
+					if (m_arena.getGameBoard() instanceof GameBoardCube) {
+						((GameBoardCube)m_arena.getGameBoard()).setPMin(getpMinRubiks());
 				}
+		}
 		);
+		pMax_T.addActionListener(e ->
+				{
+					//if pMax is changed by user, set the corresponding element in GameBoardCubeGUI
+					if (m_arena.getGameBoard() instanceof GameBoardCube) {
+						((GameBoardCube)m_arena.getGameBoard()).setPMax(getpMaxRubiks());
+				}
+		}
+		);
+
 
 		replayBuf.addItemListener(new ItemListener()
 				{
@@ -237,8 +223,8 @@ public class OtherParams extends Frame {
 		oPanel.add(stopEval_L);
 		oPanel.add(stopEval_T);
 
-		oPanel.add(wMCTS_L);
-		oPanel.add(wMCTS_T);
+		oPanel.add(wMCTSiter_L);
+		oPanel.add(wMCTSiter_T);
 
 		oPanel.add(wMCTSpUCT_L);
 		oPanel.add(wMCTSpUCT_T);
@@ -264,15 +250,15 @@ public class OtherParams extends Frame {
 			oPanel.add(learnRM);
 		}
 
-		oPanel.add(rgs_L);
-		oPanel.add(rewardIsGameScore);
 		if (m_arena.getGameName().equals("RubiksCube")) {
 			oPanel.add(rBuf_L);
 			oPanel.add(replayBuf);
 		} else {
-			oPanel.add(new Canvas());
-			oPanel.add(new Canvas());
+			oPanel.add(rgs_L);
+			oPanel.add(rewardIsGameScore);
 		}
+		oPanel.add(aState_L);
+		oPanel.add(agentState);
 
 		add(oPanel, BorderLayout.CENTER);
 		add(ok, BorderLayout.SOUTH);
@@ -280,6 +266,7 @@ public class OtherParams extends Frame {
 		pack();
 		setVisible(false);
 
+		enableWrapNPlyPart();
 		enableWrapMCTSPart();
 		enableStopTest(false);			// stop test is now deprecated
 
@@ -301,17 +288,20 @@ public class OtherParams extends Frame {
 	}
 
 	private void enableWrapMCTSPart() {
-		if(this.getWrapperMCTSIterations()>0){
-			wMCTSdepth_L.setEnabled(true);
-			wMCTSdepth_T.setEnabled(true);
-			wMCTSpUCT_L.setEnabled(true);
-			wMCTSpUCT_T.setEnabled(true);
-		} else {
-			wMCTSdepth_L.setEnabled(false);
-			wMCTSdepth_T.setEnabled(false);
-			wMCTSpUCT_L.setEnabled(false);
-			wMCTSpUCT_T.setEnabled(false);
-		}
+		//boolean enable = getWrapperMCTSIterations()>0;	// old version, before WrapperParams
+		boolean enable = false;				// always disable, we use now WrapperParams
+		wMCTSdepth_L.setEnabled(enable);
+		wMCTSdepth_T.setEnabled(enable);
+		wMCTSpUCT_L.setEnabled(enable);
+		wMCTSpUCT_T.setEnabled(enable);
+		wMCTSiter_L.setEnabled(enable);		// this is for the
+		wMCTSiter_T.setEnabled(enable);		// disable-always case
+	}
+
+	private void enableWrapNPlyPart() {
+		boolean enable = false;				// always disable, we use now WrapperParams
+		wNply_L.setEnabled(enable);
+		wNply_T.setEnabled(enable);
 	}
 
 
@@ -325,7 +315,7 @@ public class OtherParams extends Frame {
 		if (s == null)
 			return 0; 	// return a dummy, if choiceEvalQ is empty (happens in
 					  	// case of 'new OtherParams()')
-		return Integer.valueOf(s).intValue();
+		return Integer.parseInt(s);
 	}
 
 	public int getTrainEvalMode() {
@@ -333,29 +323,29 @@ public class OtherParams extends Frame {
 		if (s == null)
 			return 0; 	// return a dummy, if choiceEvalT is empty (happens in
 						// case of 'new OtherParams()')
-		return Integer.valueOf(s).intValue();
+		return Integer.parseInt(s);
 	}
 
 	public int getStopTest() {
-		return Integer.valueOf(stopTest_T.getText()).intValue();
+		return Integer.parseInt(stopTest_T.getText());
 	}
 
 	public int getStopEval() {
-		int elen = Integer.valueOf(stopEval_T.getText()).intValue();
+		int elen = Integer.parseInt(stopEval_T.getText());
 		if (elen == -1)	elen = Integer.MAX_VALUE;
 		return elen;
 	}
 
 	public int getNumEval() {
-		return Integer.valueOf(numEval_T.getText()).intValue();
+		return Integer.parseInt(numEval_T.getText());
 	}
 
 	public int getWrapperNPly() {
-		return Integer.valueOf(wNply_T.getText()).intValue();
+		return Integer.parseInt(wNply_T.getText());
 	}
 
 	public int getWrapperMCTSIterations() {
-		return Integer.parseInt(wMCTS_T.getText());
+		return Integer.parseInt(wMCTSiter_T.getText());
 	}
 
 	public double getWrapperMCTS_PUCT() {
@@ -363,15 +353,15 @@ public class OtherParams extends Frame {
 	}
 
 	public int getWrapperMCTS_depth() {
-		return Integer.valueOf(wMCTSdepth_T.getText());
+		return Integer.parseInt(wMCTSdepth_T.getText());
 	}
 
 	public int getpMinRubiks() {
-		return Integer.valueOf(pMin_T.getText()).intValue();
+		return Integer.parseInt(pMin_T.getText());
 	}
 
 	public int getpMaxRubiks() {
-		return Integer.valueOf(pMax_T.getText()).intValue();
+		return Integer.parseInt(pMax_T.getText());
 	}
 
 	public boolean getReplayBuffer() {
@@ -384,7 +374,7 @@ public class OtherParams extends Frame {
 	}
 
 	public int getEpisodeLength() {
-		int elen = Integer.valueOf(epiLeng_T.getText()).intValue();
+		int elen = Integer.parseInt(epiLeng_T.getText());
 		if (elen == -1)	elen = Integer.MAX_VALUE;
 		return elen;
 	}
@@ -399,6 +389,17 @@ public class OtherParams extends Frame {
 
 	public boolean getRewardIsGameScore() {
 		return rewardIsGameScore.getState();
+	}
+
+	public AgentState getAgentState() {
+		AgentState as =
+				switch(agentState.getText()) {
+					case "RAW","" -> AgentState.RAW;
+					case "INIT" -> AgentState.INIT;
+					case "TRAINED" -> AgentState.TRAINED;
+					default -> throw new IllegalStateException("Unexpected value: " + agentState.getText());
+				};
+		return as;
 	}
 
 	public void setQuickEvalMode(int qEvalmode) {
@@ -454,7 +455,7 @@ public class OtherParams extends Frame {
 	}
 
 	public void setWrapperMCTSIterations(final int value) {
-		wMCTS_T.setText(value + "");
+		wMCTSiter_T.setText(value + "");
 	}
 
 	public void setWrapperMCTS_PUCT(final double value) {
@@ -494,6 +495,14 @@ public class OtherParams extends Frame {
 		rewardIsGameScore.setState(bRGS);
 	}
 
+	public void setAgentState(AgentState as) {
+		switch (as) {
+			case RAW -> agentState.setText("RAW");
+			case INIT -> agentState.setText("INIT");
+			case TRAINED -> agentState.setText("TRAINED");
+		}
+	}
+
 	/**
 	 * Needed to restore the param tab with the parameters from a re-loaded
 	 * agent
@@ -502,12 +511,15 @@ public class OtherParams extends Frame {
 	 *            ParOther of the re-loaded agent
 	 */
 	public void setFrom(ParOther op) {
+		int elen;
 		this.setQuickEvalMode(op.getQuickEvalMode());
 		this.setTrainEvalMode(op.getTrainEvalMode());
 		this.setNumEval(op.getNumEval());
-		this.setEpisodeLength(op.getEpisodeLength());
+		elen = (op.getEpisodeLength()==Integer.MAX_VALUE) ? -1 : op.getEpisodeLength();
+		this.setEpisodeLength(elen);
+		elen = (op.getStopEval()==Integer.MAX_VALUE) ? -1 : op.getStopEval();
+		this.setStopEval(elen);
 		this.setStopTest(op.getStopTest());
-		this.setStopEval(op.getStopEval());
 		this.setWrapperNPly(op.getWrapperNPly());
 		this.setWrapperMCTSIterations(op.getWrapperMCTSIterations());
 		this.setWrapperMCTS_PUCT(op.getWrapperMCTS_PUCT());
@@ -518,6 +530,7 @@ public class OtherParams extends Frame {
 		this.learnRM.setState(op.getLearnFromRM());
 		this.replayBuf.setState(op.getReplayBuffer());
 		this.rewardIsGameScore.setState(op.getRewardIsGameScore());
+		this.setAgentState(op.getAgentState());
 
 		// only for RubiksCube:
 		// if pMax is changed via fillParamTabsAfterLoading, set also the corresponding element in GameBoardCubeGUI
@@ -526,6 +539,7 @@ public class OtherParams extends Frame {
 			((GameBoardCube)m_arena.getGameBoard()).setPMax(getpMaxRubiks());
 		}
 
+		enableWrapNPlyPart();
 		enableWrapMCTSPart();
 
 	}

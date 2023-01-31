@@ -49,11 +49,6 @@ public class BoardGui extends JPanel {
         return board;
     }
 
-
-    public GameBoardEWN getGameBoardEWS(){
-        return this.m_gb;
-    }
-
     public void selectToken(int x, int y){
         board[x][y].markAsSelected();
     }
@@ -109,7 +104,7 @@ public class BoardGui extends JPanel {
         this.from = u;
    }
 
-    public GameBoardEWN getM_gb(){
+   public GameBoardEWN getM_gb(){
         return m_gb;
     }
 }

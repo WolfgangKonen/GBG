@@ -3,7 +3,7 @@ package games.RubiksCube;
 import controllers.PlayAgent;
 import games.*;
 import games.RubiksCube.CubeConfig.BoardVecType;
-import games.RubiksCube.CubeConfig.CubeType;
+import games.RubiksCube.CubeConfig.CubeSize;
 import games.RubiksCube.CubeConfig.TwistType;
 
 /**
@@ -26,14 +26,20 @@ public class ArenaCube extends Arena   {
 
 	public ArenaCube(String title, boolean withUI) {
 		super(title,withUI);
-		CubeStateFactory.generateInverseTs();
-		CubeState.generateForwardTs();
+		initialize();
 	}
 
 	public ArenaCube(String title, boolean withUI, boolean withTrainRights) {
 		super(title,withUI,withTrainRights);
+		initialize();
+	}
+
+	private void initialize() {
 		CubeStateFactory.generateInverseTs();
 		CubeState.generateForwardTs();
+		CubeStateMap.allWholeCubeRots = new CubeStateMap(CubeStateMap.CsMapType.AllWholeCubeRotTrafos);
+		ColorTrafoMap allCT = new ColorTrafoMap(ColorTrafoMap.ColMapType.AllColorTrafos);
+		// we need to recalculate allWholeCubeRots and allCT (in case that CubeConfig.cubeSize has changed (!))
 	}
 
 	/**
@@ -53,12 +59,16 @@ public class ArenaCube extends Arena   {
 	@Override
 	public GameBoard makeGameBoard() {
 		CubeStateFactory.generateInverseTs();	// since makeGameBoard is called via super --> Arena
-		CubeState.generateForwardTs();			// prior to finishing ArenaTrainCube(String,boolean)
+		CubeState.generateForwardTs();			// prior to finishing ArenaCube(String,boolean)
 		gb = new GameBoardCube(this);
 
-		// optional, to print out invU and invL, given invF:
-//		CubeStateFactory csfactory = new CubeStateFactory();
-//		csfactory.makeCubeState().show_invF_invL_invU();		// once to print out the arrays needed for invL and invU (see CubeState3x3)
+		// optional debug info: print out invU and invL, given invF:
+		boolean SHOW_INV = false;
+		if (SHOW_INV) {
+			CubeStateFactory csfactory = new CubeStateFactory();
+			csfactory.makeCubeState().show_invF_invL_invU();
+			// once to print out the arrays needed for invL and invU (see CubeState2x2, CubeState3x3)
+		}
 
 		return gb;
 	}
@@ -91,12 +101,15 @@ public class ArenaCube extends Arena   {
     /**
      * set the cube type (POCKET or RUBIKS) for Rubik's Cube
      */
-    public static void setCubeType(String sCube) {
+    public static void setCubeSize(String sCube) {
 		switch (sCube) {
-			case "2x2x2" -> CubeConfig.cubeType = CubeType.POCKET;
-			case "3x3x3" -> CubeConfig.cubeType = CubeType.RUBIKS;
+			case "2x2x2" -> CubeConfig.cubeSize = CubeSize.POCKET;
+			case "3x3x3" -> CubeConfig.cubeSize = CubeSize.RUBIKS;
 			default -> throw new RuntimeException("Cube type " + sCube + " is not known.");
 		}
+		CubeStateMap.allWholeCubeRots = new CubeStateMap(CubeStateMap.CsMapType.AllWholeCubeRotTrafos);
+		ColorTrafoMap allCT = new ColorTrafoMap(ColorTrafoMap.ColMapType.AllColorTrafos);
+		// we need to recalculate allWholeCubeRots and allCT if CubeConfig.cubeSize has changed
     }
 
     /**
@@ -113,7 +126,7 @@ public class ArenaCube extends Arena   {
     }
 
     /**
-     * set the twist type (ALLTWISTS or QUARTERTWISTS) for Rubik's Cube
+     * set the twist type (HTM = half-turn metric or QTM = quarter-turn metric) for Rubik's Cube
      */
     public static void setTwistType(String tCube) {
 		switch (tCube) {
@@ -123,21 +136,4 @@ public class ArenaCube extends Arena   {
 		}
     }
 
-    // *** ArenaCube is now started via GBGLaunch or GBGBatch
-//	/**
-//	 * Start GBG for Rubik's Cube
-//	 *
-//	 * @param args
-//	 */
-//	public static void main(String[] args)
-//	{
-//		ArenaCube t_Frame = new ArenaCube("General Board Game Playing",true);
-//
-//		if (args.length==0) {
-//			t_Frame.init();
-//		} else {
-//			throw new RuntimeException("[ArenaCube.main] args="+args+" not allowed. Use batch facility.");
-//		}
-//	}
-	
 }

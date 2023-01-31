@@ -258,7 +258,29 @@ public class GBGLaunch extends SetupGBG {
 					}
 				}	
 		);
-		
+
+		choiceScaPar0.addActionListener(
+				new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						selectedGame = (String)choiceGame.getSelectedItem();
+						if (selectedGame!=null) {
+							if (selectedGame.equals("Nim")) {
+								String heapSize = (String)choiceScaPar1.getSelectedItem();
+								try {
+									int iHeapSize = Integer.parseInt(heapSize);
+									if (iHeapSize == -1) {			// the triangle-shaped sizes for the Ludii case
+										choiceScaPar2.setSelectedItem(choiceScaPar0.getSelectedItem());
+									}
+								} catch(NumberFormatException ne) {
+									// do nothing, if heapSize is not number
+								}
+							}
+						}
+					}
+				}
+		);
 		choiceScaPar1.addActionListener(
 				new ActionListener()
 				{
@@ -268,12 +290,23 @@ public class GBGLaunch extends SetupGBG {
 						if (selectedGame!=null) {
 							if (selectedGame.equals("Nim")) {
 								String heapSize = (String)choiceScaPar1.getSelectedItem();
-								assert heapSize!=null : "heapSize is null!";
+								//assert heapSize!=null : "heapSize is null!";
+								// /WK/ commented assertion out, it would fire right after the selection of game "Nim",
+								// where choiceScaPar1 is still empty
 								int iHeapSize = Integer.parseInt(heapSize);
 								choiceScaPar2.removeAllItems();
-								if (iHeapSize==3) {
+								if (iHeapSize == -1) {			// the triangle-shaped sizes for the Ludii case
+									setScaPar0List(new int[]{3,5,7,9,11});
+									setScaPar2List(new int[]{3,5,7,9,11});
+									choiceScaPar0.setSelectedItem("5");		// the initial (recommended) values
+									choiceScaPar2.setSelectedItem("5");		// the initial (recommended) values
+								} else if (iHeapSize==3) {
+									setScaPar0List(new int[]{2,3,4,5});
+									choiceScaPar0.setSelectedItem("3");		// the initial (recommended) values
 									setScaPar2List(new int[]{2,3});
 								} else {
+									setScaPar0List(new int[]{2,3,4,5});
+									choiceScaPar0.setSelectedItem("3");		// the initial (recommended) values
 									setScaPar2List(new int[]{2,3,4,5});
 									if (iHeapSize>5) choiceScaPar2.addItem(heapSize);
 								}
@@ -320,12 +353,14 @@ public class GBGLaunch extends SetupGBG {
 			scaPar0_L.setText("Heaps");
 			scaPar1_L.setText("Heap Size");
 			setScaPar0List(new int[]{2,3,4,5});				// int values are converted to 
-			setScaPar1List(new int[]{3,5,6,7,8,9,10,20,50});// Strings in ChoiceBoxes 
+			setScaPar1List(new int[]{-1,3,5,6,7,8,9,10,20,50});// Strings in ChoiceBoxes
 			choiceScaPar0.setSelectedItem("3");		// 
 			choiceScaPar1.setSelectedItem("5");		// the initial (recommended) values
 			if (selectedGame.equals("Nim")) {
 				scaPar2_L.setText("Max Minus");
-				setScaPar2List(new int[]{2,3,4,5});			
+				setScaPar0List(new int[]{2,3,4,5});
+				choiceScaPar0.setSelectedItem("3");
+				setScaPar2List(new int[]{2,3,4,5});
 				choiceScaPar2.setSelectedItem("5");					
 			} else { // i.e. "Nim3P"
 				scaPar2_L.setText("Extra Rule");
@@ -353,8 +388,7 @@ public class GBGLaunch extends SetupGBG {
 			scaPar2_L.setText("Twist Type");
 			scaPar0_L.setToolTipText("Pocket Cube or Rubik's Cube");
 			scaPar1_L.setToolTipText("Type of board vectors (only n-tuple agents)");
-			scaPar2_L.setToolTipText("<html>Type of twists: half-turn metric (HTM) <br>" +
-					"or quarter-turn metric (QTM)</html>");
+			scaPar2_L.setToolTipText("Type of twists (all or only quarter)");
 			//setScaPar0List(new int[]{});
 			//setScaPar1List(new int[]{});
 			//setScaPar2List(new int[]{});
@@ -362,16 +396,16 @@ public class GBGLaunch extends SetupGBG {
 			setScaPar1List(new String[]{"CSTATE","CPLUS","STICKER","STICKER2"});
 			setScaPar2List(new String[]{"HTM","QTM"});
 			//choiceScaPar0.addItem("3x3x3");
-			choiceScaPar0.setSelectedItem("2x2x2");			//
+			choiceScaPar0.setSelectedItem("3x3x3");			//
 			choiceScaPar1.setSelectedItem("STICKER2");		// the initial (recommended) values
 			choiceScaPar2.setSelectedItem("QTM");			//
 			break;
 		case "EWN":
 			scaPar0_L.setText("Settings:");
-			setScaPar0List(new String[]{"3x3 2-Player", "5x5 2-Player","4x4 2-Player","6x6 3-Player", "4x4 4-Player","6x6 4-Player"});
+			setScaPar0List(new String[]{"3x3 2-Player", "4x4 2-Player","5x5 2-Player","6x6 3-Player", "4x4 4-Player","6x6 4-Player"});
 			choiceScaPar0.setSelectedItem("3x3 2-Player");
 			scaPar1_L.setText("Position values:");
-			setScaPar1List(new String[]{"[0,..,n]", "[0,1],[2,3],[4,5]"});
+			setScaPar1List(new String[]{"[0,..,n]", "[0,1],[2,3],[4,5]","[0],[1],[2],[3],[4],[5]"});
 			choiceScaPar1.setSelectedItem("[0,..,n]");
 			scaPar2_L.setText("Random starting:");
 			setScaPar2List(new String[]{"True", "False"});
@@ -469,3 +503,4 @@ public class GBGLaunch extends SetupGBG {
 	}
 
 }
+

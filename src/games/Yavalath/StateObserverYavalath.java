@@ -99,14 +99,11 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
     @Override
     public ArrayList<Types.ACTIONS> getAllAvailableActions() {
         ArrayList<Types.ACTIONS> allActions = new ArrayList<>();
-        for(int i = 0; i< getMaxRowLength(); i++){
-            for(int j = 0; j< getMaxRowLength(); j++){
-                if(Math.abs(j-i)< getBoardSize()){
-                    int actionInt = i* getMaxRowLength() +j;
-                    allActions.add(new Types.ACTIONS(actionInt));
-                }
-            }
+
+        for (int i = 0; i < CELLS; i++) {
+            allActions.add(new Types.ACTIONS(i));
         }
+
         return allActions;
     }
 
@@ -142,14 +139,14 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
             for(int j = 0; j< getMaxRowLength(); j++){
                 if(Math.abs(j-i)< getBoardSize() && board[i][j].getPlayer() == EMPTY){
                     int actionInt = i* getMaxRowLength() +j;
-                    availableActions.add(new Types.ACTIONS(actionInt));
+                    availableActions.add(getActionFromTileValue(actionInt));
                     }
                 }
             }
             //If only the first piece has been placed, swap rule is available and the just executed action needs to be added to
             //the list of available actions again
         if(getMoveCounter()==1 && numPlayers == 2){
-            availableActions.add(new Types.ACTIONS(moveList.get(0).getX()* getMaxRowLength() +moveList.get(0).getY()));
+            availableActions.add(getActionFromTileValue(moveList.get(0).getX()* getMaxRowLength() +moveList.get(0).getY()));
         }
 
     }
@@ -165,7 +162,7 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
     @Override
     public void advance(Types.ACTIONS action) {
         this.advanceBase(action);
-        int actionInt = action.toInt();
+        int actionInt = getTileValueFromAction(action);
 
         int j = actionInt % getMaxRowLength();
         int i = (actionInt-j) / getMaxRowLength();
@@ -182,7 +179,6 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
         moveList.add(0, board[i][j]);
         super.addToLastMoves(action);
         super.incrementMoveCounter();
-
         setAvailableActions();
         Types.WINNER info = UtilityFunctionsYavalath.getWinner(this);
         if(info != null){
@@ -407,7 +403,8 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
         for(int i=0;i<getNumAvailableActions();i++){
             double value = valueTable[i];
             int actionInt = getAction(i).toInt();
-            int y = actionInt% getMaxRowLength(), x= (actionInt-y)/ getMaxRowLength();
+            int boardValue = ConfigYavalath.getTileValueFromAction(new Types.ACTIONS(actionInt));
+            int y = boardValue% getMaxRowLength(), x= (boardValue-y)/ getMaxRowLength();
             board[x][y].setValue(value);
         }
     }

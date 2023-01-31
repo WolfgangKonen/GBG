@@ -1,15 +1,17 @@
 #
 # **** These are Nov'2021 results with TDNTuple4Agt on Othello. 
-#      TCL-wrap: 10 wrapped agents   
+#      TCL-wrap: 20 wrapped agents   
 #         multiTrain/TCL4-100_7_250k-lam05_P4_nPly2-FAm_A_0*.agt.zip with *=0,1,...,9
 #      with MCTSWrapper and 10.000 iterations in each move
-#      TCL-base: the same 10 agents, but no wrapper
+#      TCL-base: the same 20 agents, but no wrapper
 #      MCTS-i10k: MCTS with 10.000 iterations, but no TCL
 # ****
 #
 # This script shows that TCL-wrap is clearly better than either TCL-base or MCTS-i10k.
 # 
 # TCL-wrap results are obtained with EPS=+1e-8.
+# 
+# April'22: removed errorbars
 # 
 library(ggplot2)
 library(grid)
@@ -30,7 +32,7 @@ filenames=c(#"multiTrainOthello-10Agents.csv"
 )
 pdffile=#"MCTSWrap-TCL10.pdf"
         #"MCTSWrap-TCL10-2.pdf"
-        "MCTSWrap-TCL20.pdf"
+        "MCTSWrap-TCL20.R1.pdf"
         
   
 dfAll = data.frame()
@@ -61,7 +63,7 @@ tgc <- tgc[tgc$EPS==1e-8,]
 
 
 q <- ggplot(tgc,aes(x=dEdax,y=winrate,colour=agentGroup,shape=agentGroup)) #,linetype=agentGroup))
-q <- q+geom_errorbar(aes(ymin=winrate-se, ymax=winrate+se), width=errWidth) #, position=pd)
+#q <- q+geom_errorbar(aes(ymin=winrate-se, ymax=winrate+se), width=errWidth) #, position=pd)
 #q <- q+labs(title="MCTSWrap(TCL) vs. Edax")
 #q <- q+geom_line(position=pd,size=1.0) + geom_point(position=pd,size=2.0) 
 q <- q+geom_line(size=1.0) + geom_point(size=3.0)

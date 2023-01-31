@@ -87,9 +87,10 @@ public class MCTSExpectimaxAgt extends AgentBase implements PlayAgent
 	 * 
 	 * @see Arena#loadAgent
 	 */
-	public void fillParamTabsAfterLoading(int n, Arena m_arena) { 
+	public void fillParamTabsAfterLoading(int n, Arena m_arena) {
+		super.fillParamTabsAfterLoading(n, m_arena);
 		m_arena.m_xab.setMctseParFrom(n, this.getParMCTSE() );
-		m_arena.m_xab.setOParFrom(n, this.getParOther() );
+		//m_arena.m_xab.setOParFrom(n, this.getParOther() ); // now in super
 	}
 	
     /**
@@ -203,31 +204,31 @@ public class MCTSExpectimaxAgt extends AgentBase implements PlayAgent
 
 
 
-	/**
-	 * Get the best next action and return its score
-	 *
-	 * @param so 			current game state (not changed on return)
-	 *
-	 * @return				the score of the best action
-	 */
-	public double getScore(StateObservation so) {
-		double[] vtable = new double[so.getNumAvailableActions()+1];
-        double nextActionScore = Double.NEGATIVE_INFINITY;
-
-        if (so.isGameOver()) {
-        	return so.getGameScore(so.getPlayer());
-        } else {
-    		act(so,vtable);
-
-            for (int i = 0; i < so.getNumAvailableActions(); i++) {
-                if (nextActionScore <= vtable[i]) {
-                    nextActionScore = vtable[i];
-                }
-            }
-
-            return nextActionScore;
-        }
-	}
+//	/**
+//	 * Get the best next action and return its score
+//	 *
+//	 * @param so 			current game state (not changed on return)
+//	 *
+//	 * @return				the score of the best action
+//	 */
+//	public double getScore(StateObservation so) {
+//		double[] vtable = new double[so.getNumAvailableActions()+1];
+//        double nextActionScore = Double.NEGATIVE_INFINITY;
+//
+//        if (so.isGameOver()) {
+//        	return so.getGameScore(so.getPlayer());
+//        } else {
+//    		act(so,vtable);
+//
+//            for (int i = 0; i < so.getNumAvailableActions(); i++) {
+//                if (nextActionScore <= vtable[i]) {
+//                    nextActionScore = vtable[i];
+//                }
+//            }
+//
+//            return nextActionScore;
+//        }
+//	}
 
 	public String stringDescr() {
 		String cs = getClass().getName();

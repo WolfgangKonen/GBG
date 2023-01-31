@@ -1,14 +1,15 @@
 package controllers;
 
+import java.io.Serial;
 import java.io.Serializable;
 
-import javax.swing.JOptionPane;
-
-import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.Arena;
+import games.GameBoard;
 import games.StateObservation;
 import params.ParOther;
+import params.ParRB;
+import params.ParWrapper;
 import tools.ScoreTuple;
 import tools.Types;
 
@@ -29,25 +30,25 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	 */
 	private int m_MaxGameNum;
 	private String m_name;
-	private AgentState m_agentState = AgentState.RAW;
+	private final AgentState m_agentState = AgentState.RAW;	// deprecated, use m_oPar.agentState
 	private int epochMax = 0;
 	protected long m_numTrnMoves = 0L;			// moves (calls to getNextAction2) done during training
 	private long durationTrainingMs = 0L;		// total time in ms used for training
 	private long durationEvaluationMs = 0L;		// total time in ms used for evaluation (during training)
-	protected ParOther m_oPar = new ParOther();
+	protected ParOther m_oPar;
+	protected ParWrapper m_wrPar;
+	protected ParRB m_rbPar;					// needed only by trainable agents, but we put it here to have the code
+												// only once
 	public static String EGV_EXCEPTION_TEXT = "Agents derived from AgentBase have to implement this method: estimateGameValueTuple";
 
-	/**
-	 * TODO: Add explanation for stochastic policies
-	 */
-
-	private boolean stochasticPolicy = false;
+//	private boolean stochasticPolicy = false;
 
 	/**
 	 * change the version ID for serialization only if a newer version is no
 	 * longer compatible with an older one (older .agt.zip will become
-	 * unreadable or you have to provide a special version transformation)
+	 * unreadable, or you have to provide a special version transformation)
 	 */
+	@Serial
 	private static final long serialVersionUID = 12L;
 
 	/**
@@ -59,12 +60,21 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	}
 
 	public AgentBase(String name) {
-		m_name = name;
+		this(name, new ParOther(), new ParRB());
 	}
 
 	public AgentBase(String name, ParOther oPar) {
+		this(name, oPar, new ParRB(), new ParWrapper());
+	}
+
+	public AgentBase(String name, ParOther oPar, ParRB rbPar) {
+		this(name, oPar, rbPar, new ParWrapper());
+	}
+	public AgentBase(String name, ParOther oPar, ParRB rbPar, ParWrapper wrPar) {
 		m_name = name;
 		m_oPar = new ParOther(oPar);
+		m_rbPar = new ParRB(rbPar);
+		m_wrPar = new ParWrapper(wrPar);
 	}
 
 	/**
@@ -74,39 +84,23 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	 */
 	 abstract public Types.ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean silent);
 
-	/**
-	 * On the long run, {@link PlayAgent#getScore(StateObservation)} should become deprecated (in favor of
-	 * getScoreTuple). But for the moment, we leave a default implementation in AgentBase, which should
-	 * however be overridden by derived classes. The base implementation just throws an exception.
-	 *
-	 * @param sob
-	 *            the state observation object
-	 * @return the agent's estimate of the game value function
-	 */
-	public double getScore(StateObservation sob) {
-		throw new RuntimeException("AgentBase.getScore has to be overridden by derived classes!");
-	}
+//	/**
+//	 * On the long run, {@link PlayAgent#getScore(StateObservation)} should become deprecated (in favor of
+//	 * {@link PlayAgent#getScoreTuple(StateObservation, ScoreTuple) getScoreTuple}).
+//	 * But for the moment, we leave a default implementation in AgentBase, which should
+//	 * however be overridden by derived classes. The base implementation just throws an exception.
+//	 *
+//	 * @param sob
+//	 *            the state observation object
+//	 * @return the agent's estimate of the game value function
+//	 */
+//	public double getScore(StateObservation sob) {
+//		throw new RuntimeException("AgentBase.getScore has to be overridden by derived classes!");
+//	}
 
 	public ScoreTuple getScoreTuple(StateObservation sob, ScoreTuple prevTuple) {
 		throw new RuntimeException("Agents derived from AgentBase have to implement this method: getScoreTuple");
 	}
-
-//	/**
-//	 * Return the estimated game value for {@link StateObservation} sob. The
-//	 * default behavior is to return {@link #getScore(StateObservation)}.
-//	 * <p>
-//	 *
-//	 * This method is deprecated, use estimateGameValueTuple instead.
-//	 *
-//	 * @param sob
-//	 *            the state observation object
-//	 * @return {@link #getScore(StateObservation)}, that is whatever the derived
-//	 *         class implements for {@link #getScore(StateObservation)}.
-//	 */
-//	@Deprecated
-//	public double estimateGameValue(StateObservation sob) {
-//		return this.estimateGameValueTuple(sob, null).scTup[sob.getPlayer()];
-//	};
 
 	/**
 	 * Return the agent's estimate of {@code sob}'s final game value (final
@@ -114,10 +108,10 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	 * (TD) or maximum tree depth for certain agents (Max-N) is reached.
 	 * 
 	 * <b>Important note</b>: Derived classes that use this method
-	 * inside {@code getScore(so)} or {@code getScoreTuple(so,...)}
+	 * inside {@code getScoreTuple(so,...)}
 	 * (e.g. Max-N, MC or MCTS when reaching the predefined rollout depth)
 	 * have to <b>override</b> this function with a function <b>not</b> using
-	 * {@code getScore(so)} or {@code getScoreTuple(so,...)}, otherwise an
+	 * {@code getScoreTuple(so,...)}, otherwise an
 	 * infinite loop would result.
 	 *
 	 * @param sob
@@ -131,13 +125,22 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	}
 
 	public AgentState getAgentState() {
-		return m_agentState;
+		return m_oPar.getAgentState();
+	}
+
+	public String getAgentFile() {
+		return m_oPar.getAgentFile();
+	}
+
+	public void setAgentFile(String aFile) {
+		m_oPar.setAgentFile(aFile);
 	}
 
 	public void setAgentState(AgentState aState) {
-		m_agentState = aState;
+		m_oPar.setAgentState(aState);
 	}
-	public void resetAgent() { ; }
+
+	public void resetAgent() {  }
 
 	public String getName() {
 		return m_name;
@@ -162,7 +165,16 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	public long getDurationEvaluationMs() {
 		return this.durationEvaluationMs;
 	}
-	
+
+	@Override
+	public boolean isWrapper() { return false; }
+
+	/**
+	 * @return {@code this} for unwrapped agents (that is, agents not overriding this method)
+	 */
+	@Override
+	public PlayAgent getWrappedPlayAgent() { return this; }
+
 	/**
 	 * @see #trainAgent(StateObservation)
 	 */
@@ -185,8 +197,30 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	 * @param so		the state from which the episode is played 
 	 * @return			true, if agent raised a stop condition (only CMAPlayer)
 	 */
-    @Override
+	@Override
 	public boolean trainAgent(StateObservation so) {
+    	return trainAgent(so,this);
+	}
+
+	/**
+	 * 'Train' the agent for one complete game episode. This base training is valid for <b>all</b> agents
+	 * except {@link HumanPlayer}), whether they are truly adaptable or not. Its purpose is
+	 * to measure <b>moves/second</b> and/or to evaluate an agent multiple times during self-play.
+	 * It is no real training, since the agent itself is not modified.
+	 * <p>
+	 * Side effects: Increment m_GameNum and {@code acting_pa}'s gameNum by +1.
+	 * <p>
+	 * This method is used by the wrappers: They call it with {@code this} being the wrapped agent (it has the internal
+	 * parameters) and {@code acting_pa} being the wrapper.
+	 *
+	 * @param so		the state from which the episode is played (usually the
+	 * 					return value of {@link GameBoard#chooseStartState(PlayAgent)} to get
+	 * 					some exploration of different game paths)
+	 * @param acting_pa the agent to be called when an action is requested ({@code getNextAction2})
+	 * @return			true, if agent raised a stop condition (only CMAPlayer - deprecated)
+	 */
+	@Override
+	public boolean trainAgent(StateObservation so, PlayAgent acting_pa) {
 		Types.ACTIONS  a_t;
 		StateObservation s_t = so.copy();
 		boolean m_finished=false;
@@ -198,7 +232,7 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	        m_numTrnMoves++;		// number of train moves
 			moveCounter++;
 	        
-			a_t = getNextAction2(s_t.partialState(), true, true);	// choose action a_t (agent-specific behavior)
+			a_t = acting_pa.getNextAction2(s_t.partialState(), true, true);	// choose action a_t (agent-specific behavior)
 			s_t.advance(a_t);		// advance the state (game-specific behavior)
 
 			if(s_t.isRoundOver()&&!s_t.isGameOver()&&s_t.isRoundBasedGame())
@@ -208,6 +242,7 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 		} while(!m_finished);
 
 		incrementGameNum();
+		acting_pa.setGameNum(this.getGameNum());
 		if (this.getGameNum() % 100 == 0) {
 			System.err.println("[AgentBase.trainAgent] WARNING: only dummy training (for time measurements)");
 		}
@@ -235,13 +270,33 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	}
 
     @Override
-	public boolean instantiateAfterLoading() { 
-		return true; 	// dummy stub, see LoadSaveTD.saveTDAgent
+	public boolean instantiateAfterLoading() {		// needed by LoadSaveTD.saveTDAgent
+		// older agents may have only this.m_agentState set:
+		if (this.m_agentState!=null && m_oPar.getAgentState()==null)
+			m_oPar.setAgentState(this.m_agentState);
+
+		// older agents may not have the wrapper depth parameter, so it is 0. Set it in this case to -1:
+		if (this.getParOther().getWrapperMCTS_depth()==0) this.getParOther().setWrapperMCTS_depth(-1);
+		// older agents may not have the wrapper p_UCT parameter, so it is 0. Set it in this case to 1.0:
+		if (this.getParOther().getWrapperMCTS_PUCT()==0) this.getParOther().setWrapperMCTS_PUCT(1.0);
+		// older agents may not have the agent state, so it is null. Set it to TRAINED:
+		if (this.getParOther().getAgentState()==null) this.getParOther().setAgentState(AgentState.TRAINED);
+
+		// older agents may not have ParWrapper. If so, set a default ParWrapper and copy the wrapper params
+		// from ParOther over to it.
+		if (this.getParWrapper()==null) {
+			this.setDefaultParWrapper(getParOther());
+		}
+
+		return true;
 	}
 	
     @Override
-	public void fillParamTabsAfterLoading(int n, Arena m_arena) { 
-		; 				// dummy stub, see XArenaMenu.loadAgent
+	public void fillParamTabsAfterLoading(int n, Arena m_arena) {
+		setWrapperParamsOfromWr(this.getParWrapper());
+		m_arena.m_xab.setOParFrom(n, this.getParOther() );
+		m_arena.m_xab.setWrapperParFrom(n, this.getParWrapper());
+		m_arena.m_xab.setRBParFrom(n, this.getParReplay());
 	}
 	
     @Override
@@ -275,12 +330,14 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 
     @Override
 	public long getNumLrnActions() {
-		return m_numTrnMoves; // dummy stub for agents which are not trainable
+		if (isWrapper()) return getWrappedPlayAgent().getNumLrnActions();
+		return m_numTrnMoves; // dummy stub for agents which are no wrapper and do not override this method
 	}
 
     @Override
 	public long getNumTrnMoves() {
-		return m_numTrnMoves;
+		if (isWrapper()) return getWrappedPlayAgent().getNumTrnMoves();
+		return m_numTrnMoves; // dummy stub for agents which are no wrapper and do not override this method
 	}
 
     @Override
@@ -289,8 +346,7 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	}
 
 	/**
-	 * @return During training: Call the Evaluator after this number of training
-	 *         games
+	 * @return During training: Call the Evaluator after this number of training games
 	 */
     @Override
 	public int getNumEval() {
@@ -307,37 +363,108 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 		m_oPar.setStopEval(num);
 	}
 
+	/**
+	 * Set the wrapper part + stopEval in {@link ParOther} m_oPar from {@code otherPar}
+	 * (needed to store {@link ParOther} from environment in the agent)
+	 */
     @Override
-	public void setWrapperParams(ParOther otherPar) {
+	public void setWrapperParamsO(ParOther otherPar) {
 		m_oPar.setWrapperNPly(otherPar.getWrapperNPly());
 		m_oPar.setWrapperMCTS_PUCT(otherPar.getWrapperMCTS_PUCT());
 		m_oPar.setWrapperMCTS_depth(otherPar.getWrapperMCTS_depth());
 		m_oPar.setWrapperMCTSIterations(otherPar.getWrapperMCTSIterations());
+		m_oPar.setStopEval(otherPar.getStopEval());
 	}
 
-    @Override
-	public ParOther getParOther() {
-		return m_oPar;
+	/**
+	 * Just for safety, make the wrapper params in {@link ParOther} m_oPar the same as the
+	 * wrapper params in {@link ParWrapper} wrPar. Should be obsolete in principle, because we do not
+	 * use any longer the wrapper params in {@link ParOther}. But we keep them for some time to be able
+	 * to load older agents.
+	 * @param wrPar wrapper params
+	 */
+	@Override
+	public void setWrapperParamsOfromWr(ParWrapper wrPar) {
+		m_oPar.setWrapperNPly(wrPar.getWrapperNPly());
+		m_oPar.setWrapperMCTS_PUCT(wrPar.getWrapperMCTS_PUCT());
+		m_oPar.setWrapperMCTS_depth(wrPar.getWrapperMCTS_depth());
+		m_oPar.setWrapperMCTSIterations(wrPar.getWrapperMCTS_iterations());
 	}
+
+	@Override
+	public void setParOther(ParOther op) { m_oPar.setFrom(op); 	}
+
+	@Override
+	public void setParReplay(ParRB prb) {
+		m_rbPar.setFrom(prb);
+	}
+
+	@Override
+	public void setParWrapper(ParWrapper pwr) {
+		m_wrPar.setFrom(pwr);
+	}
+
 	/**
 	 * Set defaults for m_oPar (needed in {@link Arena#loadAgent} when
 	 * loading older agents, where m_oPar=null in the saved version).
 	 */
- 	public void setDefaultParOther() {
+	public void setDefaultParOther() {
 		m_oPar = new ParOther();
 	}
 
 	/**
-	 * Check whether pa is a valid (non-null) and trained agent
+	 * Set defaults for m_rbPar (needed in {@link Arena#loadAgent} when
+	 * loading older agents, where m_rbPar=null in the saved version).
+	 */
+	public void setDefaultParReplay() {
+		m_rbPar = new ParRB();
+	}
+
+	/**
+	 * Set defaults for {@code m_wrPar} (called from {@link Arena#loadAgent} and {@link AgentBase#instantiateAfterLoading()} when
+	 * loading older agents, where {@code m_wrPar=null} in the saved version).
+	 * Take over the wrapper parameters from {@link ParOther} {@code oPar} (usually = {@code this.m_oPar}).
+	 */
+	public void setDefaultParWrapper(ParOther oPar) {
+		assert m_wrPar==null : "Oops, m_wrPar is not null!";
+		m_wrPar = new ParWrapper();		// takes over some defaults from ConfigWrapper
+
+		//m_wrPar.setParamDefaults(m_name,gameName); // currently, we do not have gameName here
+
+		// since m_wrPar was null when calling this method, take over wrapper parameters from ParOther oPar
+		m_wrPar.setWrapperNPly(oPar.getWrapperNPly());
+		m_wrPar.setWrapperMCTS_iterations(oPar.getWrapperMCTSIterations());
+		m_wrPar.setWrapperMCTS_PUCT(oPar.getWrapperMCTS_PUCT());
+		m_wrPar.setWrapperMCTS_depth(oPar.getWrapperMCTS_depth());
+
+		if (m_wrPar.getWrapperNPly()>0) m_wrPar.setWrapperMode(1); 				// Max-N wrapper
+		if (m_wrPar.getWrapperMCTS_iterations()>0) m_wrPar.setWrapperMode(2); 	// MCTSWrapperAgent
+
+	}
+
+	@Override
+	public ParOther getParOther() {
+		return m_oPar;
+	}
+	@Override
+	public ParRB getParReplay() {
+		return m_rbPar;
+	}
+	@Override
+	public ParWrapper getParWrapper() {
+		return m_wrPar;
+	}
+
+	/**
+	 * Check whether all agents in paVector are valid (non-null) and trained.
+	 * Otherwise, a RuntimeException is thrown.
 	 * 
 	 * @param paVector
 	 *            vector of all agents in {@link games.Arena}
 	 * @param numPlayers
 	 *            number of players
-	 * @return true, if each agent is valid. Otherwise a RuntimeException is
-	 *         thrown.
 	 */
-	public static boolean validTrainedAgents(PlayAgent[] paVector, int numPlayers) throws RuntimeException {
+	public static void validTrainedAgents(PlayAgent[] paVector, int numPlayers) throws RuntimeException {
 		PlayAgent pa;
 		String nStr;
 		for (int n = 0; n < paVector.length; n++) {
@@ -348,46 +475,35 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 			if (pa == null) {
 				throw new RuntimeException("Cannot execute command. Agent for player " + nStr + " is null!");
 			}
-			if (pa.getAgentState() != AgentState.TRAINED) {
+ 			if (pa.getAgentState() != AgentState.TRAINED) {
 				throw new RuntimeException(
 						"Cannot execute command. Agent " + pa.getName() + " for player " + nStr + " is not trained!");
 			}
 		}
-		return true;
 	}
 
-	// --- not used anywhere ---
-//	/**
-//	 * Check whether pa is a valid (non-null) and trained agent, of the same
-//	 * type as requested by agentName
-//	 *
-//	 * @param pa			the agent to validate
-//	 * @param agentName		the agent's name
-//	 * @param Player		needed for message forming
-//	 * @param arena			where to show message
-//	 * @return				false, if any check fails, otherwise true
-//	 */
-//	public static boolean validTrainedAgent(PlayAgent pa, String agentName, int Player, Arena arena) {
-//		if (pa == null) {
-//			arena.showMessage("Cannot execute command. " + agentName + " is null!",
-//					"Warning", JOptionPane.WARNING_MESSAGE);
-//			return false;
-//		}
-//		if (pa.getAgentState() != AgentState.TRAINED) {
-//			arena.showMessage("Cannot execute command. " + agentName + " is not trained!",
-//					"Warning", JOptionPane.WARNING_MESSAGE);
-//			return false;
-//		}
-//
-//		String pa_string = pa.getClass().getName();
-//		if (agentName.equals("TDS") & !(pa instanceof TDAgent)) {
-//			arena.showMessage(
-//					"Cannot execute command. " + "Current player " + Player + " is not a TDAgent: " + pa_string + ".",
-//					"Warning", JOptionPane.WARNING_MESSAGE);
-//			return false;
-//		}
-//		return true;
-//	}
+	/**
+	 * Check whether pa is a valid (non-null) agent.
+	 * Otherwise, a RuntimeException is thrown.
+	 *
+	 * @param pa
+	 *            vector of all agents in {@link games.Arena}
+	 * @param numPlayers
+	 *            number of players
+	 */
+	public static void validSaveAgent(PlayAgent pa, int n, int numPlayers) throws RuntimeException {
+		String nStr = (numPlayers == 2)
+				?  Types.GUI_2PLAYER_NAME[n]
+				:	Types.GUI_PLAYER_NAME[n];
+		if (pa == null) {
+			throw new RuntimeException("Cannot execute command. Agent for player " + nStr + " is null!");
+		}
+// the check on TRAINED is not wanted here: we want to save agents in state INIT (agent stubs for GitHub)
+//			if (pa.getAgentState() != AgentState.TRAINED) {
+//				throw new RuntimeException(
+//						"Cannot execute command. Agent " + pa.getName() + " for player " + nStr + " is not trained!");
+//			}
+	}
 
 	public int getEpochMax() {
 		return epochMax;
@@ -405,13 +521,14 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 		return getClass().getName() + ":";
 	}
 
-	@Override
-	public boolean isStochastic() {
-		return stochasticPolicy;
-	}
-
-	@Override
-	public void setStochastic(boolean hasStochasticPolicy) {
-		stochasticPolicy = hasStochasticPolicy;
-	}
+	// --- never used ---
+//	@Override
+//	public boolean isStochastic() {
+//		return stochasticPolicy;
+//	}
+//
+//	@Override
+//	public void setStochastic(boolean hasStochasticPolicy) {
+//		stochasticPolicy = hasStochasticPolicy;
+//	}
 }

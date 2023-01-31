@@ -15,19 +15,22 @@ public class NimConfig {
     /**
      * Number of heaps
      */
-    protected static int NUMBER_HEAPS = 3;
+    public static int NUMBER_HEAPS = 3;
 
     /**
-     * Initial heap size (maximum number of items in each heap)
+     * Initial heap size (maximum number of items in each heap).
+     * If == -1, then unique heap structure is used in which HEAP_SIZE == NUMBER_HEAPS for the middle heap and
+     * decreases by 1 on each side.
+     * (e.g. for NUMBER_HEAPS == 5, heap structure would be (3 4 5 4 3))
      */
-    protected static int HEAP_SIZE = 5; // 50
+    public static int HEAP_SIZE = 5; // 50
 
     /**
      * Maximum number of items to subtract ('minus') from a heap in one move.
      * May not be bigger than {@link #HEAP_SIZE}. If == {@link #HEAP_SIZE}, then each heap can be 
      * cleared in one move.
      */
-    protected static int MAX_MINUS = 3;
+    public static int MAX_MINUS = 3;
 
 	/**
 	 * Only for Nim3P: If true, activate this optional extra rule: In addition to the winner, who gets reward 1: 

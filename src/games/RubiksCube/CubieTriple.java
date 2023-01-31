@@ -2,50 +2,61 @@ package games.RubiksCube;
 
 import java.text.DecimalFormat;
 
-public class CubieTriple {
-	public enum Orientation {COUNTER, CLOCK};
-	int[] loc = new int[3];
-	int[] col = new int[3];
+/**
+ * A representation of a corner cubie
+ */
+abstract public class CubieTriple {
+	public enum Orientation {COUNTER, CLOCK}
+	int[] loc;
+	int[] col;
 	Orientation ori;
-	
+
 	/**
-	 * The ygr-cubie in its default location
+	 * If {@code i} is the sticker location for the y-face of the ygr-cubie, then {@code right[i]} is the sticker location
+	 * for the g-face of the ygr-cubie (marching around the cubie in clockwise orientation).
+	 * And {@code right[right[i]]} is the sticker location of the r-face of the ygr-cubie.
+	 * <p>
+	 * {@code right} is set to {@link CubieTriple2x2#right_P right_P} for the Pocket cube and to
+	 * {@link CubieTriple3x3#right_R right_R} for Rubik's cube.
 	 */
+	public static int[] right= null;
+
+	/**
+	 * If {@code i} is a sticker location, then {@code ccolo[i]} is the default color for this location
+	 */
+	protected static int[] ccolo=null;
+
 	public CubieTriple() {
-		final int[] loc = {12,16,20};
-		final int[] col = {3,4,5};
-		this.loc = loc.clone();
-		this.col = col.clone();
-		this.ori = Orientation.CLOCK;
+		// empty, just a stub for  derived classes
 	}
-	
-	public CubieTriple(int[] loc, int[] col, Orientation ori) {
-		this.loc = loc.clone();
-		this.col = col.clone();
-		this.ori = ori; 
-	}
-	
+
 	public CubieTriple(CubieTriple other) {
 		this.loc = other.loc.clone();
 		this.col = other.col.clone();
 		this.ori = other.ori;
 	}
-	
+
+	protected void initialize(int i) {
+		this.loc = new int[] {i, right[i], right[right[i]]};
+		this.col = new int[] {ccolo[i], ccolo[right[i]], ccolo[right[right[i]]]};
+		this.ori = Orientation.CLOCK;
+	}
+
 	public CubieTriple print() {
-		System.out.println(this.toString());
+		System.out.println(this); // calls toString()
 		return this;
 	}
 	
 	public String toString() {
 		DecimalFormat form = new DecimalFormat("00");
-		String s = "";
-		s = s + "(";
+		StringBuilder sb = new StringBuilder();
+		sb.append("(");
 		for (int i=0;i<3;i++) {
-			s = s + form.format(this.loc[i]);
-			if (i!=2) s = s + ",";
+			sb.append(form.format(this.loc[i]));
+			if (i!=2) sb.append(",");
 		}
-		s = s + ")";
-		return s;
+		sb.append(")");
+		return sb.toString();
 	}
 	
 	@Override

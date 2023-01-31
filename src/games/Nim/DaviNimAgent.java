@@ -193,12 +193,12 @@ public class DaviNimAgent extends AgentBase implements PlayAgent {
 		return false;		
 	} 
 
-	@Override
-	public double getScore(StateObservation so) {
-        assert (so instanceof StateObserverNim3P) : "Not a StateObserverNim3P object";
-        ScoreTuple sc = daviValue((StateObserverNim3P) so);
-		return sc.scTup[so.getPlayer()];
-	}
+//	@Override
+//	public double getScore(StateObservation so) {
+//        assert (so instanceof StateObserverNim3P) : "Not a StateObserverNim3P object";
+//        ScoreTuple sc = daviValue((StateObserverNim3P) so);
+//		return sc.scTup[so.getPlayer()];
+//	}
 
 	@Override
 	public ScoreTuple getScoreTuple(StateObservation so, ScoreTuple prevTuple) {

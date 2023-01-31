@@ -1,20 +1,9 @@
 package starters;
 
 import java.io.*;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Objects;
-
-import controllers.MCTSWrapper.ConfigWrapper;
-import controllers.MCTSWrapper.MCTSWrapperAgent;
-import controllers.MCTSWrapper.stateApproximation.PlayAgentApproximator;
 import controllers.PlayAgent;
-import controllers.PlayAgtVector;
 import games.*;
-import games.Othello.Edax.Edax2;
-import params.ParEdax;
-import tools.Measure;
-import tools.ScoreTuple;
 import tools.Types;
 
 /**
@@ -29,7 +18,7 @@ import tools.Types;
  *  <li> {@code dEdax}: depth parameter Edax2
  *  <li> {@code iterMCTS}: iterations in MCTSWrapperAgent
  *  <li> {@code EPS}: parameter ConfigWrapper.EPS
- *  <li> {@code p_MCTS}: whether MCTSWrapperAgent is player 0 or player 1
+ *  <li> {@code p_MWrap}: whether MCTSWrapperAgent is player 0 or player 1
  *  <li> {@code c_puct}: parameter c_puct in MCTSWrapperAgent
  *  <li> {@code winrate}: win rate MCTSWrapperAgent
  *  <li> {@code userValue1}: <em>not used</em>
@@ -50,8 +39,8 @@ public class MCompeteMWrap {
     public double winrate;
     public double userValue1;
     public double userValue2;
-    public String agtFile="";
-    static String sep = ", ";
+    public String agtFile;
+    static String sep = "; ";
 
     protected Evaluator m_evaluatorQ = null;
     protected Evaluator m_evaluatorT = null;

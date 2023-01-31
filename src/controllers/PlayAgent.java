@@ -7,6 +7,8 @@ import agentIO.LoadSaveGBG;
 import games.Arena;
 import games.Evaluator;
 import games.GameBoard;
+import params.ParRB;
+import params.ParWrapper;
 import tools.ScoreTuple;
 import tools.Types;
 
@@ -62,17 +64,21 @@ public interface PlayAgent {
 	 */
 	Types.ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean silent);
 	
-	/**
-	 * Return the agent's estimate of the final score for that game state.
-	 * @param sob			the current game state;
-	 * @return				the agent's estimate of the final score for that state. 
-	 * 						For 2-player games this is usually the probability 
-	 * 						that the player to move wins from that state.
-	 * 						If game is over: the score for the player who *would*
-	 * 						move (if the game were not over).<p>
-	 * Each player wants to maximize *its* score.	 
-	 */
-	double getScore(StateObservation sob);
+//	/**
+//	 * Return the agent's estimate of the final score for that game state.
+//	 * <p>
+//	 * On the long run, {@link PlayAgent#getScore(StateObservation) getScore(sob)} should become deprecated (in favor of
+//	 * {@link PlayAgent#getScoreTuple(StateObservation, ScoreTuple) getScoreTuple(sob, prevTuple)}).
+//	 *
+//	 * @param sob			the current game state;
+//	 * @return				the agent's estimate of the final score for that state.
+//	 * 						For 2-player games this is usually the probability
+//	 * 						that the player to move wins from that state.
+//	 * 						If game is over: the score for the player who *would*
+//	 * 						move (if the game were not over).<p>
+//	 * Each player wants to maximize *its* score.
+//	 */
+//	double getScore(StateObservation sob);
 
 	/**
 	 * Return the agent's estimate of {@code sob}'s score-to-come  (future reward) <b>for all players</b>.
@@ -130,7 +136,23 @@ public interface PlayAgent {
 	 * @return			true, if agent raised a stop condition (only CMAPlayer - deprecated)	 
 	 */
 	boolean trainAgent(StateObservation so /*, int epiLength, boolean learnFromRM*/);
-	
+
+	/**
+	 * Train the agent for one complete game episode. <p>
+	 * Side effects: Increment m_GameNum and {@code acting_pa}'s gameNum by +1.
+	 * Change the agent's internal parameters (weights and so on).
+	 * <p>
+	 * This method is used by the wrappers: They call it with {@code this} being the wrapped agent (it has the internal
+	 * parameters) and {@code acting_pa} being the wrapper.
+	 *
+	 * @param so		the state from which the episode is played (usually the
+	 * 					return value of {@link GameBoard#chooseStartState(PlayAgent)} to get
+	 * 					some exploration of different game paths)
+	 * @param acting_pa the agent to be called when an action is requested ({@code getNextAction2})
+	 * @return			true, if agent raised a stop condition (only CMAPlayer - deprecated)
+	 */
+	boolean trainAgent(StateObservation so, PlayAgent acting_pa);
+
 	String printTrainStatus();
 	
 	/**
@@ -224,17 +246,26 @@ public interface PlayAgent {
 	void setGameNum(int num);
 	
 	ParOther getParOther();
-	
+	ParRB getParReplay();
+	ParWrapper getParWrapper();
+
 	/**
 	 * @return During training: Call {@link Evaluator} after this number of training games
 	 */
 	int getNumEval();
 	void setNumEval(int num);
 	void setStopEval(int num);
-	void setWrapperParams(ParOther otherPar);
-	
+	void setWrapperParamsO(ParOther otherPar);
+	void setWrapperParamsOfromWr(ParWrapper wrPar);
+	void setParOther(ParOther op);
+	void setParReplay(ParRB prb);
+	void setParWrapper(ParWrapper pwr);
+
 	AgentState getAgentState();
 	void setAgentState(AgentState aState);
+
+	String getAgentFile();
+	void setAgentFile(String agtFile);
 
 	/**
 	 * reset agent when starting a new episode
@@ -246,7 +277,11 @@ public interface PlayAgent {
 	String getName();
 	void setName(String name);
 
-	boolean isStochastic();
-	void setStochastic(boolean hasStochasticPolicy);
+	boolean isWrapper();
+	PlayAgent getWrappedPlayAgent();
+
+	// --- never used ---
+//	boolean isStochastic();
+//	void setStochastic(boolean hasStochasticPolicy);
 
 }

@@ -2,13 +2,11 @@ package games.Poker;
 
 import controllers.AgentBase;
 import controllers.PlayAgent;
-import games.KuhnPoker.StateObserverKuhnPoker;
 import games.StateObservation;
 import tools.Types;
 
+import java.io.Serial;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
@@ -20,38 +18,37 @@ import java.util.concurrent.ThreadLocalRandom;
 public class PokerAgent extends AgentBase implements PlayAgent {
 
 
-    // Housekeeping
-    public static final int ROYAL_FLUSH = 0;
-    public static final int STRAIGHT_FLUSH = 1;
-    public static final int FOUR_OF_A_KIND = 2;
-    public static final int FULL_HOUSE = 3;
-    public static final int FLUSH = 4;
-    public static final int STRAIGHT = 5;
-    public static final int THREE_OF_A_KIND = 6;
-    public static final int TWO_PAIR = 7;
-    public static final int ONE_PAIR = 8;
-    public static final int HIGH_CARD = 9;
-    public static final int KICKER = 10;
+    // --- never used ---
+//    public static final int ROYAL_FLUSH = 0;
+//    public static final int STRAIGHT_FLUSH = 1;
+//    public static final int FOUR_OF_A_KIND = 2;
+//    public static final int FULL_HOUSE = 3;
+//    public static final int FLUSH = 4;
+//    public static final int STRAIGHT = 5;
+//    public static final int THREE_OF_A_KIND = 6;
+//    public static final int TWO_PAIR = 7;
+//    public static final int ONE_PAIR = 8;
+//    public static final int HIGH_CARD = 9;
+//    public static final int KICKER = 10;
 
-    private Random rand;
-    private int[][] m_trainTable = null;
-    private double[][] m_deltaTable = null;
+    //private Random rand;
+    //private final int[][] m_trainTable = null;
+    //private final double[][] m_deltaTable = null;
 
 
     private Hand hand;
 
     private double chips;
     private double toCall;
-    private double pot;
-    private int cardsDealt;
     private PlayingCard[] cards;
     private ArrayList<Types.ACTIONS> acts;
 
     /**
      * change the version ID for serialization only if a newer version is no longer
-     * compatible with an older one (older .agt.zip will become unreadable or you have
+     * compatible with an older one (older .agt.zip will become unreadable, or you have
      * to provide a special version transformation)
      */
+    @Serial
     private static final long  serialVersionUID = 12L;
 
 
@@ -83,7 +80,7 @@ public class PokerAgent extends AgentBase implements PlayAgent {
         }
 
         Types.ACTIONS actBest = getAction(so);
-        Types.ACTIONS_VT actBestVT = null;
+        Types.ACTIONS_VT actBestVT;
         double[] vtable = new double[acts.size()];
         double maxScore = -Double.MAX_VALUE;
 
@@ -114,10 +111,10 @@ public class PokerAgent extends AgentBase implements PlayAgent {
 
         // gather some information about the current state for the agent
 
-            toCall = sop.getOpen();                     // how much do I need to call?
-            chips = sop.getChips()[sop.getPlayer()];    // how many chips do I have?
-            pot = sop.getPotSize();                     // how big is the pot?
-            hand = new Hand();
+        toCall = sop.getOpen();                     // how much do I need to call?
+        chips = sop.getChips()[sop.getPlayer()];    // how many chips do I have?
+        //double pot = sop.getPotSize();                     // how big is the pot?
+        hand = new Hand();
 
             PlayingCard[] myCards = sop.getHoleCards();          // what's my hand ?
             PlayingCard[] sharedCards = sop.getCommunityCards(); // community cards?
@@ -125,7 +122,7 @@ public class PokerAgent extends AgentBase implements PlayAgent {
             cards = new PlayingCard[myCards.length+sharedCards.length];
             cards[0] = myCards[0];
             cards[1] = myCards[1];
-            cardsDealt = 0;
+        int cardsDealt = 0;
 
             for (int i = 0;i<sharedCards.length;i++) {
                 cards[2+i] =  sharedCards[i];
@@ -133,7 +130,7 @@ public class PokerAgent extends AgentBase implements PlayAgent {
             }
 
         // determine what to do
-        if(cardsDealt==0) {
+        if(cardsDealt ==0) {
 
             // if the user only has the wholecards we are using tables to estimate the value
             return play(evaluateWholeCards(cards)+1);
@@ -179,7 +176,7 @@ public class PokerAgent extends AgentBase implements PlayAgent {
                 return play(4);
 
         }
-        return play(7-cardsDealt);
+        return play(7- cardsDealt);
     }
 
     private void updateHand(){
@@ -225,7 +222,7 @@ public class PokerAgent extends AgentBase implements PlayAgent {
         hand.connected = maxConnected;
 
         // check for pairs
-        ArrayList[] multiples = checkForMultiples(ranks);
+        ArrayList<Integer>[] multiples = checkForMultiples(ranks);
         hand.pairs = multiples[0];
         hand.triples = multiples[1];
         hand.four = multiples[2];
@@ -233,7 +230,7 @@ public class PokerAgent extends AgentBase implements PlayAgent {
         hand.straight = connected > 4;
         hand.flush = maxSuits > 4;
         if(hand.triples.size()>0) {
-            hand.pairs.remove(Integer.valueOf(hand.triples.get(0)));
+            hand.pairs.remove(hand.triples.get(0));
             if (hand.pairs.size()>0){
                 hand.fullHouse = true;
             }
@@ -350,152 +347,153 @@ public class PokerAgent extends AgentBase implements PlayAgent {
         return(acts.get(ThreadLocalRandom.current().nextInt(acts.size())));
     }
 
-    public Types.ACTIONS play2(int confidence) {
-        /*
-            - 0 -> FOLD	: give up the current round
-            - 1 -> CHECK	: pass for the current action (wait for someone else to do something to react on)
-            - 2 -> BET	: bet the "Big Blind"
-            - 3 -> CALL	: bet the same amount as the previous player bet
-            - 4 -> RAISE	: raise the last bet by the "Big Blind"
-            - 5 -> ALL IN : bet all remaining chips
-        */
+    // --- never used ---
+//    public Types.ACTIONS play2(int confidence) {
+//        /*
+//            - 0 -> FOLD	: give up the current round
+//            - 1 -> CHECK	: pass for the current action (wait for someone else to do something to react on)
+//            - 2 -> BET	: bet the "Big Blind"
+//            - 3 -> CALL	: bet the same amount as the previous player bet
+//            - 4 -> RAISE	: raise the last bet by the "Big Blind"
+//            - 5 -> ALL IN : bet all remaining chips
+//        */
+//
+//        if(confidence == 10) {
+//
+//            //RAISE
+//            if(acts.contains(Types.ACTIONS.fromInt(4)))
+//                return Types.ACTIONS.fromInt(4);
+//
+//            //BET
+//            if(acts.contains(Types.ACTIONS.fromInt(2)))
+//                return Types.ACTIONS.fromInt(2);
+//
+//            //CALL
+//            if(acts.contains(Types.ACTIONS.fromInt(3)))
+//                return Types.ACTIONS.fromInt(3);
+//
+//            //ALL-IN
+//            if(acts.contains(Types.ACTIONS.fromInt(5)))
+//                return Types.ACTIONS.fromInt(5);
+//
+//        }
+//        if(confidence == 9) {
+//            //RAISE
+//            if(acts.contains(Types.ACTIONS.fromInt(4)))
+//                return Types.ACTIONS.fromInt(4);
+//
+//            //BET
+//            if(acts.contains(Types.ACTIONS.fromInt(2)))
+//                return Types.ACTIONS.fromInt(2);
+//
+//            //CALL
+//            if(acts.contains(Types.ACTIONS.fromInt(3)))
+//                return Types.ACTIONS.fromInt(3);
+//
+//            //ALL-IN
+//            if(acts.contains(Types.ACTIONS.fromInt(5)))
+//                return Types.ACTIONS.fromInt(5);
+//        }
+//        if(confidence == 8) {
+//            //RAISE
+//            if(acts.contains(Types.ACTIONS.fromInt(4)))
+//                return Types.ACTIONS.fromInt(4);
+//
+//            //BET
+//            if(acts.contains(Types.ACTIONS.fromInt(2)))
+//                return Types.ACTIONS.fromInt(2);
+//
+//            //CALL
+//            if(acts.contains(Types.ACTIONS.fromInt(3)))
+//                return Types.ACTIONS.fromInt(3);
+//
+//        }
+//        if(confidence == 7) {
+//
+//            //BET
+//            if(acts.contains(Types.ACTIONS.fromInt(2)))
+//                return Types.ACTIONS.fromInt(2);
+//
+//            //CALL
+//            if(acts.contains(Types.ACTIONS.fromInt(3)))
+//                return Types.ACTIONS.fromInt(3);
+//
+//        }
+//        if(confidence == 6) {
+//
+//            //CHECK
+//            if(acts.contains(Types.ACTIONS.fromInt(1)))
+//                return Types.ACTIONS.fromInt(1);
+//
+//            //CALL
+//            if(acts.contains(Types.ACTIONS.fromInt(3)))
+//                return Types.ACTIONS.fromInt(3);
+//
+//        }
+//        if(confidence == 5) {
+//
+//            //CHECK
+//            if(acts.contains(Types.ACTIONS.fromInt(1)))
+//                return Types.ACTIONS.fromInt(1);
+//
+//            //CALL
+//            if(acts.contains(Types.ACTIONS.fromInt(3)))
+//                return Types.ACTIONS.fromInt(3);
+//
+//        }
+//        if(confidence == 4) {
+//
+//            //CHECK
+//            if(acts.contains(Types.ACTIONS.fromInt(1)))
+//                return Types.ACTIONS.fromInt(1);
+//
+//            //FOLD
+//            if(acts.contains(Types.ACTIONS.fromInt(0)))
+//                return Types.ACTIONS.fromInt(0);
+//
+//        }
+//        if(confidence == 3) {
+//
+//            //CHECK
+//            if(acts.contains(Types.ACTIONS.fromInt(1)))
+//                return Types.ACTIONS.fromInt(1);
+//
+//            //FOLD
+//            if(acts.contains(Types.ACTIONS.fromInt(0)))
+//                return Types.ACTIONS.fromInt(0);
+//
+//        }
+//        if(confidence == 2) {
+//
+//            //CHECK
+//            if(acts.contains(Types.ACTIONS.fromInt(1)))
+//                return Types.ACTIONS.fromInt(1);
+//
+//            //FOLD
+//            if(acts.contains(Types.ACTIONS.fromInt(0)))
+//                return Types.ACTIONS.fromInt(0);
+//
+//        }
+//        if(confidence == 1) {
+//
+//            //CHECK
+//            if(acts.contains(Types.ACTIONS.fromInt(1)))
+//                return Types.ACTIONS.fromInt(1);
+//
+//            //FOLD
+//            if(acts.contains(Types.ACTIONS.fromInt(0)))
+//                return Types.ACTIONS.fromInt(0);
+//
+//        }
+//
+//        // backup: using a random action
+//        return(acts.get(ThreadLocalRandom.current().nextInt(acts.size())));
+//    }
 
-        if(confidence == 10) {
-
-            //RAISE
-            if(acts.contains(Types.ACTIONS.fromInt(4)))
-                return Types.ACTIONS.fromInt(4);
-
-            //BET
-            if(acts.contains(Types.ACTIONS.fromInt(2)))
-                return Types.ACTIONS.fromInt(2);
-
-            //CALL
-            if(acts.contains(Types.ACTIONS.fromInt(3)))
-                return Types.ACTIONS.fromInt(3);
-
-            //ALL-IN
-            if(acts.contains(Types.ACTIONS.fromInt(5)))
-                return Types.ACTIONS.fromInt(5);
-
-        }
-        if(confidence == 9) {
-            //RAISE
-            if(acts.contains(Types.ACTIONS.fromInt(4)))
-                return Types.ACTIONS.fromInt(4);
-
-            //BET
-            if(acts.contains(Types.ACTIONS.fromInt(2)))
-                return Types.ACTIONS.fromInt(2);
-
-            //CALL
-            if(acts.contains(Types.ACTIONS.fromInt(3)))
-                return Types.ACTIONS.fromInt(3);
-
-            //ALL-IN
-            if(acts.contains(Types.ACTIONS.fromInt(5)))
-                return Types.ACTIONS.fromInt(5);
-        }
-        if(confidence == 8) {
-            //RAISE
-            if(acts.contains(Types.ACTIONS.fromInt(4)))
-                return Types.ACTIONS.fromInt(4);
-
-            //BET
-            if(acts.contains(Types.ACTIONS.fromInt(2)))
-                return Types.ACTIONS.fromInt(2);
-
-            //CALL
-            if(acts.contains(Types.ACTIONS.fromInt(3)))
-                return Types.ACTIONS.fromInt(3);
-
-        }
-        if(confidence == 7) {
-
-            //BET
-            if(acts.contains(Types.ACTIONS.fromInt(2)))
-                return Types.ACTIONS.fromInt(2);
-
-            //CALL
-            if(acts.contains(Types.ACTIONS.fromInt(3)))
-                return Types.ACTIONS.fromInt(3);
-
-        }
-        if(confidence == 6) {
-
-            //CHECK
-            if(acts.contains(Types.ACTIONS.fromInt(1)))
-                return Types.ACTIONS.fromInt(1);
-
-            //CALL
-            if(acts.contains(Types.ACTIONS.fromInt(3)))
-                return Types.ACTIONS.fromInt(3);
-
-        }
-        if(confidence == 5) {
-
-            //CHECK
-            if(acts.contains(Types.ACTIONS.fromInt(1)))
-                return Types.ACTIONS.fromInt(1);
-
-            //CALL
-            if(acts.contains(Types.ACTIONS.fromInt(3)))
-                return Types.ACTIONS.fromInt(3);
-
-        }
-        if(confidence == 4) {
-
-            //CHECK
-            if(acts.contains(Types.ACTIONS.fromInt(1)))
-                return Types.ACTIONS.fromInt(1);
-
-            //FOLD
-            if(acts.contains(Types.ACTIONS.fromInt(0)))
-                return Types.ACTIONS.fromInt(0);
-
-        }
-        if(confidence == 3) {
-
-            //CHECK
-            if(acts.contains(Types.ACTIONS.fromInt(1)))
-                return Types.ACTIONS.fromInt(1);
-
-            //FOLD
-            if(acts.contains(Types.ACTIONS.fromInt(0)))
-                return Types.ACTIONS.fromInt(0);
-
-        }
-        if(confidence == 2) {
-
-            //CHECK
-            if(acts.contains(Types.ACTIONS.fromInt(1)))
-                return Types.ACTIONS.fromInt(1);
-
-            //FOLD
-            if(acts.contains(Types.ACTIONS.fromInt(0)))
-                return Types.ACTIONS.fromInt(0);
-
-        }
-        if(confidence == 1) {
-
-            //CHECK
-            if(acts.contains(Types.ACTIONS.fromInt(1)))
-                return Types.ACTIONS.fromInt(1);
-
-            //FOLD
-            if(acts.contains(Types.ACTIONS.fromInt(0)))
-                return Types.ACTIONS.fromInt(0);
-
-        }
-
-        // backup: using a random action
-        return(acts.get(ThreadLocalRandom.current().nextInt(acts.size())));
-    }
-
-    @Override
-    public double getScore(StateObservation sob) {
-        return rand.nextDouble();
-    }
+//    @Override
+//    public double getScore(StateObservation sob) {
+//        return rand.nextDouble();
+//    }
 
     /*
     public WholeCards checkWholeCards(PlayingCard[] cards){
@@ -544,7 +542,7 @@ public class PokerAgent extends AgentBase implements PlayAgent {
 
         boolean suited = cards[0].getSuit()==cards[1].getSuit();
 
-        int confidence = 0;
+        int confidence;
 
         if(suited){
             confidence = wholeCardLookup.wholeCardLookupSuited[high][low];
@@ -572,25 +570,26 @@ public class PokerAgent extends AgentBase implements PlayAgent {
         }
     }
 
-    private class WholeCards {
-        boolean connected;
-        boolean suited;
-        boolean pair;
-        int valueHigh;
-        int valueLow;
-        int suit0;
-        int suit1;
-
-        WholeCards(){
-            connected = false;
-            suited = false;
-            pair = false;
-            valueHigh = 0;
-            valueLow = 0;
-            suit0 = 0;
-            suit1 = 0;
-        }
-    }
+    // --- never used ---
+//    private class WholeCards {
+//        boolean connected;
+//        boolean suited;
+//        boolean pair;
+//        int valueHigh;
+//        int valueLow;
+//        int suit0;
+//        int suit1;
+//
+//        WholeCards(){
+//            connected = false;
+//            suited = false;
+//            pair = false;
+//            valueHigh = 0;
+//            valueLow = 0;
+//            suit0 = 0;
+//            suit1 = 0;
+//        }
+//    }
 
     //public void stuff(){
 //

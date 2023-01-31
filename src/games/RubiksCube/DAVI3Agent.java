@@ -52,7 +52,7 @@ public class DAVI3Agent extends NTuple4Base implements PlayAgent {
 
 	/**
 	 * change the version ID for serialization only if a newer version is no longer
-	 * compatible with an older one (older .agt.zip will become unreadable or you have
+	 * compatible with an older one (older .agt.zip will become unreadable, or you have
 	 * to provide a special version transformation)
 	 */
 	@Serial
@@ -75,9 +75,11 @@ public class DAVI3Agent extends NTuple4Base implements PlayAgent {
 		initNet(ntPar,tdPar,oPar, nTuples, xnf, maxGameNum);			
 	}
 
-	public DAVI3Agent(String name) {
-		super(name);
-	}
+	// --- never used ---
+//	public DAVI3Agent(String name) {
+//		super(name);
+//	}
+
 	/**
 	 * 
 	 * @param tdPar			temporal difference parameters
@@ -111,12 +113,13 @@ public class DAVI3Agent extends NTuple4Base implements PlayAgent {
 	}
 
 	/**
-	 * If agents need a special treatment after being loaded from disk (e. g. instantiation
+	 * If agents need a special treatment after being loaded from disk (e.g. instantiation
 	 * of transient members), put the relevant code in here.
 	 * 
 	 * @see LoadSaveGBG#transformObjectToPlayAgent
 	 */
 	public boolean instantiateAfterLoading() {
+		super.instantiateAfterLoading();
 		this.m_Net.xnf.instantiateAfterLoading();
 		//assert (m_Net.getNTuples()[0].getPosVals()==m_Net.xnf.getNumPositionValues()) : "Error getPosVals()";
 		assert (this.getParTD().getHorizonCut()!=0.0) : "Error: horizonCut==0";
@@ -179,7 +182,7 @@ public class DAVI3Agent extends NTuple4Base implements PlayAgent {
 
 			// value is the r + V(s) for taking action i in state s='so'. Action i leads to state newSO.
 			value = vTable[i] = newSO.getRewardTuple(rgs).scTup[0] +
-					newSO.getStepRewardTuple().scTup[0] + daviValue(newSO);
+					newSO.getStepRewardTuple(null).scTup[0] + daviValue(newSO);
 						// this is a bit complicated for saying "stepReward
 						// ( + REWARD_POSITIVE, if it's the solved cube)' but
 						// in this way we have a common interface valid for all games:
@@ -212,7 +215,7 @@ public class DAVI3Agent extends NTuple4Base implements PlayAgent {
 	}
 
 	/**
-	 * This is the NN version: Ask the neural net (here: an ntuple network) to predict the value of {@code so}
+	 * This is the NN version: Ask the neural net (here: an n-tuple network) to predict the value of {@code so}
 	 * @param so	the state
 	 * @return 0.0, if {@code so} is the solved state (no expected future rewards).
 	 *         In all other cases, return the prediction of {@link #m_Net}.
@@ -234,7 +237,9 @@ public class DAVI3Agent extends NTuple4Base implements PlayAgent {
      */
     @Override
 	public boolean trainAgent(StateObservation so) {
-		return (CubeConfig.REPLAYBUFFER) ? trainAgent_replayBuffer(so) : trainAgent_baseline(so);
+		return (CubeConfig.REPLAYBUFFER) ?
+				trainAgent_replayBuffer(so) :
+				trainAgent_baseline(so);
 	}
 
 	/**
@@ -264,7 +269,7 @@ public class DAVI3Agent extends NTuple4Base implements PlayAgent {
 			curPlayer = s_t.getPlayer();
         	vLast = m_Net.getScoreI(curSOWB,curPlayer);
 			m_Net.updateWeightsTD(curSOWB, curPlayer, vLast, target,
-					s_t.getStepRewardTuple().scTup[0],s_t);
+					s_t.getStepRewardTuple(null).scTup[0],s_t);
 			
 			//System.out.println(s_t.stringDescr()+", "+a_t.getVBest());
 	        
@@ -362,7 +367,7 @@ public class DAVI3Agent extends NTuple4Base implements PlayAgent {
 				curPlayer = item.sowb.getStateObservation().getPlayer();
 				vLast = m_Net.getScoreI(item.sowb, curPlayer);
 				m_Net.updateWeightsTD(item.sowb, curPlayer, vLast, item.target,
-						s_t.getStepRewardTuple().scTup[0], item.sowb.getStateObservation());
+						s_t.getStepRewardTuple(null).scTup[0], item.sowb.getStateObservation());
 			}
 		} else {
 			// ... with batchSize random samples
@@ -372,7 +377,7 @@ public class DAVI3Agent extends NTuple4Base implements PlayAgent {
 				s_t = item.sowb.getStateObservation();
 				vLast = m_Net.getScoreI(item.sowb,s_t.getPlayer());
 				m_Net.updateWeightsTD(item.sowb, s_t.getPlayer(), vLast, item.target,
-						s_t.getStepRewardTuple().scTup[0], s_t);
+						s_t.getStepRewardTuple(null).scTup[0], s_t);
 			}
 		}
 
@@ -406,7 +411,7 @@ public class DAVI3Agent extends NTuple4Base implements PlayAgent {
 	@Override
 	public ScoreTuple estimateGameValueTuple(StateObservation so, ScoreTuple prevTuple) {
 		double[] d = {so.getRewardTuple(false).scTup[0] +
-					  so.getStepRewardTuple().scTup[0] + daviValue((StateObserverCube)so)};
+					  so.getStepRewardTuple(null).scTup[0] + daviValue((StateObserverCube)so)};
 		return new ScoreTuple(d);
 	}
 
@@ -425,8 +430,9 @@ public class DAVI3Agent extends NTuple4Base implements PlayAgent {
 	public String stringDescr() {
 		m_Net.setHorizon();
 		String cs = getClass().getSimpleName();
-		String str = cs + ": USESYM:" + (m_ntPar.getUSESYMMETRY()?"true":"false")
-				+ ", P:" + (m_Net.getXnf().getNumPositionValues())
+		return cs + ": USESYM:" + (m_ntPar.getUSESYMMETRY()?"true":"false")
+				+ ", nSym:" + m_ntPar.getNSym()
+				+ ", P:" + m_Net.getXnf().getNumPositionValues()
 				+ ", NORMALIZE:" + (m_tdPar.getNormalize()?"true":"false")
 				+ ", sigmoid:"+(m_Net.hasSigmoid()? "tanh":"none")
 				+ ", alpha:" + m_Net.getAlpha()
@@ -435,7 +441,6 @@ public class DAVI3Agent extends NTuple4Base implements PlayAgent {
 				+ ", qMode:" + m_oPar.getQuickEvalMode()
 				+ ", incAmount:" + m_oPar.getIncAmount()
 				;
-		return str;
 	}
 
 	@Override
@@ -447,7 +452,7 @@ public class DAVI3Agent extends NTuple4Base implements PlayAgent {
 	}
 
 	// Callback function from constructor NextState(NTupleAgt,StateObservation,ACTIONS). 
-	// Currently only dummy to make the interface NTupleAgt (which NTupleBase has to implement) happy!
+	// Currently, only dummy to make the interface NTupleAgt (which NTupleBase has to implement) happy!
 	public void collectReward(NextState4 ns) {
 	}
 

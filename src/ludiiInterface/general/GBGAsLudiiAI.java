@@ -3,10 +3,15 @@ package ludiiInterface.general;
 import controllers.PlayAgent;
 import game.Game;
 import games.Hex.HexConfig;
+import games.Nim.NimConfig;
 import games.Othello.ArenaOthello;
 import ludiiInterface.Util;
+import ludiiInterface.games.CFour.StateObserverC4TranslationLayer;
+import ludiiInterface.games.CFour.SystemConversionC4;
 import ludiiInterface.games.Hex.StateObserverHexTranslationLayer;
 import ludiiInterface.games.Hex.SystemConversionHex;
+import ludiiInterface.games.Nim.StateObserverNimTranslationLayer;
+import ludiiInterface.games.Nim.SystemConversionNim;
 import ludiiInterface.games.othello.StateObserverOthelloTranslationLayer;
 import ludiiInterface.games.othello.SystemConversionOthello;
 import ludiiInterface.games.yavalath.StateObserverYavalathTranslationLayer;
@@ -17,7 +22,8 @@ import other.context.Context;
 import other.move.Move;
 import tools.Types;
 
-import javax.swing.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
@@ -26,65 +32,39 @@ import static ludiiInterface.Util.loadFileFromDialog;
 public class GBGAsLudiiAI extends AI {
 
     private PlayAgent gbgAgent;
-
-    /**
-     * -1 = uninitialized, needed for game selection in Ludii UI
-     * 0 = Othello
-     * 1 = Yavalath
-     * 2 = Hex
-     **/
-    private int gameID = -1;
     private int playerID, size, players;
     private String gbgAgentPathYavalath = "C:\\Users\\Ann\\IdeaProjects\\GBG\\agents\\Yavalath\\yavAgent.agt.zip";
     private final String gbgAgentPathOthello = "C:\\Users\\Ann\\IdeaProjects\\GBG\\agents\\Othello\\TCL3-100_7_250k-lam05_P4_nPly2-FAm_A.agt.zip";
     private final String gbgAgentPathHex = "C:\\Users\\Ann\\IdeaProjects\\GBG\\agents\\Hex\\06\\TDNT3-TCLid-25_6-300k-eps02.agt.zip";
-    private final String[] games = {"Othello", "Yavalath", "Hex"};
+    private final String[] games = {"Othello", "Yavalath", "Hex", "Connect Four", "Nim"};
     private String agentPath;
+    private List<Move> movesNim;
 
     public GBGAsLudiiAI(){
         friendlyName = getClass().getSimpleName();
     }
 
-    public GBGAsLudiiAI(int gameID){
-        this.gameID = gameID;
-        friendlyName = getClass().getSimpleName();
-    }
-
-    public GBGAsLudiiAI(int gameID, int size, int players){
-        this.gameID = gameID;
+    public GBGAsLudiiAI(int size, int players){
         this.size = size;
         this.players = players;
         friendlyName = getClass().getSimpleName();
+        this.movesNim = new ArrayList<>();
     }
 
     /**
-     * Sets the gameID if it has not been specified in the constructor. Then loads the agent that is supposed to play
-     * either via a direct path or by opening a file dialog to choose from.
+     * Loads the agent that is supposed to play either via a direct path or by opening a file dialog to choose from.
      * @param game
      * @param playerID
      */
     @Override
     public void initAI(final Game game, final int playerID){
         this.playerID = playerID;
-        if(gameID == -1){
-            JComboBox comboBox = new JComboBox(games);
-            comboBox.setSelectedIndex(0);
-            JOptionPane.showMessageDialog(null, comboBox,"Choose a game", JOptionPane.QUESTION_MESSAGE);
-            switch ((String) comboBox.getSelectedItem()){
-                case "Othello" -> gameID = 0;
-                case "Yavalath" -> gameID = 1;
-                case "Hex" -> {
-                    gameID = 2;
-                    size = 6;
-                    HexConfig.BOARD_SIZE = 6;
-                }
-            }
-        }
 
         //Load the agent either via file dialog, or directly via a specified string (useful if you're only using the same agent for a while)
         try{
             if(agentPath == null){
                 agentPath = loadFileFromDialog("GBG Agenten auswählen");
+                System.out.println(agentPath);
             }
             gbgAgent = new ArenaOthello(
                     "GBG vs. Ludii",
@@ -99,7 +79,19 @@ public class GBGAsLudiiAI extends AI {
     }
 
     /**
-     * Selects an action based on the game being played. If no game is selected returns a random move from the (possible) moves list.
+     * Loads the agent that is supposed to play from param {@code pa}
+     * @param game
+     * @param playerID
+     * @param pa
+     */
+    public void initAI(final Game game, final int playerID, PlayAgent pa){
+        this.playerID = playerID;
+        this.gbgAgent = pa;
+    }
+
+    /**
+     * Selects an action based on the game being played. If the game is not part of the switch cases, it issues a warning
+     * and returns a random move from the (possible) moves list.
      * The Ludii limitations maxSeconds, maxIterations and maxDepth are ignored as of now.
      * @return The move the agent wants to make.
      */
@@ -108,18 +100,29 @@ public class GBGAsLudiiAI extends AI {
         Optional<Move> move;
 
 
-        switch(gameID){
-            case 0 -> {
+        switch(game.name()){
+            case "Reversi" -> {
                 move = selectActionOthello(game,context,maxSeconds,maxIterations,maxDepth,playerID);
             }
-            case 1 -> {
+            case "Yavalath" -> {
                 move = selectActionYavalath(game,context,maxSeconds,maxIterations,maxDepth);
             }
-            case 2 -> {
+            case "Hex" -> {
                 move = selectActionHex(game,context,maxSeconds,maxIterations,maxDepth);
             }
+            case "Connect Four" -> {
+                move = selectActionC4(game,context,maxSeconds,maxIterations,maxDepth);
+            }
+            case "Nim" -> {
+                if(movesNim.isEmpty()) selectActionNim(game, context, maxSeconds, maxIterations, maxDepth);
+
+                move = Optional.ofNullable(movesNim.get(0));
+                movesNim.remove(0);
+            }
+
             default -> {
                 // Default to random move
+                System.err.println("[GBGAsLudiiAI.selectAction] Returning a random move, since game is not part of interface!");
                 int numMoves = game.moves(context).moves().size();
                 Random r = new Random();
                 return game.moves(context).moves().get(r.nextInt(numMoves-1));
@@ -178,6 +181,15 @@ public class GBGAsLudiiAI extends AI {
      */
     private Optional<Move> selectActionHex(Game game,Context context,double maxSeconds, int maxIterations, int maxDepth){
 
+        //Detects and sets board size
+        for(String s : game.getOptions()){
+            if(s.contains("Board Size")){
+                int boardSize = Character.getNumericValue(s.charAt(11));
+                HexConfig.BOARD_SIZE = boardSize;
+                size = boardSize;
+            }
+        }
+
         Optional<Move> returnMove = Optional.empty();
 
         SystemConversionHex conversion = new SystemConversionHex(size);
@@ -196,4 +208,112 @@ public class GBGAsLudiiAI extends AI {
         }
         return returnMove;
     }
+
+    /**
+     * Translates the current Ludii context into a StateObserverC4 that the agent then uses to choose its next action.
+     * Then translates that action back into a list of Ludii moves.
+     */
+    private Optional<Move> selectActionC4(Game game, Context context, double maxSeconds, int maxIterations, int maxDepth){
+        Optional<Move> returnMove = Optional.empty();
+        SystemConversionC4 conversion = new SystemConversionC4();
+
+        FastArrayList<Move> moves = game.moves(context).moves();
+        List<Move> moveList = context.trial().generateCompleteMovesList();
+        int gbgAction = 0;
+
+      /*  try{
+            gbgAction = gbgAgent.getNextAction2(new StateObserverC4TranslationLayer(context, playerID).partialState(), false, true).toInt();
+        } catch (Exception e){
+            if(moveList.get(moveList.size()-1).isPass()){
+                gbgAction = -1;
+            } else{
+                StateObserverC4TranslationLayer obs = new StateObserverC4TranslationLayer(context,playerID);
+                if(obs.isGameOver()){
+                    gbgAction = -1;
+                }
+            }
+        }*/
+
+        // checks if last made move was a pass
+        // needed because of ties/draws; when a draw happens, Ludii requires both players to make a pass move before it ends the game)
+        if(!moveList.isEmpty() && moveList.get(moveList.size()-1).isPass()){
+            gbgAction = -1; // GBG doesn't have pass moves for C4, so just assign it without consulting gbgAgent
+        } else {
+            // gbgAgent might realize there's no available action in case of a draw and throw an exception
+            try{
+                gbgAction = gbgAgent.getNextAction2(new StateObserverC4TranslationLayer(context, playerID).partialState(), false, true).toInt();
+            } catch( Exception e){
+                // check whether exception was caused by a draw and assign a pass move to gbgAction
+                StateObserverC4TranslationLayer obs = new StateObserverC4TranslationLayer(context,playerID);
+                if(obs.isGameOver()){
+                    gbgAction = -1;
+                }
+            }
+        }
+        for(Move move : moves){
+            if(move.to() == conversion.getLudiiIndexFromGBG(gbgAction)) returnMove = Optional.of(move);
+        }
+
+        return returnMove;
+    }
+
+    /**
+     * Translates the current Ludii context into a StateObserverNim that the agent then uses to choose its next action.
+     * Then translates that action back into a list of Ludii moves.
+     */
+    private void selectActionNim(Game game, Context context, double maxSeconds, int maxIterations, int maxDepth) {
+
+        int numberHeaps = 0;
+
+        //Detects and sets number of heaps
+        for (String s : game.getOptions()) {
+            if (s.contains("Number Piles")) {
+
+                numberHeaps = Character.getNumericValue(s.charAt(13));
+
+                // checking if number of heaps has two digits and the second digit was cut off by charAt()
+                if (numberHeaps == 1)
+                    numberHeaps = Integer.parseInt(s.substring(13, 15)); // if so, replace numberHeaps with correct two digit integer
+
+                NimConfig.NUMBER_HEAPS = numberHeaps;
+                NimConfig.HEAP_SIZE = -1;
+                NimConfig.MAX_MINUS = numberHeaps;
+            }
+        }
+
+        SystemConversionNim conversion = new SystemConversionNim(numberHeaps);
+        StateObserverNimTranslationLayer sobTNim = new StateObserverNimTranslationLayer(context, playerID, numberHeaps);
+        FastArrayList<Move> moves = game.moves(context).moves();
+
+        Types.ACTIONS gbgAction = gbgAgent.getNextAction2(sobTNim.partialState(), false, true);
+        int moveRep = (gbgAction.toInt() % NimConfig.MAX_MINUS) + 1;  // calculates how many objects are taken off heap
+
+        for (Move move : moves) {
+            if (move.to() == ((gbgAction.toInt() - (gbgAction.toInt() % numberHeaps)) / numberHeaps)) {
+                try {
+                    if (move.to() == conversion.getLudiiIndexFromGBG(gbgAction.toInt())) { // check if a mapping is available for the GBG move, i.e. if GBG player wants to take only one item off heap
+                        movesNim.add(move);
+                    }
+                } catch (Exception e) { // if no mapping available, then add move as many times as necessary to take wanted amount off heap
+                    for (int i = 0; i < moveRep; i++) {
+                        movesNim.add(move);
+                    }
+                }
+            }
+        }
+
+        int[] testHeap = sobTNim.getHeaps();
+
+        int j = gbgAction.toInt()%NimConfig.MAX_MINUS;
+        int heap = (gbgAction.toInt()-j)/NimConfig.MAX_MINUS;
+        int subtractor = j+1;
+
+        testHeap[heap] -= subtractor;
+
+        if(testHeap[heap] != 0) // checks if heap will be empty after action is performed, if it's empty, Ludii ends GBG players turn on its own
+            movesNim.add(Game.createPassMove(context, true)); // if not, add pass move at end of the list to signal end of the GBG player's turn after move is complete
+
+        assert !movesNim.isEmpty() : "List is Empty!!";
+    }
+
 }

@@ -7,6 +7,7 @@ import controllers.MC.MCAgentN;
 import controllers.MCTS.MCTSAgentT;
 import controllers.MCTSWrapper.ConfigWrapper;
 import controllers.PlayAgent;
+import game.rules.play.moves.nonDecision.effect.Apply;
 import games.Hex.HexTile;
 import games.Hex.StateObserverHex;
 import games.Sim.StateObserverSim;
@@ -14,6 +15,7 @@ import games.SimpleGame.StateObserverSG;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import gui.ArenaGui;
 import gui.MessageBox;
+import params.ParWrapper;
 import starters.GBGLaunch;
 import tools.PStats;
 import tools.ScoreTuple;
@@ -263,7 +265,7 @@ abstract public class Arena implements Runnable {
 			}
 
 			if (m_hasTrainRights)
-				performArenaDerivedTasks(); 		// additional train-right-related tasks
+				performArenaTrainTasks(); 		// additional train-right-related tasks
 
 		} // while (true)
 	}
@@ -316,7 +318,7 @@ abstract public class Arena implements Runnable {
 			return;
 		}
 
-		String sMsg = "Inspecting the value function of "+ agentX +" (X) ...";
+		String sMsg = "Inspecting the value function of "+ paX.stringDescr2() +" (X) ...";
 		setStatusMessage(sMsg);
 		System.out.println("[InspectGame] " + sMsg);
 		
@@ -329,8 +331,11 @@ abstract public class Arena implements Runnable {
 		gb.updateBoard(null, true, true); // update with reset
 		gb.enableInteraction(true); // needed for CFour
 
-		boolean stored_USELASTMCTS = ConfigWrapper.USELASTMCTS;
-		ConfigWrapper.USELASTMCTS = false;
+		boolean stored_USELASTMCTS = paX.getParWrapper().getUseLastMCTS();
+		paX.getParWrapper().setUseLastMCTS(false);
+		// We need to disable USELASTMCTS in InspectV, otherwise we get AssertionError "Oops, action mismatch!"
+		// We restore it later, when finishing InspectV
+
 		so = gb.getStateObs();  // just to initialize it
 
 		while (taskState == Task.INSPECTV) {
@@ -351,8 +356,8 @@ abstract public class Arena implements Runnable {
 				if (!so.isGameOver()&&so.isRoundOver()) so.initRound();
 				if (DBG_HEX && (so instanceof StateObserverHex)) {
 					StateObserverHex soh = (StateObserverHex) so;
-					// int Index = this.getHexIndex(soh.getBoard());
-					// System.out.println("Index: "+Index);
+					int Index = this.getHexIndex(soh.getBoard());
+					System.out.println("Index: "+Index);
 					System.out.println("[" + soh.stringDescr() + "]");
 				}
 				boolean DBG_SIM=false;
@@ -369,10 +374,7 @@ abstract public class Arena implements Runnable {
 						so.storeBestActionInfo(actBest);
 
 					gb.updateBoard(so, true, true);
-//					if (so.isRoundOver()) {
-//						so.initRound();
-//						assert !so.isRoundOver() : "Error: initRound() did not reset round-over-flag";
-//					}
+
 					if (so instanceof StateObserverSG && actBest.getVTable()!=null) {
 						DecimalFormat form = new DecimalFormat("0.0000");
 						double[] optimHit = {4.888888889,4.666666667,4.333333333,3.888888889,
@@ -402,7 +404,7 @@ abstract public class Arena implements Runnable {
 					}
 				}
 				gb.enableInteraction(true);
-			} else {
+			} else {  	// no action_req
 				try {
 					Thread.sleep(100);
 					// wait until an action in GameBoard gb occurs (see
@@ -422,7 +424,7 @@ abstract public class Arena implements Runnable {
 		} // while(taskState == Task.INSPECTV) [will be left only by the break
 		  // above or when taskState changes]
 
-		ConfigWrapper.USELASTMCTS = stored_USELASTMCTS;
+		paX.getParWrapper().setUseLastMCTS(stored_USELASTMCTS);
 
 		// We arrive here under three conditions:
 		// 1) InspectV pressed again --> taskState changed to Task.IDLE
@@ -502,6 +504,7 @@ abstract public class Arena implements Runnable {
 
 		so = selectPlayStartState(showValue);
 
+		boolean silent = (so instanceof StateObserver2048);
 		assert qaVector.length == so.getNumPlayers() : "Number of agents does not match so.getNumPlayers()!";
 		startSO = so.copy();
 		pstats = new PStats(1, so.getMoveCounter(), so.getPlayer(), -1, gameScore, nEmpty, cumEmpty, highestTile);
@@ -532,7 +535,7 @@ abstract public class Arena implements Runnable {
 							actBest = getNextAction_DEBG(so.partialState(), pa, p2, N_EMPTY);
 						} else {
 							long startTNano = System.nanoTime();
-							actBest = pa.getNextAction2(so.partialState(), false, false);
+							actBest = pa.getNextAction2(so.partialState(), false, silent);
 
 							if (m_spDT!=null) {
 								long endTNano = System.nanoTime();
@@ -571,7 +574,7 @@ abstract public class Arena implements Runnable {
 							nEmpty = so2048.getNumEmptyTiles();
 							cumEmpty += nEmpty;
 							highestTile = so2048.getHighestTileValue();
-							gameScore = so2048.getGameScore(so2048.getPlayer()) * so2048.MAXSCORE;
+							gameScore = so2048.getGameScore(so2048.getPlayer()) * StateObserver2048.MAXSCORE;
 						} else {
 							gameScore = so.getGameScore(so.getPlayer());
 						}
@@ -661,7 +664,7 @@ abstract public class Arena implements Runnable {
 	 *
 	 * @param qaVector	the agent vector
 	 * @param so		the start state
-	 * @return
+	 * @return a String list with play messages
 	 */
 	public ArrayList<String> playInnerGame(PlayAgent[] qaVector,StateObservation so) {
 		final int numPlayers = gb.getStateObs().getNumPlayers();
@@ -793,7 +796,6 @@ abstract public class Arena implements Runnable {
 	private ArrayList<String> buildPlayMessages(PlayAgent[] qaVector, int numPlayers){
 //		String[] agentVec = new String[numPlayers];
 		ArrayList<String> agentList = new ArrayList<>();
-		String str;
 		StringBuilder sMsg;
 
 		if (m_spDT == null)
@@ -804,7 +806,7 @@ abstract public class Arena implements Runnable {
 //				agentVec[0] = m_xab.getSelectedAgent(0);
 				agentList.add(0,m_xab.getSelectedAgent(0));
 				sMsg = new StringBuilder("Playing a game ... [ " + agentList.get(0) + " ]");
-				int wrappedNPly = m_xab.oPar[0].getWrapperNPly();
+				int wrappedNPly = m_xab.wrPar[0].getWrapperNPly();
 				if (wrappedNPly > 0)
 					sMsg = new StringBuilder("Playing a game ... [ " + agentList.get(0) + ", nPly=" + wrappedNPly + " ]");
 			}
@@ -1174,11 +1176,12 @@ abstract public class Arena implements Runnable {
 	public boolean saveAgent(int index, String savePath) {
 		int numPlayers = getGameBoard().getStateObs().getNumPlayers();
 		boolean bstatus = false;
+		this.setStatusMessage("Saving ....");
 		try {
 			// fetching the agents ensures that the actual parameters from the tabs
 			// are all taken (!)
 			m_xfun.m_PlayAgents = m_xfun.fetchAgents(m_xab);
-			AgentBase.validTrainedAgents(m_xfun.m_PlayAgents,numPlayers);
+			//AgentBase.validTrainedAgents(m_xfun.m_PlayAgents,numPlayers);
 
 		} catch (RuntimeException e) {
 			this.showMessage( e.getMessage(), 
@@ -1188,6 +1191,14 @@ abstract public class Arena implements Runnable {
 		}
 
 		PlayAgent td = this.m_xfun.m_PlayAgents[index];
+		if (td.isWrapper()) td = td.getWrappedPlayAgent();		// /WK/ hook for MCTSWrapperAgent, which is not serializable
+		AgentBase.validSaveAgent(td,index,numPlayers);
+		td.setParOther(m_xab.oPar[index]);		// copy parameter settings from oPar tab
+		if (td.getAgentState()== PlayAgent.AgentState.INIT) {
+			td.setMaxGameNum(m_xab.getGameNumber());
+			td.setGameNum(0);
+		}
+
 		String str;
 		try {
 			if (savePath==null) {
@@ -1195,7 +1206,7 @@ abstract public class Arena implements Runnable {
 			} else {
 				this.tdAgentIO.saveGBGAgent(td,savePath);
 			}
-			str = "Saved Agent!";
+			str = "Saving .... Saved Agent!";
 			bstatus = true;
 		} catch(IOException e) {
 			str = e.getMessage();
@@ -1205,8 +1216,15 @@ abstract public class Arena implements Runnable {
 		return bstatus;
 	}
 
+	// only used from MCompeteSweep
 	public boolean saveAgent(PlayAgent pa, String savePath) {
 		String str;
+		if (pa.isWrapper()) {
+			PlayAgent wpa;
+			wpa = pa.getWrappedPlayAgent();		// /WK/ hook for MCTSWrapperAgent, which is not serializable
+			wpa.setAgentState(pa.getAgentState());
+			pa = wpa;
+		}
 		try {
 			this.tdAgentIO.saveGBGAgent(pa,savePath);
 			str = "Saved Agent!";
@@ -1236,9 +1254,7 @@ abstract public class Arena implements Runnable {
 			td = this.tdAgentIO.loadGBGAgent(filePath);			
 		} catch(Exception e) {
 			str = e.getMessage();			
-//		} catch(ClassNotFoundException e) {
-//			str = e.getMessage();			
-		} 
+		}
 		
 		if (td == null) {
 			str = str + "\n No Agent loaded!";
@@ -1267,13 +1283,7 @@ abstract public class Arena implements Runnable {
 				this.m_xab.setGameNumber(td.getMaxGameNum());
 				this.m_xab.oPar[n].setNumEval(td.getNumEval());
 			}
-//			if (td instanceof TDNTuple2Agt && TDNTuple2Agt.VER_3P) {
-//				this.m_xab.tdPar[n].enableMode3P(true);
-//				this.m_xab.tdPar[n].enableNPly(false);
-//			} else {
-//				this.m_xab.tdPar[n].enableNPly(false);
-//			}
-			
+
 			// if called via Arena, then disable all actionable elements in all param tabs
 			// "TD pars" and "NT par" (allow only viewing of parameters)
 			if (!this.hasTrainRights()) {
@@ -1288,12 +1298,14 @@ abstract public class Arena implements Runnable {
 			this.m_xfun.m_PlayAgents[n] = td;
 			String strAgent = (numPlayers==2) ? "Agent-"+Types.GUI_2PLAYER_NAME[n] :
 												"Agent-"+Types.GUI_PLAYER_NAME[n];
-			str = "Agent "+td.getName()+" succesfully loaded to "
-				+ strAgent + "!";
+			str = "Agent "+td.getName()+" successfully loaded from " + td.getAgentFile() + "!";
+			System.out.println("[Arena.loadAgent] "+str);
+			str = "Agent "+td.getName()+" successfully loaded to " + strAgent + "!";
 			res = true;
 		}
 		this.setStatusMessage(str);
-		System.out.println("[LoadAgent] "+str);
+		if (!res) 		// in the (res==true)-case we have already the td.getAgentFile()-printout above
+			System.out.println("[Arena.loadAgent] "+str);
 		return res;
 	}
 
@@ -1454,10 +1466,10 @@ abstract public class Arena implements Runnable {
 	 * taskState back to IDLE (when appropriate).
 	 * <p>
 	 * A class derived from {@code this} may override this method, but it
-	 * should usually call inside with {@code super.performArenaDerivedTask()} this
+	 * should usually call inside with {@code super.performArenaTrainTasks()} this
 	 * method, before extensions are added.
 	 */
-	public void performArenaDerivedTasks() {
+	public void performArenaTrainTasks() {
 		String agentN;
 		int n;
 		if (m_hasTrainRights) {
@@ -1496,6 +1508,7 @@ abstract public class Arena implements Runnable {
 							m_evaluator2.eval(pa);
 							System.out.println("final "+m_evaluator2.getMsg());
 							m_xfun.m_PlayAgents[n].setAgentState(PlayAgent.AgentState.TRAINED);
+							m_xab.setOParFrom(n,pa.getParOther());
 							setStatusMessage("final "+m_evaluator2.getMsg());
 							//System.out.println("Duration training: " + ((double)pa.getDurationTrainingMs()/1000));
 							//System.out.println("Duration evaluation: " + ((double)pa.getDurationEvaluationMs()/1000));
@@ -1527,6 +1540,7 @@ abstract public class Arena implements Runnable {
 						setStatusMessage("Done.");
 					} else {
 						m_xfun.m_PlayAgents[0].setAgentState(PlayAgent.AgentState.TRAINED);
+						m_xab.setOParFrom(0,m_xfun.m_PlayAgents[0].getParOther());  // /WK/ Bug fix 2022-04-12
 						setStatusMessage("MultiTrain finished: "+ m_xfun.getLastMsg());
 					}
 					double elapsed_time = (System.currentTimeMillis() - start_time)/1000.0;

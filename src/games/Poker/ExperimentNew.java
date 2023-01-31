@@ -80,6 +80,7 @@ public class ExperimentNew {
     private ParMCTSE mctsePar;
     private ParMC mcPar;
     private ParRB rbPar;
+    private ParWrapper wrPar;
     DateTimeFormatter dtf;
 
     public static void main(String[] args) throws Exception {
@@ -95,6 +96,7 @@ public class ExperimentNew {
         oPar = new ParOther();
         // ReplayBuffer
         rbPar = new ParRB();
+        wrPar = new ParWrapper();
         // DEFAULT TD
         tdPar = new ParTD();
         tdPar.setNormalize(true);
@@ -477,7 +479,7 @@ public class ExperimentNew {
 
         NTuple4Factory ntupfac = new NTuple4Factory();
         int[][] nTuples = ntupfac.makeNTupleSet(ntPar, xnTuple);
-        PlayAgent pa = new TDNTuple4Agt(agentName,tdPar,ntPar, oPar, rbPar,nTuples, xnTuple, numberOfTrainingGames);
+        PlayAgent pa = new TDNTuple4Agt(agentName,tdPar,ntPar, oPar, rbPar, wrPar, nTuples, xnTuple, numberOfTrainingGames);
 
         // return agent
         return pa;

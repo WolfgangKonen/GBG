@@ -8,6 +8,7 @@ import controllers.PlayAgent;
 import controllers.PlayAgtVector;
 import controllers.TD.ntuple2.*;
 import controllers.TD.ntuple4.*;
+import games.Nim.StateObserverNim;
 import tools.ScoreTuple;
 import tools.Types;
 import tools.Types.ACTIONS;
@@ -46,6 +47,16 @@ public interface StateObservation extends PartialState, Serializable{
 	 * @return a cleared copy of {@code this}
 	 */
 	StateObservation clearedCopy();
+
+	/**
+	 * Project a StateObservation object into its canonical form. This is just the object itself for most state observers.
+	 * Only for {@link StateObserverNim} it is different, it has the heaps sorted in ascending order.
+	 * @return a projected copy of {@code this}
+	 *
+	 * @see StateObserverNim
+	 * @see TDNTuple4Agt
+	 */
+	StateObservation project();
 
 	boolean isGameOver();
 
@@ -173,8 +184,9 @@ public interface StateObservation extends PartialState, Serializable{
 	 * method, because MaxN2Wrapper needs the separate step reward when returning from recursion
 	 *
 	 * @return	a score tuple
+	 * @param pa
 	 */
-	ScoreTuple getStepRewardTuple();
+	ScoreTuple getStepRewardTuple(PlayAgent pa);
 
 	double getMinGameScore();
 	double getMaxGameScore();

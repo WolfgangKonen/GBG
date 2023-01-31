@@ -113,10 +113,10 @@ abstract public class NTupleBase extends AgentBase implements NTupleAgt, Seriali
 	 * 
 	 * @see Arena#loadAgent
 	 */
-	public void fillParamTabsAfterLoading(int n, Arena m_arena) { 
+	public void fillParamTabsAfterLoading(int n, Arena m_arena) {
+		super.fillParamTabsAfterLoading(n, m_arena);
 		m_arena.m_xab.setTdParFrom(n, this.getParTD() );
 		m_arena.m_xab.setNtParFrom(n, this.getParNT() );
-		m_arena.m_xab.setOParFrom(n, this.getParOther() );
 	}
 	
 	/**
@@ -268,11 +268,17 @@ abstract public class NTupleBase extends AgentBase implements NTupleAgt, Seriali
 	public ParTD getParTD() {
 		return m_tdPar;
 	}
-	public ParNT getParNT() {
-		return m_ntPar;
-	}
+	public ParNT getParNT() { return m_ntPar; }
 	// getParOther() is in AgentBase
-	
+
+	public void setParTD(ParTD m_tdPar) {
+		this.m_tdPar = new ParTD(m_tdPar);
+	}
+	public void setParNT(ParNT m_ntPar) {
+		this.m_ntPar = new ParNT(m_ntPar);
+	}
+
+
 	public boolean getAFTERSTATE() {
 		return m_ntPar.getAFTERSTATE();
 	}

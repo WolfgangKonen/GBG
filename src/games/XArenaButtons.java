@@ -45,6 +45,7 @@ public class XArenaButtons //extends JPanel
 	public ParMCTSE[] mctsePar;
 	public ParEdax[] edPar;
 	public ParRB[] rbPar;
+	public ParWrapper[] wrPar;
 	public String[] selectedAgents;
 
 	// tournament system remote data input
@@ -75,6 +76,7 @@ public class XArenaButtons //extends JPanel
 		mctsePar = new ParMCTSE[numPlayers];
 		edPar = new ParEdax[numPlayers];
 		rbPar = new ParRB[numPlayers];
+		wrPar = new ParWrapper[numPlayers];
 		selectedAgents = new String[numPlayers];
 
 		// for-loop over *decrementing* n so that we set on the last pass (n=0) with the call 
@@ -82,7 +84,7 @@ public class XArenaButtons //extends JPanel
 		for (int n=numPlayers-1; n>=0; n--) {
 			selectedAgents[n] = Types.GUI_AGENT_INITIAL[n];
 			
-			tdPar[n] = new ParTD(m_arena.hasGUI());
+			tdPar[n] = new ParTD(m_arena.hasGUI(),m_arena);
 			ntPar[n] = new ParNT(m_arena.hasGUI());
 			oPar[n] = new ParOther(m_arena.hasGUI(),m_arena);
 			maxnPar[n] = new ParMaxN(m_arena.hasGUI());
@@ -91,6 +93,7 @@ public class XArenaButtons //extends JPanel
 			mctsePar[n] = new ParMCTSE(m_arena.hasGUI());
 			edPar[n] = new ParEdax(m_arena.hasGUI());
 			rbPar[n] = new ParRB(m_arena.hasGUI());
+			wrPar[n] = new ParWrapper(m_arena.hasGUI());
 			this.setParamDefaults(n, Types.GUI_AGENT_INITIAL[n], m_arena.getGameName());
 			
 			try {
@@ -165,6 +168,7 @@ public class XArenaButtons //extends JPanel
 		maxnPar[n].setParamDefaults(agentName, gameName, numPlayers);
 		oPar[n].setParamDefaults(agentName, gameName);
 		rbPar[n].setParamDefaults(agentName,gameName);
+		wrPar[n].setParamDefaults(agentName,gameName);
 		switch (agentName) {
 		case "TDS":
 //		case "TD-Ntuple-2":
@@ -377,9 +381,7 @@ public class XArenaButtons //extends JPanel
 	public void setNtParFrom(int n, ParNT parNT) {
 		ntPar[n].setFrom( parNT );
 	}
-	public void setOParFrom(int n, ParOther parOther) {
-		oPar[n].setFrom( parOther );
-	}
+	public void setOParFrom(int n, ParOther parOther) { oPar[n].setFrom( parOther ); }
 	public void setEdaxParFrom(int n, ParEdax parEdax) {
 		edPar[n].setFrom( parEdax );
 	}
@@ -398,5 +400,6 @@ public class XArenaButtons //extends JPanel
 	public void setMctseParFrom(int n, ParMCTSE parMctse) {
 		mctsePar[n].setFrom( parMctse );
 	}
-	public void setRBParFrom(int n, ParRB parRB){rbPar[n].setFrom(parRB);}
-} // class XArenaButtons	
+	public void setRBParFrom(int n, ParRB parRB){ rbPar[n].setFrom(parRB); }
+	public void setWrapperParFrom(int n, ParWrapper parWR){ wrPar[n].setFrom(parWR); }
+} // class XArenaButtons

@@ -9,6 +9,7 @@ import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.NTuple2ValueFunc;
 import controllers.TD.ntuple2.SarsaAgt;
 import controllers.TD.ntuple2.TDNTuple3Agt;
+import games.Arena;
 
 /**
  *  TD (temporal difference) parameters for agents {@link TDAgent},  {@link TDNTuple3Agt} and {@link SarsaAgt}
@@ -29,9 +30,11 @@ public class ParTD implements Serializable {
     public static double DEFAULT_LAMBDA=0.0;  
     public static double DEFAULT_HORIZONCUT = 0.1;
     public static int DEFAULT_NPLY = 1;
-    public static int DEFAULT_MODE_3P = 2;
+//  public static int DEFAULT_MODE_3P = 2;
     public static int DEFAULT_ELIG_MODE = 0;	// 0:[et], 1:[res], 2:[rep], 3:[rr], see [Thill14]
-    
+	public static double DEFAULT_STEP_REWARD = -0.1;
+	public static double DEFAULT_REWARD_POSITIVE = 1.0;
+
     private double alpha = DEFAULT_ALPHA;		// initial learn step size
     private double alfin = DEFAULT_ALFIN;		// final learn step size
     private double epsil = DEFAULT_EPSIL;		// initial random move rate 
@@ -40,7 +43,7 @@ public class ParTD implements Serializable {
     private double lambda= DEFAULT_LAMBDA; 		// eligibility trace decay parameter (should be <= GAMMA)
     private double horCut= DEFAULT_HORIZONCUT;	// horizon cut for TD eligibility trace
     private int nply = DEFAULT_NPLY; 
-//    private int mode3P = DEFAULT_MODE_3P;
+//  private int mode3P = DEFAULT_MODE_3P;
     private int eligMode = DEFAULT_ELIG_MODE;
     private int epochs = DEFAULT_EPOCHS; 
     private int featmode = 0;
@@ -49,9 +52,11 @@ public class ParTD implements Serializable {
     private boolean hasRprop = false;
     private boolean hasSigmoid = false;
 	private boolean hasStopOnRoundOver = false;
+	private double stepReward = DEFAULT_STEP_REWARD;
+	private double rewardPositive = DEFAULT_REWARD_POSITIVE;
 
     /**
-     * This member is only constructed when the constructor {@link #ParTD(boolean) ParTD(boolean withUI)} 
+     * This member is only constructed when the constructor {@link #ParTD(boolean,Arena) ParTD(boolean withUI,Arena)}
      * called with {@code withUI=true}. It holds the GUI for {@link ParTD}.
      */
     private transient TDParams tdparams = null;
@@ -59,16 +64,16 @@ public class ParTD implements Serializable {
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
 	 * compatible with an older one (older .agt.zip containing this object will become 
-	 * unreadable or you have to provide a special version transformation)
+	 * unreadable, or you have to provide a special version transformation)
 	 */
 	@Serial
 	private static final long serialVersionUID = 1L;
 
 	public ParTD() { 	}
     
-	public ParTD(boolean withUI) {
+	public ParTD(boolean withUI, Arena m_arena) {
 		if (withUI)
-			tdparams = new TDParams();
+			tdparams = new TDParams(m_arena);
 	}
 	
 	public ParTD(ParTD tp) {
@@ -97,6 +102,8 @@ public class ParTD implements Serializable {
 		this.hasLinNet = tp.hasLinearNet();
 		this.hasRprop = tp.hasRpropLrn();
 //		this.mode3P = tp.getMode3P();
+		this.stepReward = tp.getStepReward();
+		this.rewardPositive = tp.getRewardPositive();
 		
 		if (tdparams!=null)
 			tdparams.setFrom(this);
@@ -120,7 +127,9 @@ public class ParTD implements Serializable {
 		this.hasLinNet = tp.hasLinearNet();
 		this.hasRprop = tp.hasRpropLrn();
 //		this.mode3P = tp.getMode3P();
-		
+		this.stepReward = tp.getStepReward();
+		this.rewardPositive = tp.getRewardPositive();
+
 		if (tdparams!=null)
 			tdparams.setFrom(this);
 	}
@@ -153,7 +162,7 @@ public class ParTD implements Serializable {
 		return null;
 	}
 
-	// We abandon here in all the following getters the fetching of latest changes from the GUI.
+	// We abandon here in all the following getters the fetching of the latest changes from the GUI.
 	// Because this leads to bugs, if we call these getters from PlayAgent's fillParamTabsAfterLoading.
 	//   
 	// If we want to push GUI param changes from member tdparams up to this ParTD (since we have no
@@ -187,7 +196,7 @@ public class ParTD implements Serializable {
 	}
 
 	/**
-	 * The parameter {@code C = } {@link #getHorizonCut()} controls the horizon in eligibility traces: 
+	 * The parameter {@code C = getHorizonCut()} controls the horizon in eligibility traces:
 	 * Retain only those elements in the TD-update equation where {@code lambda^(t-k)} &ge; {@code C}.  
 	 * <br>(The horizon {@code h = t-k} runs from 0,1,..., to the appropriate {@code h = ceil(log_lambda(C))}.
 	 * 
@@ -235,6 +244,13 @@ public class ParTD implements Serializable {
 
 	public boolean hasStopOnRoundOver() {
 		return hasStopOnRoundOver;
+	}
+
+	public double getStepReward() {
+		return stepReward;
+	}
+	public double getRewardPositive() {
+		return rewardPositive;
 	}
 
 	public void setAlpha(double alpha) {
@@ -350,6 +366,18 @@ public class ParTD implements Serializable {
 			tdparams.setStopOnRoundOver(hasStopOnRound);
 	}
 
+	public void setStepReward(double sr) {
+		this.stepReward = sr;
+		if (tdparams!=null)
+			tdparams.setStepReward(sr);
+	}
+
+	public void setRewardPositive(double rp) {
+		this.rewardPositive = rp;
+		if (tdparams!=null)
+			tdparams.setRewardPositive(rp);
+	}
+
 	/**
 	 * Set sensible parameters for a specific agent and specific game. By "sensible
 	 * parameters" we mean parameters producing good results. If withUI, some parameter
@@ -361,14 +389,12 @@ public class ParTD implements Serializable {
 	 * @param gameName the string from {@link games.Arena#getGameName()}
 	 */
 	public void setParamDefaults(String agentName, String gameName) {
-		// Currently we have here only the sensible defaults for some games and
-		// for three agents ("TD-Ntuple[-2,-3]" = class TDNTuple[2,3]Agt and "TDS" = class TDAgent).
+		// Currently, we have here only the sensible defaults for some games and
+		// some agents.
 		//
 		// If later good parameters for other games are found, they should be
 		// added with suitable nested switch(gameName). 
-		// Currently we have only one switch(gameName) on the initial featmode (=3 for 
-		// TicTacToe, =2 for Hex, and =0 for all others)
-		this.setHorizonCut(0.1); 			
+		this.setHorizonCut(0.1);
 		switch (agentName) {
 		case "TD-Ntuple-3":
 		case "TD-Ntuple-4":
@@ -376,44 +402,39 @@ public class ParTD implements Serializable {
 		case "Sarsa-4":
 		case "Qlearn-4":
 			switch (agentName) {
-			case "TD-Ntuple-3":
-			case "TD-Ntuple-4":
-				switch (gameName) {
-				case "ConnectFour":
-					this.setAlpha(5.0);
-					this.setAlphaFinal(5.0);
-					this.setHorizonCut(0.01);
+				case "TD-Ntuple-3","TD-Ntuple-4": {
+					switch (gameName) {
+						case "ConnectFour" -> {
+							this.setAlpha(5.0);
+							this.setAlphaFinal(5.0);
+							this.setHorizonCut(0.01);
+						}
+						case "BlackJack" -> this.setEpsilon(0.0);
+						default -> {
+							this.setAlpha(0.2);
+							this.setAlphaFinal(0.2);
+						}
+					}
 					break;
-				case "BlackJack":
-					this.setEpsilon(0.0);
-					break;
-				default: 
-					this.setAlpha(0.2);
-					this.setAlphaFinal(0.2);				
 				}
-				break;
-			case "Sarsa":
-			case "Sarsa-4":
-			case "Qlearn-4":
-				this.setAlpha(1.0);
-				this.setAlphaFinal(0.5);
-				this.setEpsilon(0.1);
-				break;
-			default:	//  all other
-				this.setEpsilon(0.3);				
-				break;
+				case "Sarsa","Sarsa-4","Qlearn-4": {
+					this.setAlpha(1.0);
+					this.setAlphaFinal(0.5);
+					this.setEpsilon(0.1);
+					break;
+				}
+				default: {
+					this.setEpsilon(0.3);
+					break;
+				}
 			}
 			this.setEpsilonFinal(0.0);
 			this.setLambda(0.0);
 			this.setGamma(1.0);
 			this.setEpochs(1);
 			this.setSigmoid(true);		// tanh
-			this.setNormalize(false); 
-			switch (gameName) {
-			case "2048": 
-				this.setEpsilon(0.0);				
-				break;
-			}
+			this.setNormalize(false);
+			if ("2048".equals(gameName)) this.setEpsilon(0.0);
 			break;
 		case "TDS":
 			this.setAlpha(0.1);
@@ -424,27 +445,21 @@ public class ParTD implements Serializable {
 			this.setGamma(1.0);
 			this.setEpochs(1);
 			this.setSigmoid(false);		// Fermi fct
-			this.setNormalize(false); 
+			this.setNormalize(false);
 			switch (gameName) {
-			case "TicTacToe": 
-				setFeatmode(3);
-				break;
-			case "Hex": 
-				setFeatmode(2);
-				this.setLambda(0.0);				
-				break;
-			default:	//  all other
-				setFeatmode(0);
-				this.setLambda(0.0);				
-				break;
+				case "TicTacToe" -> setFeatmode(3);
+				case "Hex" -> {
+					setFeatmode(2);
+					this.setLambda(0.0);
+				}
+				default -> {    //  all other
+					setFeatmode(0);
+					this.setLambda(0.0);
+				}
 			}
 			switch (gameName) {
-			case "2048": 
-				this.setEpsilon(0.0);				
-				break;
-			default:	//  all other
-				this.setEpsilon(0.3);				
-				break;
+				case "2048" -> this.setEpsilon(0.0);
+				default ->  this.setEpsilon(0.3);      //  all other
 			}
 			break;
 		}	

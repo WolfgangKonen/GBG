@@ -10,7 +10,8 @@ import tools.Types;
 import tools.Types.ACTIONS;
 
 /**
- * Class StateObservation observes the current state of the game, it has utility functions for
+ * Class StateObservation observes the current state of the game.<p>
+ * It has utility functions for
  * <ul>
  * <li> returning the available actions ({@link #getAvailableActions()}), 
  * <li> advancing the state of the game with a specific action ({@link #advance(Types.ACTIONS)}),
@@ -214,6 +215,9 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
 	 * Set them in member ACTIONS[] actions.
 	 */
 	public void setAvailableActions() {
+		if (availableActions==null) {	// safety check, needed when called from LogManagerGUI
+			availableActions = new ArrayList();
+		}
 		availableActions.clear();
 		if (m_Table[0][0]==0)  availableActions.add(Types.ACTIONS.fromInt(0));
 		if (m_Table[0][1]==0)  availableActions.add(Types.ACTIONS.fromInt(1));

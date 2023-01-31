@@ -1,15 +1,11 @@
 package params;
 
 import java.awt.BorderLayout;
-import java.awt.Canvas;
-import java.awt.Choice;
 import java.awt.Frame;
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.io.Serial;
 import java.io.Serializable;
 
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -18,9 +14,6 @@ import javax.swing.JTextField;
 
 import controllers.TD.ntuple2.SarsaAgt;
 import controllers.TD.ntuple2.TDNTuple3Agt;
-import games.Arena;
-import games.Nim.ArenaNim2P;
-import games.Nim.NimConfig;
 
 /**
  *  N-tuple parameters and TC (temporal coherence) parameters for TD agents. 
@@ -46,18 +39,19 @@ public class NTParams extends Frame implements Serializable {
 	private static final String TIPAFTERSTATE = "If checked, use afterstate logic [Jaskowski16] when training n-tuple agent";
 	private static final String TIPNSYMMETRY = "number of symmetries to use (0: all symmetries)";
 
-	private static String[] tcFactorString = { "Immediate", "Accumulating" };
-	private static String[] tcTransferString = { "id", "TC EXP" };
-	private static String[] tcAccumulString = { "delta", "rec wght change" };
-	private static String[] ntTupleTypeString={"RandomWalk","RandomPoint"};
-	private static String[] fixedTupleModeString={"1","2"};
-	private static String[] plotWghtString = { "none", "wght distr", "tcFactor distr" };
+	private final static String[] tcFactorString = { "Immediate", "Accumulating" };
+	private final static String[] tcTransferString = { "id", "TC EXP" };
+	private final static String[] tcAccumulString = { "delta", "rec wght change" };
+	private final static String[] ntTupleTypeString={"RandomWalk","RandomPoint"};
+	private final static String[] fixedTupleModeString={"1","2"};
+	private final static String[] plotWghtString = { "none", "wght distr", "tcFactor distr" };
 
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
 	 * compatible with an older one (older .agt.zip containing this object will become 
-	 * unreadable or you have to provide a special version transformation)
+	 * unreadable, or you have to provide a special version transformation)
 	 */
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	JLabel TempCoL;
@@ -89,12 +83,12 @@ public class NTParams extends Frame implements Serializable {
 	public JCheckBox UseSymmetryC;
 	public JCheckBox AfterStateC;
 
-	public JComboBox tcFactorType;
-	public JComboBox tcTransferType;
-	public JComboBox tcAccumulType;
-	public JComboBox NTupleTypeCo;
-	public JComboBox NTupleFixCo;
-	public JComboBox PlotWghtCo;
+	public JComboBox<String> tcFactorType;
+	public JComboBox<String> tcTransferType;
+	public JComboBox<String> tcAccumulType;
+	public JComboBox<String> NTupleTypeCo;
+	public JComboBox<String> NTupleFixCo;
+	public JComboBox<String> PlotWghtCo;
 
 	JPanel ntPanel;
 
@@ -151,55 +145,32 @@ public class NTParams extends Frame implements Serializable {
 
 		TempCoC = new JCheckBox();
 		TempCoC.setSelected(false);
-		TempCoC.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				enableTcPart();
-			}
-
-		});
 		RandomnessC = new JCheckBox();
-		RandomnessC.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				enableRandomPart();
-			}
-		});
-
 		UseSymmetryC = new JCheckBox();
-		UseSymmetryC.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				enableSymmetryPart();
-			}
-		});
+
+		// the following lambda's, where e is an ActionEvent, are a simpler replacement for anonymous action listeners:
+		TempCoC.addActionListener( e -> enableTcPart() );
+		RandomnessC.addActionListener( e -> enableRandomPart() );
+		UseSymmetryC.addActionListener( e -> enableSymmetryPart() );
+
 		NSymT = new JTextField(0+"");
 		NSymT.setEnabled(false);
 		AfterStateC = new JCheckBox();
 		
-		tcFactorType = new JComboBox(tcFactorString);
-		tcFactorType.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				enableTcImmPart();
-			}
-		});
+		tcFactorType = new JComboBox<>(tcFactorString);
+		tcTransferType = new JComboBox<>(tcTransferString);
+
+		// the following lambda's, where e is an ActionEvent, are a simpler replacement for anonymous action listeners:
+		tcFactorType.addActionListener( e -> enableTcImmPart() );
+		tcTransferType.addActionListener( e -> enableTcTransferPart() );
 		
-		tcTransferType = new JComboBox(tcTransferString);
-		tcTransferType.addActionListener(new ActionListener(){
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				enableTcTransferPart();
-			}
-		});
+		tcAccumulType = new JComboBox<>(tcAccumulString);
 		
-		tcAccumulType = new JComboBox(tcAccumulString);
-		
-		NTupleTypeCo= new JComboBox(ntTupleTypeString);
+		NTupleTypeCo= new JComboBox<>(ntTupleTypeString);
 		NTupleTypeCo.setEnabled(false);
-		NTupleFixCo = new JComboBox(fixedTupleModeString);
+		NTupleFixCo = new JComboBox<>(fixedTupleModeString);
 		NTupleFixCo.setEnabled(true); 
-		PlotWghtCo = new JComboBox(plotWghtString);
+		PlotWghtCo = new JComboBox<>(plotWghtString);
 		PlotWghtCo.setEnabled(true); 
 		
 		ntPanel = new JPanel();		// put the inner buttons into panel ntPanel. This panel
@@ -392,7 +363,7 @@ public class NTParams extends Frame implements Serializable {
 	}
 
 	public double getTcInit() {
-		return Double.valueOf(tcInitT.getText()).doubleValue();
+		return Double.parseDouble(tcInitT.getText());
 	}
 
 	public int getTcInterval() {
@@ -400,7 +371,7 @@ public class NTParams extends Frame implements Serializable {
 	}
 
 	public double getTcBeta() {
-		return Double.valueOf(tcBetaT.getText()).doubleValue();
+		return Double.parseDouble(tcBetaT.getText());
 	}
 
 	public String getTcImmediate() {

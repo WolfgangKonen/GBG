@@ -1,25 +1,25 @@
 package games.RubiksCube;
 
-import java.util.Random;
+import games.StateObservation;
 import params.ParOther;
 
 public class CubeConfig {
-	
+
 	/**
-	 * What type of cube is it?
+	 * What is the cube size?
 	 * <ul>
 	 * <li> <b>POCKET</b>: 2x2x2 pocket cube
 	 * <li> <b>RUBIKS</b>: 3x3x3 Rubik's cube 		
 	 * </ul>
-	 * @see ArenaCube#setCubeType(String)
+	 * @see ArenaCube#setCubeSize(String)
 	 * 
 	 */
-	public static enum CubeType {POCKET,RUBIKS}
+	public enum CubeSize {POCKET,RUBIKS}
 
 	/**
-	 * @see ArenaCube#setCubeType(String)
+	 * @see ArenaCube#setCubeSize(String)
 	 */
-	public static CubeType cubeType = CubeType.POCKET;
+	public static CubeSize cubeSize = CubeSize.POCKET;
 	
 	/**
 	 * What does a board vector state in {@link StateObserverCube} represent?. The possible options are
@@ -38,11 +38,12 @@ public class CubeConfig {
 	 * is used in {@link CubeState#getBoardVector()} and in {@link XNTupleFuncsCube}.
 	 * 
 	 * @see ArenaCube#setBoardVecType(String)
+	 * @see games.BoardVector
 	 */
 	public static BoardVecType boardVecType = BoardVecType.CUBESTATE;
 
 	/**
-	 * What type of twists are allowed?
+	 * What type of twists (HTM or QTM) are allowed?
 	 * <ul>
 	 * <li> <b>HTM</b>: half-turn metric, quarter and half twists (i.e. U1, U2, U3)
 	 * <li> <b>QTM</b>: quarter-turn metric, only quarter twists (i.e. U1, U3)
@@ -77,10 +78,27 @@ public class CubeConfig {
 	public static int pMin = 7;
 
 	/**
-	 * The cost-to-go for a transition from one state s to the next state s'. Used as part of the reward in
-	 * DAVI2Agent, DAVI3Agent, DAVI4Agent, TDNTuple3Agt and StateObserverCube.
+	 * The cost-to-go for a transition from one state s to the next state s'. Used as part of the reward via
+	 * {@link StateObservation#getStepRewardTuple(controllers.PlayAgent)} (agents DAVI2Agent, DAVI3Agent, DAVI4Agent, TDNTuple3Agt, TDNTuple4Agt).
 	 */
-	public static double stepReward = (CubeConfig.cubeType==CubeType.POCKET) ? -0.04 : -0.1;  //-0.01;
+//	public static double stepReward = (CubeConfig.cubeSize == CubeSize.POCKET) ? -0.04 : -0.1;  // setting before 2022-09-29
+	public static double stepReward = (CubeConfig.cubeSize == CubeSize.POCKET) ? -1.0 : -0.5;  //-0.01;
+
+	/**
+	 * This method needs to be called from {@link GameBoardCube#initialize()} in order to adjust {@link #stepReward}
+	 * according to the current {@link #cubeSize} (which may have changed through scalable parameters (!))
+	 */
+	public static void setStepReward() {
+		stepReward = (CubeConfig.cubeSize == CubeSize.POCKET) ? -1.0 : -0.1;
+	}
+
+	/**
+	 * The reward for the solved cube. <br>
+	 * Used in {@link StateObserverCube#getGameScore(int) StateObserverCube#getGameScore} and in
+	 * {@link StateObserverCube#getReward(int,boolean) StateObserverCube#getReward}
+	 */
+//    public static double REWARD_POSITIVE =  1.0; // setting before 2022-09-29
+	public static double REWARD_POSITIVE =  10.0;
 
 	/**
 	 * whether a replay buffer with certain capacity and batch size is used or not
@@ -101,9 +119,9 @@ public class CubeConfig {
 	 * <li> <b>false</b>: doublets are not allowed in the twist sequence. As a consequence, the twist sequence in this 
 	 * 		case is likely to require at least p (or p-1) twists to be solved.
 	 * </ul>
-	 * Detail: In case {@link #twistType}=={@link TwistType}<b>{@code .ALLTWISTS}</b>, the forbidden doublets are 
+	 * Detail: In case {@link #twistType}=={@link TwistType}<b>{@code .HTM}</b>, the forbidden doublets are
 	 * 		U*U*, L*L*, F*F* with *=1,2,3. <br>
-	 * 		In case {@link #twistType}=={@link TwistType}<b>{@code .QUARTERTWISTS}</b>, the forbidden doublets are 
+	 * 		In case {@link #twistType}=={@link TwistType}<b>{@code .QTM}</b>, the forbidden doublets are
 	 * 		U1U3, U3U1, L1L3, L3L1, F1F3, F3F1.
 	 */
 	final static boolean TWIST_DOUBLETS = false;
@@ -120,23 +138,23 @@ public class CubeConfig {
 	// Elements below are only for now deprecated cases:
 	//
 
-	/**
-	 * The larger EVAL_EPILENGTH, the larger is the success percentage of {@link EvaluatorCube}, mode=1.<br>
-	 * At the same time, a large EVAL_EPILENGTH makes {@link EvaluatorCube} much slower (e. g. during training).
-	 */
+	// --- is now replaced with ParOther.stopEval ---
+//	/**
+//	 * The larger EVAL_EPILENGTH, the larger is the success percentage of {@link EvaluatorCube}, mode=1.<br>
+//	 * At the same time, a large EVAL_EPILENGTH makes {@link EvaluatorCube} much slower (e.g. during training).
+//	 */
 //	final static int EVAL_EPILENGTH = 12;		// 12 or 50 (should be > pMax)
-	// is now replaced with ParOther.stopEval
 
-
-	/**
-	 * theoCov[p] is the known maximum size of distance set D[p] (theoretical coverage, 2x2x2 cube, see
-	 *  <a href="https://en.wikipedia.org/wiki/Pocket_Cube">https://en.wikipedia.org/wiki/Pocket_Cube</a>.
-	 */
-	final static
-	int[] theoCov = {1,9,54,321,  	// the known maximum sizes (ALLTWIST case) for D[0],D[1],D[2],D[3] ...
-			1847,9992,50136,227536,	// ... and D[4],D[5],D[6],D[7],
-			870072,1887748,623800,	// ... and D[8],D[9],D[10],D[7],
-			2644					// ... and D[11]
-	};
+	// --- is only needed in test/PocketCubeTest, where we define it locally ---
+//	/**
+//	 * theoCov[p] is the known maximum size of distance set D[p] (theoretical coverage, 2x2x2 cube, see
+//	 *  <a href="https://en.wikipedia.org/wiki/Pocket_Cube">https://en.wikipedia.org/wiki/Pocket_Cube</a>).
+//	 */
+//	final static
+//	int[] theoCov = {1,9,54,321,  	// the known maximum sizes (ALLTWIST case) for D[0],D[1],D[2],D[3] ...
+//			1847,9992,50136,227536,	// ... and D[4],D[5],D[6],D[7],
+//			870072,1887748,623800,	// ... and D[8],D[9],D[10],D[7],
+//			2644					// ... and D[11]
+//	};
 
 }

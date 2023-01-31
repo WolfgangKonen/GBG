@@ -99,6 +99,7 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
     }
 
 	public boolean instantiateAfterLoading() {
+		super.instantiateAfterLoading();
         m_Timer = new ElapsedCpuTimer(TimerType.CPU_TIME);
         m_Timer.setMaxTimeMillis(40);
         mctsPlayer.instantiateAfterLoading();
@@ -114,9 +115,10 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 	 * 
 	 * @see Arena#loadAgent
 	 */
-	public void fillParamTabsAfterLoading(int n, Arena m_arena) { 
+	public void fillParamTabsAfterLoading(int n, Arena m_arena) {
+		super.fillParamTabsAfterLoading(n, m_arena);
 		m_arena.m_xab.setMctsParFrom(n, this.getParMCTS() );
-		m_arena.m_xab.setOParFrom(n, this.getParOther() );
+		//m_arena.m_xab.setOParFrom(n, this.getParOther() );  // now in super
 	}
 	
     /**
@@ -246,8 +248,7 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 	/**
 	 * Used by {@link #getScoreTuple(StateObservation, ScoreTuple)}
 	 */
-	@Override
-	public double getScore(StateObservation so) {
+	public double _getScore4Player(StateObservation so) {
 		int nAct = so.getNumAvailableActions();
 		double[] vtable = new double[nAct+1];
 		
@@ -284,26 +285,30 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
 		int player;
 		switch (so.getNumPlayers()) {
 		case 1:
-			sc.scTup[0] = this.getScore(so);
+			sc.scTup[0] = this._getScore4Player(so);
 			break;
 		case 2:
 			player = so.getPlayer();
 			int opponent = (player==0) ? 1 : 0;
-			sc.scTup[player] = this.getScore(so);
+			sc.scTup[player] = this._getScore4Player(so);
 			sc.scTup[opponent] = -sc.scTup[player];
 			break;
 		default:
 			boolean rgs = mctsPlayer.getParOther().getRewardIsGameScore();
 			player = so.getPlayer();
 
-			// this is only partially correct, because for non-game-over states 'so' the tuple value for
-			// other players than so.getPlayer() will be zero (at least for final-reward games). But
-			// most methods that use getScoreTuple (like MaxN2Wrapper.estimateGameValueTuple) need only
-			// the correct value for so.getPlayer(), which will be inserted into sc in the 3rd line:
-			sc = so.getRewardTuple(rgs);
+			//
+			// the new logic in the case of 3-,4-,...,N-player games: starting from a previous ScoreTuple
+			// prevTuple, fill in the game value for the player to move in state so.
+			// We do not know the game values from the perspective of the other players, therefore
+			// we re-use the estimates from earlier states in prevTuple.
+			//
+			if (prevTuple != null) sc = new ScoreTuple(prevTuple);
 			if (!so.isGameOver())
-				sc.scTup[player] = this.getScore(so);
+				sc.scTup[player] = this._getScore4Player(so);
 				// return MCTS' estimate of the so's value for the player to move in so
+			// add the step reward for moving into state so:
+			sc.combine(so.getStepRewardTuple(null), ScoreTuple.CombineOP.SUM,0,0);
 		}
     	return sc;
 	}

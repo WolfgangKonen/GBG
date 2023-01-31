@@ -1,22 +1,24 @@
 package games.RubiksCube;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Map;
 
 import games.BoardVector;
 
 /**
  * Class CubeState represents a certain cube state. It comes in four different types (member {@code type}), two
- * types for each value of {@link CubeConfig#cubeType}:
+ * types for each value of {@link CubeConfig#cubeSize}:
  * <ul>
- *     <li>if {@link CubeConfig#cubeType}==<b>POCKET</b>:
+ *     <li>if {@link CubeConfig#cubeSize}==<b>POCKET</b>:
  *     <ul>
  * 			<li> <b>COLOR_P</b>: color representation of a 2x2x2 pocket cube
  * 			<li> <b>TRAFO_P</b>: transformation representation for a 2x2x2 pocket cube
  *     </ul>
- *     <li>if {@link CubeConfig#cubeType}==<b>RUBIKS</b>:
+ *     <li>if {@link CubeConfig#cubeSize}==<b>RUBIKS</b>:
  *     <ul>
  * 			<li> <b>COLOR_R</b>: color representation of a 3x3x3 Rubik's cube
  * 			<li> <b>TRAFO_R</b>: transformation representation for a 3x3x3 Rubik's cube
@@ -69,13 +71,34 @@ import games.BoardVector;
  *      14 13				
  *      15 12				
  * </pre>
- * 
- * @author Wolfgang Konen, TH Koeln, 2018-2020
+ * For the 3x3x3 cube (RUBIKS) the numbering is:
+ * <pre>
+ *               6   5   4
+ *               7       3
+ *               0   1   2
+ *  10   9   8  16  23  22  36  35  34  46  45  44
+ *  11      15  17      21  37      33  47      43
+ *  12  13  14  18  19  20  38  39  32  40  41  42
+ *              28  27  26
+ *              29      25
+ *              30  31  24
+ * </pre>
+ *
+ * @author Wolfgang Konen, TH Koeln, 2018-2022
+ * @see CubeState2x2
+ * @see CubeState3x3
  */
 abstract public class CubeState implements Serializable {
-	
-	public static enum Type {COLOR_P,COLOR_R,TRAFO_P,TRAFO_R}
-	public static enum Twist {ID,U,L,F,D,R,B}
+
+	/**
+	 * COLOR or TRAFO type?
+	 */
+	public enum Type {COLOR_P,COLOR_R,TRAFO_P,TRAFO_R}
+
+	/**
+	 * enumerate ID plus all six twists U,L,...
+	 */
+	public enum Twist {ID,U,L,F,D,R,B}
 
 	/**
 	 * We number the corners connected to the U (up) face with {a,b,c,d} in the order of the U face locations
@@ -85,20 +108,24 @@ abstract public class CubeState implements Serializable {
 	 * @see GameBoardCubeGui2x2
 	 * @see GameBoardCubeGui3x3
 	 */
-	public static enum Cor {a,b,c,d,e,f,g,h}
-	
+	public enum Cor {a,b,c,d,e,f,g,h}
+
 	/**
 	 * {@code fcol} is the face color array with 24 (<b>COLOR_P</b>) or 48 (<b>COLOR_R</b>) elements. <br> 
 	 * {@code fcol[i]} holds the face color for cubie face (sticker) with number {@code i} (<b>COLOR_*</b>).<br>
-	 * {@code fcol[i]} holds the parent location for cubie face (sticker) with number {@code i} (<b>TRAFO_*</b>).
+	 * {@code fcol[i]} holds the parent location for cubie face (sticker) with number {@code i} (<b>TRAFO_*</b>).<br>
+	 * The color is one out of {0,1,2,3,4,5} for colors {w,b,o,y,g,r}.
 	 */
-	public int[] fcol; 
+	protected int[] fcol;
 	
 	/**
 	 * {@code sloc} is the sticker location, an array with 24 (<b>COLOR_P</b>) or 48 (<b>COLOR_R</b>) elements. <br>
 	 * {@code sloc[i]} holds the location of the sticker which is at face {@code i} for the solved cube.  
 	 */
-	public int[] sloc;
+	protected int[] sloc;
+
+	protected static CubeStateFactory csFactory = new CubeStateFactory();
+	protected static CubieTripleFactory ctFactory = new CubieTripleFactory();
 
 	Type type = Type.COLOR_P;
 	Twist lastTwist = Twist.ID;
@@ -110,9 +137,10 @@ abstract public class CubeState implements Serializable {
 	
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
-	 * compatible with an older one (older .agt.zip will become unreadable or you have
+	 * compatible with an older one (older .agt.zip will become unreadable, or you have
 	 * to provide a special version transformation)
 	 */
+	@Serial
 	private static final long  serialVersionUID = 12L;
 
 	/**
@@ -144,34 +172,34 @@ abstract public class CubeState implements Serializable {
 	 */
 	public CubeState(Type type) {
 		this.type = type;
-		switch(type) {
-		case COLOR_P:
-			assert (CubeConfig.cubeType== CubeConfig.CubeType.POCKET);
-			this.fcol = new int[] {0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5};
-			break;
-		case COLOR_R:
-			assert (CubeConfig.cubeType== CubeConfig.CubeType.RUBIKS);
-			this.fcol = new int[] {0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,
-								   3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,5,5,5,5,5,5,5,5};
-			break;
-		case TRAFO_P:
-			assert (CubeConfig.cubeType== CubeConfig.CubeType.POCKET);
-			// fcol[i] holds the parent of location i under the trafo represented by this CubeState object.
-			// Initially this trafo is the id transformation for the pocket cube.
-			this.fcol = new int[24];
-			for (int i=0; i<fcol.length; i++) this.fcol[i] = i;
-			break;
-		case TRAFO_R:
-			assert (CubeConfig.cubeType== CubeConfig.CubeType.RUBIKS);
-			// fcol[i] holds the parent of location i under the trafo represented by this CubeState object.
-			// Initially this trafo is the id transformation for the Rubik's cube.
-			this.fcol = new int[48];
-			for (int i=0; i<fcol.length; i++) this.fcol[i] = i;
-			break;
+		switch (type) {
+			case COLOR_P -> {
+				assert (CubeConfig.cubeSize == CubeConfig.CubeSize.POCKET);
+				fcol = new int[]{0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5};
+			}
+			case COLOR_R -> {
+				assert (CubeConfig.cubeSize == CubeConfig.CubeSize.RUBIKS);
+				fcol = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2,
+						         3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5};
+			}
+			case TRAFO_P -> {
+				assert (CubeConfig.cubeSize == CubeConfig.CubeSize.POCKET);
+				// fcol[i] holds the parent of location i under the trafo represented by this CubeState object.
+				// Initially this trafo is the id transformation for the pocket cube.
+				fcol = new int[24];
+				for (int i = 0; i < fcol.length; i++) fcol[i] = i;
+			}
+			case TRAFO_R -> {
+				assert (CubeConfig.cubeSize == CubeConfig.CubeSize.RUBIKS);
+				// fcol[i] holds the parent of location i under the trafo represented by this CubeState object.
+				// Initially this trafo is the id transformation for the Rubik's cube.
+				fcol = new int[48];
+				for (int i = 0; i < fcol.length; i++) fcol[i] = i;
+			}
 		}
-		// sloc[i], the location of each face i, is in any case the default sequence 0,...,n where n=fcol.length
-		this.sloc = new int[this.fcol.length];
-		for (int i=0; i<sloc.length; i++) this.sloc[i] = i;
+		// sloc[i], the location of each face i, is in any case the default sequence 0,...,n-1 where n=fcol.length
+		this.sloc = new int[fcol.length];
+		for (int i=0; i<sloc.length; i++) sloc[i] = i;
 	}
 	
 	/**
@@ -187,20 +215,47 @@ abstract public class CubeState implements Serializable {
 		this.sloc = cs.sloc.clone();
 	}
 
-	// this is now in CubeStateFactory.generateInverseTs() and in the derived classes, resp.
-//	/**
-//	 * generate the <b>inverse</b> transformations {@link #invF}, {@link #invL} and {@link #invU}.
-//	 */
-//	public static void generateInverseTs() {
-//	}
+	/**
+	 * Just a one-time printout of invU, invL, ... which can be calculated, if we have {@link #FTw()}, which is based on invF.
+	 * <p>
+	 *     All twist trafos can be generated from one twist (here: {@link #FTw()}) by making a whole-cube trafo that brings the
+	 *     twist face to the Front face, doing {@link #FTw()} and then rotating back
+	 * </p>
+	 */
+	protected void show_invF_invL_invU() {
+		CubeState.Type trafoType = (CubeConfig.cubeSize== CubeConfig.CubeSize.POCKET)
+								 ? CubeState.Type.TRAFO_P : CubeState.Type.TRAFO_R;
+		CubeState t_cs = csFactory.makeCubeState(trafoType);
+		t_cs.lTr(3).FTw().lTr(1);					        // invU
+		System.out.println("invU: "+t_cs);
+		t_cs = csFactory.makeCubeState(trafoType);
+		t_cs.uTr(1).FTw().uTr(3);					        // invL
+		System.out.println("invL: "+t_cs);
+		t_cs = csFactory.makeCubeState(trafoType);
+		t_cs.FTw();											// invF
+		System.out.println("invF: "+t_cs);
+		t_cs = csFactory.makeCubeState(trafoType);
+		t_cs.lTr(1).FTw().lTr(3);					        // invD
+		System.out.println("invD: "+t_cs);
+		t_cs = csFactory.makeCubeState(trafoType);
+		t_cs.uTr(3).FTw().uTr(1);					        // invR
+		System.out.println("invR: "+t_cs);
+		t_cs = csFactory.makeCubeState(trafoType);
+		t_cs.uTr(2).FTw().uTr(2);					        // invB
+		System.out.println("invB: "+t_cs);
+	}
 
-	abstract protected void show_invF_invL_invU();
-
+//	abstract protected void show_invF_invL_invU();
 
 	/**
 	 * generate the <b>forward</b> transformations {@link #tforF} (and similar) from {@link #invF} (and similar).
 	 * <p>
-	 * [{@link #invF} is generated via {@link CubeStateFactory#generateInverseTs()}.]
+	 * {@link #invF} is generated via {@link CubeStateFactory#generateInverseTs()}.
+	 * <p>
+	 * The forward trafo {@code T} is calculated from the given inverse trafo {@code invT} with the help of the
+	 * identity relation <pre>
+	 *     T[invT[i]] = i  </pre>
+	 * This method is called once the {@link ArenaCube} object is constructed.
 	 */
 	public static void generateForwardTs() {
 		tforU = new int[invF.length];
@@ -209,26 +264,64 @@ abstract public class CubeState implements Serializable {
 		tforD = new int[invF.length];
 		tforR = new int[invF.length];
 		tforB = new int[invF.length];
-		// Since 3x applying F is F^3 = F^{-1}, it also holds that 3x applying F^{-1} gives F^9 = F.
-		// So we can calculate tforF by 3x appling invF:
 		for (int i=0; i<invF.length; i++) {
-			tforU[i] = invU[invU[invU[i]]];
-			tforL[i] = invL[invL[invL[i]]];
-			tforF[i] = invF[invF[invF[i]]];
-			tforD[i] = invD[invD[invD[i]]];
-			tforR[i] = invR[invR[invR[i]]];
-			tforB[i] = invB[invB[invB[i]]];
+			tforU[invU[i]]=i;
+			tforL[invL[i]]=i;
+			tforF[invF[i]]=i;
+			tforD[invD[i]]=i;
+			tforR[invR[i]]=i;
+			tforB[invB[i]]=i;
+		}
+
+		assertForwardTs();
+	}
+
+	private static void assertForwardTs() {
+		// alternative way of calculating the forward trafos tfor*:
+		//
+		int[] tf2U = new int[invF.length];
+		int[] tf2L = new int[invF.length];
+		int[] tf2F = new int[invF.length];
+		int[] tf2D = new int[invF.length];
+		int[] tf2R = new int[invF.length];
+		int[] tf2B = new int[invF.length];
+		// Since 3x applying F is F^3 = F^{-1}, it also holds that 3x applying F^{-1} gives F^{-3} = F.
+		// So we can calculate tforF by 3x applying invF:
+		for (int i=0; i<tf2U.length; i++) {
+			tf2U[i] = invU[invU[invU[i]]];
+			tf2L[i] = invL[invL[invL[i]]];
+			tf2F[i] = invF[invF[invF[i]]];
+			tf2D[i] = invD[invD[invD[i]]];
+			tf2R[i] = invR[invR[invR[i]]];
+			tf2B[i] = invB[invB[invB[i]]];
+		}
+		for (int i=0; i<tf2U.length; i++) {
+			assert (tforU[i]==tf2U[i]) : "difference tforU at i="+i;
+			assert (tforL[i]==tf2L[i]) : "difference tforL at i="+i;
+			assert (tforF[i]==tf2F[i]) : "difference tforF at i="+i;
+			assert (tforD[i]==tf2D[i]) : "difference tforD at i="+i;
+			assert (tforR[i]==tf2R[i]) : "difference tforR at i="+i;
+			assert (tforB[i]==tf2B[i]) : "difference tforB at i="+i;
+		}
+		// Since tforU is the inverse of invU, we can calculate is via the inverse map as well:
+		for (int i=0; i<tf2U.length; i++) {
+			tf2U[invU[i]] = i;
+			tf2L[invL[i]] = i;
+			tf2F[invF[i]] = i;
+			tf2D[invD[i]] = i;
+			tf2R[invR[i]] = i;
+			tf2B[invB[i]] = i;
+		}
+		for (int i=0; i<tf2U.length; i++) {
+			assert (tforU[i]==tf2U[i]) : "difference tforU at i="+i;
+			assert (tforL[i]==tf2L[i]) : "difference tforL at i="+i;
+			assert (tforF[i]==tf2F[i]) : "difference tforF at i="+i;
+			assert (tforD[i]==tf2D[i]) : "difference tforD at i="+i;
+			assert (tforR[i]==tf2R[i]) : "difference tforR at i="+i;
+			assert (tforB[i]==tf2B[i]) : "difference tforB at i="+i;
 		}
 	}
 
-	//
-	// The following methods are currently only valid for 2x2x2 Pocket Cube.
-	// (They need to be generalized later to the 3x3x3 case.)
-	//
-	
-	// TODO: The whole cube rotations need later to be extended to transform also this.sloc. But for the moment 
-	// this is not needed, because whole-cube rotations come only into play if we use color symmetries.
-	
 	/**
 	 * Whole-cube rotation 90° counter-clockwise around the u-face
 	 */
@@ -345,7 +438,7 @@ abstract public class CubeState implements Serializable {
 	}
 
 	/**
-	 * U-face twist, {@code times} * 90° counter-clockwise
+	 * U-face twist, {@code times} * 90 degree counter-clockwise
 	 */
 	public CubeState UTw(int times) {
 		for (int i=0; i<times; i++) this.UTw();
@@ -356,7 +449,7 @@ abstract public class CubeState implements Serializable {
 	}
 	
 	/**
-	 * L-face twist, {@code times} * 90° counter-clockwise
+	 * L-face twist, {@code times} * 90 degree counter-clockwise
 	 */
 	public CubeState LTw(int times) {
 		for (int i=0; i<times; i++) this.LTw();
@@ -367,7 +460,7 @@ abstract public class CubeState implements Serializable {
 	}
 	
 	/**
-	 * F-face twist, {@code times} * 90° counter-clockwise
+	 * F-face twist, {@code times} * 90 degree counter-clockwise
 	 */
 	public CubeState FTw(int times) {
 		for (int i=0; i<times; i++) this.FTw();
@@ -378,7 +471,7 @@ abstract public class CubeState implements Serializable {
 	}
 
 	/**
-	 * U-face twist, {@code times} * 90° counter-clockwise
+	 * U-face twist, {@code times} * 90 degree counter-clockwise
 	 */
 	public CubeState DTw(int times) {
 		for (int i=0; i<times; i++) this.DTw();
@@ -389,7 +482,7 @@ abstract public class CubeState implements Serializable {
 	}
 
 	/**
-	 * L-face twist, {@code times} * 90° counter-clockwise
+	 * L-face twist, {@code times} * 90 degree counter-clockwise
 	 */
 	public CubeState RTw(int times) {
 		for (int i=0; i<times; i++) this.RTw();
@@ -400,7 +493,7 @@ abstract public class CubeState implements Serializable {
 	}
 
 	/**
-	 * F-face twist, {@code times} * 90° counter-clockwise
+	 * F-face twist, {@code times} * 90 degree counter-clockwise
 	 */
 	public CubeState BTw(int times) {
 		for (int i=0; i<times; i++) this.BTw();
@@ -410,45 +503,213 @@ abstract public class CubeState implements Serializable {
 		return this;
 	}
 
-	// CAUTION: This method is not yet extended for member sloc. But apply(trafo) is only needed in case
-	// of color symmetries.
 	/**
-	 * Apply transformation {@code trafo} to this
+	 * Apply transformation {@code trafo} to {@code this}. {@code this} has to be of type COLOR_P or COLOR_R.
+	 *
 	 * @param trafo a {@link CubeState} object of type TRAFO_P or TRAFO_R
-	 * @return the transformed 'this'
+	 * @return the transformed {@code this}
 	 */
 	public CubeState apply(CubeState trafo) {
-		assert(trafo.type==Type.TRAFO_P || this.type==Type.TRAFO_R) : "Wrong type in apply(trafo) !";
+		return apply(trafo,false);
+	}
+	public CubeState apply(CubeState trafo, boolean doAssert) {
+		assert(trafo.type==Type.TRAFO_P || trafo.type==Type.TRAFO_R) : "Wrong type in apply(trafo) !";
 		int i;
 		int[] tmp = this.fcol.clone();
-		//for (i=0; i<fcol.length; i++) tmp[i] = this.fcol[trafo.fcol[i]];
-		for (i=0; i<fcol.length; i++) this.fcol[i] = tmp[trafo.fcol[i]]; 
+		for (i=0; i<fcol.length; i++) this.fcol[i] = tmp[trafo.fcol[i]];
+		apply_sloc(trafo,doAssert);
+		//apply_sloc_slow(trafo,doAssert);			// the slow version (for debug)
 		return this;		
 	}
-	
+
+//	public CubeState apply_wcr(CubeState trafo, boolean doAssert) {
+//		assert(trafo.type==Type.TRAFO_P || this.type==Type.TRAFO_R) : "Wrong type in apply(trafo) !";
+//		int i;
+//		int[] tmp = this.fcol.clone();
+//		for (i=0; i<fcol.length; i++) this.fcol[i] = tmp[trafo.fcol[i]];
+//		apply_sloc_wcr(trafo,doAssert);
+//		return this;
+//	}
+
 	/**
-	 * Apply color transformation cT to {@code this}. {@code this} has to be of 
+	 * Apply transformation {@code trafo} to {@link #sloc}. Do it the <b>fast</b> way:
+	 * The permutation stored in {@code trafo}'s {@link #fcol} is used to calculate
+	 * the new setting for {@link #sloc} via <pre>
+	 *     new_sloc[trafo.fcol[i]]=sloc[i]
+	 * </pre>
+	 *
+	 * @param trafo a {@link CubeState} object of type TRAFO_P or TRAFO_R
+	 * @param doAssert assert the correctness of {@link #sloc} transformation by calling
+	 *          {@link CubeState#apply_sloc_slow(CubeState, boolean) apply_sloc_slow}
+	 * @return {@code this} with its member {@link #sloc} transformed
+	 */
+	protected CubeState apply_sloc(CubeState trafo, boolean doAssert) {
+		//int[] tmp = sloc.clone();
+		//for (int i=0; i<sloc.length; i++)  sloc[trafo.fcol[i]]=tmp[i];// OLD version, WRONG for twists
+
+		int[] invS = sloc.clone();                                      // NEW version 2022-06: works for twists and whole-cube rots
+		for (int i=0; i<sloc.length; i++) invS[sloc[i]]=i;
+		for (int i=0; i<sloc.length; i++) sloc[invS[i]]=trafo.sloc[i];
+
+		if (doAssert) {
+			CubeState cs2 = csFactory.makeCubeState(this);
+			cs2.apply_sloc_slow(trafo,doAssert);
+			assert (cs2.isEqual(this)) : "sloc_slow check: cs2 and this differ!";
+		}
+		return this;
+	}
+
+	abstract protected CubeState apply_sloc_slow(CubeState trafo, boolean doAssert);
+//	abstract protected CubeState apply_sloc_wcr(CubeState trafo, boolean doAssert);
+
+	/**
+	 * Apply color transformation {@code cT} to {@code this}. {@code this} has to be of
 	 * type COLOR_P or COLOR_R. 
 	 * @param cT color transformation
-	 * @return the transformed 'this'
+	 * @param doAssert assert the correctness of {@link #sloc} transformation by calling
+	 *          {@link CubeState#apply_sloc_slow(CubeState, boolean) apply_sloc_slow}
+	 * @return the transformed {@code this}
 	 */
+	abstract public CubeState applyCT(ColorTrafo cT,boolean doAssert);
 	public CubeState applyCT(ColorTrafo cT) {
-		assert(this.type==Type.COLOR_P || this.type==Type.COLOR_R) : "Wrong type in apply(cT) !";
-		int[] tmp = this.fcol.clone();
-		for (int i=0; i<fcol.length; i++) this.fcol[i] = cT.fcol[tmp[i]];
-		return this;		
+		applyCT(cT,false);
+		return this;
 	}
-	
+
 	/**
-	 * Locate the cubie with the colors of {@link CubieTriple} {@code tri} in {@code this}. 
-	 * {@code this} has to be of type COLOR_P or COLOR_R.<br>
-	 * [This method is only needed if we want to use color symmetries.]
+	 * Apply all color transformations in {@code ctMap} to {@code this}: For each color transform {@code cT} use
+	 * {@link #applyCT(ColorTrafo, boolean)}. <br>
+	 * {@code this} has to be of type COLOR_P or COLOR_R.
+	 * @param ctMap color transformation map
+	 * @param doAssert assert the correctness of {@link #sloc} transformation by calling
+	 *          {@link CubeState#apply_sloc_slow(CubeState, boolean) apply_sloc_slow}
+	 * @return a map of transformed cube states
+	 */
+	public CubeStateMap applyCT(ColorTrafoMap ctMap,boolean doAssert) {
+		CubeStateMap csMap = new CubeStateMap();
+		assert(this.type==Type.COLOR_P || this.type==Type.COLOR_R) : "Wrong type "+this.type+" in apply(cT) !";
+		for (Map.Entry<Integer, ColorTrafo> entry : ctMap.entrySet()) {
+			ColorTrafo cT = entry.getValue();
+			CubeState tS = csFactory.makeCubeState(this);       // make a copy
+
+			tS.applyCT(cT,doAssert);
+
+			csMap.put(entry.getKey(), tS);
+		}
+		return csMap;
+	}
+	public CubeStateMap applyCT(ColorTrafoMap ctMap) {
+		return applyCT(ctMap,false);
+	}
+
+	/**
+	 * Locate the cubie with the colors of {@link CubieTriple} {@code tri} in {@code this}.
+	 * {@code this} has to be of type COLOR_P or COLOR_R.
+	 * <p>
+	 *     Details:
+	 * <ul>
+	 * <li> This method is only needed if we want to use color symmetries.
+	 * <li> This method relies on member {@code floc} to be transformed, member {@code sloc} needs not to be transformed.
+	 * </ul>
 	 *
-	 * @param tri
-	 * @return a {@link CubieTriple} whose member {@code loc} carries the location of the cubie with 
+	 * @param tri a cubie
+	 * @return a {@link CubieTriple} whose member {@code loc} carries the location of the cubie with
 	 * 		   the colors of {@code tri}.
 	 */
-	abstract public CubieTriple locate(CubieTriple tri);
+	public CubieTriple locate(CubieTriple tri) {
+		assert(type==Type.COLOR_P || type==Type.COLOR_R) : "Wrong type "+type+" in locate() !";
+		int isep = (CubeConfig.cubeSize== CubeConfig.CubeSize.POCKET) ? 1 : 2;
+		//            0           4          8          12         16          20
+//      int[] left = {4,11,17,22, 8,3,21,14, 0,7,13,18, 20,19,9,6, 12,23,1,10, 16,15,5,2};  // not needed, use right[right[i]]
+		// right= {8,18,23,5,  0,22,15,9, 4,14,19,1, 16,10,7,21,20,2,11,13, 12,6,3,17};
+		int[] right= CubieTriple.right;
+		int rig,lef;
+		CubieTriple where = ctFactory.makeCubieTriple(tri);
+		switch(tri.ori) {
+			case CLOCK:
+				for (int i=0; i<fcol.length; i=i+isep)
+					assert (right[right[right[i]]]==i) : "right-assertion failed for i="+i;
+				for (int i=0; i<fcol.length; i=i+isep) {
+					if (fcol[i]==tri.col[0]) {
+						where.loc[0]=i;
+						rig = right[i];
+						if (fcol[rig]==tri.col[1]) {
+							where.loc[1]=rig;
+							lef = right[rig];
+							if (fcol[lef]==tri.col[2]) {
+								where.loc[2]=lef;
+								return where;
+							}
+						}
+					}
+				}
+				break;
+			case COUNTER:
+				throw new RuntimeException("Case COUNTER not yet implemented");
+		}
+		throw new RuntimeException("Invalid cube, we should not arrive here!");
+	}
+
+	/**
+	 * Apply color trafo {@code cT} to {@link #sloc}. Calculates the new {@code s' = sloc} via
+	 * <pre>
+	 *     s'[invS[i]] = t[i]   </pre>
+	 * where {@code invS} is the inverse of {@link #sloc} and {@code t = trafo.fcol} with {@code trafo} being the
+	 * whole-cube rotation corresponding to color trafo {@code cT}.
+	 *
+	 * @param cT    the color trafo
+	 * @param doAssert assert the correctness of {@link #sloc} transformation by calling
+	 *          {@link CubeState#apply_sloc_slow(CubeState, boolean) apply_sloc_slow}
+	 * @return the transformed cube state
+	 *
+	 * @see CubeState2x2#applyCT(ColorTrafo, boolean)
+	 * @see CubeState3x3#applyCT(ColorTrafo, boolean)
+	 */
+	protected CubeState applyCT_sloc(ColorTrafo cT, boolean doAssert) {
+		int[] tmp = sloc.clone();
+		CubeState cS = csFactory.makeCubeState();
+		CubeState trafo = CubeStateMap.allWholeCubeRots.get(cT.getKey());
+		cS.apply(trafo,doAssert);
+		int[] invS = cS.sloc.clone();
+		for (int i=0; i<cS.sloc.length; i++) invS[cS.sloc[i]]=i;
+		for (int i=0; i<sloc.length; i++) this.sloc[invS[i]] = tmp[i];
+
+		if (doAssert) {
+			CubeState cs2 = csFactory.makeCubeState(this);
+			cs2.apply_sloc_slow(trafo, doAssert);
+			assert (cs2.isEqual(this)) : "sloc_slow check: cs2 and this differ!";
+		}
+		return this;
+	}
+
+
+	// helper for CubeStateMap.allWholeCubeRotTrafos() --- no longer needed ---
+//	public void recalc_sloc() {
+//		for (int i=0; i<sloc.length; i++) sloc[fcol[i]]=i;
+//	}
+
+	/**
+	 * Calculate the inverse of {@code trafo.fcol} and store it in {@code this.sloc}
+	 * @param trafo	a cube state of type TRAFO
+	 */
+	public void inv_fcol_trafo_to_sloc(CubeState trafo) {
+		int[] invf = trafo.fcol.clone();
+		for (int i=0; i<sloc.length; i++) invf[trafo.fcol[i]]=i;
+		System.arraycopy(invf, 0, sloc, 0, sloc.length);
+	}
+
+	/**
+	 * Assert that the fcol-sloc-relation<pre>
+	 * fcol[sloc[i]] = def.fcol[i]  </pre> holds ({@code def}: default cube).
+	 * @param s a string to append to a possible assertion message
+	 */
+	public void assert_fcol_sloc(String s) {
+		CubeState def = csFactory.makeCubeState(this.type);
+		for (int i=0; i<sloc.length; i++) {
+			assert (fcol[sloc[i]] == def.fcol[i]) : "fcol[sloc[i]]-relation violated for i="+i+" and call: "+s;
+		}
+
+	}
 
 	/**
 	 * There are four possible board vector types, depending on {@link CubeConfig#boardVecType}
@@ -473,40 +734,79 @@ abstract public class CubeState implements Serializable {
 	}
 	
 	public CubeState print() {
-		System.out.println(this.toString());
+		System.out.println(this);		// calls this.toString()
 		return this;
 	}
-	
-	/** 
-	 * Return a one-line string representing this object: Print a 
-	 * 
-	 */
-	public String toString() {
+
+//	public String print_inv_fcol(){
+//		int[] invf = fcol.clone();
+//		int isep = (CubeConfig.cubeSize== CubeConfig.CubeSize.POCKET) ? 4 : 8;
+//		DecimalFormat form = new DecimalFormat("00");
+//		StringBuilder sb = new StringBuilder();
+//		for (int i=0; i<fcol.length; i++)
+//			invf[fcol[i]]=i;
+//		for (int i=0; i<invf.length; i++) {
+//			if (i%isep==0) sb.append("|"); else sb.append(",");
+//			sb.append(form.format(invf[i]));
+//		}
+//		return sb.toString();
+//	}
+
+	public String print_sloc() {
 		int isep = (this.type==Type.COLOR_P) ? 4 : 8;
 		DecimalFormat form = new DecimalFormat("00");
-		String s = "";
+		StringBuilder sb = new StringBuilder();
+		for (int i=0; i<sloc.length; i++) {
+			if (i%isep==0) sb.append("|"); else sb.append(",");
+			sb.append(form.format(sloc[i]));
+		}
+		return sb.toString();
+	}
+
+	public String print_inv_sloc() {
+		int[] invs = sloc.clone();
+		for (int i=0; i<sloc.length; i++) {
+			invs[sloc[i]]=i;
+		}
+		int isep = (this.type==Type.COLOR_P) ? 4 : 8;
+		DecimalFormat form = new DecimalFormat("00");
+		StringBuilder sb = new StringBuilder();
+		for (int i=0; i<sloc.length; i++) {
+			if (i%isep==0) sb.append("|"); else sb.append(",");
+			sb.append(form.format(invs[i]));
+		}
+		return sb.toString();
+	}
+
+	/**
+	 * @return a one-line string representing this object: This string is a representation of {@link #fcol}.
+	 */
+	public String toString() {
+		DecimalFormat form = new DecimalFormat("00");
+		StringBuilder sb = new StringBuilder();
+		int isep = (CubeConfig.cubeSize == CubeConfig.CubeSize.POCKET) ? 4 : 8;
 		switch(this.type) {
 		case TRAFO_P: 
     		for (int i=0; i<fcol.length; i++) {
-    			if (i%4==0) s = s + "|";
-    			s = s + form.format(fcol[i]);
+    			if (i%isep==0) sb.append("|");
+				sb.append(form.format(fcol[i]));
     		}
     		break;
     	case TRAFO_R:
 			for (int i=0; i<fcol.length; i++) {
-				if (i%isep==0) s = s + "|"; else s = s + ",";
-				s = s + form.format(fcol[i]);
+				if (i%isep==0) sb.append("|"); else sb.append(",");
+				sb.append(form.format(fcol[i]));
 			}
 			break;
-		default:
+		default: // COLOR_P or COLOR_R
     		for (int i=0; i<fcol.length; i++) {
-    			if (i%isep==0) s = s + "|";
-    			s = s + fcol[i];
+    			if (i%isep==0) sb.append("|");
+				sb.append(fcol[i]);
     		}
     		break;
 		}
-		s = s + "|";  
-		return s;	
+		sb.append("|");
+		return sb.toString();
 	}
 	
 	public String getTwistSeq() {
@@ -521,7 +821,6 @@ abstract public class CubeState implements Serializable {
 	 * If {@code this.twistSeq=""} (not known), then return always true. 
 	 */
 	public boolean assertTwistSequence() {
-		CubeStateFactory csFactory = new CubeStateFactory();
 		CubeState tst = csFactory.makeCubeState();
 		Twist T=Twist.ID;
 		int times;
@@ -539,21 +838,33 @@ abstract public class CubeState implements Serializable {
 			if (tw.startsWith("R")) T=Twist.R;
 			if (tw.startsWith("B")) T=Twist.B;
 			assert (tw.length()>1);
-			times = (int)(tw.charAt(1)-48);
+			times = (tw.charAt(1)-48);
 			assert (1<=times && times<=3);
-			switch(T) {
-				case U: tst.UTw(times); break;
-				case L: tst.LTw(times); break;
-				case F: tst.FTw(times); break;
-				case D: tst.DTw(times); break;
-				case R: tst.RTw(times); break;
-				case B: tst.BTw(times); break;
+			switch (T) {
+				case U -> tst.UTw(times);
+				case L -> tst.LTw(times);
+				case F -> tst.FTw(times);
+				case D -> tst.DTw(times);
+				case R -> tst.RTw(times);
+				case B -> tst.BTw(times);
 			}
 			tw =  (tw.length()>2) ? tw.substring(2,tw.length()) : "";				
 		}
 		return this.equals(tst);
 	}
-	
+
+	public int get_fcol(int i) {
+		return fcol[i];
+	}
+
+	public int get_sloc(int i) {
+		return sloc[i];
+	}
+
+	public int get_fcol_length() {
+		return fcol.length;
+	}
+
 	/**
 	 * Checks whether elements of members fcol, sloc and type are the same in {@code this} and {@code other}.
 	 * (This differs from {@link Object#equals(Object)}, since the latter tests, whether 

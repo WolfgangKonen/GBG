@@ -3,6 +3,7 @@ package games.Nim;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import controllers.TD.ntuple4.TDNTuple4Agt;
 import games.ObserverBase;
 import games.StateObservation;
 import tools.Types;
@@ -23,7 +24,8 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 	protected int[] m_heap;		// has for each heap the count of items in it
 	protected int m_player;		// player who makes the next move (0 or 1)
 	protected ArrayList<Types.ACTIONS> availableActions = new ArrayList<>();	// holds all available actions
-	protected boolean SORT_IT = false;		// experimental
+
+	protected boolean SORT_IT = false;		// deprecated, use project() instead
     
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -37,9 +39,31 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 	 * {@link NimConfig#HEAP_SIZE} items. Player 0 is the starting player.
 	 */
 	public StateObserverNim() {
-		m_heap = new int[NimConfig.NUMBER_HEAPS]; 
-		for (int i=0;i<NimConfig.NUMBER_HEAPS;i++) 
-			m_heap[i] = NimConfig.HEAP_SIZE;
+		m_heap = new int[NimConfig.NUMBER_HEAPS];
+
+		//if HEAP_SIZE is set to -1, infer different heap sizes from NUMBER_HEAPS (as used in Ludii)
+		//e.g. NUMBER_HEAPS is 5, then heap sizes in order would be 3,4,5,4,3
+		if(NimConfig.HEAP_SIZE == -1){
+
+			//NimConfig.MAX_MINUS = NimConfig.NUMBER_HEAPS;	// /WK/ commented out. This setting for MAX_MINUS is the
+															// preconfigured one in GBGLaunch, but the user may decide
+															// at launch time to set it to another (smaller) value.
+
+			int k = NimConfig.NUMBER_HEAPS/2;
+			for (int i=0; i<NimConfig.NUMBER_HEAPS; i++){
+				if(k>0 || k==0){
+					m_heap[i] = NimConfig.NUMBER_HEAPS - k;
+				} else {
+					m_heap[i] = NimConfig.NUMBER_HEAPS + k;
+				}
+				k--;
+			}
+		}
+		else { // else every heap has the same amount items equaling Heap Size
+			for (int i = 0; i < NimConfig.NUMBER_HEAPS; i++)
+				m_heap[i] = NimConfig.HEAP_SIZE;
+		}
+		if (SORT_IT) Arrays.sort(m_heap);	// still experimental
 		m_player = 0;
 		setAvailableActions();
 	}
@@ -47,7 +71,20 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 	public StateObserverNim(int[] heaps, int player) {
 		m_heap = heaps.clone(); 
 		m_player = player;
+		if (SORT_IT) Arrays.sort(m_heap);	// still experimental
 		setAvailableActions();
+	}
+
+	/**
+	 * Project {@code this} into its canonical form: This has for Nim the list of heaps sorted in ascending order
+	 * @return a projected copy of {@code this}
+	 *
+	 * @see TDNTuple4Agt
+	 */
+	public StateObservation project() {
+		StateObserverNim p_so = this.copy();
+		Arrays.sort(p_so.m_heap);
+		return p_so;
 	}
 
 	public StateObserverNim(StateObserverNim other) {

@@ -176,7 +176,7 @@ public class GameBoardGUIYavalath {
                 TileYavalath clickedTile = UtilityFunctionsYavalath.clickedTile(clicked, gb.m_so.getGameBoard());
                 if (clickedTile == null) return;
 
-                Types.ACTIONS humanMove = new Types.ACTIONS(clickedTile.getX()* getMaxRowLength() + clickedTile.getY());
+                Types.ACTIONS humanMove = ConfigYavalath.getActionFromTileValue(clickedTile.getX()* getMaxRowLength() + clickedTile.getY());
                 gb.HGameMove(humanMove);
                 updateBoard(null, false, false);
             }

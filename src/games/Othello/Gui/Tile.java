@@ -1,8 +1,6 @@
 package games.Othello.Gui;
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Insets;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -25,6 +23,8 @@ public class Tile extends JButton{
 	private boolean isMarked = false;
 	
 	public Tile(GameBoardOthello gb, int i, int j) {
+		Font font=new Font("Arial",Font.BOLD,Types.GUI_HELPFONTSIZE);
+		setFont(font);
 		setBackground(ConfigOthello.BOARDCOLOR);
 		setMargin(new Insets(0,0,0,0));
 		index = i * ConfigOthello.BOARD_SIZE + j;

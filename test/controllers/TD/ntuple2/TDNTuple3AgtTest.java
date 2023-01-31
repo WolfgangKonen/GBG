@@ -8,6 +8,7 @@ import org.junit.Test;
 import starters.GBGBatch;
 import starters.MTrainSweep;
 import starters.SetupGBG;
+import starters.SingleTrainer;
 
 /**
  * The JUnit tests in this class are not exact, because most agent performances fluctuate a bit due to random variations
@@ -148,6 +149,7 @@ public class TDNTuple3AgtTest extends GBGBatch {
         GameBoard gb = arenaTrain.makeGameBoard();		// needed for chooseStartState()
 
         MTrainSweep mTrainSweep = new MTrainSweep();
+        SingleTrainer sTrainer = new SingleTrainer();
 
         for (int k=0; k< agtFile.length; k++) {
             setupPaths(agtFile[k],csvFile);     // builds filePath
@@ -160,7 +162,7 @@ public class TDNTuple3AgtTest extends GBGBatch {
             String sAgent = arenaTrain.m_xab.getSelectedAgent(0);
             pa = arenaTrain.m_xfun.fetchAgent(0,sAgent, arenaTrain.m_xab);
 
-            pa = mTrainSweep.doSingleTraining(0,0,pa, arenaTrain, arenaTrain.m_xab,gb,maxGameNum,0.0,0.0);
+            pa = sTrainer.doSingleTraining(0,0,pa, arenaTrain, arenaTrain.m_xab,gb,maxGameNum,0.0,0.0);
 
             innerQuickEval(pa,k,nplyMax, agtFile, evalThresh, gb, -1);
 

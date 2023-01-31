@@ -1,0 +1,23 @@
+Mean number of distinct color-trafo states for t-twisted 3x3x3 cube states:;
+scaPar:3x3x3 STICKER2 QTM;  average over NRUNS=500
+TWISTS; NSYM_TRUE_DIFF
+19;24,000
+18;24,000
+17;23,976
+16;24,000
+15;24,000
+14;24,000
+13;24,000
+12;23,976
+11;23,952
+10;23,772
+9;23,736
+8;23,772
+7;23,280
+6;23,070
+5;21,924
+4;22,062
+3;18,864
+2;17,982
+1;6,000
+0;1,000

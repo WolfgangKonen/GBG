@@ -1,13 +1,22 @@
 package params;
 
 import controllers.TD.TDAgent;
-import controllers.TD.ntuple2.TDNTuple3Agt;
+import controllers.TD.ntuple4.TDNTuple4Agt;
+import controllers.TD.ntuple4.NTuple4Base;
 import games.Arena;
-import games.StateObservation;
 
 import javax.swing.*;
+import java.io.Serial;
 import java.io.Serializable;
 
+/**
+ *  Replay buffer parameters for all agents that support replay buffer (currently only {@link TDNTuple4Agt}).
+ *  <p>
+ *  Game- and agent-specific parameters are set with {@link #setParamDefaults(String, String)}.
+ *
+ *  @see NTuple4Base
+ *  @see TDNTuple4Agt
+ */
 public class ParRB implements Serializable {
 
     public static boolean DEFAULT_USERB = false;
@@ -26,8 +35,9 @@ public class ParRB implements Serializable {
     /**
      * change the version ID for serialization only if a newer version is no longer
      * compatible with an older one (older .agt.zip containing this object will become
-     * unreadable or you have to provide a special version transformation)
+     * unreadable, or you have to provide a special version transformation)
      */
+    @Serial
     private static final long serialVersionUID = 1L;
 
     public ParRB() {	}
@@ -130,7 +140,7 @@ public class ParRB implements Serializable {
      * parameters" we mean parameter producing good results. If with UI, some parameter
      * choices may be enabled or disabled.
      *
-     * @param agentName either "TD-Ntuple-3" (for {@link TDNTuple3Agt}) or "TDS" (for {@link TDAgent})
+     * @param agentName either "TD-Ntuple-4" (for {@link TDNTuple4Agt}) or "TDS" (for {@link TDAgent})
      * @param gameName the string from {@link Arena#getGameName()}
      */
     public void setParamDefaults(String agentName, String gameName) {

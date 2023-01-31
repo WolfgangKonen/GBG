@@ -51,7 +51,7 @@ public class MCAgentN extends AgentBase implements PlayAgent {
     private static final long  serialVersionUID = 12L;
 
     public MCAgentN(ParMC mcParams){
-        this("MC", mcParams, new ParOther());    	
+        this("MC-N", mcParams, new ParOther());
     }
     
     public MCAgentN(String name, ParMC mcParams, ParOther oPar)
@@ -71,9 +71,10 @@ public class MCAgentN extends AgentBase implements PlayAgent {
 	 * 
 	 * @see Arena#loadAgent
 	 */
-	public void fillParamTabsAfterLoading(int n, Arena m_arena) { 
+	public void fillParamTabsAfterLoading(int n, Arena m_arena) {
+        super.fillParamTabsAfterLoading(n, m_arena);
 		m_arena.m_xab.setMcParFrom(n, this.getParMC() );
-		m_arena.m_xab.setOParFrom(n, this.getParOther() );
+		//m_arena.m_xab.setOParFrom(n, this.getParOther() );  // now in super
 	}
 	
 	/**
@@ -551,20 +552,20 @@ public class MCAgentN extends AgentBase implements PlayAgent {
         return actBestVT;
     }
 
-	@Override
-    public double getScore(StateObservation sob) {
-        
-		// This if branch is vital: It was missing before, and if 'sob' was a game-over state
-		// this could result in wrong scores.
-		// Now we fix this by returning sob.getGameScore(sob) on a game-over situation:
-        if (sob.isGameOver()) {
-        	return sob.getGameScore(sob.getPlayer());
-        } else {       	
-            Types.ACTIONS_VT actBestVT = getNextAction2(sob.partialState(), false, true);
-            return actBestVT.getVBest();
-        }
-
-    }
+//	@Override
+//    public double getScore(StateObservation sob) {
+//
+//		// This if branch is vital: It was missing before, and if 'sob' was a game-over state
+//		// this could result in wrong scores.
+//		// Now we fix this by returning sob.getGameScore(sob) on a game-over situation:
+//        if (sob.isGameOver()) {
+//        	return sob.getGameScore(sob.getPlayer());
+//        } else {
+//            Types.ACTIONS_VT actBestVT = getNextAction2(sob.partialState(), false, true);
+//            return actBestVT.getVBest();
+//        }
+//
+//    }
     
 	/**
 	 * Return a tuple with the agent's estimate of {@code sob}'s final game value (final reward) 

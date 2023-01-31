@@ -265,18 +265,17 @@ public class Types {
     /**
      * list of available agents = list of choices in Agent Selectors
      */
-    public static final String[] GUI_AGENT_LIST 	 
-    	= {"Random", "RHEA", "RHEA-SI", "Max-N", "Expectimax-N", /*"MC",*/ "MC-N", /*"MCTS0",*/
+    public static final String[] GUI_AGENT_LIST
+    	= {"Random", "Max-N", "Expectimax-N", "MC-N", /*"MCTS0",*/ "RHEA-SI",
     	   "MCTS", "MCTS Expectimax", "Human", /*"TD-Ntuple", "TD-Ntuple-2",*/ "TD-Ntuple-3","TD-Ntuple-4",
     	   "Sarsa", "Sarsa-4", "Qlearn-4","TDS"};
     /**
      * initial agent choice for P0, P1, ... (for up to 5 players) 
      */
     public static final String[] GUI_AGENT_INITIAL  
-    	//= {"MCTS", "MC", "MCTS Expectimax", "Human", "Human", "Human"};
     	//= {"Human", "MCTS", "Human", "Human", "Human", "Human"};
     	//= {"TD-Ntuple-3", "MCTS", "Human", "Human", "Human", "Human"};
-		= {"MCTS", "MC", "MCTS Expectimax", "Human", "Human", "Human"};
+		= {"MCTS", "MC-N", "MCTS Expectimax", "Human", "Human", "Human"};
     public static final String[] GUI_PLAYER_NAME  	// player names for P0, P1, ... (for up to 5 players)
     	//= {"P0", "P1", "P2", "P3", "P4"};
     	= {"0", "1", "2", "3", "4"};

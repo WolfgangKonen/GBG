@@ -231,6 +231,7 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 	 * @see LoadSaveGBG#transformObjectToPlayAgent
 	 */
 	public boolean instantiateAfterLoading() {
+		super.instantiateAfterLoading();
 		this.books = new BookSum();
 		// the book members of 'books' may be initially null. They are read in 
 		// on first use by one of the methods BookSum.getOpeningBook[Deep][Dist] which are 

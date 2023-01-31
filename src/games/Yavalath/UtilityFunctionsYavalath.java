@@ -110,7 +110,7 @@ public class UtilityFunctionsYavalath {
      * @param lastTile  The last placed tile
      * @return  A list of tiles that neighbour the last placed tile
      */
-    private static ArrayList<TileYavalath> getNeighbours(TileYavalath[][] board, TileYavalath lastTile){
+    public static ArrayList<TileYavalath> getNeighbours(TileYavalath[][] board, TileYavalath lastTile){
 
         ArrayList<TileYavalath> neighbours = new ArrayList<>();
         int i = lastTile.getX();

@@ -2,6 +2,7 @@ package ludiiInterface.general;
 
 import game.Game;
 import games.Hex.HexConfig;
+import games.Nim.NimConfig;
 import ludiiInterface.Util;
 import other.AI;
 import other.GameLoader;
@@ -18,7 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class LudiiCustomMatch {
-    static String[] games = { "Othello", "Yavalath", "Hex"};
+    static String[] games = { "Othello", "Yavalath", "Hex", "ConnectFour", "Nim"};
     static final AI PLAYER_1 = new LudiiAI();
     static AI PLAYER_2;
     static Game ludiiGame;
@@ -35,12 +36,12 @@ public class LudiiCustomMatch {
 
         switch (game){
             case "Othello" -> {
-                PLAYER_2 = new GBGAsLudiiAI(0);
+                PLAYER_2 = new GBGAsLudiiAI();
                 ludiiGame = GameLoader.loadGameFromName("Reversi.lud");
 
             }
             case "Yavalath" -> {
-                PLAYER_2 = new GBGAsLudiiAI(1);
+                PLAYER_2 = new GBGAsLudiiAI();
                 ludiiGame = GameLoader.loadGameFromName("Yavalath.lud");
             }
             case "Hex" -> {
@@ -81,9 +82,28 @@ public class LudiiCustomMatch {
                     }
 
                 }
-                PLAYER_2 = new GBGAsLudiiAI(2,size,2);
+                PLAYER_2 = new GBGAsLudiiAI(size,2);
                 ludiiGame = GameLoader.loadGameFromName("Hex.lud",options);
             }
+            case "ConnectFour" -> {
+                PLAYER_2 = new GBGAsLudiiAI();
+                ludiiGame = GameLoader.loadGameFromName("Connect Four.lud");
+            }
+            case "Nim" -> {
+                String[] sizes = {"3", "5", "7", "9", "11", "13", "15", "17", "19"};
+                JComboBox nimSize = new JComboBox(sizes);
+                JOptionPane.showMessageDialog(null,nimSize,"Choose the number of heaps", JOptionPane.QUESTION_MESSAGE);
+                int size = Integer.parseInt((String) nimSize.getSelectedItem());
+
+                List<String> options;
+
+                String piles = "Number Piles/" + size;
+                options = Arrays.asList(piles, "End Rules/Last Mover Wins");
+
+                PLAYER_2 = new GBGAsLudiiAI(size, 2);
+                ludiiGame = GameLoader.loadGameFromName("Nim.lud", options);
+            }
+
         }
 
 
@@ -102,9 +122,13 @@ public class LudiiCustomMatch {
         ais.add(PLAYER_2);
 
         int winsPlayer1 = 0, winsPlayer2 =0, ties = 0;
-
         for (int gameCounter = 0; gameCounter < gamesNumber; gameCounter++) {
             ludiiGame.start(context);
+
+            if(game.equals("Nim"))
+            {
+                context.trial().reset(ludiiGame); // needed because context makes moves on its own after being initialized
+            }
 
             //Initialize the AIs
             for (int i = 1; i < ais.size(); i++) {
@@ -114,7 +138,7 @@ public class LudiiCustomMatch {
             final Model model = context.model();
 
             while (!context.trial().over()){
-                model.startNewStep(context,ais,1.0);
+                model.startNewStep(context,ais,0.1);
             }
             if(context.trial().status().winner() == 0){
                 System.out.println("Tie.");

@@ -42,7 +42,8 @@ public class ExpectimaxN2Wrapper extends AgentBase implements PlayAgent, Seriali
 
 	public ExpectimaxN2Wrapper(PlayAgent pa, int nply) {
 		super("Expectimax2Wrapper");
-		this.m_oPar.setWrapperNPly(nply);
+		this.m_oPar.setWrapperNPly(nply); 	// deprecated
+		this.m_wrPar.setWrapperNPly(nply);
 		m_depth = nply;
 		this.wrapped_pa = pa;
 	}
@@ -62,7 +63,7 @@ public class ExpectimaxN2Wrapper extends AgentBase implements PlayAgent, Seriali
 		this(name);
 		m_depth = nply;
 	}
-		
+
 	/**
 	 * After loading an agent from disk fill the param tabs of {@link Arena} according to the
 	 * settings of this agent
@@ -72,9 +73,9 @@ public class ExpectimaxN2Wrapper extends AgentBase implements PlayAgent, Seriali
 	 * 
 	 * @see Arena#loadAgent
 	 */
-	public void fillParamTabsAfterLoading(int n, Arena m_arena) { 
+	public void fillParamTabsAfterLoading(int n, Arena m_arena) {
+		super.fillParamTabsAfterLoading(n, m_arena);
 		m_arena.m_xab.setMaxNDepthFrom(n, this.getDepth() );
-//		m_arena.m_xab.setOParFrom(n, this.getParOther() );		// do or don't?
 	}
 	
 	/**
@@ -267,21 +268,21 @@ public class ExpectimaxN2Wrapper extends AgentBase implements PlayAgent, Seriali
 		return act_vt.getScoreTuple();		// return ScoreTuple for best action
 	}
 
-	/**
-	 * Return the agent's score for that after state.
-	 * @param sob			the current game state;
-	 * @return				the probability that the player to move wins from that 
-	 * 						state. If game is over: the score for the player who 
-	 * 						*would* move (if the game were not over).
-	 * Each player wants to maximize its score	 
-	 */
-	@Override
-	public double getScore(StateObservation sob) {
-		assert sob instanceof StateObsNondeterministic : "Error, sob must be of class StateObservationNondet";
-		StateObsNondeterministic soND = (StateObsNondeterministic) sob;
-		
-		return getAllScores(soND,sob,true,0).scTup[sob.getPlayer()];
-	}
+//	/**
+//	 * Return the agent's score for that after state.
+//	 * @param sob			the current game state;
+//	 * @return				the probability that the player to move wins from that
+//	 * 						state. If game is over: the score for the player who
+//	 * 						*would* move (if the game were not over).
+//	 * Each player wants to maximize its score
+//	 */
+//	@Override
+//	public double getScore(StateObservation sob) {
+//		assert sob instanceof StateObsNondeterministic : "Error, sob must be of class StateObservationNondet";
+//		StateObsNondeterministic soND = (StateObsNondeterministic) sob;
+//
+//		return getAllScores(soND,sob,true,0).scTup[sob.getPlayer()];
+//	}
 	@Override
 	public ScoreTuple getScoreTuple(StateObservation sob, ScoreTuple prevTuple) {
 		assert sob instanceof StateObsNondeterministic : "Error, sob must be of class StateObservationNondet";
@@ -306,10 +307,6 @@ public class ExpectimaxN2Wrapper extends AgentBase implements PlayAgent, Seriali
 //		return wrapped_pa.getScoreTuple(sob, prevTuple);		// /WK/ 2021-09-10: old and flawed
 	}
 
-	public PlayAgent getWrappedPlayAgent() {
-		return wrapped_pa;
-	}
-
 	@Override
 	public String stringDescr() {
 		String cs = wrapped_pa.getClass().getSimpleName();
@@ -318,13 +315,6 @@ public class ExpectimaxN2Wrapper extends AgentBase implements PlayAgent, Seriali
 	}
 
 	// getName: use method ObserverBase::getName()
-
-	// --- never used ---
-//	public String getFullName() {
-//		String cs = wrapped_pa.getClass().getSimpleName();
-//		cs = cs + "[nPly="+m_depth+"]";
-//		return cs;
-//	}
 
 	public int getDepth() {
 		return m_depth;
@@ -359,6 +349,28 @@ public class ExpectimaxN2Wrapper extends AgentBase implements PlayAgent, Seriali
     {
     	System.out.println("---   Random: "+NewSO.stringDescr()+"   "+scTuple.toString()+
     			", p="+currProbab+", depth="+depth);
-    }	 
+    }
+
+	@Override
+	public PlayAgent getWrappedPlayAgent() {
+		return wrapped_pa;
+	}
+
+	@Override
+	public boolean isWrapper() { return true; }
+
+	/**
+	 * Train this agent for one episode, starting from state {@code so}.
+	 * Train the inner (wrapped) agent, but use the outer agent (the wrapper) for selecting the next action.
+	 *
+	 * @param so    the start state of the episode
+	 * @return	true, if agent raised a stop condition (deprecated)
+	 */
+	@Override
+	public boolean trainAgent(StateObservation so) {
+		resetAgent();
+		return getWrappedPlayAgent().trainAgent(so,this);
+
+	}
 
 }

@@ -32,8 +32,10 @@ import tools.Types.ACTIONS;
  * <li> 20: compete against HeurPlayer, different starts
  * <li> 21: compete against TDReferee.agt.zip, different starts
  * </ul>  
- * The value of mode is set in the constructor. <br>
- * For 'different starts' see {@link #diffStartList}.
+ * The value of {@code mode} is set in the constructor. <p>
+ * Competition is done in all roles for {@code numEpisodes=10} episodes. <br>
+ * For 'different starts' see {@link #diffStartList}. In that case we use {@code numEpisodes=1}, because we have already
+ * many different start states.
  */
 public class EvaluatorOthello extends Evaluator {
 

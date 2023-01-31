@@ -1,5 +1,6 @@
 package games.CFour;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Arrays;
 
@@ -62,7 +63,7 @@ public class C4Base extends AgentBase implements Serializable {
 	 *      41  35  29  23  17  11  05
 	 * </pre>
 	 */
-	public static final long fieldMask[][] = {
+	public static final long[][] fieldMask = {
 			{ 2199023255552L, 1099511627776L, 549755813888L, 274877906944L,
 					137438953472L, 68719476736L }, //
 			{ 34359738368L, 17179869184L, 8589934592L, 4294967296L,
@@ -73,14 +74,14 @@ public class C4Base extends AgentBase implements Serializable {
 			{ 131072L, 65536L, 32768L, 16384L, 8192L, 4096L }, //
 			{ 2048L, 1024L, 512L, 256L, 128L, 64L }, //
 			{ 32L, 16L, 8L, 4L, 2L, 1L } }; //
-	protected static final long columnMask[] = { 0x3F000000000L, 0xFC0000000L,
+	protected static final long[] columnMask = { 0x3F000000000L, 0xFC0000000L,
 			0x3F000000L, 0xFC0000L, 0x3F000L, 0xFC0L, 0x3FL };
 
 	/**
 	 * All possible FourRows horizontally, diagonal and vertical <br>
 	 * (seems to be never used)
 	 */
-	protected static final long fourRows[] = { 0x1041040000L, 0x41041000L,
+	protected static final long[] fourRows = { 0x1041040000L, 0x41041000L,
 			0x1041040L, 0x41041L, 0x2082080000L, 0x82082000L, 0x2082080L,
 			0x82082L, 0x1084200000L, 0x42108000L, 0x1084200L, 0x42108L,
 			0x8102040000L, 0x204081000L, 0x8102040L, 0x204081L, 0x4104100000L,
@@ -96,7 +97,7 @@ public class C4Base extends AgentBase implements Serializable {
 			0xF000L, 0xF00L, 0x780L, 0x3C0L, 0x3CL, 0x1EL, 0xFL };
 
 	// Random-Numbers for Zobrist Keys
-	protected static final long rnd[][] = {
+	protected static final long[][] rnd = {
 			{ 19298943901485610L, 6548220796761019L, 1777628907278452803L,
 					11891769178478592L, 3564258696970080L, 236708853179436288L,
 					349182760342233125L, 429289086240375L, 121921717543355343L,
@@ -140,13 +141,14 @@ public class C4Base extends AgentBase implements Serializable {
 	/**
 	 * array of length COLCOUNT: how many pieces are in column i, i=0,...,COLCOUNT-1
 	 */
-	protected final int colHeight[];
+	protected final int[] colHeight;
 
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
 	 * compatible with an older one (older .gamelog containing this object will become 
 	 * unreadable or you have to provide a special version transformation)
 	 */
+	@Serial
 	private static final long serialVersionUID = 12L;
 
 	/**
@@ -165,49 +167,51 @@ public class C4Base extends AgentBase implements Serializable {
 	 *            a 7x6 Connect-Four board with '1' for player 1 (who starts) 
 	 *            and '2' for player 2
 	 */
-	public C4Base(int field[][]) {
+	public C4Base(int[][] field) {
 		super("AlphaBeta");
 		colHeight = new int[COLCOUNT];
 		resetBoard();
 		setBoard(field);
 	}
 
-	/**
-	 * Create a new Board
-	 * 
-	 * @param fieldP1
-	 *            BitBoard of Player1
-	 * @param fieldP2
-	 *            BitBoard of Player2
-	 */
-	public C4Base(long fieldP1, long fieldP2) {
-		super("AlphaBeta");
-		colHeight = new int[COLCOUNT];
-		resetBoard();
-		setBoard(fieldP1, fieldP2);
-	}
+	// --- never used ---
+//	/**
+//	 * Create a new Board
+//	 *
+//	 * @param fieldP1
+//	 *            BitBoard of Player1
+//	 * @param fieldP2
+//	 *            BitBoard of Player2
+//	 */
+//	public C4Base(long fieldP1, long fieldP2) {
+//		super("AlphaBeta");
+//		colHeight = new int[COLCOUNT];
+//		resetBoard();
+//		setBoard(fieldP1, fieldP2);
+//	}
 
-	/**
-	 * Copy-Constructor for {@link C4Base}. Only use, if necessary. Make sure, that
-	 * the {@link #colHeight} array contains the correct heights for each column,
-	 * otherwise you will get severe problems!!!
-	 * 
-	 * @param fieldP1
-	 *            BitBoard of Player1
-	 * @param fieldP2
-	 *            BitBoard of Player2
-	 * @param colHeight
-	 *            Array, containing the heights of all 7 columns
-	 */
-	public C4Base(long fieldP1, long fieldP2, int[] colHeight) {
-		super("AlphaBeta");
-		this.fieldP1 = fieldP1;
-		this.fieldP2 = fieldP2;
-		if (colHeight.length != COLCOUNT)
-			throw new UnsupportedOperationException(
-					"Wrong length of colHeight-Array!!!");
-		this.colHeight = colHeight;
-	}
+	// --- never used ---
+//	/**
+//	 * Copy-Constructor for {@link C4Base}. Only use, if necessary. Make sure, that
+//	 * the {@link #colHeight} array contains the correct heights for each column,
+//	 * otherwise you will get severe problems!!!
+//	 *
+//	 * @param fieldP1
+//	 *            BitBoard of Player1
+//	 * @param fieldP2
+//	 *            BitBoard of Player2
+//	 * @param colHeight
+//	 *            Array, containing the heights of all 7 columns
+//	 */
+//	public C4Base(long fieldP1, long fieldP2, int[] colHeight) {
+//		super("AlphaBeta");
+//		this.fieldP1 = fieldP1;
+//		this.fieldP2 = fieldP2;
+//		if (colHeight.length != COLCOUNT)
+//			throw new UnsupportedOperationException(
+//					"Wrong length of colHeight-Array!!!");
+//		this.colHeight = colHeight;
+//	}
 
 	/**
 	 * Set the Board to the new Values
@@ -231,9 +235,9 @@ public class C4Base extends AgentBase implements Serializable {
 	 * @param field
 	 *            7x6 Array-representation of the Board <br>
 	 */
-	public void setBoard(int field[][]) {
+	public void setBoard(int[][] field) {
 		// Konvertierung des Arrays in das Bitboard-Format
-		// und Eintragen der einzelnen Spaltenhöhen in colHeight
+		// und Eintragen der einzelnen Spaltenhï¿½hen in colHeight
 		if (isLegalBoard(field)) {
 			resetBoard();
 			for (int i = 0; i < COLCOUNT; i++) {
@@ -256,7 +260,7 @@ public class C4Base extends AgentBase implements Serializable {
 	 * @return 7x6-Array of the board
 	 */
 	public int[][] getBoard() {
-		int board[][] = new int[COLCOUNT][ROWCOUNT];
+		int[][] board = new int[COLCOUNT][ROWCOUNT];
 		for (int i = 0; i < COLCOUNT; i++) {
 			for (int j = 0; j < colHeight[i]; j++) {
 				if ((fieldP1 & fieldMask[i][j]) != 0L) {
@@ -271,64 +275,65 @@ public class C4Base extends AgentBase implements Serializable {
 		return board;
 	}
 
-	/**
-	 * Get all winning rows for one player (if existing)
-	 * 
-	 * @param player
-	 *            search for this player
-	 * @return Array of all pieces that are within a Winning-Row. Even indexes
-	 *         represent the column, even indexes the row
-	 */
-	public int[] getWinRows(int player) {
-		int[] winRow = new int[2];
-		int[][] b = getBoard();
-		int k = 0, i, j;
-		for (i = 0; i < COLCOUNT; i++) {
-			for (j = 0; j < colHeight[i]; j++) {
-				if (canWin(player, i, j) && b[i][j] == player) {
-					if (k == winRow.length) {
-						int[] temp = winRow;
-						winRow = new int[k + 2];
-						for (int l = 0; l < temp.length; l++) {
-							winRow[l] = temp[l];
-						}
-					}
-					winRow[k++] = i;
-					winRow[k++] = j;
-				}
-			}
-		}
-		// Vertikale Reihen werden von oberer Schleife nicht erkannt
-		int count;
-		for (i = 0; i < COLCOUNT; i++) {
-			count = 0;
-			for (j = 0; j < colHeight[i]; j++) {
-				if (b[i][j] == player) {
-					count++;
-				} else {
-					count = 0;
-				}
-				if (count == 4) {
-					break;
-				}
-			}
-			if (count == 4) {
-				for (count = (j - 1); count > j - 4; count--) {
-					if (k == winRow.length) {
-						int[] temp = winRow;
-						winRow = new int[k + 2];
-						for (int l = 0; l < temp.length; l++) {
-							winRow[l] = temp[l];
-						}
-					}
-					winRow[k++] = i;
-					winRow[k++] = count;
-				}
-			}
-
-		}
-		return winRow;
-	}
+	// --- never used ---
+//	/**
+//	 * Get all winning rows for one player (if existing)
+//	 *
+//	 * @param player
+//	 *            search for this player
+//	 * @return Array of all pieces that are within a Winning-Row. Even indexes
+//	 *         represent the column, even indexes the row
+//	 */
+//	public int[] getWinRows(int player) {
+//		int[] winRow = new int[2];
+//		int[][] b = getBoard();
+//		int k = 0, i, j;
+//		for (i = 0; i < COLCOUNT; i++) {
+//			for (j = 0; j < colHeight[i]; j++) {
+//				if (canWin(player, i, j) && b[i][j] == player) {
+//					if (k == winRow.length) {
+//						int[] temp = winRow;
+//						winRow = new int[k + 2];
+//						for (int l = 0; l < temp.length; l++) {
+//							winRow[l] = temp[l];
+//						}
+//					}
+//					winRow[k++] = i;
+//					winRow[k++] = j;
+//				}
+//			}
+//		}
+//		// Vertikale Reihen werden von oberer Schleife nicht erkannt
+//		int count;
+//		for (i = 0; i < COLCOUNT; i++) {
+//			count = 0;
+//			for (j = 0; j < colHeight[i]; j++) {
+//				if (b[i][j] == player) {
+//					count++;
+//				} else {
+//					count = 0;
+//				}
+//				if (count == 4) {
+//					break;
+//				}
+//			}
+//			if (count == 4) {
+//				for (count = (j - 1); count > j - 4; count--) {
+//					if (k == winRow.length) {
+//						int[] temp = winRow;
+//						winRow = new int[k + 2];
+//						for (int l = 0; l < temp.length; l++) {
+//							winRow[l] = temp[l];
+//						}
+//					}
+//					winRow[k++] = i;
+//					winRow[k++] = count;
+//				}
+//			}
+//
+//		}
+//		return winRow;
+//	}
 
 	/**
 	 * Print the current board to console
@@ -348,30 +353,31 @@ public class C4Base extends AgentBase implements Serializable {
 		}
 	}
 
-	/**
-	 * Print the current board to console
-	 */
-	public static void printBoard(int[][] board) {
-		for (int j = ROWCOUNT - 1; j >= 0; j--) {
-			for (int i = 0; i < COLCOUNT; i++) {
-				System.out.print(board[i][j] + " ");
-			}
-			System.out.print("\n");
-		}
-	}
+	// --- never used ---
+//	/**
+//	 * Print the current board to console
+//	 */
+//	public static void printBoard(int[][] board) {
+//		for (int j = ROWCOUNT - 1; j >= 0; j--) {
+//			for (int i = 0; i < COLCOUNT; i++) {
+//				System.out.print(board[i][j] + " ");
+//			}
+//			System.out.print("\n");
+//		}
+//	}
 
 	/**
 	 * Get a Board as String
 	 */
 	public static String toString(int[][] board) {
-		String str = new String();
+		StringBuilder str = new StringBuilder();
 		for (int j = ROWCOUNT - 1; j >= 0; j--) {
 			for (int i = 0; i < COLCOUNT; i++) {
-				str += (board[i][j] + " ");
+				str.append(board[i][j]).append(" ");
 			}
-			str += ("\n");
+			str.append("\n");
 		}
-		return str;
+		return str.toString();
 	}
 
 	/**
@@ -438,7 +444,7 @@ public class C4Base extends AgentBase implements Serializable {
 	 * @return
 	 */
 	protected long getMask(int col, int row) {
-		// Ermittelt Maske Für eine Zelle des Spielfeldes
+		// Ermittelt Maske FÃ¼r eine Zelle des Spielfeldes
 		return 1L << (ROWCOUNT * COLCOUNT - 1 - (col * ROWCOUNT + row));
 	}
 
@@ -547,9 +553,9 @@ public class C4Base extends AgentBase implements Serializable {
 	 * @param col
 	 */
 	public void removePiece(int player, int col) {
-		// Es muss ggfs. geprüft werden, ob überhaupt ein Stein in der Spalte
+		// Es muss ggfs. geprï¿½ft werden, ob ï¿½berhaupt ein Stein in der Spalte
 		// ist
-		// Es wird eine invertierte Maske zum löschen benötigt
+		// Es wird eine invertierte Maske zum lï¿½schen benï¿½tigt
 		long mask = ~fieldMask[col][--colHeight[col]];
 
 		if (player == PLAYER1) {
@@ -563,7 +569,7 @@ public class C4Base extends AgentBase implements Serializable {
 	 * Compute the height of all columns, and put results in array {@link #colHeight} (of length COLCOUNT).
 	 */
 	protected void computeColHeight() {
-		// Berechnet die Füllhöhe der einzelnen Spalten
+		// Berechnet die Fï¿½llhï¿½he der einzelnen Spalten
 		long mask;
 		int i, j;
 		for (i = 0; i < COLCOUNT; i++) {
@@ -665,7 +671,7 @@ public class C4Base extends AgentBase implements Serializable {
 		// Convert to 32-Bit, since a lot of the literals are only 32-Bit long
 		int y = (int) x;
 		// X und Y Position in eine feste Position(0-41) umgerechnet, da die
-		// switch-anweisung schneller ausgeführt wird
+		// switch-anweisung schneller ausgefï¿½hrt wird
 		switch (xx * 6 + yy) {
 		case 0:
 			if (!((x & 0x408100000L) != 0 && (x & 0x820800000L) != 0))
@@ -1219,8 +1225,8 @@ public class C4Base extends AgentBase implements Serializable {
 	 * @return mirrored BitBoard
 	 */
 	protected long getMirroredField(int player) {
-		// Feld spiegeln. Wird benötigt, da Stellungen nur jeweils in einer
-		// Variante in der Eröffnungsdatenbank vorhanden sind
+		// Feld spiegeln. Wird benï¿½tigt, da Stellungen nur jeweils in einer
+		// Variante in der Erï¿½ffnungsdatenbank vorhanden sind
 		long temp = (player == PLAYER1 ? fieldP1 : fieldP2);
 		long mirroredField = 0L;
 
@@ -2154,10 +2160,10 @@ public class C4Base extends AgentBase implements Serializable {
 //		return null;
 	}
 
-	@Override
-	public double getScore(StateObservation sob) {
-		throw new RuntimeException("C4Base.getScore has to be overridden by derived classes!");
-//		return 0;
-	}
+//	@Override
+//	public double getScore(StateObservation sob) {
+//		throw new RuntimeException("C4Base.getScore has to be overridden by derived classes!");
+////		return 0;
+//	}
 
 }

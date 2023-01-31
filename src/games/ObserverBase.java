@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import TournamentSystem.TSTimeStorage;
 import controllers.PlayAgent;
 import controllers.PlayAgtVector;
+import games.Nim.StateObserverNim;
 import tools.ScoreTuple;
 import tools.Types;
 import tools.Types.ACTIONS;
@@ -15,8 +16,8 @@ import tools.Types.ACTIONS;
  * reward, stored action and value info, ...).
  * <p>
  * This default behavior in {@link ObserverBase} - which may be overridden in derived classes -
- * is for deterministic, 2-player games, where reward and game score are the same. (If one of 
- * the {@code getReward}-functions in {@link ObserverBase} is called with 
+ * is for deterministic, 2-player, perfect-information (see {@link PartialPerfect}) games, where reward and game
+ * score are the same. (If one of the {@code getReward}-functions in {@link ObserverBase} is called with
  * 		{@code boolean rewardIsGameScore==false}, 
  * a warning is issued.)
  * 
@@ -62,6 +63,8 @@ abstract public class ObserverBase extends PartialPerfect implements StateObserv
 	public StateObservation clearedCopy() {
     	return this.copy();
 	}
+
+	public StateObservation project() { return this; }
 
 	/**
 	 * Given the current state, store some useful information for inspecting the  
@@ -366,8 +369,9 @@ abstract public class ObserverBase extends PartialPerfect implements StateObserv
 	 * they override this method.
 	 *
 	 * @return	a score tuple with 0.0 for all elements
+     * @param pa
 	 */
-	public ScoreTuple getStepRewardTuple() {
+	public ScoreTuple getStepRewardTuple(PlayAgent pa) {
 		int N = this.getNumPlayers();
 		ScoreTuple sc = new ScoreTuple(N);
 		for (int i=0; i<N; i++) sc.scTup[i] = 0.0;

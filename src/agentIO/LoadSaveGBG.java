@@ -526,7 +526,7 @@ public class LoadSaveGBG {
 //			final JDialog dlg = createProgressDialog(ptis, "Loading...");
 
 			pa = transformObjectToPlayAgent(ois, fis, filePath);
-			
+
 //			disposeProgressDialog(dlg);
 
 		} 
@@ -796,6 +796,7 @@ public class LoadSaveGBG {
 			Object obj = ois.readObject();
 			if (obj instanceof PlayAgent) {
 				pa = (PlayAgent) obj;
+				pa.setAgentFile(filePath);
 				pa.instantiateAfterLoading();	// special treatment of agents after loading (if necessary)
 				// [instantiateAfterLoading replaces completely the long and complicated switch statement we had here before (!)]
 			} else {
@@ -813,7 +814,13 @@ public class LoadSaveGBG {
 			// If this is the case, replace the null value with a default ParOther.
 			if (pa.getParOther() == null) {
 				((AgentBase) pa).setDefaultParOther();
-			}						
+			}
+			if (pa.getParReplay() == null) {
+				((AgentBase) pa).setDefaultParReplay();
+			}
+			if (pa.getParWrapper() == null) {
+				((AgentBase) pa).setDefaultParWrapper(pa.getParOther());
+			}
 
 //			disposeProgressDialog(dlg);
 //			arenaGame.setProgress(null);

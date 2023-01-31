@@ -1,6 +1,7 @@
 package controllers.MCTSWrapper.stateApproximation;
 
 import controllers.MCTSWrapper.utils.Tuple;
+import controllers.PlayAgent;
 import games.StateObservation;
 
 /**
@@ -15,10 +16,12 @@ public interface Approximator {
      */
     Tuple<Double, double[]> predict(final StateObservation stateObservation);
 
-    /**
-     * @return The approximator's estimate of the final score for that game state.
-     */
-    double getScore(final StateObservation sob);
+//    /**
+//     * @return The approximator's estimate of the final score for that game state.
+//     */
+//    double getScore(final StateObservation sob);
 
     String getName();
+
+    PlayAgent getWrappedPlayAgent();
 }

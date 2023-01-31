@@ -2,6 +2,9 @@ package games.RubiksCube;
 
 import games.BoardVector;
 
+import java.io.Serial;
+import java.util.Map;
+
 /**
  * See {@link CubeState} for class description
  */
@@ -9,14 +12,16 @@ public class CubeState2x2 extends CubeState {
 
     /**
      * change the version ID for serialization only if a newer version is no longer
-     * compatible with an older one (older .agt.zip will become unreadable or you have
+     * compatible with an older one (older .agt.zip will become unreadable, or you have
      * to provide a special version transformation)
      */
+    @Serial
     private static final long  serialVersionUID = -4066880431436899009L;
 
-    public CubeState2x2() {
-        super(Type.COLOR_P);
-    }
+    // --- never used ---
+//    public CubeState2x2() {
+//        super(Type.COLOR_P);
+//    }
 
     public CubeState2x2(CubeState cs) {
         super(cs);
@@ -32,89 +37,164 @@ public class CubeState2x2 extends CubeState {
 
     /**
      * Construct a new cube of <b>color representation</b> type from a board vector {@code bvec}
-     * @param boardVector	the board vector, see {@link #getBoardVector()} for the different types
+     * @param boardVector	the board vector, see {@link #getBoardVector()} for the different types. Its member
+     *                      {@code bvec} holds {@link CubeState#fcol} and its member {@code aux} holds
+     *                      {@link CubeState#sloc}
      */
     public CubeState2x2(BoardVector boardVector) {
         super();    // would be called silently otherwise
-        assert (CubeConfig.cubeType== CubeConfig.CubeType.POCKET);
+        assert (CubeConfig.cubeSize == CubeConfig.CubeSize.POCKET);
         CubeStateFactory csFactory = new CubeStateFactory();
         int[] bvec = boardVector.bvec;
-        switch(bvec.length) {
-            case 24: 	// boardvecType == CUBESTATE, 2x2x2
+        switch (bvec.length) {
+            case 24 -> {    // boardvecType == CUBESTATE, 2x2x2
                 this.type = Type.COLOR_P;
                 this.fcol = bvec.clone();
                 this.sloc = boardVector.aux.clone();
-                break;
-            case 26: 	// boardvecType == CUBEPLUSACTION, 2x2x2
+            }
+            case 26 -> {    // boardvecType == CUBEPLUSACTION, 2x2x2
                 this.type = Type.COLOR_P;
                 this.fcol = new int[24];
                 System.arraycopy(bvec, 0, this.fcol, 0, 24);
                 this.sloc = boardVector.aux.clone();
-                break;
-            case 49: 	// boardvecType == STICKER, 2x2x2
+            }
+            case 49 -> {    // boardvecType == STICKER, 2x2x2
                 this.type = Type.COLOR_P;
                 this.sloc = slocFromSTICKER(bvec);
                 CubeState def = csFactory.makeCubeState(this.type);
                 this.fcol = new int[def.fcol.length];
-                for (int i=0; i<fcol.length; i++) this.fcol[sloc[i]] = def.fcol[i];
-                break;
-            case 14: 	// boardvecType == STICKER2, 2x2x2
-                throw new RuntimeException("Case bvec.length = "+bvec.length+" (STICKER2) not yet implemented.");
-            default:
-                throw new RuntimeException("Case bvec.length = "+bvec.length+" not yet implemented.");
+                for (int i = 0; i < fcol.length; i++) this.fcol[sloc[i]] = def.fcol[i];
+            }
+            case 14 ->    // boardvecType == STICKER2, 2x2x2
+                    throw new RuntimeException("Case bvec.length = " + bvec.length + " (STICKER2) not yet implemented.");
+            default -> throw new RuntimeException("Case bvec.length = " + bvec.length + " not yet implemented.");
         }
     }
 
-    protected void show_invF_invL_invU() {
-        CubeState2x2 t_cs = new CubeState2x2(CubeState.Type.TRAFO_P);
-        t_cs.FTw();											// invF
-        System.out.println(t_cs);
-        t_cs = new CubeState2x2(CubeState.Type.TRAFO_P);
-        t_cs.uTr().FTw().uTr().uTr().uTr();					// invL
-        System.out.println(t_cs);
-        t_cs = new CubeState2x2(CubeState.Type.TRAFO_P);
-        t_cs.lTr().lTr().lTr().FTw().lTr();					// invU
-        System.out.println(t_cs);
+//    protected CubeState apply_sloc_wcr(CubeState trafo, boolean doAssert) {
+//        int[] tmp = sloc.clone();
+//        for (int i=0; i<sloc.length; i++)  sloc[trafo.fcol[i]]=tmp[i];
+//
+//        if (doAssert) {
+//            CubeState2x2 cs2 = new CubeState2x2(this);
+//            cs2.apply_sloc_slow(trafo,doAssert );
+//            assert (cs2.isEqual(this)) : "sloc_slow check: cs2 and this differ!";
+//        }
+//        return this;
+//    }
+
+    /**
+     * Apply transformation {@code trafo} to {@link #sloc}. Needs {@link #fcol} to be transformed
+     * already, but does not need {@code trafo} (it is only here to have the same signature as
+     * {@link #apply_sloc(CubeState, boolean) apply_sloc}).
+     * Do it the <b>slow</b> way (as an independent check): <br>
+     * 1) {@link #locate(CubieTriple) locate} one sticker {@code s} for every cubie by finding the right color
+     * configuration in {@code this.}{@link #fcol} <br>
+     * 2) Set {@link #sloc}{@code [s]} to this location, set the clockwise-right sticker to the 2nd cubie location, and
+     * set its clockwise-right neighbor to the 3rd location.
+     *
+     * @param trafo a {@link CubeState} object of type TRAFO_P or TRAFO_R
+     * @param doAssert assert the correctness of {@link #sloc} transformation by checking the {@code fcol[sloc]}-relation.
+     * @return {@code this} with its member {@link #sloc} transformed
+     */
+    protected CubeState apply_sloc_slow(CubeState trafo, boolean doAssert) {
+        assert(type==Type.COLOR_P || type==Type.COLOR_R) : "Wrong type "+type+" in apply_sloc_slow() !";
+        int[] stickers = {0,1,2,3,12,13,14,15};     // the necessary stickers (one for every cubie)
+        int[] rig = CubieTriple.right;
+        CubieTriple where;
+        // we implement it the slow way by locating each of the eight cubies:
+        for (int s : stickers) {
+            where = locate(ctFactory.makeCubieTriple(s));
+            sloc[s] = where.loc[0];
+            sloc[rig[s]] = where.loc[1];
+            sloc[rig[rig[s]]] = where.loc[2];
+        }
+
+        if (doAssert) {
+            CubeState def = csFactory.makeCubeState();   // COLOR_P or COLOR_R
+            for (int i=0; i<sloc.length; i++)
+                assert (fcol[sloc[i]] == def.fcol[i]) : "fcol[sloc[i]]-relation violated for i="+i;
+        }
+
+        return this;
     }
 
     /**
-     * Locate the cubie with the colors of {@link CubieTriple} {@code tri} in {@code this}.
-     * {@code this} has to be of type COLOR_P or COLOR_R.<br>
-     * [This method is only needed if we want to use color symmetries.]
-     *
-     * @param tri
-     * @return a {@link CubieTriple} whose member {@code loc} carries the location of the cubie with
-     * 		   the colors of {@code tri}.
+     * Apply color transformation {@code cT} to {@code this}: Each face color {@code fcol[i]} gets the new color
+     * {@code cT.ccol[fcol[i]]}. Each sticker location {@code sloc[i]} gets its new sticker after color transform.  <br>
+     * {@code this} has to be of type COLOR_P or COLOR_R.
+     * @param cT color transformation
+     * @param doAssert assert the correctness of {@link #sloc} transformation by calling
+     *          {@link CubeState#apply_sloc_slow(CubeState, boolean) apply_sloc_slow}
+     * @return the transformed {@code this}
      */
-    public CubieTriple locate(CubieTriple tri) {
-        CubieTriple where = new CubieTriple(tri);
-        assert(this.type==Type.COLOR_P || this.type==Type.COLOR_R) : "Wrong type in apply() !";
-        //            0           4          8          12         16          20
-        int[] left = {4,11,17,22, 8,3,21,14, 0,7,13,18, 20,19,9,6, 12,23,1,10, 16,15,5,2};
-        int[] right= {8,18,23,5, 0,22,15,9, 4,14,19,1, 16,10,7,21, 20,2,11,13, 12,6,3,17};
-        int rig;
-        switch(tri.ori) {
-            case CLOCK:
-                for (int i=0; i<fcol.length; i++) {
-                    if (fcol[i]==tri.col[0]) {
-                        where.loc[0]=i;
-                        rig = right[i];
-                        if (fcol[rig]==tri.col[1]) {
-                            where.loc[1]=rig;
-                            rig = right[rig];
-                            if (fcol[rig]==tri.col[2]) {
-                                where.loc[2]=rig;
-                                return where;
-                            }
-                        }
-                    }
-                }
-                break;
-            case COUNTER:
-                throw new RuntimeException("Case COUNTER not yet implemented");
-        }
-        throw new RuntimeException("Invalid cube, we should not arrive here!");
+    public CubeState applyCT(ColorTrafo cT, boolean doAssert) {
+        CubieTriple ygrCubie = ctFactory.makeCubieTriple();
+        assert(this.type==Type.COLOR_P || this.type==Type.COLOR_R) : "Wrong type "+this.type+" in apply(cT) !";
+        // 1) apply the color trafo to fcol:
+        int[] tmp = this.fcol.clone();
+        for (int i=0; i<fcol.length; i++) this.fcol[i] = cT.getCCol(tmp[i]);
+
+        // 2) apply the color trafo to sloc:
+        applyCT_sloc(cT,doAssert);
+
+//        boolean DO_NORMALIZE=false;       // this branch *ONLY* for DistinctColorTrafos.examplePocket_CT in order to
+//        if (DO_NORMALIZE) {               // generate Fig. 8 in TR_Rubiks (color trafo before normalization)
+
+            // 3) locate the ygr-cubie and its forward whole-cube rot:
+            CubieTriple where = this.locate(ygrCubie);
+            Integer iWholeCubeRot = CubeStateMap.map_ygr_wholeKey.get(where.loc[0]);
+            // --- only debug-printout: ---
+//            DecimalFormat form = new DecimalFormat("00");
+//            System.out.println("key: "+form.format(entry.getKey())
+//                    + ", y-sticker: "+form.format(where.loc[0])
+//                    + ", iWholeCubeRot: "+form.format(iWholeCubeRot));
+
+            // 4) apply the corresponding whole-cube rotation that brings the ygr-cubie 'home':
+            CubeState trafo = CubeStateMap.allWholeCubeRots.get(iWholeCubeRot);
+            //applyWholeCubeRot(iWholeCubeRot,tS);      // 3.a: WRONG! (and no longer needed)
+            this.apply(trafo, doAssert);                 // 3.b: works now, with repaired apply_sloc in apply
+//          tmp = this.fcol.clone();                    // 3.c: not needed: is the same as 3.b. with apply_sloc
+//          for (int i=0; i<fcol.length; i++)           //      and is slow with apply_sloc_slow
+//              this.fcol[i] = tmp[trafo.fcol[i]];      //
+//          //apply_sloc_slow(trafo,doAssert);          //
+//          apply_sloc(trafo,doAssert);                 //
+
+            if (doAssert) {
+                CubeState2x2 cs2 = new CubeState2x2(this);
+                cs2.apply_sloc_slow(trafo, doAssert);
+                assert (cs2.isEqual(this)) : "sloc_slow check: cs2 and this differ!";
+            }
+//      }
+        return this;
     }
+
+    // --- not needed ---
+//  public void applyWholeCubeRot(int iWholeCubeRot, CubeState tS) {
+//        // given iWholeCubeRot, build the inverse trafo
+//        tS.uTr(iWholeCubeRot % 4);
+//        int iRot = iWholeCubeRot/4;
+//        switch(iRot) {
+//            case 0:
+//                break;
+//            case 1:
+//                tS.fTr(3);
+//                break;
+//            case 2:
+//                tS.fTr(2);
+//                break;
+//            case 3:
+//                tS.fTr(1);
+//                break;
+//            case 4:
+//                tS.lTr(3);
+//                break;
+//            case 5:
+//                tS.lTr(1);
+//                break;
+//        }
+//
+//    }
 
     /**
      * There are four possible board vector types, depending on {@link CubeConfig#boardVecType}
@@ -153,7 +233,7 @@ public class CubeState2x2 extends CubeState {
      *    face  07 08 09 10 11 12 13
      * </pre>
      *
-     * @return an int[] vector representing the 'board' state (= cube state)
+     * @return a board vector representing the 'board' state (= cube state)
      *
      */
     public BoardVector getBoardVector() {
@@ -161,7 +241,7 @@ public class CubeState2x2 extends CubeState {
         final int[] orig = {0,1,2,3,13,14,15}; 	// the original locations of the tracked stickers
         // cor[i]: For face location i (out  of 24): to which corner-cubie does it belong?
         //                 00                       04                       08
-        final Cor cor[] = {Cor.a,Cor.b,Cor.c,Cor.d, Cor.a,Cor.d,Cor.h,Cor.g, Cor.a,Cor.g,Cor.f,Cor.b,
+        final Cor[] cor = {Cor.a,Cor.b,Cor.c,Cor.d, Cor.a,Cor.d,Cor.h,Cor.g, Cor.a,Cor.g,Cor.f,Cor.b,
         //                 12                       16                       20
                            Cor.e,Cor.f,Cor.g,Cor.h, Cor.e,Cor.c,Cor.b,Cor.f, Cor.e,Cor.h,Cor.d,Cor.c};
         final int[] face = {1,1,1,1,2,3,2,3,3,2,3,2,1,1,1,1,2,2,3,2,3,3,2,3};
@@ -169,50 +249,47 @@ public class CubeState2x2 extends CubeState {
         int[] bvec;
 
         switch (CubeConfig.boardVecType) {
-            case CUBESTATE:
-                bvec = fcol.clone();
-                break;
-            case CUBEPLUSACTION:
-                bvec = new int[fcol.length+2];
+            case CUBESTATE -> bvec = fcol.clone();
+            case CUBEPLUSACTION -> {
+                bvec = new int[fcol.length + 2];
                 System.arraycopy(this.fcol, 0, bvec, 0, fcol.length);
                 bvec[fcol.length] = this.lastTwist.ordinal();
-                bvec[fcol.length+1] = this.lastTimes;
-                break;
-            case STICKER:
+                bvec[fcol.length + 1] = this.lastTimes;
+            }
+            case STICKER -> {
                 int[][] board = new int[7][7];
-                for (int i=0; i<7; i++) {		// set in every column i (sticker) the row cell specified by 'cor'
+                for (int i = 0; i < 7; i++) {        // set in every column i (sticker) the row cell specified by 'cor'
                     // to the appropriate face value:
                     column = cor[sloc[orig[i]]].ordinal();
                     //assert column!=4;	// should not be the ygr-cubie
-                    if (column>4) column = column-1;
+                    if (column > 4) column = column - 1;
                     //assert column<7;
                     board[column][i] = face[sloc[orig[i]]];
                 }
 
                 // copy to linear bvec according to STICKER coding specified above
-                bvec = new int[7*7];
-                for (int j=0, k=0; j<7; j++)
-                    for (int i=0; i<7; i++,k++)
+                bvec = new int[7 * 7];
+                for (int j = 0, k = 0; j < 7; j++)
+                    for (int i = 0; i < 7; i++, k++)
                         bvec[k] = board[j][i];
-                break;
-            case STICKER2:
+            }
+            case STICKER2 -> {
                 int[][] board2 = new int[2][7];
-                for (int i=0; i<7; i++) {		// set in every column i (sticker) the location specified by {cor,face}
+                for (int i = 0; i < 7; i++) {        // set in every column i (sticker) the location specified by {cor,face}
                     column = cor[sloc[orig[i]]].ordinal();
                     //assert column!=4;	// should not be the ygr-cubie
-                    if (column>4) column = column-1;
+                    if (column > 4) column = column - 1;
                     board2[0][i] = column;
-                    board2[1][i] = face[sloc[orig[i]]]-1;       // map faces 1,2,3 to 0,1,2
+                    board2[1][i] = face[sloc[orig[i]]] - 1;       // map faces 1,2,3 to 0,1,2
                 }
 
                 // copy to linear bvec according to STICKER2 coding specified above
-                bvec = new int[7*2];
-                for (int j=0, k=0; j<2; j++)
-                    for (int i=0; i<7; i++,k++)
+                bvec = new int[7 * 2];
+                for (int j = 0, k = 0; j < 2; j++)
+                    for (int i = 0; i < 7; i++, k++)
                         bvec[k] = board2[j][i];
-                break;
-            default:
-                throw new RuntimeException("Illegal value in switch boardVecType");
+            }
+            default -> throw new RuntimeException("Illegal value in switch boardVecType");
         }
         return new BoardVector(bvec,sloc);   // return a BoardVector with aux = sloc (needed to reconstruct CubeState from BoardVector)
     }
@@ -261,7 +338,7 @@ public class CubeState2x2 extends CubeState {
      */
     private int[] getCornerAndFace(int z, int[] bvec) {
         int[] corfac = {4,0};	// the values for sticker z=4 (ygr-cubie, which stays always in place)
-        int column=0;
+        int column;
 
         // index arithmetic, part one
         if (z<4) column=z;
@@ -270,7 +347,7 @@ public class CubeState2x2 extends CubeState {
 
         // find (row number, value) of the only non-zero element in 'column':
         int nonzero = 0;
-        int rv=0;
+        int rv;
         for (int r=0; r<7; r++) {
             rv = bvec[r*7+column];
             if (rv!=0) {
@@ -286,26 +363,27 @@ public class CubeState2x2 extends CubeState {
 
     // invF_2x2[i] is the sticker location which moves under an F-twist to location i. E.g. sticker 18 moves to location 0.
     //                                		0          4         8            12           16           20
-    private static final int[] 	invF_2x2 = {18,19,2,3,  1, 5,6,0, 11, 8, 9,10, 12, 7, 4,15, 16,17,13,14, 20,21,22,23},
+    private static final int[] 	invU_2x2 = { 3, 0,1,2, 22,23,6,7,  5, 9,10, 4, 12,13,14,15, 16,11, 8,19, 20,21,17,18},
                                 invL_2x2 = { 9, 1,2,8,  7, 4,5,6, 14,15,10,11, 12,13,21,22, 16,17,18,19, 20, 3, 0,23},
-                                invU_2x2 = { 3, 0,1,2, 22,23,6,7,  5, 9,10, 4, 12,13,14,15, 16,11, 8,19, 20,21,17,18};
+                                invF_2x2 = {18,19,2,3,  1, 5,6,0, 11, 8, 9,10, 12, 7, 4,15, 16,17,13,14, 20,21,22,23};
     //
     // use the following line once on a default TRAFO_P CubeState t_cs to generate int[] invL above:
     //			return t_cs.uTr().FTw().uTr().uTr().uTr();   	// L(x) = u^3(F(u(x)))
     // use the following line once on a default TRAFO_P CubeState t_cs to generate int[] invU above:
     //			return t_cs.lTr().lTr().lTr().FTw().lTr();   	// U(x) = l(F(l^3(x)))
+    // (see CubeState2x2.show_invF_invL_invU(), which is called once by ArenaCube.makeGameBoard if SHOW_INV==true)
 
     // invD|R|B_2x2 are just dummies, we do not need these twists for 2x2x2, but we need the variables to be present to
     // get everything compiled
-    private static final int[] 	invD_2x2 = {18,19,2,3,  1, 5,6,0, 11, 8, 9,10, 12, 7, 4,15, 16,17,13,14, 20,21,22,23},
-            invR_2x2 = { 9, 1,2,8,  7, 4,5,6, 14,15,10,11, 12,13,21,22, 16,17,18,19, 20, 3, 0,23},
-            invB_2x2 = { 3, 0,1,2, 22,23,6,7,  5, 9,10, 4, 12,13,14,15, 16,11, 8,19, 20,21,17,18};
+    private static final int[] 	invD_2x2 = { 0, 1, 2, 3,  4, 5, 9,10,  8,19,16,11, 15,12,13,14, 21,17,18,20,  6, 7,22,23},
+                                invR_2x2 = { 0,23,20, 3,  4, 5, 6, 7,  8, 9, 1, 2, 10,11,14,15, 19,16,17,18, 13,21,22,12},
+                                invB_2x2 = { 0, 1, 5, 6,  4,15,12, 7,  8, 9,10,11, 17,13,14,16,  2,03,18,19, 23,20,21,22};
 
     /**
      * generate the <b>inverse</b> transformations {@link #invF}, {@link #invL} and {@link #invU}.
      */
     public static void generateInverseTs() {
-        assert (CubeConfig.cubeType== CubeConfig.CubeType.POCKET);
+        assert (CubeConfig.cubeSize == CubeConfig.CubeSize.POCKET);
         invU = invU_2x2;
         invL = invL_2x2;
         invF = invF_2x2;
@@ -313,6 +391,20 @@ public class CubeState2x2 extends CubeState {
         invR = invR_2x2;
         invB = invB_2x2;
     }
+
+//    protected void show_invF_invL_invU() {
+//        CubeState2x2 t_cs = new CubeState2x2(CubeState.Type.TRAFO_P);
+//        System.out.println("--- generated by show_invF_invL_invU ---");
+//        t_cs.FTw();											// invF
+//        System.out.println("invF: "+t_cs);
+//        t_cs = new CubeState2x2(CubeState.Type.TRAFO_P);
+//        t_cs.uTr().FTw().uTr().uTr().uTr();					// invL
+//        System.out.println("invL: "+t_cs);
+//        t_cs = new CubeState2x2(CubeState.Type.TRAFO_P);
+//        t_cs.lTr().lTr().lTr().FTw().lTr();					// invU
+//        System.out.println("invU: "+t_cs);
+//        System.out.println();
+//    }
 
     /**
      * Whole-cube rotation 90° counter-clockwise around the u-face
@@ -323,6 +415,14 @@ public class CubeState2x2 extends CubeState {
         int[] invT = {3,0,1,2,22,23,20,21,5,6,7,4,13,14,15,12,10,11,8,9,19,16,17,18};
         int[] tmp = this.fcol.clone();
         for (i=0; i<invT.length; i++) this.fcol[i] = tmp[invT[i]];
+        tmp = this.sloc.clone();
+        //for (i=0; i<sloc.length; i++) this.sloc[invT[i]] = tmp[i];    // WRONG!
+        //for (i=0; i<sloc.length; i++) this.sloc[fcol[i]] = i;         // ONLY correct if this is of type TRAFO
+        int[] T = new int[invT.length];                                 // CORRECT for both types, COLOR and TRAFO
+        for (i=0; i<invT.length; i++) T[invT[i]] = i;
+        for (i=0; i<sloc.length; i++) sloc[i] = T[tmp[i]];
+
+        //this.assert_fcol_sloc(" from uTr()");
         return this;
     }
 
@@ -335,6 +435,14 @@ public class CubeState2x2 extends CubeState {
         int[] invT = {18,19,16,17,1,2,3,0,11,8,9,10,6,7,4,5,15,12,13,14,21,22,23,20};
         int[] tmp = this.fcol.clone();
         for (i=0; i<invT.length; i++) this.fcol[i] = tmp[invT[i]];
+        tmp = this.sloc.clone();
+        //for (i=0; i<sloc.length; i++) this.sloc[invT[i]] = tmp[i];    // WRONG!
+        //for (i=0; i<sloc.length; i++) this.sloc[fcol[i]] = i;         // ONLY correct if this is of type TRAFO
+        int[] T = new int[invT.length];                                 // CORRECT for both types, COLOR and TRAFO
+        for (i=0; i<invT.length; i++) T[invT[i]] = i;
+        for (i=0; i<sloc.length; i++) sloc[i] = T[tmp[i]];
+
+        //this.assert_fcol_sloc(" from fTr()");
         return this;
     }
 

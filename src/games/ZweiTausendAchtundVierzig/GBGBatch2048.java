@@ -125,7 +125,8 @@ public class GBGBatch2048 {
 
 		for (int nPly : nPlyArr) {
 
-			xab.oPar[0].setWrapperNPly(nPly);
+			xab.oPar[0].setWrapperNPly(nPly);	// deprecated
+			xab.wrPar[0].setWrapperNPly(nPly);
 			String sAgent = xab.getSelectedAgent(0);
 			xab.m_arena.m_xfun.m_PlayAgents = xab.m_arena.m_xfun.fetchAgents(xab);
 			AgentBase.validTrainedAgents(xab.m_arena.m_xfun.m_PlayAgents, 1);
@@ -136,8 +137,8 @@ public class GBGBatch2048 {
 
 			// run Quick Evaluation
 			try {
-				int nPly1 = xab.oPar[0].getWrapperNPly();
-				int nPly2 = pa.getParOther().getWrapperNPly();
+				int nPly1 = xab.wrPar[0].getWrapperNPly();
+				int nPly2 = pa.getParWrapper().getWrapperNPly();
 				assert nPly == nPly1 : "Ooops, nPly  and nPly1 differ! " + nPly + " != " + nPly1;
 				assert nPly1 == nPly2 : "Ooops, nPly1 and nPly2 differ! " + nPly1 + " != " + nPly2;
 				System.out.println("nPly: " + nPly1);

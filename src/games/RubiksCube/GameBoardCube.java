@@ -51,17 +51,19 @@ public class GameBoardCube implements GameBoard {
 //		rand 		= new Random(seed);
         rand 		= new Random(System.currentTimeMillis());	
         rand2 		= new Random(2*System.currentTimeMillis());	
-		m_so		= new StateObserverCube();	// empty table
+		m_so		= new StateObserverCube();	// solved cube
 		
         if (m_Arena.hasGUI() && m_gameGui==null) {
-			switch (CubeConfig.cubeType) {
+			switch (CubeConfig.cubeSize) {
 				case POCKET -> m_gameGui = new GameBoardCubeGui2x2(this);
 				case RUBIKS -> m_gameGui = new GameBoardCubeGui3x3(this);
 			}
 
         }
         getPMax();		// actualize CubeConfig.pMin and CubeConfig.pMax, if GUI present
-        
+
+		//CubeConfig.setStepReward();	// actualize CubeConfig.stepReward according to current CubeConfig.cubeSize (from scalable params)
+
 	}
 	
 	public int getPMax() {
@@ -330,7 +332,7 @@ public class GameBoardCube implements GameBoard {
 	
 	@Override
 	public String getSubDir() {
-		String substr = switch (CubeConfig.cubeType) {
+		String substr = switch (CubeConfig.cubeSize) {
 			case POCKET -> "2x2x2";
 			case RUBIKS -> "3x3x3";
 		};

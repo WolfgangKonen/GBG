@@ -1,8 +1,8 @@
 package games.RubiksCube;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.text.DecimalFormat;
-import games.RubiksCube.CubeState.Type;
 
 /**
  * A color transformation assigns each cubie face a new color in such a way that
@@ -16,36 +16,60 @@ import games.RubiksCube.CubeState.Type;
  * up-face w=white and left-face b=blue and so on), and making any one of the 24
  * whole-cube rotations with it. The color of the new up-face is the new color
  * for white, and so on.
+ * <p>
+ * Member {@code key} carries the same number as the corresponding whole-cube rotation.
+ * See {@link CubeStateMap#CubeStateMap(CubeStateMap.CsMapType)} for numbering convention.
  * 
  * @see ColorTrafoMap
+ * @see CubeStateMap
  */
 public class ColorTrafo implements Serializable {
-	public int[] fcol; // fcol[i] holds the new color for current color no. i
-	public int[] T = null; // the forward trafo
+	private int key;
+	private int[] ccol; 			// ccol[i] holds the new color for current color no. i
+	private int[] T = new int[6]; 	// the forward trafo  		// TODO: Do we need this?
 
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
-	 * compatible with an older one (older .agt.zip will become unreadable or you have
+	 * compatible with an older one (older .agt.zip will become unreadable, or you have
 	 * to provide a special version transformation)
 	 */
+	@Serial
 	private static final long  serialVersionUID = 12L;
 
-	public ColorTrafo() {
-		this.fcol = new int[] { 0, 1, 2, 3, 4, 5 };
+	public ColorTrafo(int key) {
+		this.key = key;
+		this.ccol = new int[] { 0, 1, 2, 3, 4, 5 };
+		setT();
 	}
 
-	public ColorTrafo(int[] fcol) {
-		assert (fcol.length == 6) : "fcol has not length 6";
-		this.fcol = fcol.clone();
-	}
+	// --- never used ---
+//	public ColorTrafo(int[] currentCol) {
+//		assert (currentCol.length == 6) : "currentCol has not length 6";
+//		this.ccol = currentCol.clone();
+//		setT();
+//	}
 
 	/**
 	 * Copy constructor
 	 * 
-	 * @param cs
+	 * @param other	the trafo to copy
 	 */
-	public ColorTrafo(ColorTrafo cs) {
-		this.fcol = cs.fcol.clone();
+	public ColorTrafo(ColorTrafo other) {
+		this.key = other.key;
+		this.ccol = other.ccol.clone();
+		this.T = other.T.clone();
+	}
+
+	/**
+	 * Copy constructor, but with new key
+	 *
+	 * @param key 	the new key (may be different from {@code other.key})
+	 * @param other	the trafo to copy
+	 */
+	public ColorTrafo(int key, ColorTrafo other) {
+		this.key = key;
+		this.ccol = other.ccol.clone();
+		this.T = other.T.clone();
 	}
 
 	/**
@@ -53,14 +77,14 @@ public class ColorTrafo implements Serializable {
 	 */
 	private ColorTrafo uTr() {
 		int i;
-		// fcol[invT[i]] is the color which cubie faces with color i get after
+		// ccol[invT[i]] is the color which cubie faces with color i get after
 		// transformation:
 		int[] invT = { 0, 5, 1, 3, 2, 4 };
-		int[] tmp = this.fcol.clone();
+		int[] tmp = new int[ccol.length];
 		for (i = 0; i < invT.length; i++)
-			tmp[i] = this.fcol[invT[i]];
+			tmp[i] = this.ccol[invT[i]];
 		for (i = 0; i < invT.length; i++)
-			this.fcol[i] = tmp[i];
+			this.ccol[i] = tmp[i];
 		return this;
 	}
 
@@ -69,14 +93,14 @@ public class ColorTrafo implements Serializable {
 	 */
 	private ColorTrafo fTr() {
 		int i;
-		// fcol(invT[i]) is the color which cubie faces with color i get after
+		// ccol(invT[i]) is the color which cubie faces with color i get after
 		// transformation:
 		int[] invT = { 4, 0, 2, 1, 3, 5 };
-		int[] tmp = this.fcol.clone();
+		int[] tmp = new int[ccol.length];
 		for (i = 0; i < invT.length; i++)
-			tmp[i] = this.fcol[invT[i]];
+			tmp[i] = this.ccol[invT[i]];
 		for (i = 0; i < invT.length; i++)
-			this.fcol[i] = tmp[i];
+			this.ccol[i] = tmp[i];
 		return this;
 	}
 
@@ -88,74 +112,87 @@ public class ColorTrafo implements Serializable {
 	}
 
 	/**
-	 * Whole-cube rotation, {@code times} * 90° counter-clockwise around the u-face
+	 * Whole-cube rotation, {@code times} * 90 degree counter-clockwise around the u-face
 	 * @param times		how many times
 	 * @return			{@code this}
 	 */
 	public ColorTrafo uTr(int times) {
 		for (int i = 0; i < times; i++)	this.uTr();
+		setT();
 		return this;
 	}
 
 	/**
-	 * Whole-cube rotation, {@code times} * 90° counter-clockwise around the l-face
-	 * @param times		how many times
-	 * @return			{@code this}
-	 */
-	public ColorTrafo lTr(int times) {
-		for (int i = 0; i < times; i++)	this.lTr();
-		return this;
-	}
-
-	/**
-	 * Whole-cube rotation, {@code times} * 90° counter-clockwise around the f-face
+	 * Whole-cube rotation, {@code times} * 90 degree counter-clockwise around the f-face
 	 * @param times		how many times
 	 * @return			{@code this}
 	 */
 	public ColorTrafo fTr(int times) {
 		for (int i = 0; i < times; i++) this.fTr();
+		setT();
+		return this;
+	}
+
+	/**
+	 * Whole-cube rotation, {@code times} * 90 degree counter-clockwise around the l-face
+	 * @param times		how many times
+	 * @return			{@code this}
+	 */
+	public ColorTrafo lTr(int times) {
+		for (int i = 0; i < times; i++)	this.lTr();
+		setT();
 		return this;
 	}
 
 	//
 	/**
 	 * Set the forward trafo T for {@code this}
+	 * TODO: Do we need this?
 	 */
-	public void setT() {
-		this.T = new int[6];
+	private void setT() {
 		for (int k = 0; k < 6; k++)
-			T[fcol[k]] = k;
+			T[ccol[k]] = k;
+	}
+
+	public int getKey() {
+		return key;
+	}
+
+	public int getCCol(int i) {
+		return ccol[i];
 	}
 
 	public ColorTrafo print() {
-		System.out.println(this.toString());
+		System.out.println(this);
 		return this;
 	}
 
 	public String toString() {
 		DecimalFormat form = new DecimalFormat("0");
-		String s = "";
-		for (int i = 0; i < fcol.length; i++) {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < ccol.length; i++) {
 			if (i % 6 == 0)
-				s = s + "|";
-			s = s + form.format(fcol[i]);
+				sb.append("|");
+			sb.append(form.format(ccol[i]));
 		}
-		s = s + "|";
-		return s;
+		sb.append("|");
+		sb.append(" (key:"+key+")");
+		return sb.toString();
 	}
 
 	/**
-	 * Checks whether elements of members fcol and type are the same in
+	 * Checks whether elements of members ccol and T are the same in
 	 * {@code this} and {@code other}. (This differs from
 	 * {@link Object#equals(Object)}, since the latter tests, whether the
 	 * objects are the same, not their content.)
-	 * @param other
-	 * @return
+	 * @param other the other trafo
+	 * @return true, if contents is the same
 	 */
 	public boolean isEqual(ColorTrafo other) {
-		for (int i = 0; i < fcol.length; i++) {
-			if (this.fcol[i] != other.fcol[i])
-				return false;
+		if (this.key != other.key) return false;
+		for (int i = 0; i < ccol.length; i++) {
+			if (this.ccol[i] != other.ccol[i]) return false;
+			if (this.T[i] != other.T[i]) return false;
 		}
 		return true;
 	}
@@ -163,7 +200,7 @@ public class ColorTrafo implements Serializable {
 	/**
 	 * It is important that {@link Object#equals(Object)} is overwritten here,
 	 * so that objects of class ColorTrafo which have the same elements in
-	 * fcol[] are counted as equal. The operation equals is the one that
+	 * ccol[] are counted as equal. The operation equals is the one that
 	 * HashSet::add() relies on.
 	 * 
 	 * @see #hashCode()

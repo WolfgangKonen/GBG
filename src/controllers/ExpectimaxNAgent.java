@@ -22,7 +22,7 @@ import java.util.Random;
 /**
  * The Expectimax-N agent implements the Expectimax-N algorithm via interface {@link PlayAgent}. 
  * Expectimax-N  is the generalization {@link MaxNAgent} to nondeterministic games. It works on  
- * {@link ScoreTuple}, an N-tuple of game scores (one score for each player 0,1,...,N-1).
+ * {@link ScoreTuple}, an N-tuple of game scores (one score for each player 0, 1,..., N-1).
  * It traverses the game tree up to a prescribed depth (default: 10, see {@link ParMaxN}).
  * <p>
  * {@link ExpectimaxNAgent} is for <b>non-deterministic</b> games. For deterministic games see 
@@ -38,7 +38,7 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 {
 	/**
 	 * If {@code PARTIAL_IN_RECURSION==true}, form a partial state before starting the recursion in
-	 * {@link #getScore(StateObservation)} and {@link #getScoreTuple(StateObservation, ScoreTuple)} (recommended)
+	 * {@link #getScoreTuple(StateObservation, ScoreTuple)}
 	 * <p>
 	 * If {@code PARTIAL_IN_RECURSION==false}, do not form partial states before starting the recursion.
 	 */
@@ -56,15 +56,15 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 
 	//	protected boolean m_rgs=true;  // use now AgentBase::m_oPar.getRewardIsGameScore()
 	private boolean m_useHashMap=true;	// new 2021-10-18
-	private HashMap<String,ScoreTuple> hm;
+	private final HashMap<String,ScoreTuple> hm;
 	protected int countTerminal;		// # of terminal node visits in getNextAction2
 	protected int countMaxDepth;		// # of premature returns due to maxDepth in getNextAction2
-	private boolean DBG_EWN = false;
-	private int DBG_EWN_DEPTH = 2;
+	private final boolean DBG_EWN = false;
+	private final int DBG_EWN_DEPTH = 2;
 
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
-	 * compatible with an older one (older .agt.zip will become unreadable or you have
+	 * compatible with an older one (older .agt.zip will become unreadable, or you have
 	 * to provide a special version transformation)
 	 */
 	@Serial
@@ -77,17 +77,21 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 		super.setGameNum(0);
         rand = new Random(System.currentTimeMillis());
         m_mpar = new ParMaxN();
-		hm = new HashMap<String, ScoreTuple>();
+		hm = new HashMap<>();
 		setAgentState(AgentState.TRAINED);
 	}
 	
 	public ExpectimaxNAgent(String name, ParMaxN mpar, ParOther opar)
 	{
-		this(name);
+		super(name,opar);
+		super.setMaxGameNum(1000);
+		super.setGameNum(0);
+		rand = new Random(System.currentTimeMillis());
 		m_mpar = mpar;
-		m_oPar = opar;		// AgentBase::m_oPar
 		m_depth = mpar.getMaxNDepth();
+		hm = new HashMap<>();
 		m_useHashMap = mpar.getMaxNUseHashmap();
+		setAgentState(AgentState.TRAINED);		// do again to set oPar's agent state to TRAINED
 	}
 	
 	public ExpectimaxNAgent(String name, int nply)
@@ -106,10 +110,11 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 	 * 
 	 * @see Arena#loadAgent
 	 */
-	public void fillParamTabsAfterLoading(int n, Arena m_arena) { 
+	public void fillParamTabsAfterLoading(int n, Arena m_arena) {
+		super.fillParamTabsAfterLoading(n, m_arena);
 		m_arena.m_xab.setMaxNDepthFrom(n, this.getDepth() );
 		m_arena.m_xab.setMaxNParFrom(n,this.m_mpar);
-//		m_arena.m_xab.setOParFrom(n, this.getParOther() );		// do or don't?
+		//m_arena.m_xab.setOParFrom(n, this.getParOther() );  // now in super
 	}
 
 	private ScoreTuple retrieveFromHashMap(boolean m_useHashMap, String stringRep) {
@@ -327,7 +332,7 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 						currScoreTuple =  NewSO.getRewardTuple(rgs);
 					} else {
 						countMaxDepth++;
-						// setAvailableActions not needed anymore (and leads for EWN to a wrong isNextActionDeterministic==false):
+						// setAvailableActions not needed any more (and leads for EWN to a wrong isNextActionDeterministic==false):
 //						NewSO.setAvailableActions();		// The former problematic MC-N, which could not handle an
 						// incoming NewSO with next-action-nondeterministic, does now handle it
 						currScoreTuple = estimateGameValueTuple(NewSO, null);
@@ -335,7 +340,7 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 				}
 				//if (!silent && depth<0) printAfterstate(soND,acts.get(i),currScoreTuple,depth);
 
-				// always *maximize* P's element in the tuple currScoreTuple,
+				// *maximize* always P's element in the tuple currScoreTuple,
 				// where P is the player to move in state soND:
 				scBest.combine(currScoreTuple, cOpMax, player, 0.0);
 
@@ -576,27 +581,27 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 
 	}
 
-	/**
-	 * Return the agent's score for that after state.
-	 * @param sob			the current game state;
-	 * @return				the probability that the player to move wins from that 
-	 * 						state. If game is over: the score for the player who 
-	 * 						*would* move (if the game were not over).
-	 * Each player wants to maximize its score	 
-	 */
-	@Override
-	public double getScore(StateObservation sob) {
-		assert sob instanceof StateObsNondeterministic : "Error, sob must be of class StateObsNondeterministic";
-		StateObsNondeterministic soND_p, soND = (StateObsNondeterministic) sob;
-		if (!soND.isImperfectInformationGame()) {
-			return getEAScoreTuple(soND, true, 0).scTup[sob.getPlayer()];
-		} else {
-			soND_p = PARTIAL_IN_RECURSION ? soND.partialState() : soND;
-			return getEAScoreTuple_partial(new DuoStateND(soND_p,soND_p), true, 0,ViewType.ROOT)
-					.element2()
-					.scTup[sob.getPlayer()];
-		}
-	}
+//	/**
+//	 * Return the agent's score for that after state.
+//	 * @param sob			the current game state;
+//	 * @return				the probability that the player to move wins from that
+//	 * 						state. If game is over: the score for the player who
+//	 * 						*would* move (if the game were not over).
+//	 * Each player wants to maximize its score
+//	 */
+//	@Override
+//	public double getScore(StateObservation sob) {
+//		assert sob instanceof StateObsNondeterministic : "Error, sob must be of class StateObsNondeterministic";
+//		StateObsNondeterministic soND_p, soND = (StateObsNondeterministic) sob;
+//		if (!soND.isImperfectInformationGame()) {
+//			return getEAScoreTuple(soND, true, 0).scTup[sob.getPlayer()];
+//		} else {
+//			soND_p = PARTIAL_IN_RECURSION ? soND.partialState() : soND;
+//			return getEAScoreTuple_partial(new DuoStateND(soND_p,soND_p), true, 0,ViewType.ROOT)
+//					.element2()
+//					.scTup[sob.getPlayer()];
+//		}
+//	}
 	@Override
 	public ScoreTuple getScoreTuple(StateObservation sob, ScoreTuple prevTuple) {
 		assert sob instanceof StateObsNondeterministic : "Error, sob must be of class StateObsNondeterministic";
@@ -665,13 +670,14 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
     	System.out.println("---     Move: "+NewSO.stringDescr()+"   "+scTuple.toString()+", depth="+depth);
     }	 
 
-    private void printBestAfterstate(StateObsNondeterministic soND,ACTIONS actBest,
-    		double pMaxScore, int depth)
-    {
-		StateObsNondeterministic NewSO = soND.copy();
-    	NewSO.advanceDeterministic(actBest);
-    	System.out.println("---Best Move: "+NewSO.stringDescr()+"   "+pMaxScore+", depth="+depth);
-    }	
+    // --- never used ---
+//    private void printBestAfterstate(StateObsNondeterministic soND,ACTIONS actBest,
+//    		double pMaxScore, int depth)
+//    {
+//		StateObsNondeterministic NewSO = soND.copy();
+//    	NewSO.advanceDeterministic(actBest);
+//    	System.out.println("---Best Move: "+NewSO.stringDescr()+"   "+pMaxScore+", depth="+depth);
+//    }
 
     private void printNondet(StateObsNondeterministic NewSO,
     		ScoreTuple scTuple, double currProbab, int depth)

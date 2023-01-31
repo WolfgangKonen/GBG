@@ -28,6 +28,7 @@ public class ParEdax implements Serializable {
 
     private int depth = DEFAULT_DEPTH;
     private double moveTime = DEFAULT_MOVE_TIME;
+    private boolean book_on = true;
     
     /**
      * This member is only constructed when the constructor {@link #ParEdax(boolean) ParEdax(boolean withUI)} 
@@ -94,6 +95,8 @@ public class ParEdax implements Serializable {
 	public double getMoveTime() {
 		return moveTime;
 	}
+
+	public boolean getBookOn() { return book_on; }
 
 	public void setDepth(int num) {
 		this.depth=num;

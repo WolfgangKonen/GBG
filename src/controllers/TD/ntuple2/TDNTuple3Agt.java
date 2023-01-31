@@ -1,12 +1,14 @@
 package controllers.TD.ntuple2;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 import agentIO.LoadSaveGBG;
+import controllers.MCTSWrapper.MCTSWrapperAgent;
 import controllers.TD.ntuple4.TDNTuple4Agt;
 import params.ParNT;
 import params.ParOther;
@@ -79,9 +81,10 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
-	 * compatible with an older one (older .agt.zip will become unreadable or you have
+	 * compatible with an older one (older .agt.zip will become unreadable, or you have
 	 * to provide a special version transformation)
 	 */
+	@Serial
 	private static final long  serialVersionUID = 13L;
 
 	private int numPlayers;
@@ -116,8 +119,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 		super();
 		ParTD tdPar = new ParTD();
 		ParNT ntPar = new ParNT();
-		ParOther oPar = new ParOther();
-		initNet(ntPar, tdPar, oPar, null, null, 1000);
+		initNet(ntPar, tdPar, m_oPar, null, null, 1000);
 	}
 
 	/**
@@ -169,20 +171,22 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	}
 
 	/**
-	 * If agents need a special treatment after being loaded from disk (e. g. instantiation
+	 * If agents need a special treatment after being loaded from disk (e.g. instantiation
 	 * of transient members), put the relevant code in here.
 	 * 
 	 * @see LoadSaveGBG#transformObjectToPlayAgent
 	 */
 	public boolean instantiateAfterLoading() {
+		super.instantiateAfterLoading();
 		this.m_Net.xnf.instantiateAfterLoading();
 		assert (m_Net.getNTuples()[0].getPosVals()==m_Net.xnf.getNumPositionValues()) : "Error getPosVals()";
 		assert (this.getParTD().getHorizonCut()!=0.0) : "Error: horizonCut==0";
 
-		// older agents may not have the wrapper depth parameter, so it is 0. Set it in this case to -1:
-		if (this.getParOther().getWrapperMCTS_depth()==0) this.getParOther().setWrapperMCTS_depth(-1);
-		// older agents may not have the wrapper p_UCT parameter, so it is 0. Set it in this case to 1.0:
-		if (this.getParOther().getWrapperMCTS_PUCT()==0) this.getParOther().setWrapperMCTS_PUCT(1.0);
+		// already done in superclass' AgentBase.instantiateAfterLoading():
+//		// older agents may not have the wrapper depth parameter, so it is 0. Set it in this case to -1:
+//		if (this.getParOther().getWrapperMCTS_depth()==0) this.getParOther().setWrapperMCTS_depth(-1);
+//		// older agents may not have the wrapper p_UCT parameter, so it is 0. Set it in this case to 1.0:
+//		if (this.getParOther().getWrapperMCTS_PUCT()==0) this.getParOther().setWrapperMCTS_PUCT(1.0);
 
 		// set certain elements in td.m_Net (withSigmoid, useSymmetry) from tdPar and ntPar
 		// (they would stay otherwise at their default values, would not 
@@ -204,11 +208,10 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	 * 
 	 * @param so			current game state (is returned unchanged)
 	 * @param random		allow random action selection with probability m_epsilon
-	 * @param silent
 	 * @return actBest,		the best action. If several actions have the same
 	 * 						score, break ties by selecting one of them at random. 
 	 * <p>						
-	 * actBest has predicate isRandomAction()  (true: if action was selected 
+	 * actBest has the predicate isRandomAction()  (true: if action was selected
 	 * at random, false: if action was selected by agent).<br>
 	 * actBest has also the members vTable and vBest to store the Q-value for each available
 	 * action (as returned by so.getAvailableActions()) and the Q-value for the best action actBest, resp.
@@ -235,7 +238,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 //        	System.out.println("Game over: "+so.getRewardTuple(true));
 //        }
         
-    	boolean randomSelect;		// true signals: the next action is a random selected one
+    	boolean randomSelect;		// true signals: the next action is a randomly selected one
     	randomSelect = false;
 		if (random) {
 			randomSelect = (rand.nextDouble() < m_epsilon);
@@ -289,7 +292,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
     	        // but they usually differ for nondeterministic games.
 
 				rtilde  = (NewSO.getRewardTuple(rgs).scTup[so.getPlayer()]-otilde)
-						+ so.getStepRewardTuple().scTup[so.getPlayer()];
+						+ so.getStepRewardTuple(this).scTup[so.getPlayer()];
             	if (TERNARY) {
             		value = NewSO.isGameOver() ? rtilde : getGamma()*value;
             	} else {
@@ -380,31 +383,31 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	}
 
 		
-	/**
-	 * Return the agent's estimate of the score for that afterstate {@code so}.
-	 * For 2-player games like TTT, the score is V(), the probability that the player to move
-	 * wins from that after state. V(s_t|p_t) learns this probability for every t.
-	 * V(s_t|p_t) is the quantity to be maximized by getNextAction2.
-	 * For 1-player games like 2048 it is the estimated (total or future) reward.
-	 * <p>
-	 * NOTE: For {@link TDNTuple3Agt} and N &gt; 1, this method should be never called, since the score
-	 * of {@code so} from perspective of player {@code so.getPlayer()} is never trained. What is trained 
-	 * is the score of {@code so} from perspective of the player preceding {@code so.getPlayer()}, see
-	 * {@link #getScore(StateObservation, StateObservation)}.
-	 * <p> 
-	 * This method is only implemented here to satisfy {@link PlayAgent}'s interface. If called,
-	 * it throws an exception.
-	 * 
-	 * @param so		   the (after-)state for which the value is desired
-	 * @return V(s_t|p_t), the agent's estimate of the future score for that after state (its value)
-	 */
-	@Deprecated
-	public double getScore(StateObservation so) {
-		throw new RuntimeException("getScore(so) is not valid for TDNTuple3Agt --> use getScore(so,PreSO) instead");
-//		int[] bvec = m_Net.xnf.getBoardVector(so);
-//		double score = m_Net.getScoreI(bvec,so.getPlayer());
-//		return score;
-	}
+//	/**
+//	 * Return the agent's estimate of the score for that afterstate {@code so}.
+//	 * For 2-player games like TTT, the score is V(), the probability that the player to move
+//	 * wins from that after state. V(s_t|p_t) learns this probability for every t.
+//	 * V(s_t|p_t) is the quantity to be maximized by getNextAction2.
+//	 * For 1-player games like 2048 it is the estimated (total or future) reward.
+//	 * <p>
+//	 * NOTE: For {@link TDNTuple3Agt} and N &gt; 1, this method should be never called, since the score
+//	 * of {@code so} from perspective of player {@code so.getPlayer()} is never trained. What is trained
+//	 * is the score of {@code so} from perspective of the player preceding {@code so.getPlayer()}, see
+//	 * {@link #getScore(StateObservation, StateObservation)}.
+//	 * <p>
+//	 * This method is only implemented here to satisfy {@link PlayAgent}'s interface. If called,
+//	 * it throws an exception.
+//	 *
+//	 * @param so		   the (after-)state for which the value is desired
+//	 * @return V(s_t|p_t), the agent's estimate of the future score for that after state (its value)
+//	 */
+//	@Deprecated
+//	public double getScore(StateObservation so) {
+//		throw new RuntimeException("getScore(so) is not valid for TDNTuple3Agt --> use getScore(so,PreSO) instead");
+////		int[] bvec = m_Net.xnf.getBoardVector(so);
+////		double score = m_Net.getScoreI(bvec,so.getPlayer());
+////		return score;
+//	}
 
 	/**
 	 * Return the agent's estimate of the score for that afterstate {@code so}. 
@@ -449,37 +452,36 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 		ScoreTuple sc = new ScoreTuple(so);
 		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(so,m_Net.xnf);
 		switch (so.getNumPlayers()) {
-		case 1: 
-			sc.scTup[0] = m_Net.getScoreI(curSOWB,so.getPlayer());
-			break;
-		case 2:
-			int player = so.getPlayer();
-			int opponent = (player==0) ? 1 : 0;
+			case 1 -> sc.scTup[0] = m_Net.getScoreI(curSOWB, so.getPlayer());
+			case 2 -> {
+				int player = so.getPlayer();
+				int opponent = (player == 0) ? 1 : 0;
 //			sc.scTup[player] = m_Net.getScoreI(bvec,player);	// wrong before 2019-03-10
 //			sc.scTup[opponent] = -sc.scTup[player];
-			// 
-			// This is an important bug fix (2019-03-10) for TDNTuple3Agt: 
-			// If we want to get the score tuple for state 'so' where 
-			// 'player' has to move, we may *NOT* ask for m_Net.getScoreI(bvec,player), 
-			// because the net did never learn this, it was trained on getScore(so,refer), where
-			// refer is the player who *created* 'so' (the opponent). We construct the score 
-			// tuple by starting with m_Net.getScoreI(bvec,opponent), the value that bvec has 
-			// for opponent, and infer from this the player's value by negation:
-			// 
-			sc.scTup[opponent] = m_Net.getScoreI(curSOWB,opponent);  
-			sc.scTup[player] = 	-sc.scTup[opponent];
-			break;
-		default: 	
-			//
-			// the new logic in the case of 3-,4-,...,N-player games: starting from a previous ScoreTuple
-			// prevTuple, fill in the game value for the player for which TDNTuple3Agt has learned the value:
-			// This is the player who *created* so. (We do not know the game values from the perspective 
-			// of the other players, therefore we re-use the estimates from earlier states in prevTuple.)
-			//
-			if (prevTuple!=null) sc = new ScoreTuple(prevTuple);
-			int cp = so.getCreatingPlayer();
-			if (cp!=-1) {
-				sc.scTup[cp] = m_Net.getScoreI(curSOWB,cp);  
+				//
+				// This is an important bug fix (2019-03-10) for TDNTuple3Agt:
+				// If we want to get the score tuple for state 'so' where
+				// 'player' has to move, we may *NOT* ask for m_Net.getScoreI(bvec,player),
+				// because the net did never learn this, it was trained on getScore(so,refer), where
+				// refer is the player who *created* 'so' (the opponent). We construct the score
+				// tuple by starting with m_Net.getScoreI(bvec,opponent), the value that bvec has
+				// for opponent, and infer from this the player's value by negation:
+				//
+				sc.scTup[opponent] = m_Net.getScoreI(curSOWB, opponent);
+				sc.scTup[player] = -sc.scTup[opponent];
+			}
+			default -> {
+				//
+				// the new logic in the case of 3-,4-,...,N-player games: starting from a previous ScoreTuple
+				// prevTuple, fill in the game value for the player for which TDNTuple3Agt has learned the value:
+				// This is the player who *created* so. (We do not know the game values from the perspective
+				// of the other players, therefore we re-use the estimates from earlier states in prevTuple.)
+				//
+				if (prevTuple != null) sc = new ScoreTuple(prevTuple);
+				int cp = so.getCreatingPlayer();
+				if (cp != -1) {
+					sc.scTup[cp] = m_Net.getScoreI(curSOWB, cp);
+				}
 			}
 		}
 
@@ -509,7 +511,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 		// sob.getRewardTuple(rgs): the reward obtained so far, since the net predicts
 		// with getScoreI only the expected future reward.
 		sc.combine(sob.getRewardTuple(rgs), ScoreTuple.CombineOP.SUM,0,0);
-		sc.combine(sob.getStepRewardTuple(), ScoreTuple.CombineOP.SUM,0,0);
+		sc.combine(sob.getStepRewardTuple(this), ScoreTuple.CombineOP.SUM,0,0);
 
 		// old version (2019), not recommended:
 //		boolean rgs = m_oPar.getRewardIsGameScore();
@@ -567,7 +569,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 			// delta reward from curPlayer's perspective when moving into s_next
 			double r_next;
 			r_next  = (R.scTup[curPlayer] - rLast.scTup[curPlayer])
-					+ s_next.getStepRewardTuple().scTup[curPlayer];
+					+ s_next.getStepRewardTuple(this).scTup[curPlayer];
         	if (TERNARY) {
         		target = s_next.isGameOver() ? r_next : getGamma()*v_next;
         	} else {
@@ -671,7 +673,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 				//
 				if (sLast[n]!=null ) {
 					target  = (R.scTup[n] - rLast.scTup[n]) 		// delta reward
-							+ s_next.getStepRewardTuple().scTup[n];
+							+ s_next.getStepRewardTuple(this).scTup[n];
 		    		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(sLast[n], m_Net.xnf);
 		        	vLast = m_Net.getScoreI(curSOWB,n);
 		        	
@@ -724,15 +726,34 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	}
 	
 	/**
-	 * Train the agent for one complete game episode <b>using self-play</b>. <p>
-	 * Side effects: Increment m_GameNum by +1. Change the agent's internal  
-	 * parameters (weights and so on).
+	 * Train the agent for one complete game episode <b>using self-play</b>.
+	 * <p>
+	 * Side effects: Increment gameNum by +1.
+	 * Change the agent's internal parameters (weights and so on).
 	 * @param so		the state from which the episode is played (usually the
 	 * 					return value of {@link GameBoard#chooseStartState(PlayAgent)} to get
 	 * 					some exploration of different game paths)
-	 * @return			true, if agent raised a stop condition (only CMAPlayer)	 
+	 * @return			true, if agent raised a stop condition (only CMAPlayer)
 	 */
 	public boolean trainAgent(StateObservation so) {
+		return trainAgent(so,this);
+	}
+
+	/**
+	 * Train the agent for one complete game episode <b>using self-play</b>. <p>
+	 * Side effects: Increment m_GameNum and {@code acting_pa}'s gameNum by +1.
+	 * Change the agent's internal parameters (weights and so on).
+	 * <p>
+	 * This method is used by the wrappers: They call it with {@code this} being the wrapped agent (it has the internal
+	 * parameters) and {@code acting_pa} being the wrapper.
+	 *
+	 * @param so		the state from which the episode is played (usually the
+	 * 					return value of {@link GameBoard#chooseStartState(PlayAgent)} to get
+	 * 					some exploration of different game paths)
+	 * @param acting_pa the agent to be called when an action is requested ({@code getNextAction2})
+	 * @return			true, if agent raised a stop condition (only CMAPlayer - deprecated)
+	 */
+	public boolean trainAgent(StateObservation so, PlayAgent acting_pa) {
 		Types.ACTIONS_VT a_t;
 		int   curPlayer=so.getPlayer();
 		NextState ns;
@@ -759,7 +780,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	        m_numTrnMoves++;		// number of train moves (including random moves)
 	        
 	        // choose action a_t, using epsilon-greedy policy based on V
-			a_t = getNextAction2(s_t.partialState(), true, true);
+			a_t = acting_pa.getNextAction2(s_t.partialState(), true, true);
 			// only for debug:
 //			if (a_t.isRandomAction() && s_t.getPlayer()==1) {
 //				int dummy = 1;
@@ -797,12 +818,17 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 		
 		
 		try {
-			this.finishUpdateWeights();		// adjust learn params ALPHA & m_epsilon
+			this.finishUpdateWeights();		// adjust learn params ALPHA & epsilon of wrapped agent
+			if (acting_pa instanceof MCTSWrapperAgent) {
+				// adjust epsilon of wrapper (only relevant for wrapperMCTS_exploMode==2)
+				((MCTSWrapperAgent) acting_pa).adjustEpsilon();
+			}
 		} catch (Throwable e) {
 			e.printStackTrace();
 		}
 		
 		incrementGameNum();
+		acting_pa.setGameNum(this.getGameNum());
 
 		return false;
 		
@@ -814,7 +840,8 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 		m_Net.setHorizon();
 		String cs = getClass().getSimpleName();
 		String str = cs + ": USESYM:" + (m_ntPar.getUSESYMMETRY()?"true":"false")
-						+ ", P:" + (m_Net.getXnf().getNumPositionValues())
+						+ ", nSym:" + m_ntPar.getNSym()
+						+ ", P:" + m_Net.getXnf().getNumPositionValues()
 						+ ", NORMALIZE:" + (m_tdPar.getNormalize()?"true":"false")
 						+ ", sigmoid:"+(m_Net.hasSigmoid()? "tanh":"none")
 						+ ", lambda:" + m_Net.getLambda()

@@ -1,9 +1,11 @@
 package params;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import javax.swing.JPanel;
 
+import controllers.PlayAgent.AgentState;
 import controllers.TD.ntuple2.SarsaAgt;
 import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.Arena;
@@ -34,13 +36,9 @@ public class ParOther implements Serializable {
     private int quickEvalMode = DEFAULT_QUICK_EVAL_MODE;
     private int trainEvalMode = DEFAULT_TRAIN_EVAL_MODE;
     private int numEval = DEFAULT_NUM_EVAL;
-    private int episodeLength = DEFAULT_EPISODE_LENGTH;
+    private int episodeLength = DEFAULT_EPISODE_LENGTH;		// max. episode length during training
 	private int stopTest = DEFAULT_STOP_TEST;
     private int stopEval = DEFAULT_STOP_EVAL; 		// new meaning: max episode length during eval & play
-    private int wrapperNply = DEFAULT_WRAPPER_NPLY;
-	private int wrapperMCTSIterations = DEFAULT_WRAPPER_MCTS_ITERATIONS;
-	private double wrapperMCTS_PUCT = DEFAULT_WRAPPER_MCTS_PUCT;
-	private int wrapperMCTS_depth = DEFAULT_WRAPPER_MCTS_DEPTH;
 	private int pMinRubiks = DEFAULT_PMIN_RUBIKS;	// only relevant for RubiksCube, see CubeConfig.pMin
 	private int pMaxRubiks = DEFAULT_PMAX_RUBIKS;	// only relevant for RubiksCube, see CubeConfig.pMax
 	private boolean chooseStart01 = false;
@@ -48,7 +46,17 @@ public class ParOther implements Serializable {
 	private boolean bReplayBuf = false;	// only relevant for RubiksCube: whether to use a replay buffer or not
 	private double incAmount = 0;		// only relevant for RubiksCube in case bReplayBuf==true, see DAVI3Agent
     private boolean rewardIsGameScore = true;
-    
+    private AgentState aState = AgentState.RAW;
+    private String agtFile = null;
+
+    // These elements should become obsolete on the long run, they are now replaced by parameters in ParWrapper.
+	// But we keep them for some transient time to correctly load older agents which had ParWrapper wrPar==null
+	// at the time they were saved.
+	private int wrapperNply = DEFAULT_WRAPPER_NPLY;
+	private int wrapperMCTSIterations = DEFAULT_WRAPPER_MCTS_ITERATIONS;
+	private double wrapperMCTS_PUCT = DEFAULT_WRAPPER_MCTS_PUCT;
+	private int wrapperMCTS_depth = DEFAULT_WRAPPER_MCTS_DEPTH;
+
     /**
      * This member is only constructed when the constructor 
      * {@link #ParOther(boolean,Arena) ParOther(boolean withUI,Arena)}
@@ -59,19 +67,23 @@ public class ParOther implements Serializable {
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
 	 * compatible with an older one (older .agt.zip containing this object will become 
-	 * unreadable or you have to provide a special version transformation)
+	 * unreadable, or you have to provide a special version transformation)
 	 */
+	@Serial
 	private static final long serialVersionUID = 1L;
 	
-	public ParOther() {	}
+	public ParOther() {    }
     
 	public ParOther(boolean withUI, Arena m_arena) {
-		if (withUI)
+		if (withUI) {
 			otparams = new OtherParams(m_arena);
+			otparams.setFrom(this);             // set GUI parameter according to 'this'
+		}
 	}
 	
 	public ParOther(ParOther op) {
     	this.setFrom(op);
+		this.agtFile = op.agtFile;
 	}
 	
     public ParOther(OtherParams op) { 
@@ -96,7 +108,8 @@ public class ParOther implements Serializable {
 		this.bReplayBuf = op.getReplayBuffer();
 		this.incAmount = op.getIncAmount();
 		this.rewardIsGameScore = op.getRewardIsGameScore();
-		
+		this.aState = op.getAgentState();
+
 		if (otparams!=null)
 			otparams.setFrom(this);
 	}
@@ -119,6 +132,7 @@ public class ParOther implements Serializable {
 		this.bReplayBuf = op.getReplayBuffer();
 		this.incAmount = op.getIncAmount();
 		this.rewardIsGameScore = op.getRewardIsGameScore();
+		this.aState = op.getAgentState();
 		
 		if (otparams!=null)
 			otparams.setFrom(this);
@@ -177,18 +191,11 @@ public class ParOther implements Serializable {
 		return stopEval;
 	}
 
-	public int getWrapperNPly() {
-		return wrapperNply;
-	}
-	
-	public int getWrapperMCTSIterations() {
-		return wrapperMCTSIterations;
-	}
-
-	public double getWrapperMCTS_PUCT() {
-		return wrapperMCTS_PUCT;
-	}
-
+	// deprecated, use these getters only for older agents (at the time when ParWrapper was not yet present).
+	// Otherwise, use the new getters in ParWrapper
+	public int getWrapperNPly() { return wrapperNply; }
+	public int getWrapperMCTSIterations() { return wrapperMCTSIterations; }
+	public double getWrapperMCTS_PUCT() { return wrapperMCTS_PUCT; }
 	public int getWrapperMCTS_depth() { return wrapperMCTS_depth; }
 
 	public int getpMinRubiks() { return pMinRubiks;	}
@@ -196,6 +203,10 @@ public class ParOther implements Serializable {
 	public int getpMaxRubiks() { return pMaxRubiks;	}
 
 	public double getIncAmount() { return incAmount; }
+
+	public boolean getReplayBuffer() {
+		return bReplayBuf;
+	}
 
 	public boolean getChooseStart01() {
 		return chooseStart01;
@@ -205,12 +216,20 @@ public class ParOther implements Serializable {
 		return learnFromRM;
 	}
 
-	public boolean getReplayBuffer() {
-		return bReplayBuf;
-	}
-
 	public boolean getRewardIsGameScore() {
 		return rewardIsGameScore;
+	}
+
+	public AgentState getAgentState() {
+		return aState;
+	}
+
+	public String getAgentFile() {
+		return agtFile;
+	}
+
+	public void setAgentFile(String aFile) {
+		this.agtFile = aFile;
 	}
 
 	public void setQuickEvalMode(int qem) {
@@ -328,7 +347,13 @@ public class ParOther implements Serializable {
 		if (otparams!=null)
 			otparams.setRewardIsGameScore(bRGS);
 	}
-	
+
+	public void setAgentState(AgentState as) {
+		this.aState=as;
+		if (otparams!=null)
+			otparams.setAgentState(as);
+	}
+
 
 	/**
 	 * Set sensible parameters for a specific agent and specific game. By "sensible
@@ -339,35 +364,42 @@ public class ParOther implements Serializable {
 	 * @param gameName the string from {@link games.Arena#getGameName()}
 	 */
 	public void setParamDefaults(String agentName, String gameName) {
-		// Currently we have here only the sensible defaults for one game ("RubiksCube"):
-		switch (gameName) {
-		case "RubiksCube": 
-			this.setChooseStart01(true);		// always select a non-solved cube as start state
-			enableChoosePart(false);
-			enableRgsPart(false);
-			this.setEpisodeLength(12);
-			this.setStopEval(50);
-			this.setpMinRubiks(1);
-			this.setpMaxRubiks(9);
-			this.setReplayBuffer(false);
-			this.setQuickEvalMode(1);
-			this.setTrainEvalMode(-1);
-			this.setNumEval(10000);
-			this.setRewardIsGameScore(false);
-			break;
-		default:								//  all other
-			this.setEpisodeLength(-1);
-			this.setStopEval(-1);
-			break;
-		}
 		switch (agentName) {
-		case "Sarsa":
-		case "TD-NTuple-3":
-			this.setLearnFromRM(true);
-			break;
-		default: 
-			this.setLearnFromRM(false);
-			break;
+			case "Sarsa":
+				this.setLearnFromRM(true);
+				break;
+			default:
+				this.setLearnFromRM(false);
+				break;
+		}
+		switch (gameName) {
+			case "RubiksCube":
+				this.setChooseStart01(true);		// always select a non-solved cube as start state
+				enableChoosePart(false);
+				this.setRewardIsGameScore(false);
+				enableRgsPart(false);
+				this.setEpisodeLength(12);
+				this.setStopEval(50);
+				this.setpMinRubiks(1);
+				this.setpMaxRubiks(9);
+				this.setReplayBuffer(false);
+				this.setQuickEvalMode(1);
+				this.setTrainEvalMode(-1);
+				this.setNumEval(10000);
+				break;
+			case "TicTacToe":
+				this.setQuickEvalMode(2);
+				this.setTrainEvalMode(1);
+				switch (agentName) {
+					case "Sarsa", "Sarsa-4", "Qlearn-4", "TD-Ntuple-3", "TD-Ntuple-4"
+							-> this.setLearnFromRM(true);
+					default -> this.setLearnFromRM(false);
+				}
+				break;
+			default:								//  all other
+				this.setEpisodeLength(-1);
+				this.setStopEval(-1);
+				break;
 		}
 	}
 	

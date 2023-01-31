@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import controllers.TD.ntuple2.TDNTuple3Agt;
+import games.Arena;
 import games.StateObservation;
 import params.ParOther;
 import tools.ScoreTuple;
-import tools.Types;
 import tools.Types.ACTIONS;
 import tools.Types.ACTIONS_VT;
 
@@ -57,7 +57,21 @@ public class MaxN2Wrapper extends AgentBase implements PlayAgent, Serializable {
 		m_depth = nPly;
 		this.wrapped_pa = pa;
 	}
-	
+
+	/**
+	 * After loading an agent from disk fill the param tabs of {@link Arena} according to the
+	 * settings of this agent
+	 *
+	 * @param n         fill the {@code n}th parameter tab
+	 * @param m_arena	member {@code m_xab} has the param tabs
+	 *
+	 * @see Arena#loadAgent
+	 */
+	public void fillParamTabsAfterLoading(int n, Arena m_arena) {
+		super.fillParamTabsAfterLoading(n, m_arena);
+		m_arena.m_xab.setMaxNDepthFrom(n, m_depth );
+	}
+
 	/**
 	 * Get the best next action and return it
 	 * @param so_in			current game state (not changed on return)
@@ -139,10 +153,10 @@ public class MaxN2Wrapper extends AgentBase implements PlayAgent, Serializable {
 				act_vt = getBestAction(NewSO/*.clearedCopy()*/, random, silent, depth+1, prevTuple);
 				currScoreTuple = act_vt.getScoreTuple();
 
-				currScoreTuple.combine(NewSO.getStepRewardTuple(), ScoreTuple.CombineOP.SUM,0,0);
+				currScoreTuple.combine(NewSO.getStepRewardTuple(null), ScoreTuple.CombineOP.SUM,0,0);
 				// NewSO.getStepRewardTuple returns 0.0, except for Rubik's Cube, where it returns CubeConfig.stepReward.
 				// The increment by stepReward is very important for Rubik's Cube, because there every depth level means
-				// an additional twist, thus additional costs (stepReward is negative). Otherwise MaxN2Wrapper won't work.
+				// an additional twist, thus additional costs (stepReward is negative). Otherwise, MaxN2Wrapper won't work.
 				// The former implementation of the above line:
 //				     if (so instanceof StateObserverCube)
 //		  		          currScoreTuple.scTup[P] += CubeConfig.stepReward;
@@ -318,25 +332,21 @@ public class MaxN2Wrapper extends AgentBase implements PlayAgent, Serializable {
 			// (because getNextAction2's ScoreTuple does not include score-so-far, but a final game state does)
 	}
 	
-	/**
-	 * Return the agent's score for that after state.
-	 * @param sob			the current game state;
-	 * @return				the probability that the player to move wins from that 
-	 * 						state. If game is over: the score for the player who 
-	 * 						*would* move (if the game were not over).
-	 * Each player wants to maximize its score	 
-	 */
-	@Override
-	public double getScore(StateObservation sob) {
-		return getBestAction(sob, false, true, 0, null).getScoreTuple().scTup[sob.getPlayer()];
-	}
+//	/**
+//	 * Return the agent's score for that after state.
+//	 * @param sob			the current game state;
+//	 * @return				the probability that the player to move wins from that
+//	 * 						state. If game is over: the score for the player who
+//	 * 						*would* move (if the game were not over).
+//	 * Each player wants to maximize its score
+//	 */
+//	@Override
+//	public double getScore(StateObservation sob) {
+//		return getBestAction(sob, false, true, 0, null).getScoreTuple().scTup[sob.getPlayer()];
+//	}
 	@Override
 	public ScoreTuple getScoreTuple(StateObservation sob, ScoreTuple prevTuple) {
 		return getBestAction(sob, false, true, 0, null).getScoreTuple();
-	}
-	
-	public PlayAgent getWrappedPlayAgent() {
-		return wrapped_pa;
 	}
 
 	@Override
@@ -359,11 +369,34 @@ public class MaxN2Wrapper extends AgentBase implements PlayAgent, Serializable {
 		return cs;
 	}
 
-	
-	public String getFullName() {
-		String cs = wrapped_pa.getName();
-		cs = cs + "[nPly="+m_depth+"]";
-		return cs;
+
+	// --- never used ---
+//	public String getFullName() {
+//		String cs = wrapped_pa.getName();
+//		cs = cs + "[nPly="+m_depth+"]";
+//		return cs;
+//	}
+
+	@Override
+	public PlayAgent getWrappedPlayAgent() {
+		return wrapped_pa;
+	}
+
+	@Override
+	public boolean isWrapper() { return true; }
+
+	/**
+	 * Train this agent for one episode, starting from state {@code so}.
+	 * Train the inner (wrapped) agent, but use the outer agent (the wrapper) for selecting the next action.
+	 *
+	 * @param so    the start state of the episode
+	 * @return	true, if agent raised a stop condition (deprecated)
+	 */
+	@Override
+	public boolean trainAgent(StateObservation so) {
+		resetAgent();
+		return getWrappedPlayAgent().trainAgent(so,this);
+
 	}
 
 }

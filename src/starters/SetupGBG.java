@@ -74,7 +74,7 @@ public class SetupGBG {
                 scaPar[0]=scaPar[1]=scaPar[2]="";
                 break;
             default:
-                System.err.println("[SetupGBG.setDefaulScaPars] "+selectedGame+": This game is unknown.");
+                System.err.println("[SetupGBG.setDefaultScaPars] "+selectedGame+": This game is unknown.");
                 System.exit(1);
         }
         return scaPar;
@@ -101,9 +101,14 @@ public class SetupGBG {
             case "2048":
                 return new Arena2048(title, withUI, withTrainRights);
             case "Blackjack":
-                return new ArenaBlackJack(title,withUI);
+                return new ArenaBlackJack(title,withUI,withTrainRights);
             case "ConnectFour":
                 return new ArenaC4(title, withUI,withTrainRights);
+            case "EWN":
+                ArenaEWN.setConfig(scaPar[0]);
+                ArenaEWN.setCellCoding(scaPar[1]);
+                ArenaEWN.setRandomStartingPosition(scaPar[2]);
+                return new ArenaEWN(title, withUI,withTrainRights);
             case "Hex":
                 ArenaHex.setBoardSize(Integer.parseInt(scaPar[0]));
                 return new ArenaHex(title, withUI,withTrainRights);
@@ -121,11 +126,11 @@ public class SetupGBG {
             case "Othello":
                 return new ArenaOthello(title, withUI,withTrainRights);
             case "Poker":
-                return new ArenaPoker(title,withUI);
+                return new ArenaPoker(title,withUI,withTrainRights);
             case "KuhnPoker":
                 return new ArenaKuhnPoker(title,withUI,withTrainRights);
             case "RubiksCube":
-                ArenaCube.setCubeType(scaPar[0]);
+                ArenaCube.setCubeSize(scaPar[0]);
                 ArenaCube.setBoardVecType(scaPar[1]);
                 ArenaCube.setTwistType(scaPar[2]);
                 return new ArenaCube(title, withUI,withTrainRights);
@@ -136,15 +141,10 @@ public class SetupGBG {
                 return new ArenaSim(title, withUI,withTrainRights);
             case "TicTacToe":
                 return new ArenaTTT(title, withUI,withTrainRights);
-            case "EWN":
-                ArenaEWN.setConfig(scaPar[0]);
-                ArenaEWN.setCellCoding(scaPar[1]);
-                ArenaEWN.setRandomStartingPosition(scaPar[2]);
-                return new ArenaEWN(title, withUI,withTrainRights);
             case "Yavalath":
                 ArenaYavalath.setPlayerNumber(Integer.parseInt(scaPar[0]));
                 ArenaYavalath.setBoardSize(Integer.parseInt(scaPar[1]));
-                return new ArenaYavalath(title,withUI);
+                return new ArenaYavalath(title,withUI,withTrainRights);
             default:
                 System.err.println("[SetupGBG.setupSelectedGame] args[0]=" + selectedGame + ": This game is unknown.");
                 System.exit(1);

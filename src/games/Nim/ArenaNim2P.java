@@ -88,8 +88,9 @@ public class ArenaNim2P extends Arena   {
      * May not be bigger than {@link #getHeapSize()}. 
      */
     public static void setMaxMinus(int val) {
-    	assert val <= getHeapSize() : "ArenaNim.setMaxMinus: value may not be bigger than heap size!"; 
-    	NimConfig.MAX_MINUS = val;
+		if(NimConfig.HEAP_SIZE != -1) assert val <= getHeapSize() : "ArenaNim.setMaxMinus: value may not be bigger than heap size!";
+
+		NimConfig.MAX_MINUS = val;
     }
 
 	/**

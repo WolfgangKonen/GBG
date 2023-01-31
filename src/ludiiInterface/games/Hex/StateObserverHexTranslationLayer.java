@@ -24,8 +24,8 @@ public class StateObserverHexTranslationLayer extends StateObserverHex {
 
         for(Move x : ludiiContextMoves){
             int actionInt = conversionHex.getGBGIndexFromLudii(x.actions().get(0).to());
-            int j = actionInt% 6;
-            int i = (actionInt-j)/6;
+            int j = actionInt% size;
+            int i = (actionInt-j)/size;
             board[i][j].setPlayer(conversionHex.getGBGPlayerFromLudii(x.mover()));
             currentPlayer = (conversionHex.getGBGPlayerFromLudii(x.mover()) == 0 ? 1 : 0);
         }

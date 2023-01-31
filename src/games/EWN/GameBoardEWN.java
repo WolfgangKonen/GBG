@@ -10,18 +10,11 @@ import games.Othello.ConfigOthello;
 import games.StateObservation;
 import tools.Types;
 
-import javax.swing.*;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Random;
 
 /**
- * The GameboardEWS contains multiple classes:
- *      GameboardGuiEWS acts as a wrapper for the board and settings
- *      LegendGui: Container which holds the cube value
- *      BoardGui: Holds the board  with its pieces
- *      TileGui:
- *      TokenGui:
+ * GameBoardEWN contains the 'game-theoretic' part of the game board. See {@link GameBoardGuiEWN} for the GUI.
  */
 public class GameBoardEWN implements GameBoard {
 
@@ -31,7 +24,7 @@ public class GameBoardEWN implements GameBoard {
     public static final long serialVersionUID = 12L;
 
     /**
-     * Gameboard Attributes
+     * Game board Attributes
      */
     public Arena m_Arena;
     private StateObserverEWN m_so;
@@ -41,7 +34,7 @@ public class GameBoardEWN implements GameBoard {
     double[][] vGameState;
     private int selectedTokenPosition;
     private boolean selecting;
-    private int[] cubed;
+    //private int[] cubed;      // never used
 
     public GameBoardEWN(Arena arena){
         super();
@@ -56,19 +49,20 @@ public class GameBoardEWN implements GameBoard {
         }
     }
 
-    public GameBoardEWN(Arena arena, int size, int player){
-        super();
-        ConfigEWN.BOARD_SIZE = size;
-        ConfigEWN.NUM_PLAYERS = player;
-        m_Arena = arena;
-        m_so = new StateObserverEWN();
-        rand = new Random();
-        selecting = true;
-        selectedTokenPosition = -1;
-        if(m_Arena.hasGUI()){
-            m_gameGui = new GameBoardGuiEWN(this);
-        }
-    }
+    // --- never used ---
+//    public GameBoardEWN(Arena arena, int size, int player){
+//        super();
+//        ConfigEWN.BOARD_SIZE = size;
+//        ConfigEWN.NUM_PLAYERS = player;
+//        m_Arena = arena;
+//        m_so = new StateObserverEWN();
+//        rand = new Random();
+//        selecting = true;
+//        selectedTokenPosition = -1;
+//        if(m_Arena.hasGUI()){
+//            m_gameGui = new GameBoardGuiEWN(this);
+//        }
+//    }
 
     @Override
     public void initialize() {}
@@ -92,7 +86,7 @@ public class GameBoardEWN implements GameBoard {
     public void updateBoard(StateObservation so, boolean withReset, boolean showValueOnGameboard) {
         StateObserverEWN soN = null;
         if(so!=null){
-            assert( so instanceof StateObserverEWN):"StateObservation 'so' is not an instance of StateObserverEWS";
+            assert( so instanceof StateObserverEWN):"StateObservation 'so' is not an instance of StateObserverEWN";
             soN = (StateObserverEWN) so;
             m_so = soN;
         }
@@ -108,11 +102,11 @@ public class GameBoardEWN implements GameBoard {
             for(int y = 0 ; y < soN.getStoredValues().length; y++)
             {
                 System.out.println("index: " + y + " Values" + soN.getStoredValues()[y]);
-                /**Types.ACTIONS action = sot.getStoredAction(y);
+                /*Types.ACTIONS action = sot.getStoredAction(y);
                 int iAction = action.toInt();
                 int jFirst= iAction%ConfigOthello.BOARD_SIZE;
                 int iFirst= (iAction-jFirst)/ConfigOthello.BOARD_SIZE;
-                vGameState[iFirst][jFirst] = sot.getStoredValues()[y];**/
+                vGameState[iFirst][jFirst] = sot.getStoredValues()[y];*/
             }
         }
     }

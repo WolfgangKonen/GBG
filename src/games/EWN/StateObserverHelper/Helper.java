@@ -6,7 +6,7 @@ import tools.Types;
 public class Helper {
 
     /**
-     * Concatenate from + to =&gt;  1, 4 => 104
+     * Concatenate from + to, e.g.  1, 4 &rArr; 104
      * where [1][04] is the string;
      * @param from  index of board
      * @param to index of board

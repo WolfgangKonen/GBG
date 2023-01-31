@@ -9,6 +9,7 @@ import games.Evaluator;
 import games.GameBoard;
 import games.StateObservation;
 import games.XArenaFuncs;
+import params.ParMCTS;
 import params.ParMaxN;
 import params.ParOther;
 import tools.ScoreTuple;
@@ -23,7 +24,7 @@ public class EvaluatorYavalath extends Evaluator {
     private MCTSAgentT mctsAgentT;
     protected static ArrayList<StateObserverYavalath> diffStartList;
 
-    public EvaluatorYavalath(PlayAgent e_PlayAgent, GameBoard gb, int mode, int stopEval){
+    public EvaluatorYavalath(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode){
         super(e_PlayAgent,gb,mode,stopEval);
         initEvaluator();
     }
@@ -35,27 +36,27 @@ public class EvaluatorYavalath extends Evaluator {
 
     private void initEvaluator() {
         ParMaxN params = new ParMaxN();
-        int maxNDepth = 1;
+        int maxNDepth = 2;
         params.setMaxNDepth(maxNDepth);
+
+        ParMCTS paramsMCTS = new ParMCTS();
+        paramsMCTS.setNumIter(10000);
+        paramsMCTS.setTreeDepth(25);
+        paramsMCTS.setRolloutDepth(2000);
         randomAgent = new RandomAgent("Random");
         maxNAgent = new MaxNAgent("MaxN", params, new ParOther());
-        mctsAgentT = new MCTSAgentT();
+        mctsAgentT = new MCTSAgentT("MCTS",new StateObserverYavalath(),paramsMCTS);
 
     }
 
     private ArrayList<StateObserverYavalath> addAll1PlyStates(ArrayList<StateObserverYavalath> diffStartList){
         StateObserverYavalath so = (StateObserverYavalath) m_gb.getDefaultStartState();
-        for(int i = 0; i<ConfigYavalath.getMaxRowLength(); i++){
-            for(int j = 0; j<ConfigYavalath.getMaxRowLength(); j++){
-                if(Math.abs(j-i)>ConfigYavalath.getBoardSize()){
-                    break;
-                }
-                Types.ACTIONS a = new Types.ACTIONS(i*ConfigYavalath.getMaxRowLength() +j);
-                StateObserverYavalath so_copy = so.copy();
-                so_copy.advance(a);
-                diffStartList.add(so_copy);
+        ArrayList<Types.ACTIONS> actions = so.getAllAvailableActions();
 
-            }
+        for (Types.ACTIONS action : actions){
+            StateObserverYavalath so_copy = so.copy();
+            so_copy.advance(action);
+            diffStartList.add(so_copy);
         }
         diffStartList.add(so);
         return diffStartList;
@@ -75,8 +76,8 @@ public class EvaluatorYavalath extends Evaluator {
                 m_msg = "No evaluation done ";
                 lastResult = 0.0;
                 return false;
-            case 0: return evaluateAgainstOpponent(m_PlayAgent, randomAgent, false, 1) > 0.0;
-            case 1: return evaluateAgainstOpponent(m_PlayAgent, maxNAgent, false, 1) > 0.0;
+            case 0: return evaluateAgainstOpponent(m_PlayAgent, randomAgent, false, 10) > 0.0;
+            case 1: return evaluateAgainstOpponent(m_PlayAgent, maxNAgent, false, 10) > 0.0;
             case 2: return evaluateAgainstOpponent(m_PlayAgent, mctsAgentT,false,10) > 0.0;
             case 3: return evaluateAgainstOpponent(m_PlayAgent,maxNAgent,true,1) >0.0;
             case 4: return evaluateAgainstOpponent(m_PlayAgent, mctsAgentT,true, 1) > 0.0;

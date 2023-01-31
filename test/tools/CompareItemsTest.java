@@ -73,6 +73,15 @@ public class CompareItemsTest {
     }
 
     @Test
+    public void testStringSplit() {
+        String fname = "myFile-stu.agt.zip";
+        String[] arr = fname.split("-stub");
+        StringBuilder out= new StringBuilder();
+        for (String s : arr) out.append(s);
+        System.out.println(out.toString());
+    }
+
+    @Test
     public void testContains() {
         String str;
 

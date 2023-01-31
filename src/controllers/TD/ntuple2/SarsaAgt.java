@@ -199,6 +199,7 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 	 * @see LoadSaveGBG#transformObjectToPlayAgent
 	 */
 	public boolean instantiateAfterLoading() {
+		super.instantiateAfterLoading();
 		this.m_Net.xnf.instantiateAfterLoading();
 		// set horizon cut for older agents (where horCut was not part of ParTD):
 		if (this.getParTD().getHorizonCut()==0.0) 
@@ -325,21 +326,21 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 	
 
 		
-	/**
-	 * Return the agent's estimate of the score for that after state 
-	 * For 2-player games like TTT, the score is V(), the probability that 
-	 * X (Player +1) wins from that after state. V(s_t|p_t) learns this probability for every t.
-	 * p_t*V(s_t) is the quantity to be maximized by getNextAction2.
-	 * For 1-player games like 2048 it is the estimated (total or future) reward.
-	 * 
-	 * @param so			the state for which the value is desired
-	 * @return the agent's estimate of the future score for that after state
-	 */
-	public double getScore(StateObservation so) {
-		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(so,m_Net.xnf);
-		double score = m_Net.getScoreI(curSOWB,so.getPlayer());
-		return score;
-	}
+//	/**
+//	 * Return the agent's estimate of the score for that after state
+//	 * For 2-player games like TTT, the score is V(), the probability that
+//	 * X (Player +1) wins from that after state. V(s_t|p_t) learns this probability for every t.
+//	 * p_t*V(s_t) is the quantity to be maximized by getNextAction2.
+//	 * For 1-player games like 2048 it is the estimated (total or future) reward.
+//	 *
+//	 * @param so			the state for which the value is desired
+//	 * @return the agent's estimate of the future score for that after state
+//	 */
+//	public double getScore(StateObservation so) {
+//		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(so,m_Net.xnf);
+//		double score = m_Net.getScoreI(curSOWB,so.getPlayer());
+//		return score;
+//	}
 
 	/**
 	 * Return the agent's estimate of {@code sob}'s final game value (final reward) <b>for all players</b>. 

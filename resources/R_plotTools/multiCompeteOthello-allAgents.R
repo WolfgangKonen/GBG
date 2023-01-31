@@ -11,6 +11,8 @@
 # 
 # TCL-wrap results are obtained with EPS=+1e-8, but the results for EPS=0 or EPS=-1e-8 are not
 # very different (uncomment line 56 or 57 to see the difference).
+#
+# April'22: removed errorbars
 # 
 library(ggplot2)
 library(grid)

@@ -11,16 +11,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JSlider;
-import javax.swing.JTextField;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import controllers.PlayAgent;
 import games.Arena;
 import games.LogManagerGUI;
 import games.XArenaButtons;
@@ -48,7 +43,7 @@ public class XArenaButtonsGui extends JPanel {
 	JLabel AgentX_L;
 	JLabel SleepDurationL;
 	JPanel[][] qcol;			// the color stripes
-	JComboBox[] choiceAgent;
+	JComboBox<String>[] choiceAgent;
 	JLabel showValOnGB_L;
 	JCheckBox showValOnGB;		// show game values on GameBoard
 	private LogManagerGUI logManagerGUI = null;
@@ -143,7 +138,7 @@ public class XArenaButtonsGui extends JPanel {
 
 		// add game-specific agent names for certain games (currently ConnectFour, Nim and Othello)
 		String gName = m_arena.getGameName();
-		int offset = (gName.equals("Nim") || gName.equals("Nim3P")) || gName.equals("BlackJack") || gName.equals("KuhnPoker")
+		int offset = (gName.equals("Nim") || gName.equals("Nim3P")) || gName.equals("BlackJack") || gName.equals("KuhnPoker") || gName.equals("2048")
 				   ? 1 : (gName.equals("ConnectFour"))
 				   ? 2 : (gName.equals("Othello") || gName.equals("RubiksCube")) ? 3: 0;
 		String[] gui_agent_list = new String[Types.GUI_AGENT_LIST.length+offset];
@@ -156,6 +151,7 @@ public class XArenaButtonsGui extends JPanel {
 			case "KuhnPoker" -> gui_agent_list[gui_agent_list.length - 1] = "KuhnOptimal";
 			case "Nim" -> gui_agent_list[gui_agent_list.length - 1] = "Bouton";
 			case "Nim3P" -> gui_agent_list[gui_agent_list.length - 1] = "DaviNim";
+			case "2048" -> gui_agent_list[gui_agent_list.length - 1] = "MCTS";	// test: how acts normal MCTS on 2048?
 			case "RubiksCube" -> {
 				gui_agent_list[gui_agent_list.length - 3] = "DAVI2";
 				gui_agent_list[gui_agent_list.length - 2] = "DAVI3";
@@ -172,7 +168,7 @@ public class XArenaButtonsGui extends JPanel {
 		}
 		
 		for (int n=numPlayers-1; n>=0; n--) {
-			choiceAgent[n] = new JComboBox(gui_agent_list);
+			choiceAgent[n] = new JComboBox<>(gui_agent_list);
 			choiceAgent[n].setSelectedItem(Types.GUI_AGENT_INITIAL[n]);
 			
 			// only applicable agents:
@@ -219,7 +215,26 @@ public class XArenaButtonsGui extends JPanel {
 									m_arena.m_xab.changedViaLoad[n]=false;
 							} else {
 								// the normal case, if item change was triggered by user:
-								m_arena.m_xab.setParamDefaults(n, m_arena.m_xab.selectedAgents[n], m_arena.getGameName());
+								// new 2022-01-20: construct agent at selection time (agent state INIT)
+								if (arg0.getStateChange()==ItemEvent.SELECTED) {
+									// each change in choiceAgent[n] will trigger TWO ItemEvents:
+									// 1) a DESELECTED event and 2) a SELECTED event. We construct the agent
+									// only after the 2nd event.
+									m_arena.m_xab.setParamDefaults(n, m_arena.m_xab.selectedAgents[n], m_arena.getGameName());
+									//
+									String agentN = m_arena.m_xab.getSelectedAgent(n);
+									PlayAgent pa=null;
+									try {
+										pa = m_arena.m_xfun.constructAgent(n,agentN, m_arena.m_xab);
+										if (pa==null) throw new RuntimeException("Could not construct agent = " + agentN);
+
+									} catch(Exception e) {
+										m_arena.showMessage(e.getMessage(),"Warning", JOptionPane.WARNING_MESSAGE);
+									}
+									m_arena.m_xfun.m_PlayAgents[n] = pa;
+									m_arena.m_xab.setOParFrom(n,pa.getParOther());
+								}
+
 								if (!m_arena.hasTrainRights()) {
 									m_arena.m_xab.tdPar[n].enableAll(false);
 									m_arena.m_xab.ntPar[n].enableAll(false);									
@@ -466,7 +481,7 @@ public class XArenaButtonsGui extends JPanel {
 			p1.add(GameNumL);
 			p1.add(GameNumT);			
 //			p1.add(new Canvas());		// WK: 	comment this out to let player-1 choicebox 
-//			p1.add(new Canvas());		//		appear in full length (always)
+//			p1.add(new Canvas());		//		appear (always) in full length
 		} else {
 			for (int i=0; i<4; i++) p1.add(new Canvas());
 		}
@@ -584,7 +599,7 @@ public class XArenaButtonsGui extends JPanel {
 		return showValOnGB.isSelected();
 	}
 	
-	public JComboBox getChoiceAgent(int i) {
+	public JComboBox<String> getChoiceAgent(int i) {
 		return choiceAgent[i];
 	}
 	
