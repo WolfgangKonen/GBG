@@ -16,16 +16,16 @@ public class RheaAgentSI extends AgentBase implements PlayAgent, Serializable {
 
   private static boolean debug = false;
 
-  private static final String GEN_OP = "BOTH"; // CROSSOVER, MUTATION, BOTH
+  private static final String GEN_OP = "MUTATION"; // CROSSOVER, MUTATION, BOTH
   private static final String SELECTION_TYPE = "ROULETTE"; //ROULETTE, RANK, TOURNAMENT
   private static final String CROSSOVER_TYPE = "POSITION_BASED"; // Recombination of permutations (ORDER_BASED)
   private static final String MUTATION_TYPE = "UNIFORM_PERMUTATION"; //Mutation type
 
-  private static final int POP_SIZE = 50;
+  private static final int POP_SIZE = 1000;
   private static final int SIM_DEPTH = 25;
-  private static final int GENERATIONS = 50;
-  private static final int AGGRESSIVENESS = 6; // basically the turns (of all players) the Bot will look in advancement to prevent an opponent from winning
-  private static final double FIRST_ACTION_WEIGHT = 0.0001;
+  private static final int GENERATIONS = 25;
+  // private static final int AGGRESSIVENESS = 6; // basically the turns (of all players) the Bot will look in advancement to prevent an opponent from winning
+  private static final double FIRST_ACTION_WEIGHT = 1;
   private static final boolean ELITISM_PROMOTION = true;
   private static Random rand;
   private static boolean isElitistChosen = false;
@@ -77,9 +77,10 @@ public class RheaAgentSI extends AgentBase implements PlayAgent, Serializable {
       sortedScores = rankActions(sortedScores);
 
       //TODO no competition between multiple best cases yet
+      //sortedScores = bestCompetition(sortedScores);
       sortedScores = insertionSort(sortedScores);
       isElitistChosen = false;
-      if (debug) System.out.println("Generation: " + j + " Scoremap: " + sortedScores);
+      // System.out.println("Generation: " + j + " Scoremap: " + sortedScores);
       switch (GEN_OP) {
         case "CROSSOVER":
           crossover(sortedScores);
@@ -99,25 +100,34 @@ public class RheaAgentSI extends AgentBase implements PlayAgent, Serializable {
 
 
     }
-
+    //sortedScores = rankActions(sortedScores);
     sortedScores = insertionSort(sortedScores);
+    // System.out.println("Last Generation: " + GENERATIONS + " Scoremap: " + sortedScores);
     return sortedScores.get(0);
+  }
+
+  private ArrayList<Pair<Integer, Double>> bestCompetition(ArrayList<Pair<Integer, Double>> sortedScores) {
+    return sortedScores;
   }
 
   private ArrayList<Pair<Integer, Double>> rankActions(ArrayList<Pair<Integer, Double>> sortedScores) {
     Map<Types.ACTIONS, Integer> countedActs = new HashMap<>();
+    Map<Types.ACTIONS, Double> countedActsPoints = new HashMap<>();
     ArrayList<Pair<Integer, Double>> rankActions = new ArrayList<>();
     for (Pair<Integer, Double> pair : sortedScores) {
       if (!countedActs.containsKey(POP_ACTIONS[pair.getKey()].get(0))) {
         countedActs.put(POP_ACTIONS[pair.getKey()].get(0), 1);
+        countedActsPoints.put(POP_ACTIONS[pair.getKey()].get(0), pair.getValue());
       } else {
         countedActs.replace(POP_ACTIONS[pair.getKey()].get(0), countedActs.get(POP_ACTIONS[pair.getKey()].get(0)) + 1);
+        countedActsPoints.replace(POP_ACTIONS[pair.getKey()].get(0), countedActsPoints.get(POP_ACTIONS[pair.getKey()].get(0)) + pair.getValue());
       }
     }
     for (Pair<Integer, Double> pair : sortedScores) {
-      rankActions.add(new Pair<Integer, Double>(pair.getKey(), pair.getValue() + (countedActs.get(POP_ACTIONS[pair.getKey()].get(0)) * FIRST_ACTION_WEIGHT)));
+      rankActions.add(new Pair<Integer, Double>(pair.getKey(), pair.getValue() + (countedActsPoints.get(POP_ACTIONS[pair.getKey()].get(0)) * FIRST_ACTION_WEIGHT)));
     }
-    if (debug) System.out.println(countedActs);
+    // System.out.println("Anzahl der Züge als ersten Zug: " + countedActs);
+    // System.out.println("Punktzahl der Zugsequenzen korrespondierend des 1. Zuges: " + countedActsPoints);
     if (debug) System.out.println(rankActions);
 
     return rankActions;
@@ -267,7 +277,7 @@ public class RheaAgentSI extends AgentBase implements PlayAgent, Serializable {
 
     return returnParents;
   }
-
+// Idee: Alle Illegalen Züge zum Abbruch führen lassen..
   private double simulate(StateObservation so, int indiv, int gen) {
 
     StateObservation soCopy1 = so.copy();
@@ -293,24 +303,24 @@ public class RheaAgentSI extends AgentBase implements PlayAgent, Serializable {
       }
     }
     double score;
-    score = Math.pow(0.95, depth) * soCopy1.getReward(so.getPlayer(), true);
+    score = Math.pow(0.9, depth) * (soCopy1.getReward(so.getPlayer(), true));
 
-    if (score < 0) {
-      score *= -1;
-      score += (0.06 * AGGRESSIVENESS);
-      if (GENERATIONS - 1 == gen) {
-        Types.ACTIONS temp1 = POP_ACTIONS[indiv].get(0);
-        Types.ACTIONS temp2 = POP_ACTIONS[indiv].get(depth);
-        POP_ACTIONS[indiv].set(0, temp2);
-        POP_ACTIONS[indiv].set(depth, temp1);
-      }
-    } else if (score == 1) {
-      score = 10;
-    }
-
-    if (!so.isDeterministicGame() && soCopy1.isGameOver()) {
-      score = -10;
-    }
+//    if (score < 0) {
+//      score *= -1;
+//      score += (0.06 * AGGRESSIVENESS);
+//      if (GENERATIONS - 1 == gen) {
+//        Types.ACTIONS temp1 = POP_ACTIONS[indiv].get(0);
+//        Types.ACTIONS temp2 = POP_ACTIONS[indiv].get(depth);
+//        POP_ACTIONS[indiv].set(0, temp2);
+//        POP_ACTIONS[indiv].set(depth, temp1);
+//      }
+//    } else if (score == 1) {
+//      score = 10;
+//    }
+//
+//    if (!so.isDeterministicGame() && soCopy1.isGameOver()) {
+//      score = -10;
+//    }
     if (debug) System.out.println("Player Score with depth : " + score);
 
     return score;
