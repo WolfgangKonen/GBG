@@ -10,7 +10,6 @@ import controllers.MCTSExpWrapper.stateApproximation2.PlayAgentApproximator2;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.MCTSWrapper.MCTSWrapperAgent;
 import controllers.MCTSWrapper.stateApproximation.PlayAgentApproximator;
-import controllers.RHEA.RheaAgent;
 import controllers.RHEA.RheaAgentSI;
 import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.NTupleBase;
@@ -288,8 +287,6 @@ public class XArenaFuncs {
 
 		if (sAgent.equals("Max-N")) {
 			pa = new MaxNAgent(sAgent, m_xab.maxnPar[n], m_xab.oPar[n]);
-		} else if (sAgent.equals("RHEA")) {
-			pa = new RheaAgent(sAgent, null,  m_xab.oPar[n]);
 		} else if (sAgent.equals("RHEA-SI")) {
 			pa = new RheaAgentSI(sAgent, null);
 		} else if (sAgent.equals("Expectimax-N")) {
