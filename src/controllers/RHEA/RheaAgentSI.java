@@ -1,9 +1,11 @@
 package controllers.RHEA;
 
 import controllers.AgentBase;
+import controllers.MCTS.MCTSAgentT;
 import controllers.PlayAgent;
 import games.StateObservation;
 import org.apache.commons.math3.util.Pair;
+import params.ParMCTS;
 import tools.ScoreTuple;
 import tools.Types;
 
@@ -23,7 +25,7 @@ public class RheaAgentSI extends AgentBase implements PlayAgent, Serializable {
   private static boolean debug = false;
 
   private static final String GEN_OP = "BOTH"; // CROSSOVER, MUTATION, BOTH
-  private static final String SELECTION_TYPE = "ROULETTE"; //ROULETTE     (more to implement: RANK, TOURNAMENT)
+  private static final String SELECTION_TYPE = "ROULETTE";
   private static final String CROSSOVER_TYPE = "UNIFORM";
   private static final String MUTATION_TYPE = "UNIFORM";
 
@@ -33,19 +35,25 @@ public class RheaAgentSI extends AgentBase implements PlayAgent, Serializable {
   private static final double DEPTH_WEIGHT = 0.95; // weight of the depth inside the simulation on the fitness value (0 - infinity)
   private static final boolean ELITISM_PROMOTION = true;
   private static final boolean RANDOM_OPPONENT_TURN = false;
+  private static final boolean TURNS_COUNTED = false;
+  private static final String OPPONENT = "-"; // MCTS
   private static final boolean FIRST_MOVE_OUTSOURCED = true;
   private static Random rand;
+  private static MCTSAgentT mctsAgent;
 
 
   public RheaAgentSI(String name, StateObservation so) {
     super(name);
     super.setAgentState(AgentState.TRAINED);
     rand = new Random();
+    if (OPPONENT.equals("MCTS")) {
+      mctsAgent = new MCTSAgentT("MCTS", so, new ParMCTS());
+    }
   }
 
   @Override
   public Types.ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
-    int[][][] genome = new int[so.getAllAvailableActions().size()][POP_SIZE][SIM_DEPTH];
+    int[][][] genome = new int[so.getAvailableActions().size()][POP_SIZE][SIM_DEPTH];
     genome = initPop(so, genome);
 
     double[] vtable = bestAction(so, genome);
@@ -87,20 +95,20 @@ public class RheaAgentSI extends AgentBase implements PlayAgent, Serializable {
 
   private double[] bestAction(StateObservation so, int[][][] genome) {
     double[] vtable = new double[so.getAvailableActions().size()];
-    int woAmI = so.getPlayer();
+    int whoAmI = so.getPlayer();
     if (FIRST_MOVE_OUTSOURCED) {
       for (int i = 0; i < vtable.length; i++) {
 
-          StateObservation soCopy = so.copy();
-          Types.ACTIONS action = soCopy.getAvailableActions().get(i);
-          soCopy.advance(action);
+        StateObservation soCopy = so.copy();
+        Types.ACTIONS action = soCopy.getAvailableActions().get(i);
+        soCopy.advance(action);
 
-          vtable[i] = simulate(woAmI, soCopy, genome[i]);
-          // System.out.println("Normalized Score for Action" + action + ": " + vtable[i]);
+        vtable[i] = simulate(whoAmI, soCopy, genome[i]);
+        // System.out.println("Normalized Score for Action" + action + ": " + vtable[i]);
 
       }
     } else {
-      vtable = simulate2(woAmI, so, genome[0]);
+      vtable = simulate2(whoAmI, so, genome[0]);
     }
 
     return vtable;
@@ -108,96 +116,118 @@ public class RheaAgentSI extends AgentBase implements PlayAgent, Serializable {
 
   private double[] simulate2(int whoAmI, StateObservation so, int[][] population) {
     double[] vtable = new double[so.getAvailableActions().size()];
-//    ArrayList<Pair<Integer, Double>> scoreList = new ArrayList<>();
-//    boolean isMultiplayerGame = so.getNumPlayers() > 1;
-//    boolean lastTurnRhea;
-//
-//    for (int i = 0; i < POP_SIZE; i++) {
-//      lastTurnRhea = true;
-//      StateObservation soCopy = so.copy();
-//      int depth = 0;
-//      for (; depth < SIM_DEPTH; depth++) {
-//        if (soCopy.isGameOver()) {
-//          break;
-//        }
-//        if (isMultiplayerGame && lastTurnRhea && RANDOM_OPPONENT_TURN) {
-//          soCopy.advance(soCopy.getAvailableActions().get(rand.nextInt(soCopy.getAvailableActions().size())));
-//          lastTurnRhea = false;
-//          // System.out.println("enemy");
-//        } else {
-//          if (population[i][depth] < soCopy.getAvailableActions().size()) {
-//            soCopy.advance(soCopy.getAction(population[i][depth]));
-//            // System.out.println("RHEA");
-//            lastTurnRhea = true;
-//          }
-//        }
-//      }
-//      score = Math.pow(DEPTH_WEIGHT, depth) * ((soCopy.getReward(whoAmI, soCopy.isFinalRewardGame())));
-//      normalisedScore += score;
-//
-//      scoreList.add(new Pair<>(i, score));
-//
-//    }
-//
-//    scoreList = insertionSort(scoreList);
-//    System.out.println("Scoremap Generation 0: " + scoreList);
-//
-//
-//    for (int g = 1; g <= GENERATIONS; g++) {
-//      switch (GEN_OP) {
-//        case "CROSSOVER":
-//          population = crossover(scoreList, population);
-//          break;
-//        case "MUTATION":
-//          population = mutation(scoreList, population, so);
-//          break;
-//        case "BOTH":
-//          population = crossover(scoreList, population);
-//          population = mutation(scoreList, population, so);
-//          break;
-//
-//        default:
-//          System.out.println("No valid Selection Operator selected");
-//          break;
-//      }
-//      normalisedScore = 0.0;
-//      scoreList = new ArrayList<>();
-//      for (int i = 0; i < POP_SIZE; i++) {
-//        lastTurnRhea = true;
-//        StateObservation soCopy = so.copy();
-//        int depth = 0;
-//        for (; depth < SIM_DEPTH; depth++) {
-//          if (soCopy.isGameOver()) {
-//            break;
-//          }
-//          if (isMultiplayerGame && lastTurnRhea && RANDOM_OPPONENT_TURN) {
-//            soCopy.advance(soCopy.getAvailableActions().get(rand.nextInt(soCopy.getAvailableActions().size())));
-//            lastTurnRhea = false;
-//            // System.out.println("enemy");
-//          } else {
-//            if (population[i][depth] < soCopy.getAvailableActions().size()) {
-//              soCopy.advance(soCopy.getAction(population[i][depth]));
-//              // System.out.println("RHEA");
-//              lastTurnRhea = true;
-//            }
-//          }
-//        }
-//        score = Math.pow(DEPTH_WEIGHT, depth) * ((soCopy.getReward(whoAmI, soCopy.isFinalRewardGame())));
-//        // System.out.println(soCopy.getReward(whoAmI, soCopy.isFinalRewardGame()));
-//        normalisedScore += score;
-//        scoreList.add(new Pair<>(i, score));
-//      }
-//      scoreList = insertionSort(scoreList);
-//      System.out.println("Scoremap Generation " + g + ": " + scoreList);
-//    }
-//
-//    if (so.isFinalRewardGame()) {
-//      normalisedScore /= POP_SIZE;
-//    } else {
-//      normalisedScore = scoreList.get(0).getValue();
-//    }
+    double score;
+    ArrayList<Pair<Integer, Double>> scoreList = new ArrayList<>();
+    boolean isMultiplayerGame = so.getNumPlayers() > 1;
+    boolean lastTurnRhea;
 
-    // System.out.println("Normalized Score: " + normalisedScore);
+
+    for (int i = 0; i < POP_SIZE; i++) {
+      lastTurnRhea = false;
+      StateObservation soCopy = so.copy();
+      int depth = 0;
+      for (; depth < SIM_DEPTH; depth++) {
+        if (soCopy.isGameOver()) {
+          break;
+        }
+        if (isMultiplayerGame && lastTurnRhea && RANDOM_OPPONENT_TURN) {
+          soCopy.advance(soCopy.getAvailableActions().get(rand.nextInt(soCopy.getAvailableActions().size())));
+          lastTurnRhea = false;
+          // System.out.println("enemy");
+        } else if (isMultiplayerGame && lastTurnRhea && OPPONENT.equals("MCTS")) {
+          soCopy.advance(mctsAgent.getNextAction2(soCopy, false, false));
+          lastTurnRhea = false;
+        } else {
+          if (population[i][depth] < soCopy.getAvailableActions().size()) {
+            soCopy.advance(soCopy.getAction(population[i][depth]));
+            // System.out.println("RHEA");
+            lastTurnRhea = true;
+          }
+        }
+      }
+
+      score = Math.pow(DEPTH_WEIGHT, depth) * ((soCopy.getReward(whoAmI, soCopy.isFinalRewardGame())));
+
+      scoreList.add(new Pair<>(i, score));
+    }
+
+    scoreList = insertionSort(scoreList);
+    // System.out.println("Scoremap Generation 0: " + scoreList);
+
+
+    for (int g = 1; g <= GENERATIONS; g++) {
+      switch (GEN_OP) {
+        case "CROSSOVER":
+          population = crossover(scoreList, population);
+          break;
+        case "MUTATION":
+          population = mutation(scoreList, population, so);
+          break;
+        case "BOTH":
+          population = crossover(scoreList, population);
+          population = mutation(scoreList, population, so);
+          break;
+
+        default:
+          System.out.println("No valid Selection Operator selected");
+          break;
+      }
+      scoreList = new ArrayList<>();
+      for (int i = 0; i < POP_SIZE; i++) {
+        lastTurnRhea = false;
+        StateObservation soCopy = so.copy();
+        int depth = 0;
+        for (; depth < SIM_DEPTH; depth++) {
+          if (soCopy.isGameOver()) {
+            break;
+          }
+          if (isMultiplayerGame && lastTurnRhea && RANDOM_OPPONENT_TURN) {
+            soCopy.advance(soCopy.getAvailableActions().get(rand.nextInt(soCopy.getAvailableActions().size())));
+            lastTurnRhea = false;
+            // System.out.println("enemy");
+          } else if (isMultiplayerGame && lastTurnRhea && OPPONENT.equals("MCTS")) {
+            soCopy.advance(mctsAgent.getNextAction2(soCopy, false, false));
+            lastTurnRhea = false;
+          } else {
+            if (population[i][depth] < soCopy.getAvailableActions().size()) {
+              soCopy.advance(soCopy.getAction(population[i][depth]));
+              // System.out.println("RHEA");
+              lastTurnRhea = true;
+            }
+          }
+        }
+        score = Math.pow(DEPTH_WEIGHT, depth) * ((soCopy.getReward(whoAmI, soCopy.isFinalRewardGame())));
+        // System.out.println(soCopy.getReward(whoAmI, soCopy.isFinalRewardGame()));
+        scoreList.add(new Pair<>(i, score));
+      }
+      scoreList = insertionSort(scoreList);
+      // System.out.println("Scoremap Generation " + g + ": " + scoreList);
+    }
+
+    boolean firstCounted;
+    int j = 0;
+
+    // filling vtable
+    if (!TURNS_COUNTED) {
+      for (Pair<Integer, Double> pair : scoreList) {
+        if (vtable.length > population[pair.getKey()][0] && vtable[population[pair.getKey()][0]] < pair.getValue()) {
+          vtable[population[pair.getKey()][0]] = pair.getValue();
+        }
+      }
+    } else {
+      for (int i = 0; i < POP_SIZE; i++) {
+        firstCounted = false;
+        j = 0;
+        do {
+          if (vtable.length > population[i][j]) {
+            vtable[population[i][j]] += 0.01;
+            firstCounted = true;
+          }
+          j++;
+        } while (!firstCounted || j == SIM_DEPTH - 1);
+      }
+    }
+
     return vtable;
   }
 
@@ -328,6 +358,9 @@ public class RheaAgentSI extends AgentBase implements PlayAgent, Serializable {
           soCopy.advance(soCopy.getAvailableActions().get(rand.nextInt(soCopy.getAvailableActions().size())));
           lastTurnRhea = false;
           // System.out.println("enemy");
+        } else if (isMultiplayerGame && lastTurnRhea && OPPONENT.equals("MCTS")) {
+          soCopy.advance(mctsAgent.getNextAction2(soCopy, false, false));
+          lastTurnRhea = false;
         } else {
           if (population[i][depth] < soCopy.getAvailableActions().size()) {
             soCopy.advance(soCopy.getAction(population[i][depth]));
@@ -336,15 +369,15 @@ public class RheaAgentSI extends AgentBase implements PlayAgent, Serializable {
           }
         }
       }
+
       score = Math.pow(DEPTH_WEIGHT, depth) * ((soCopy.getReward(whoAmI, soCopy.isFinalRewardGame())));
       normalisedScore += score;
 
       scoreList.add(new Pair<>(i, score));
-
     }
 
     scoreList = insertionSort(scoreList);
-    System.out.println("Scoremap Generation 0: " + scoreList);
+    // System.out.println("Scoremap Generation 0: " + scoreList);
 
 
     for (int g = 1; g <= GENERATIONS; g++) {
@@ -378,6 +411,9 @@ public class RheaAgentSI extends AgentBase implements PlayAgent, Serializable {
             soCopy.advance(soCopy.getAvailableActions().get(rand.nextInt(soCopy.getAvailableActions().size())));
             lastTurnRhea = false;
             // System.out.println("enemy");
+          } else if (isMultiplayerGame && lastTurnRhea && OPPONENT.equals("MCTS")) {
+            soCopy.advance(mctsAgent.getNextAction2(soCopy, false, false));
+            lastTurnRhea = false;
           } else {
             if (population[i][depth] < soCopy.getAvailableActions().size()) {
               soCopy.advance(soCopy.getAction(population[i][depth]));
@@ -392,10 +428,10 @@ public class RheaAgentSI extends AgentBase implements PlayAgent, Serializable {
         scoreList.add(new Pair<>(i, score));
       }
       scoreList = insertionSort(scoreList);
-      System.out.println("Scoremap Generation " + g + ": " + scoreList);
+      // System.out.println("Scoremap Generation " + g + ": " + scoreList);
     }
 
-    if (so.isFinalRewardGame()) {
+    if (isMultiplayerGame) {
       normalisedScore /= POP_SIZE;
     } else {
       normalisedScore = scoreList.get(0).getValue();
