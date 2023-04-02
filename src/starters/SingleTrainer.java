@@ -73,7 +73,8 @@ public class SingleTrainer {
             int liveSignal = (so instanceof StateObserverCube) ? 10000 :
                     (!pa.isWrapper()) ? 500 : 50;
             if (gameNum % liveSignal == 0) {
-                System.out.println("gameNum: " + gameNum);
+                int exploMode = pa.getParWrapper().getWrapperMCTS_ExplorationMode();	// just as sanity check
+                System.out.println("gameNum: "+gameNum+"   EX"+exploMode);
             }
             if (gameNum % numEval == 0) { //|| gameNum==1) {
                 elapsedMs = (System.currentTimeMillis() - startTime);

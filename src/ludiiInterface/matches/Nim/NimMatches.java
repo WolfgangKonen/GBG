@@ -38,16 +38,16 @@ import java.util.*;
  * @author Meltem Seven, 2022
  * */
 public class NimMatches extends GBGBatch {
-    static int GAMESNUMBER = 1;
+    static int GAMESNUMBER = 2;
     static double MAX_SECONDS = 1.0;
 
     // list of some available GBG agents; different agents are trained for different numberHeap configurations!
     static ArrayList<String> agents = new ArrayList<>(Arrays.asList(
-            "Bouton.agt.zip", "TDNT4-project.agt.zip", "TDNT4-20k-project.agt.zip",
+            "Bouton.agt.zip", "TDNT4-20k.agt.zip", "TDNT4-20k-project.agt.zip",
             "TDNT4-60k-project.agt.zip", "TDNT4-10-4-60k-project.agt.zip", "TDNT4-20-5-60k-project.agt.zip" ));
-    static String agtFile = agents.get(0); // chosen GBG agent
+    static String agtFile = agents.get(4); // chosen GBG agent
     static String[] scaPar;
-    static int numberHeaps = 5;
+    static int numberHeaps = 9;
 
     static final AI PLAYER_1 = new LudiiAI();
     static AI PLAYER_2;

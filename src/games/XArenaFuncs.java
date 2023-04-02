@@ -592,7 +592,7 @@ public class XArenaFuncs {
 		PlayAgent qa;
 		int nply = wrPar.getWrapperNPly();
 		if (nply!=0 && iter!=0) {
-			throw new RuntimeException("Both Wrapper MCTS and Wrapper nPly are non-zero!");
+			throw new RuntimeException("Both Wrapper Iter MCTS and Wrapper nPly are non-zero!");
 		}
 		if (nply > 0 && !(pa instanceof HumanPlayer)) {
 			if (so.isDeterministicGame()) {
@@ -630,6 +630,7 @@ public class XArenaFuncs {
 				);
 			}
 		}
+		qa.setParWrapper(wrPar);		// important bug fix Feb'2023 (!!): set the wrapper params for the wrapper
 
 		return qa;
 	}
@@ -747,7 +748,8 @@ public class XArenaFuncs {
 			int liveSignal = (so instanceof StateObserverCube) ? 10000 :
 					         (!pa.isWrapper()) ? 500 : 50;
 			if (gameNum % liveSignal == 0) {
-				System.out.println("gameNum: "+gameNum);
+				int exploMode = pa.getParWrapper().getWrapperMCTS_ExplorationMode();	// just as sanity check
+				System.out.println("gameNum: "+gameNum+"   EX"+exploMode);
 			}
 			if (gameNum % numEval == 0) {
 				elapsedMs = (System.currentTimeMillis() - startTime);

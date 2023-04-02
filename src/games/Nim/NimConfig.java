@@ -1,8 +1,9 @@
 package games.Nim;
 
+import controllers.TD.ntuple4.TDNTuple4Agt;
+
 /**
- * Configurations for the games Nim and Nim3P. <br>
- * The game Nim is a quite simple game, mostly used for debugging purposes.
+ * Configurations for the games Nim and Nim3P.
  * <p>
  * There are {@link #NUMBER_HEAPS} heaps, each having initially {@link #HEAP_SIZE} items. There
  * are two players and each player removes between 1 and {@link #MAX_MINUS} items from one heap 
@@ -18,10 +19,11 @@ public class NimConfig {
     public static int NUMBER_HEAPS = 3;
 
     /**
-     * Initial heap size (maximum number of items in each heap).
-     * If == -1, then unique heap structure is used in which HEAP_SIZE == NUMBER_HEAPS for the middle heap and
-     * decreases by 1 on each side.
-     * (e.g. for NUMBER_HEAPS == 5, heap structure would be (3 4 5 4 3))
+     * Initial heap size (number of items in each heap).
+     * If == -1, a special heap structure is used (needed for {@link ludiiInterface.games.Nim.SystemConversionNim},
+     * because Ludii supports only this special heap structure):
+     * The heap size for the central heap is {@link #NUMBER_HEAPS} and decreases by 1 for each neighbouring heap.
+     * For example, with {@link #NUMBER_HEAPS} = 5 the heap structure is [3 4 5 4 3].
      */
     public static int HEAP_SIZE = 5; // 50
 
@@ -31,6 +33,14 @@ public class NimConfig {
      * cleared in one move.
      */
     public static int MAX_MINUS = 3;
+
+    /**
+     * If {@code true}, then invoke the project mechanism in {@link StateObserverNim#project()} that sorts the heaps
+     * according to their heap size in ascending order. <br>
+     * If {@code false}, do nothing.
+     * @see TDNTuple4Agt
+     */
+    public static boolean PROJECT = true;
 
 	/**
 	 * Only for Nim3P: If true, activate this optional extra rule: In addition to the winner, who gets reward 1: 

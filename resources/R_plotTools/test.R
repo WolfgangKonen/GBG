@@ -36,16 +36,21 @@ EX0_STRING = "-EX1"  # either "-EX0", "-EX0-TEST", "-EX0-TST2", "-EX1", "-EX2" o
 # "-EX0" and as "")
 pdffile=paste0("MCTSWrap",EX0_STRING,"-W100-250k.Jan23.pdf")
 
+
+# if (EX0_STRING=="") {
+#   filesW100="multiCompeteOthello-W100-250k-part0-3.csv"  # 18 agents
+# } else {
+#   filesW100=paste0("multiCompeteOthello",EX0_STRING,"-W100-250k.csv")
+# }
+# filesW100 = "multiOthello-Fig10.csv"               # 10 W100-EX0 agents, Jan'23
 filesW100 <- 
   switch(EX0_STRING
          #,"-EX0"= "multiCompeteOthello-EX0-W100-250k.csv" # -- older --
-         ,"-EX0"= "multiOthello-Fig10.csv"                 # 20 W100-EX0 agents, Jan'23
+         ,"-EX0"= "multiOthello-Fig10.csv"                 # 10 W100-EX0 agents, Jan'23
          ,"-EX1"= "multiOthello-Fig10-EX1.csv"             # 10 W100-EX1 agents, Jan'23
-         ,"INVALID_STRING"
   )
-if (EX0_STRING=="")  # separate, because switch(EX0_STRING,...) may NOT contain "" (!)
-  filesW100="multiCompeteOthello-W100-250k-part0-3.csv"    # 18 agents, -- older --
-
+if (EX0_STRING=="")  # -- older --
+  filesW100="multiCompeteOthello-W100-250k-part0-3.csv"  # 18 agents
 filenames=c(
   filesW100,
   #"multiTrainOthello-20Agents.csv"      # no iter during training (W0) for comparison

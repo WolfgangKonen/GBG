@@ -164,7 +164,6 @@ public class MCompeteSweep {
         String agtBase = agtFile.split("\\.")[0];       // agtBase = agtFile w/o .agt.zip
         agtBase = removeSubstr(agtBase, "-stub");   // remove "-stub", if it appears
 
-        int exploMode = pa.getParWrapper().getWrapperMCTS_ExplorationMode();
         int[] sweepArr = (batchSizeArr==null) ? new int[]{0} : batchSizeArr;
         String userTitle2 = (batchSizeArr==null) ? "user2" : "RB_batch";
         String trainCsvName,fCsvName="";
@@ -194,7 +193,7 @@ public class MCompeteSweep {
                 File file;
                 do {
                     k++;    // start with k=0
-                    agt_w_o_suffix = agtBase + "_EX" + frm1.format(exploMode) + "_" + frm2.format(i+k);
+                    agt_w_o_suffix = agtBase + "_" + frm2.format(i+k);
                     trainCsvName = "../" + trainOutDir + "/" + agt_w_o_suffix + ".csv";
                     // we use "../" because we do not want to store in subdir "csv/" as printMultiTrainList usually does
                     agtPath = strDir + "/" + trainOutDir + "/" + agt_w_o_suffix + ".agt.zip";

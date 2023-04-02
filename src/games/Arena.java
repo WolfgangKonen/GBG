@@ -5,9 +5,7 @@ import controllers.AgentBase;
 import controllers.HumanPlayer;
 import controllers.MC.MCAgentN;
 import controllers.MCTS.MCTSAgentT;
-import controllers.MCTSWrapper.ConfigWrapper;
 import controllers.PlayAgent;
-import game.rules.play.moves.nonDecision.effect.Apply;
 import games.Hex.HexTile;
 import games.Hex.StateObserverHex;
 import games.Sim.StateObserverSim;
@@ -15,7 +13,6 @@ import games.SimpleGame.StateObserverSG;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import gui.ArenaGui;
 import gui.MessageBox;
-import params.ParWrapper;
 import starters.GBGLaunch;
 import tools.PStats;
 import tools.ScoreTuple;
@@ -297,7 +294,6 @@ abstract public class Arena implements Runnable {
 	 * button "Train X"
 	 */
 	protected void InspectGame() {
-		String agentX = m_xab.getSelectedAgent(0);
 		StateObservation so;
 		Types.ACTIONS_VT actBest;
 		PlayAgent paX;
@@ -376,6 +372,7 @@ abstract public class Arena implements Runnable {
 					gb.updateBoard(so, true, true);
 
 					if (so instanceof StateObserverSG && actBest.getVTable()!=null) {
+						// only relevant for SimpleGame
 						DecimalFormat form = new DecimalFormat("0.0000");
 						double[] optimHit = {4.888888889,4.666666667,4.333333333,3.888888889,
 								3.333333333,2.666666667,1.888888889,1,0 };
@@ -674,57 +671,23 @@ abstract public class Arena implements Runnable {
 		String gostr;
 
 		ArrayList<String> strList = buildPlayMessages(qaVector,numPlayers);
-//		for (int i=0; i<agentVec.length; i++) strList.add(agentVec[i]);
 
 		assert qaVector.length == so.getNumPlayers() : "Number of agents does not match so.getNumPlayers()!";
 
-//		startSO = so.copy();
-
-//		logSessionid = logManager.newLoggingSession(so);
-
-//		pstats = new PStats(1, so.getMoveCounter(), so.getPlayer(), -1, gameScore, nEmpty, cumEmpty, highestTile);
-//		psList.add(pstats);
-
-//		int nEmpty = 0, cumEmpty = 0, highestTile=0;
-//		double gameScore = 0.0;
-
 		while (true) {
-				pa = qaVector[so.getPlayer()];
-				assert !(pa instanceof controllers.HumanPlayer) :"[playInnerGame] HumanPlayer not allowed";
-//					gb.setActionReq(false);
-//					showValue_U = showValue;	// leave the previously shown values if it is HumanPlayer
+			pa = qaVector[so.getPlayer()];
+			assert !(pa instanceof controllers.HumanPlayer) :"[playInnerGame] HumanPlayer not allowed";
 
-//					gb.enableInteraction(false);
+			actBest = pa.getNextAction2(so.partialState(), false, false);
 
-					actBest = pa.getNextAction2(so.partialState(), false, false);
+			if (actBest==null) {
+				// s.th. went wrong:
+				strList.add("[actBest==null] Cannot play a game with "+pa.getName());
+				return strList;
+			}
 
-					if (actBest==null) {
-						// s.th. went wrong:
-						strList.add("[actBest==null] Cannot play a game with "+pa.getName());
-						return strList;
-					}
-
-					so.storeBestActionInfo(actBest);
-					so.advance(actBest);
-//					logManager.addLogEntry(actBest, so, logSessionid);
-
-//					// gather information for later printout to agents/gameName/csv/playStats.csv.
-//					// This is mostly for diagnostics in game 2048, but useful for other games as well.
-//					if (so instanceof StateObserver2048) {
-//						StateObserver2048 so2048 = (StateObserver2048) so;
-//						nEmpty = so2048.getNumEmptyTiles();
-//						cumEmpty += nEmpty;
-//						highestTile = so2048.getHighestTileValue();
-//						gameScore = so2048.getGameScore(so2048.getPlayer()) * so2048.MAXSCORE;
-//					} else {
-//						gameScore = so.getGameScore(so.getPlayer());
-//					}
-//					pstats = new PStats(1, so.getMoveCounter(), so.getPlayer(), actBest.toInt(), gameScore,
-//							nEmpty, cumEmpty, highestTile);
-//					psList.add(pstats);
-//					gb.enableInteraction(true);
-
-//				if (!so.isRoundOver()) gb.updateBoard(so, false, showValue_U);
+			so.storeBestActionInfo(actBest);
+			so.advance(actBest);
 
 			if (so.isRoundOver()) {
 
@@ -734,15 +697,11 @@ abstract public class Arena implements Runnable {
 				}
 			}
 
-			//
-			// test two conditions to break out of the while-loop
-			//
 			if (so.isGameOver()) {
 				gostr = this.gameOverString(so,strList);
-//				this.gameOverMessages(so,numPlayers,gostr,false);
 
-				break; // this is the 1st condition to break out of while loop
-			} // if isGameOver
+				break; // out of while loop
+			}
 
 			int epiLength = m_xab.oPar[0].getStopEval();	// stopEval contains the play & eval epiLength
 			if (so.getMoveCounter() > epiLength) {
@@ -751,12 +710,11 @@ abstract public class Arena implements Runnable {
 				gostr ="Game stopped (epiLength) with score " + gScore;
 
 				break; // this is the 2nd condition to break out of while loop
-			} // if (so.getMoveCounter()...)
+			}
 
 		} // while
 
 		strList.add(gostr);
-//		logManager.endLoggingSession(logSessionid, this.getGameName());
 
 		return strList;
 	} // playInnerGame
@@ -1320,7 +1278,8 @@ abstract public class Arena implements Runnable {
 		if (subDir != null) strDir += "/" + subDir;
 		String filePath = strDir + "/" + agtFile;
 		boolean res = loadAgent(0, filePath);
-		assert res : "\nAborted: agtFile = " + agtFile + " not found! ["+filePath+"]";
+		if  (!res)
+			throw new RuntimeException( "\nAborted: agtFile = " + agtFile + " not found! ["+filePath+"]");
 		String sAgent = m_xab.getSelectedAgent(0);
 		return this.m_xfun.fetchAgent(0, sAgent, m_xab);
 	}

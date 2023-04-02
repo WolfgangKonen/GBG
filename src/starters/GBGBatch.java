@@ -517,7 +517,7 @@ public class GBGBatch extends SetupGBG {
 		}
 		PlayAgent pa = arenaTrain.m_xfun.m_PlayAgents[0];
 		PlayAgent qa = arenaTrain.m_xfun.wrapAgentTrain(pa, pa.getParOther(), pa.getParWrapper(), null, gb.getDefaultStartState());
-		pa.setWrapperParamsO(xab.oPar[0]);
+		qa.setWrapperParamsO(xab.oPar[0]);
 
 		long startTime = System.currentTimeMillis();
 

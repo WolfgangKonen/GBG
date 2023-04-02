@@ -33,21 +33,21 @@ import java.util.*;
  * */
 public class CFourMatches extends GBGBatch {
 
-    static int GAMESNUMBER = 2; // needs to be an even amount
+    static int GAMESNUMBER = 20; // needs to be an even amount
     static double MAX_SECONDS = 1.0;
 
     // some available GBG agents
     static ArrayList<String> agents = new ArrayList<>(Arrays.asList(
-            "0-MWrap1000-TCL-EXP-NT3.agt.zip", "1-AB.agt.zip", "1-AB-DL.agt.zip", "1-AB-DL2.agt.zip",
+            "0-MWrap1000-TCL-EXP-NT3.agt.zip", "1-AB.agt.zip", "9-AB-DL.agt.zip", "1-AB-DL2.agt.zip",
             "2-TCL-EXP-NT3-al37-lam000-6000k-epsfin0.agt.zip", "3-MCTS10000-40.agt.zip"));
-    static String agtFile = agents.get(1); // chosen GBG agent
+    static String agtFile = agents.get(2); // chosen GBG agent
     static String[] scaPar;
 
     static final AI PLAYER_1 = new LudiiAI(); // chosen Ludii agent
     static AI PLAYER_2;
     static Game ludiiGame;
 
-    static boolean opening = true;
+    static boolean opening = false;
     static List<Integer> openingMoves = null;
 
     static double avgEpLengthLudii;

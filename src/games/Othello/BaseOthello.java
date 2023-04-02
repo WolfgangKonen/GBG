@@ -2,15 +2,7 @@ package games.Othello;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-
-import controllers.AgentBase;
-import controllers.PlayAgent;
-import games.StateObservation;
-import tools.Types.ACTIONS;
 import tools.Types.ACTIONS;
 
 public class BaseOthello implements Serializable
@@ -18,7 +10,7 @@ public class BaseOthello implements Serializable
 	
 	public static final long serialVersionUID = 12L;
 
-	/**
+	/*
 	 * The Feature vector consist of the depending player which is activated in featureclass
 	 * Therefor the optimal feature will be calculated given by a board pattern which contains the cummulative value for 
 	 * the current players move. We will try to maximize the Score 
@@ -29,7 +21,8 @@ public class BaseOthello implements Serializable
 	 * 2 for 'X' +1 for 'O' and 0 for '-'
 	 * @param state [input] board position as string
 	 * @param table [output] the corresponding board.
-	 */
+	 **/
+	/*
 	protected void stringToTable(String state, int[][] table)
 	{
 		for (int i=0, x=0;i<ConfigOthello.BOARD_SIZE;i++)
@@ -54,7 +47,9 @@ public class BaseOthello implements Serializable
 		}
 		return str;
 	}
-	
+	*/
+
+	/*
 	private int[] tableToVector(int[][] table)
 	{
 		int[] retVal = new int[64];
@@ -72,6 +67,7 @@ public class BaseOthello implements Serializable
 	{
 		return "";
 	}
+	*/
 
 	/**
 	 * Used to determine availableActions
@@ -100,10 +96,7 @@ public class BaseOthello implements Serializable
 	{
 		for(int i = 0; i < toCopy.length; i++)
 		{
-			for(int j = 0; j < toCopy[i].length; j++)
-			{
-				result[i][j] = toCopy[i][j]; 
-			}
+			System.arraycopy(toCopy[i], 0, result[i], 0, toCopy[i].length);
 		}
 	}
 
@@ -159,7 +152,7 @@ public class BaseOthello implements Serializable
 	 * @param i 			index of current game state
 	 * @param j				index of current game state
 	 * @param x				modifier to iterate through cell.
-	 * @param playerColor	integer -1 or 1 representing the actual player.
+	 * @param player		integer representing the actual player.
 	 * @return
 	 */
 	private static boolean validateAction(int[][] cgs, int i, int j, Modifier x, int player) 

@@ -25,6 +25,7 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 	protected int m_player;		// player who makes the next move (0 or 1)
 	protected ArrayList<Types.ACTIONS> availableActions = new ArrayList<>();	// holds all available actions
 
+	@Deprecated
 	protected boolean SORT_IT = false;		// deprecated, use project() instead
     
 	/**
@@ -76,15 +77,21 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 	}
 
 	/**
-	 * Project {@code this} into its canonical form: This has for Nim the list of heaps sorted in ascending order
+	 * Project {@code this} into its canonical form: This has for Nim the list of heaps sorted according to
+	 * their heap size in ascending order.
+	 *
 	 * @return a projected copy of {@code this}
 	 *
 	 * @see TDNTuple4Agt
 	 */
 	public StateObservation project() {
-		StateObserverNim p_so = this.copy();
-		Arrays.sort(p_so.m_heap);
-		return p_so;
+		if (NimConfig.PROJECT) {
+			StateObserverNim p_so = this.copy();
+			Arrays.sort(p_so.m_heap);
+			return p_so;
+		} else {
+			return this;
+		}
 	}
 
 	public StateObserverNim(StateObserverNim other) {
