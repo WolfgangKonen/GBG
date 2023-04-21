@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import TournamentSystem.TSTimeStorage;
 import controllers.PlayAgent;
 import controllers.PlayAgtVector;
-import games.Nim.StateObserverNim;
 import tools.ScoreTuple;
 import tools.Types;
 import tools.Types.ACTIONS;
@@ -369,7 +368,7 @@ abstract public class ObserverBase extends PartialPerfect implements StateObserv
 	 * they override this method.
 	 *
 	 * @return	a score tuple with 0.0 for all elements
-     * @param pa
+     * @param pa (not used in this default implementation)
 	 */
 	public ScoreTuple getStepRewardTuple(PlayAgent pa) {
 		int N = this.getNumPlayers();

@@ -1,5 +1,6 @@
 package games.RubiksCube;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
@@ -26,6 +27,7 @@ import tools.Types.ACTIONS_VT;
  */
 public class DAVI2Agent extends AgentBase implements PlayAgent {
 
+	@Serial
 	private static final long serialVersionUID = 12L;
 
 	private final static StateObserverCube def = new StateObserverCube();   // default (solved) cube
@@ -114,7 +116,7 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
 	/**
 	 * For DAVI2: maintain a full hash table for all visited states. This is only viable for cubes
 	 * with not too large state spaces.
-	 * @param so
+	 * @param so the current state
 	 * @return 0, if {@code so} is the solved state, LOW_V if {@code so} is unknown in the HashMap. In all
 	 * 		   other cases, return the HashMap value of {@code so}.
 	 */
@@ -125,8 +127,7 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
 												// -9.1 + REWARD_POSITIVE, which is unpleasantly negative for InspectV
 		String stringRep = so.stringDescr();
 		Double dvalue = vm.get(stringRep); 		// returns null if not in vm
-		double x = (dvalue==null) ? LOW_V : dvalue;
-		return x;
+		return (dvalue==null) ? LOW_V : dvalue;
 	}
 	
     /**
@@ -152,7 +153,8 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
 	        
 			a_t = getNextAction2(s_t.partialState(), false, true);	// choose action a_t (agent-specific behavior)
 	        // put the best value from V-table for state s_t into the HashMap
-			if (a_t.getVBest()>CubeConfig.stepReward+LOW_V)		// stepReward is c in pseudo code
+			double stepReward = s_t.getStepRewardTuple(this).scTup[0];
+			if (a_t.getVBest()>stepReward+LOW_V)		// stepReward is c in pseudo code
 				// if V(s) <= c+L, there is no need to store it --> results in a factor 6 smaller hash map.
 	        	vm.put(s_t.stringDescr(), a_t.getVBest());
 	        

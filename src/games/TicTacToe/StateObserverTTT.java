@@ -1,11 +1,10 @@
 package games.TicTacToe;
 
+import java.io.Serial;
 import java.util.ArrayList;
 
-import controllers.PlayAgent;
 import games.ObserverBase;
 import games.StateObservation;
-import games.Othello.StateObserverOthello;
 import tools.Types;
 import tools.Types.ACTIONS;
 
@@ -24,14 +23,16 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
     private static final double REWARD_NEGATIVE = -1.0;
     private static final double REWARD_POSITIVE =  1.0;
 	private int[][] m_Table;		// current board position
-	private int m_Player;			// player who makes the next move (+1 or -1)
-	protected ArrayList<Types.ACTIONS> availableActions = new ArrayList();	// holds all available actions
+	private int m_Player;			// what we fill into m_Table for the current player's move:
+									// +1 for X (this.getPlayer()==0), -1 for O (this.getPlayer()==1)
+	protected ArrayList<Types.ACTIONS> availableActions = new ArrayList<>();	// holds all available actions
     
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
 	 * compatible with an older one (older .gamelog containing this object will become 
 	 * unreadable or you have to provide a special version transformation)
 	 */
+	@Serial
 	private static final long serialVersionUID = 12L;
 
 	public StateObserverTTT() {
@@ -41,19 +42,6 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
 		setAvailableActions();
 	}
 
-	// never used
-//	public StateObserverTTT(int[][] Table) {
-//		int pieceCount=0;
-//		for (int i=0; i<3; i++) 
-//			for (int j=0; j<3; j++) {
-//				pieceCount += Table[i][j];
-//			}
-//		m_Player = (pieceCount%2==0 ? +1 : -1);
-//		m_Table = new int[3][3];
-//		TicTDBase.copyTable(Table,m_Table); 
-//		setAvailableActions();
-//	}
-	
 	public StateObserverTTT(int[][] Table, int Player) {
 		super();
 		m_Table = new int[3][3];
@@ -108,22 +96,22 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
 		
 	}
 
-	@Deprecated
-    public String toString() {
-    	return stringDescr();
-    }
+//	@Deprecated
+//    public String toString() {
+//    	return stringDescr();
+//    }
 	
 	@Override
     public String stringDescr() {
-		String sout = "";
-		String str[] = new String[3]; 
+		StringBuilder sout = new StringBuilder();
+		String[] str = new String[3];
 		str[0] = "o"; str[1]="-"; str[2]="X";
 		
 		for (int i=0;i<3;i++) 
 			for (int j=0;j<3;j++)
-				sout = sout + (str[this.m_Table[i][j]+1]);
+				sout.append(str[this.m_Table[i][j] + 1]);
 		
- 		return sout;
+ 		return sout.toString();
 	}
 	
 	/**
@@ -149,17 +137,28 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
 
 	/**
 	 * @return 	the game score, i.e. the sum of rewards for the current state. 
-	 * 			For TTT only game-over states have a non-zero game score. 
+	 * 			For TTT only game-over states can have a non-zero game score.
 	 * 			It is the reward from the perspective of {@code player}.
 	 */
 	public double getGameScore(int player) {
 		int sign = (player==this.getPlayer()) ? 1 : (-1);
         if(isGameOver()) {
-    		if (TicTDBase.tie(m_Table)) 
-    			return 0;
-        	// if the game is over and not a tie, it is a win for the player who made the action towards 
-        	// state 'this' --> it is a loss for this.getPlayer().
-        	return -sign;
+        	// if the game is over and not a tie, it is a win for the player who made the action towards
+        	// state 'this' --> it is a loss for this.getPlayer() and a win for the opponent.
+        	if (TicTDBase.Win(m_Table,+1))
+        		return -sign;
+        	if (TicTDBase.Win(m_Table,-1))
+        		return -sign;
+
+        	// if the game is over and no player has won, it is a tie (0) --> we fall through the if branch and return 0
+
+// --- Bug fix 2023-04: the logic behind the following lines was wrong: If a last move filled the board and was a win
+// --- for either player, the logic would count this (wrongly) as a tie!
+//    		if (TicTDBase.tie(m_Table))
+//    			return 0;
+//        	// if the game is over and not a tie, it is a win for the player who made the action towards
+//        	// state 'this' --> it is a loss for this.getPlayer().
+//        	return -sign;
         }
         
         return 0; 
@@ -194,7 +193,7 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
 
     @Override
     public ArrayList<Types.ACTIONS> getAllAvailableActions() {
-        ArrayList allActions = new ArrayList<>();
+        ArrayList<Types.ACTIONS> allActions = new ArrayList<>();
         for (int i = 0; i < 3; i++) 
             for (int j = 0; j < 3; j++) 
             	allActions.add(Types.ACTIONS.fromInt(i * 3 + j));
@@ -216,7 +215,7 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
 	 */
 	public void setAvailableActions() {
 		if (availableActions==null) {	// safety check, needed when called from LogManagerGUI
-			availableActions = new ArrayList();
+			availableActions = new ArrayList<>();
 		}
 		availableActions.clear();
 		if (m_Table[0][0]==0)  availableActions.add(Types.ACTIONS.fromInt(0));
@@ -249,10 +248,11 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
 
 	/**
 	 * @return 	{0,1} for the player to move in this state 
-	 * 			Player 0 is X, the player who starts the game. Player 1 is O.
+	 * 			Player 0 is X, the player who starts the game (m_Player=+1). Player 1 is O (m_Player=-1).
 	 */
 	public int getPlayer() {
-		return (-m_Player+1)/2;
+		//return (-m_Player+1)/2;
+		return (m_Player==1) ? 0 : 1;
 	}
 	
 	public int getNumPlayers() {

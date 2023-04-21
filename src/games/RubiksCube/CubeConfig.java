@@ -84,13 +84,14 @@ public class CubeConfig {
 //	public static double stepReward = (CubeConfig.cubeSize == CubeSize.POCKET) ? -0.04 : -0.1;  // setting before 2022-09-29
 	public static double stepReward = (CubeConfig.cubeSize == CubeSize.POCKET) ? -1.0 : -0.5;  //-0.01;
 
-	/**
-	 * This method needs to be called from {@link GameBoardCube#initialize()} in order to adjust {@link #stepReward}
-	 * according to the current {@link #cubeSize} (which may have changed through scalable parameters (!))
-	 */
-	public static void setStepReward() {
-		stepReward = (CubeConfig.cubeSize == CubeSize.POCKET) ? -1.0 : -0.1;
-	}
+	// --- the call is now commented out in GameBoardCube#initialize() ---
+//	/**
+//	 * This method needs to be called from {@link GameBoardCube#initialize()} in order to adjust {@link #stepReward}
+//	 * according to the current {@link #cubeSize} (which may have changed through scalable parameters (!))
+//	 */
+//	public static void setStepReward() {
+//		stepReward = (CubeConfig.cubeSize == CubeSize.POCKET) ? -1.0 : -0.1;
+//	}
 
 	/**
 	 * The reward for the solved cube. <br>

@@ -126,8 +126,8 @@ abstract public class NTuple4Base extends AgentBase implements NTuple4Agt, Seria
 	public void setRewardParsFromParTD() {
 		// These two parameter stepReward and rewardPositive are currently only needed by RubiksCube.
 		// It is a bit awkward that we use them to set the global CubeConfig.stepReward and CubeConfig.REWARD_POSITIVE.
-		// This is because at the point where we need them (e.g. StateObservation.getStepRewardTuple()), the agent and
-		// its m_tdPar is not available.
+		// This is because at the point where we need them (e.g. StateObservation.getReward() or getGameScore()),
+		// the agent and its m_tdPar is not available.
 		CubeConfig.stepReward = m_tdPar.getStepReward();
 		CubeConfig.REWARD_POSITIVE = m_tdPar.getRewardPositive();
 	}

@@ -328,20 +328,20 @@ abstract public class TicTDBase  extends AgentBase implements Serializable {
 		{
 			for (j=0;j<3;j++)
 			{
-				S[j]=Table[i][j];
+				S[j]=Table[i][j];	// i-th row
 			}
-			if ((S[0]==S[1]) && (S[1]==S[2]) && (S[0]!=0) && S[0]==kind)
+			if ((S[0]==S[1]) && (S[1]==S[2]) && (S[0]!=0) && (S[0]==kind))
 			{
 				return true;
 			}
 		}
 		for (i=0;i<3;i++)
 		{
-			for (j=0;j<3;j++)
+			for (j=0;j<3;j++)		// i-th column
 			{
 				S[j]=Table[j][i];
 			}
-			if ((S[0]==S[1]) && (S[1]==S[2]) && (S[0]!=0) && S[0]==kind)
+			if ((S[0]==S[1]) && (S[1]==S[2]) && (S[0]!=0) && (S[0]==kind))
 			{
 				return true;
 			}
@@ -351,7 +351,7 @@ abstract public class TicTDBase  extends AgentBase implements Serializable {
 		{
 			S[i]=Table[i][i];		// diagonal						
 		}
-		if ((S[0]==S[1]) && (S[1]==S[2]) && (S[0]!=0) && S[0]==kind)
+		if ((S[0]==S[1]) && (S[1]==S[2]) && (S[0]!=0) && (S[0]==kind))
 		{
 			return true;
 		}
@@ -359,7 +359,7 @@ abstract public class TicTDBase  extends AgentBase implements Serializable {
 		{
 			S[i]=Table[i][2-i];		// anti-diagonal				
 		}
-		if ((S[0]==S[1]) && (S[1]==S[2]) && (S[0]!=0) && S[0]==kind)
+		if ((S[0]==S[1]) && (S[1]==S[2]) && (S[0]!=0) && (S[0]==kind))
 		{
 			return true;
 		}
