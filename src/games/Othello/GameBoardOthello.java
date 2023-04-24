@@ -64,6 +64,12 @@ public class GameBoardOthello implements GameBoard {
 	public void initialize() {}
 
 	/**
+	 * update game-specific parameters from {@link Arena}'s param tabs
+	 */
+	@Override
+	public void updateParams() {}
+
+	/**
 	 * Resets the game to it starting state {@link StateObserverOthello}
 	 */
 	@Override

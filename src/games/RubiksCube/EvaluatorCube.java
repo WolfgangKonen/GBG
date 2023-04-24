@@ -58,8 +58,9 @@ public class EvaluatorCube extends Evaluator {
 
 	private void initEvaluator(GameBoard gb) {
 		if (gb != null) {
-			assert (gb instanceof GameBoardCube);	
-			((GameBoardCube)gb).getPMax();			// actualize CubeConfig.pMin and .pMax, if GUI present
+			gb.updateParams();							// update 5 params in CubeConfig from agent settings
+			//assert (gb instanceof GameBoardCube);
+			//((GameBoardCube)gb).getPMax();			// actualize CubeConfig.pMin and .pMax, if GUI present
 		}
 	}
 	

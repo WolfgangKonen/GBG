@@ -50,6 +50,12 @@ public class GameBoardTTT implements GameBoard {
 
 	}
 
+	/**
+	 * update game-specific parameters from {@link Arena}'s param tabs
+	 */
+	@Override
+	public void updateParams() {}
+
 	@Override
 	public void clearBoard(boolean boardClear, boolean vClear) {
 		if (boardClear) {

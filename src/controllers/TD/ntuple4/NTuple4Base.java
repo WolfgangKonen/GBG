@@ -120,17 +120,18 @@ abstract public class NTuple4Base extends AgentBase implements NTuple4Agt, Seria
 	public void instantiateParTD() {
 		if (m_tdPar.getStepReward()==0.0) m_tdPar.setStepReward(-0.04);
 		if (m_tdPar.getRewardPositive()==0.0) m_tdPar.setRewardPositive(1.0);
-		setRewardParsFromParTD();
+		//setRewardParsFromParTD();
 	}
 
-	public void setRewardParsFromParTD() {
-		// These two parameter stepReward and rewardPositive are currently only needed by RubiksCube.
-		// It is a bit awkward that we use them to set the global CubeConfig.stepReward and CubeConfig.REWARD_POSITIVE.
-		// This is because at the point where we need them (e.g. StateObservation.getReward() or getGameScore()),
-		// the agent and its m_tdPar is not available.
-		CubeConfig.stepReward = m_tdPar.getStepReward();
-		CubeConfig.REWARD_POSITIVE = m_tdPar.getRewardPositive();
-	}
+	// --- is obsolete now, we call GameBoardCube.updateParams to achieve the same ---
+//	public void setRewardParsFromParTD() {
+//		// These two parameter stepReward and rewardPositive are currently only needed by RubiksCube.
+//		// It is a bit awkward that we use them to set the global CubeConfig.stepReward and CubeConfig.REWARD_POSITIVE.
+//		// This is because at the point where we need them (e.g. StateObservation.getReward() or getGameScore()),
+//		// the agent and its m_tdPar is not available.
+//		CubeConfig.stepReward = m_tdPar.getStepReward();
+//		CubeConfig.REWARD_POSITIVE = m_tdPar.getRewardPositive();
+//	}
 
 	/**
 	 * After loading an agent from disk fill the param tabs of {@link Arena} according to the

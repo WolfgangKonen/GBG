@@ -66,6 +66,7 @@ abstract public class Arena implements Runnable {
 	public int currentSleepDuration = 0;
 	public LogManager logManager;
 	private int logSessionid;
+	private Boolean hasHumanAgentB = null;
 	protected final boolean withUI;	// whether to start GUI or not
 	protected final boolean m_hasTrainRights;
 
@@ -154,6 +155,7 @@ abstract public class Arena implements Runnable {
 		}
 
 		while (true) {
+			hasHumanAgentB = null;
 			switch (taskState) {
 			case PARAM: 
 				n = m_xab.getNumParamBtn();
@@ -1292,12 +1294,20 @@ abstract public class Arena implements Runnable {
 	 * @return true, if there is at least one human agent in the game
 	 */
 	public boolean hasHumanAgent() {
-		PlayAgent[] paVector2 = m_xfun.fetchAgents(m_xab);
-		for (PlayAgent playAgent : paVector2) {
-			if (playAgent.getName().equals("Human"))
-				return true;
+		// the member variable hasHumanAgentB is set to null at the beginning of Arena.run(). It has the purpose that
+		// the lengthy if-part below with fetchAgents is called only once per pass through run() (and not with every
+		// call to gb.updateBoard() in the case of taskState==PLAY)
+		if (hasHumanAgentB ==null) {
+			hasHumanAgentB = false;
+			PlayAgent[] paVector2 = m_xfun.fetchAgents(m_xab);
+			for (PlayAgent playAgent : paVector2) {
+				if (playAgent.getName().equals("Human"))
+					hasHumanAgentB = true;
+					break;
+			}
 		}
-		return false;
+		return hasHumanAgentB;
+
 	}
 
 	public boolean hasTrainRights() {

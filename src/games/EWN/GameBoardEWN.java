@@ -68,6 +68,12 @@ public class GameBoardEWN implements GameBoard {
     public void initialize() {}
 
     /**
+     * update game-specific parameters from {@link Arena}'s param tabs
+     */
+    @Override
+    public void updateParams() {}
+
+    /**
      * Resets the game to starting state
      * @param boardClear	whether to clear the board
      * @param vClear		whether to clear the value table
