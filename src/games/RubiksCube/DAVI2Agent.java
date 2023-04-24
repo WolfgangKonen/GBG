@@ -87,7 +87,7 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
         	
         	// value is the V(s) for for taking action i in state s='so'. Action i leads to state newSO.
         	value = vTable[i] = newSO.getRewardTuple(false).scTup[0] +
-								newSO.getStepRewardTuple(null).scTup[0] + daviValue(newSO);
+								newSO.getStepRewardTuple().scTup[0] + daviValue(newSO);
         	// Always *maximize* 'value' 
         	if (value==maxValue) bestActions.add(acts.get(i));
         	if (value>maxValue) {
@@ -153,7 +153,7 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
 	        
 			a_t = getNextAction2(s_t.partialState(), false, true);	// choose action a_t (agent-specific behavior)
 	        // put the best value from V-table for state s_t into the HashMap
-			double stepReward = s_t.getStepRewardTuple(this).scTup[0];
+			double stepReward = s_t.getStepRewardTuple().scTup[0];
 			if (a_t.getVBest()>stepReward+LOW_V)		// stepReward is c in pseudo code
 				// if V(s) <= c+L, there is no need to store it --> results in a factor 6 smaller hash map.
 	        	vm.put(s_t.stringDescr(), a_t.getVBest());

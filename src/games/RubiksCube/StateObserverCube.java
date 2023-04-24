@@ -4,12 +4,9 @@ import java.io.Serial;
 import java.util.*;
 
 import controllers.PlayAgent;
-import controllers.TD.ntuple2.NTupleBase;
-import controllers.TD.ntuple4.NTuple4Base;
 import games.BoardVector;
 import games.ObserverBase;
 import games.StateObservation;
-import params.ParTD;
 import tools.ScoreTuple;
 import tools.Types;
 import tools.Types.ACTIONS;
@@ -256,23 +253,24 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 
 	/**
 	 * The tuple of step rewards given by the game environment.<p>
-	 * The step reward is for transition into state {@code this} from a previous state. It is currently non-zero only
-	 * for {@link StateObserverCube}. It is zero for all other classes implementing {@link StateObservation}
+	 * The step reward is for transition into state {@code this} from a previous state. It is currently non-zero, only
+	 * for {@link StateObserverCube}, namely {@link CubeConfig}.{@code stepReward}.
+	 * It is zero for all other classes implementing {@link StateObservation}.
 	 * <p>
 	 * The step reward ensures that if there are two paths to the solved cube, the one with the lower number of twists
 	 * (fewer step rewards) has the higher reward. This is important for tree-based agents, which may completely fail if
 	 * they always select the ones with the longer path and never come to an end!
 	 *
-	 * @param pa if it is of type {@link NTuple4Base} or {@link NTupleBase} then take stepReward from its element
-	 * 		{@link ParTD} {@code m_tdPar}. For all other agents, take {@link CubeConfig}.{@code stepReward}.
 	 * @return	a score tuple (with as many entries as there are players)
 	 */
-	public ScoreTuple getStepRewardTuple(PlayAgent pa) {
-		double val = (pa instanceof NTuple4Base) ?
-			  		 ((NTuple4Base) pa).getParTD().getStepReward() :
-					 (pa instanceof NTupleBase) ?
-					 ((NTupleBase) pa).getParTD().getStepReward() : CubeConfig.stepReward;
-
+	public ScoreTuple getStepRewardTuple() {
+//	 * @param pa if it is of type {@link NTuple4Base} or {@link NTupleBase} then take stepReward from its element
+//	 * 		{@link ParTD} {@code m_tdPar}. For all other agents, take {@link CubeConfig}.{@code stepReward}.
+//		double val = (pa instanceof NTuple4Base) ?
+//			  		 ((NTuple4Base) pa).getParTD().getStepReward() :
+//					 (pa instanceof NTupleBase) ?
+//					 ((NTupleBase) pa).getParTD().getStepReward() : CubeConfig.stepReward;
+		double val =  CubeConfig.stepReward;
 		return new ScoreTuple(new double[]{val});
 	}
 
@@ -412,6 +410,8 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	/**
 	 * Method to select a start state by doing p random twist on the default cube.
 	 * @return a p-twisted cube with {@code m_action} set to 'unknown'
+	 *
+	 * @see DAVI4Agent
 	 */
 	public static StateObserverCube chooseNewState(int p) {
 		//StateObserverCubeCleared d_so;

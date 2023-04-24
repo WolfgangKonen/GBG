@@ -282,7 +282,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 
 				// rtilde: delta reward that we get when moving into NewSO:
 				rtilde  = (NewSO.getRewardTuple(rgs).scTup[so.getPlayer()]-otilde)
-						+ so.getStepRewardTuple(this).scTup[so.getPlayer()];
+						+ so.getStepRewardTuple().scTup[so.getPlayer()];
 				if (TERNARY) {
 					value = NewSO.isGameOver() ? rtilde : getGamma()*value;
 				} else {
@@ -526,7 +526,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 		// then add sob.getRewardTuple(rgs): the reward obtained so far, since the net predicts
 		// with getScoreI only the expected future reward.
 		sc.combine(sob.getRewardTuple(rgs), ScoreTuple.CombineOP.SUM,0,0);
-		sc.combine(sob.getStepRewardTuple(this), ScoreTuple.CombineOP.SUM,0,0);
+		sc.combine(sob.getStepRewardTuple(), ScoreTuple.CombineOP.SUM,0,0);
 
 		return sc;
 	}
@@ -575,7 +575,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 		if (sLast[curPlayer]!=null) {
 			// r_next: delta reward from curPlayer's perspective when moving into s_next
 			double r_next = (R.scTup[curPlayer] - rLast.scTup[curPlayer])
-					      + s_next.getStepRewardTuple(this).scTup[curPlayer];
+					      + s_next.getStepRewardTuple().scTup[curPlayer];
 			if (TERNARY) {
 				target = s_next.isGameOver() ? r_next : getGamma()*v_next;
 			} else {
@@ -670,7 +670,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 				//
 				if (sLast[n]!=null ) {
 					target  = (R.scTup[n] - rLast.scTup[n]) 		// delta reward
-							+ s_next.getStepRewardTuple(this).scTup[n];
+							+ s_next.getStepRewardTuple().scTup[n];
 					StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(sLast[n].project(), m_Net.xnf);
 					vLast = m_Net.getScoreI(curSOWB,n);
 
@@ -899,7 +899,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 			StateObservation s_after = t.getNextState4().getAfterState();
 			double v_next = calculate_v_next(s_next,s_after,player);
 			r_next  = (t.getR().scTup[player] - t.getRLast().scTup[player])
-					+ s_next.getStepRewardTuple(this).scTup[player];
+					+ s_next.getStepRewardTuple().scTup[player];
 			switch(t.isFinalTransition()){
 				case 0:{
 					if (TERNARY) {

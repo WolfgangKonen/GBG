@@ -292,7 +292,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
     	        // but they usually differ for nondeterministic games.
 
 				rtilde  = (NewSO.getRewardTuple(rgs).scTup[so.getPlayer()]-otilde)
-						+ so.getStepRewardTuple(this).scTup[so.getPlayer()];
+						+ so.getStepRewardTuple().scTup[so.getPlayer()];
             	if (TERNARY) {
             		value = NewSO.isGameOver() ? rtilde : getGamma()*value;
             	} else {
@@ -511,7 +511,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 		// sob.getRewardTuple(rgs): the reward obtained so far, since the net predicts
 		// with getScoreI only the expected future reward.
 		sc.combine(sob.getRewardTuple(rgs), ScoreTuple.CombineOP.SUM,0,0);
-		sc.combine(sob.getStepRewardTuple(this), ScoreTuple.CombineOP.SUM,0,0);
+		sc.combine(sob.getStepRewardTuple(), ScoreTuple.CombineOP.SUM,0,0);
 
 		// old version (2019), not recommended:
 //		boolean rgs = m_oPar.getRewardIsGameScore();
@@ -569,7 +569,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 			// delta reward from curPlayer's perspective when moving into s_next
 			double r_next;
 			r_next  = (R.scTup[curPlayer] - rLast.scTup[curPlayer])
-					+ s_next.getStepRewardTuple(this).scTup[curPlayer];
+					+ s_next.getStepRewardTuple().scTup[curPlayer];
         	if (TERNARY) {
         		target = s_next.isGameOver() ? r_next : getGamma()*v_next;
         	} else {
@@ -673,7 +673,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 				//
 				if (sLast[n]!=null ) {
 					target  = (R.scTup[n] - rLast.scTup[n]) 		// delta reward
-							+ s_next.getStepRewardTuple(this).scTup[n];
+							+ s_next.getStepRewardTuple().scTup[n];
 		    		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(sLast[n], m_Net.xnf);
 		        	vLast = m_Net.getScoreI(curSOWB,n);
 		        	

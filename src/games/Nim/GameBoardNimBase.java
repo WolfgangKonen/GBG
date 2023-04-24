@@ -23,6 +23,12 @@ public abstract class GameBoardNimBase implements GameBoard {
 	@Override
 	abstract public void initialize();
 
+	/**
+	 * update game-specific parameters from {@link Arena}'s param tabs
+	 */
+	@Override
+	public void updateParams() {}
+
 	@Override
 	abstract public void clearBoard(boolean boardClear, boolean vClear);
 

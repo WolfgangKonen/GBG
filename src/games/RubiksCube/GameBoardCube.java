@@ -60,22 +60,41 @@ public class GameBoardCube implements GameBoard {
 			}
 
         }
-        getPMax();		// actualize CubeConfig.pMin and CubeConfig.pMax, if GUI present
+        updateParams();		// update 5 params in CubeConfig from agent settings
 
+        //getPMax();		// actualize CubeConfig.pMin and CubeConfig.pMax, if GUI present
 		//CubeConfig.setStepReward();	// actualize CubeConfig.stepReward according to current CubeConfig.cubeSize (from scalable params)
 
 	}
-	
-	public int getPMax() {
+
+	/**
+	 * update game-specific parameters from {@link Arena}'s param tabs
+	 */
+	@Override
+	public void updateParams() {
 		if (m_Arena.m_xab!=null) {
 			// fetch the most actual values from tab "Other Pars"
 			CubeConfig.pMin = m_Arena.m_xab.oPar[0].getpMinRubiks();
 			CubeConfig.pMax = m_Arena.m_xab.oPar[0].getpMaxRubiks();
 			if (CubeConfig.pMin<1) CubeConfig.pMin=1;
 			CubeConfig.REPLAYBUFFER = m_Arena.m_xab.oPar[0].getReplayBuffer();
+
+			CubeConfig.stepReward = m_Arena.m_xab.tdPar[0].getStepReward();
+			CubeConfig.REWARD_POSITIVE = m_Arena.m_xab.tdPar[0].getRewardPositive();
 		}
-        return CubeConfig.pMax;
 	}
+
+	// --- should be obsolete now, we use updateParams and have pMax on CubeConfig.pMax ---
+//	public int getPMax() {
+//		if (m_Arena.m_xab!=null) {
+//			// fetch the most actual values from tab "Other Pars"
+//			CubeConfig.pMin = m_Arena.m_xab.oPar[0].getpMinRubiks();
+//			CubeConfig.pMax = m_Arena.m_xab.oPar[0].getpMaxRubiks();
+//			if (CubeConfig.pMin<1) CubeConfig.pMin=1;
+//			CubeConfig.REPLAYBUFFER = m_Arena.m_xab.oPar[0].getReplayBuffer();
+//		}
+//        return CubeConfig.pMax;
+//	}
 
 	public void setPMin(int pMin) {
 		if (m_gameGui!=null) {
@@ -116,11 +135,13 @@ public class GameBoardCube implements GameBoard {
 			: "StateObservation 'so' is not an instance of StateObserverCube";
 	        soN = (StateObserverCube) so;
 			m_so = soN;//.copy();
-		} 
+		}
+
+		updateParams();
 		
 		if (m_gameGui!=null) {
-			this.setPMin(m_Arena.m_xab.oPar[0].getpMinRubiks());  		// update pMin from oPar
-			this.setPMax(m_Arena.m_xab.oPar[0].getpMaxRubiks());  		// update pMax from oPar
+			this.setPMin(m_Arena.m_xab.oPar[0].getpMinRubiks());  		// update GUI's pMin from oPar
+			this.setPMax(m_Arena.m_xab.oPar[0].getpMaxRubiks());  		// update GUI's pMax from oPar
 			m_gameGui.updateBoard(soN, withReset, showValueOnGameboard);
 		}
 

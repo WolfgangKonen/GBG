@@ -153,7 +153,7 @@ public class MaxN2Wrapper extends AgentBase implements PlayAgent, Serializable {
 				act_vt = getBestAction(NewSO/*.clearedCopy()*/, random, silent, depth+1, prevTuple);
 				currScoreTuple = act_vt.getScoreTuple();
 
-				currScoreTuple.combine(NewSO.getStepRewardTuple(null), ScoreTuple.CombineOP.SUM,0,0);
+				currScoreTuple.combine(NewSO.getStepRewardTuple(), ScoreTuple.CombineOP.SUM,0,0);
 				// NewSO.getStepRewardTuple returns 0.0, except for Rubik's Cube, where it returns CubeConfig.stepReward.
 				// The increment by stepReward is very important for Rubik's Cube, because there every depth level means
 				// an additional twist, thus additional costs (stepReward is negative). Otherwise, MaxN2Wrapper won't work.

@@ -79,7 +79,7 @@ public class CubeConfig {
 
 	/**
 	 * The cost-to-go for a transition from one state s to the next state s'. Used as part of the reward via
-	 * {@link StateObservation#getStepRewardTuple(controllers.PlayAgent)} (agents DAVI2Agent, DAVI3Agent, DAVI4Agent, TDNTuple3Agt, TDNTuple4Agt).
+	 * {@link StateObservation#getStepRewardTuple()} (agents DAVI2Agent, DAVI3Agent, DAVI4Agent, TDNTuple3Agt, TDNTuple4Agt).
 	 */
 //	public static double stepReward = (CubeConfig.cubeSize == CubeSize.POCKET) ? -0.04 : -0.1;  // setting before 2022-09-29
 	public static double stepReward = (CubeConfig.cubeSize == CubeSize.POCKET) ? -1.0 : -0.5;  //-0.01;

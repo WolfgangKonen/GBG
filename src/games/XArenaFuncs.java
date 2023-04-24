@@ -112,12 +112,13 @@ public class XArenaFuncs {
 		m_xab.edPar[n].pushFromEdaxParams();
 		m_xab.rbPar[n].pushFromRBParams();
 		m_xab.wrPar[n].pushFromWrParams();
+
+		m_xab.m_arena.getGameBoard().updateParams();		// for RubiksCube: update 5 params in CubeConfig from agent settings
+
 		// update element pMaxValue in GameBoardCubeGUI, if present:
 		if (m_xab.m_arena.getGameBoard() instanceof GameBoardCube) {
 			((GameBoardCube)m_xab.m_arena.getGameBoard()).setPMin(CubeConfig.pMin);
-			((GameBoardCube)m_xab.m_arena.getGameBoard()).setPMax(
-					((GameBoardCube)m_xab.m_arena.getGameBoard()).getPMax()			// this sets also CubeConfig.pMax
-			);
+			((GameBoardCube)m_xab.m_arena.getGameBoard()).setPMax(CubeConfig.pMax);
 		}
 
 	}
@@ -147,7 +148,7 @@ public class XArenaFuncs {
 		int maxGameNum = m_xab.getGameNumber();
 //		int featmode = m_xab.tdPar[n].getFeatmode();
 
-		// push the params from Param Tabs onto the relevant ParXX in m_xab:
+		// push the params from Param Tabs onto the relevant ParXX in m_xab & call gb.updateParams():
 		updateParams(n,m_xab);
 
 		try {
@@ -168,7 +169,8 @@ public class XArenaFuncs {
 				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
 				pa = new TDNTuple4Agt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
 						m_xab.oPar[n],m_xab.rbPar[n], m_xab.wrPar[n], nTuples, xnf, maxGameNum);
-				((TDNTuple4Agt) pa).setRewardParsFromParTD();
+				//((TDNTuple4Agt) pa).setRewardParsFromParTD();
+				m_xab.m_arena.gb.updateParams();
 			} else if (sAgent.equals("Sarsa")) {
 				XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
 				NTupleFactory ntupfac = new NTupleFactory();
@@ -282,7 +284,7 @@ public class XArenaFuncs {
 	public PlayAgent fetchAgent(int n, String sAgent, XArenaButtons m_xab) {
 		PlayAgent pa = null;
 
-		// push the params from Param Tabs onto the relevant ParXX in m_xab:
+		// push the params from Param Tabs onto the relevant ParXX in m_xab & call gb.updateParams():
 		updateParams(n,m_xab);
 
 		if (sAgent.equals("Max-N")) {
@@ -378,9 +380,12 @@ public class XArenaFuncs {
 					default:
 						throw new RuntimeException("Not supported AgentState");
 				}
-				if (pa instanceof NTuple4Base) {
-					((NTuple4Base) pa).setRewardParsFromParTD();
-				}
+
+				// --- this is now done by updateParams above
+//				if (pa instanceof NTuple4Base) {
+//					((NTuple4Base) pa).setRewardParsFromParTD();
+//				}
+
 			}
 		}
 		if (pa == null)
@@ -415,7 +420,8 @@ public class XArenaFuncs {
 				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
 				pa = new TDNTuple4Agt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
 						m_xab.oPar[n],m_xab.rbPar[n], m_xab.wrPar[n], nTuples, xnf, maxGameNum);
-				((TDNTuple4Agt) pa).setRewardParsFromParTD();
+				//((TDNTuple4Agt) pa).setRewardParsFromParTD();
+				m_xab.m_arena.gb.updateParams();
 			} catch (Exception e) {
 				m_Arena.showMessage(e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
 				// e.printStackTrace();

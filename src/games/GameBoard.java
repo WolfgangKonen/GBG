@@ -14,9 +14,12 @@ import games.RubiksCube.GameBoardCube;
  * {@link GameBoard} has an internal object derived from {@link StateObservation} which represents the 
  * current game state. This game state can be retrieved (getStateObs()), 
  * reset-retrieved (getDefaultStartState()) , or a random start state can be retrieved 
- * with {@link #chooseStartState(PlayAgent)}.  
- * 
- * @author Wolfgang Konen, TH Koeln, 2016-2020
+ * with {@link #chooseStartState(PlayAgent)}.
+ * <p>
+ * {@link GameBoard} has a reference to an object derived from {@link Arena} which allows access to
+ * {@link Arena}-specific settings (which players, params, ...)
+ *
+ * @author Wolfgang Konen, TH Koeln, 2016-2023
  *
  */
 public interface GameBoard {
@@ -30,6 +33,11 @@ public interface GameBoard {
 	 * @param vClear		whether to clear the value table
 	 */
 	void clearBoard(boolean boardClear, boolean vClear);
+
+	/**
+	 * update game-specific parameters from {@link Arena}'s param tabs
+	 */
+	void updateParams();
 
 	/**
 	 * things to be done when disposing a GameBoard object

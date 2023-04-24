@@ -182,7 +182,7 @@ public class DAVI3Agent extends NTuple4Base implements PlayAgent {
 
 			// value is the r + V(s) for taking action i in state s='so'. Action i leads to state newSO.
 			value = vTable[i] = newSO.getRewardTuple(rgs).scTup[0] +
-					newSO.getStepRewardTuple(null).scTup[0] + daviValue(newSO);
+					newSO.getStepRewardTuple().scTup[0] + daviValue(newSO);
 						// this is a bit complicated for saying "stepReward
 						// ( + REWARD_POSITIVE, if it's the solved cube)' but
 						// in this way we have a common interface valid for all games:
@@ -269,7 +269,7 @@ public class DAVI3Agent extends NTuple4Base implements PlayAgent {
 			curPlayer = s_t.getPlayer();
         	vLast = m_Net.getScoreI(curSOWB,curPlayer);
 			m_Net.updateWeightsTD(curSOWB, curPlayer, vLast, target,
-					s_t.getStepRewardTuple(null).scTup[0],s_t);
+					s_t.getStepRewardTuple().scTup[0],s_t);
 			
 			//System.out.println(s_t.stringDescr()+", "+a_t.getVBest());
 	        
@@ -367,7 +367,7 @@ public class DAVI3Agent extends NTuple4Base implements PlayAgent {
 				curPlayer = item.sowb.getStateObservation().getPlayer();
 				vLast = m_Net.getScoreI(item.sowb, curPlayer);
 				m_Net.updateWeightsTD(item.sowb, curPlayer, vLast, item.target,
-						s_t.getStepRewardTuple(null).scTup[0], item.sowb.getStateObservation());
+						s_t.getStepRewardTuple().scTup[0], item.sowb.getStateObservation());
 			}
 		} else {
 			// ... with batchSize random samples
@@ -377,7 +377,7 @@ public class DAVI3Agent extends NTuple4Base implements PlayAgent {
 				s_t = item.sowb.getStateObservation();
 				vLast = m_Net.getScoreI(item.sowb,s_t.getPlayer());
 				m_Net.updateWeightsTD(item.sowb, s_t.getPlayer(), vLast, item.target,
-						s_t.getStepRewardTuple(null).scTup[0], s_t);
+						s_t.getStepRewardTuple().scTup[0], s_t);
 			}
 		}
 
@@ -411,7 +411,7 @@ public class DAVI3Agent extends NTuple4Base implements PlayAgent {
 	@Override
 	public ScoreTuple estimateGameValueTuple(StateObservation so, ScoreTuple prevTuple) {
 		double[] d = {so.getRewardTuple(false).scTup[0] +
-					  so.getStepRewardTuple(null).scTup[0] + daviValue((StateObserverCube)so)};
+					  so.getStepRewardTuple().scTup[0] + daviValue((StateObserverCube)so)};
 		return new ScoreTuple(d);
 	}
 
