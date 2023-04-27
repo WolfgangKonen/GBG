@@ -1,6 +1,7 @@
 package games.ZweiTausendAchtundVierzig.Heuristic;
 
 import controllers.PlayAgent;
+import games.EvalResult;
 import games.Evaluator;
 import games.GameBoard;
 import games.ZweiTausendAchtundVierzig.Arena2048;
@@ -29,7 +30,7 @@ public class Evaluator2048_EA extends Evaluator {
     }
 
     @Override
-    protected boolean evalAgent(PlayAgent pa) {
+    protected EvalResult evalAgent(PlayAgent pa) {
     	m_PlayAgent = pa;
         cma.setDimension(15);
         cma.setInitialX(0.5);
@@ -97,7 +98,7 @@ public class Evaluator2048_EA extends Evaluator {
             System.out.println(i + ": " + best[i]);
         }
 
-        return true;
+        return new EvalResult();
     }
 
  	// --- implemented by Evaluator ---
@@ -106,7 +107,6 @@ public class Evaluator2048_EA extends Evaluator {
 //        return lastResult;
 //    }
 
-    @Override
     public String getMsg() {
         return "";
     }

@@ -218,9 +218,9 @@ public class MCTSWrapperAgentTest extends GBGBatch {
                         for (int p=pMin; p<=pMax; p++) {
                             EvalCubeParams ecp = new EvalCubeParams(p, p, ee, CubeConfig.EvalNmax);
                             EvaluatorCube m_eval = new EvaluatorCube(qa, gb, 0, 1, 0, ecp);
-                            m_eval.evalAgent(qa);
-                            percSolved = m_eval.getLastResult();
-                            System.out.println(m_eval.getMsg());
+                            EvalResult eRes = m_eval.evalAgent(qa);
+                            percSolved = eRes.getResult();
+                            System.out.println(eRes.getMsg());
                             mCompete = new MCompeteMWrap(run, agtFile, 1, 0, iterMCTSWrap,
                                     eps, 0, c_puct, percSolved,
                                     p, ee);

@@ -129,13 +129,13 @@ public class MCubeIterSweep extends GBGBatch {
             GameBoardCube gb = (GameBoardCube) arenaTrain.getGameBoard();
             int qem = 1;
             m_evaluatorQ = arenaTrain.makeEvaluator(qa,gb,0,qem,1);
-            m_evaluatorQ.eval(qa);
+            EvalResult eRes = m_evaluatorQ.eval(qa);
             double evalSec = (System.currentTimeMillis() - startTime)/1000.0;
-            System.out.print("Avg.success: "+m_evaluatorQ.getLastResult()+" for pMin..pMax="+pMinEval+".."+pMaxEval);
+            System.out.print("Avg.success: "+eRes.getResult()+" for pMin..pMax="+pMinEval+".."+pMaxEval);
             System.out.println("   (eval time: "+(int)evalSec+" sec)");
 
             // Step 3) write to CSV
-            mcube = new MCube(i, agtFile, pa.getGameNum(), nSym, pMinEval, pMaxEval, m_evaluatorQ.getLastResult(), 0.0, evalSec, iterMWrap,0);
+            mcube = new MCube(i, agtFile, pa.getGameNum(), nSym, pMinEval, pMaxEval, eRes.getResult(), 0.0, evalSec, iterMWrap,0);
             mcList.add(mcube);
 
             s = mcube.printMCubeList(csvName, mcList, pa, agtFile, arenaTrain, "iterMWrap", "userVal2");
@@ -212,9 +212,9 @@ public class MCubeIterSweep extends GBGBatch {
                         for (int p = pMin; p <= pMax; p++) {
                             EvalCubeParams ecp = new EvalCubeParams(p, p, ee, CubeConfig.EvalNmax);
                             EvaluatorCube m_eval = new EvaluatorCube(qa, gb, 0, 1, 0, ecp);
-                            m_eval.evalAgent(qa);
-                            percSolved = m_eval.getLastResult();
-                            System.out.println(m_eval.getMsg());
+                            EvalResult eRes = m_eval.evalAgent(qa);
+                            percSolved = eRes.getResult();
+                            System.out.println(eRes.getMsg());
                             mCompete = new MRubiksMWrap(run, agtFile, maxDepth, scaPar[0], iterMCTSWrap,
                                     eps, 0, c_puct, percSolved,
                                     p, ee);

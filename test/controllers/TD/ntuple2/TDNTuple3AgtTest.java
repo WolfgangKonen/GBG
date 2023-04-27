@@ -192,8 +192,8 @@ public class TDNTuple3AgtTest extends GBGBatch {
             m_evaluatorQ = arenaTrain.m_xab.m_arena.makeEvaluator(pa,gb,stopEval,qem,-1);
 
             for (int i=0; i<nRuns; i++) {
-                m_evaluatorQ.eval(qa);
-                evalQ = m_evaluatorQ.getLastResult();
+                EvalResult eRes = m_evaluatorQ.eval(qa);
+                evalQ = eRes.getResult();
                 System.out.println("nply="+nply+", "+i+ ": evalQ="+evalQ+"    "+evalThresh[k][nply]);
                 assert evalQ >= evalThresh[k][nply] : "["+agtFile[k]+"] nply="+nply+": did not pass evalThresh test";
             }

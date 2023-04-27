@@ -4,10 +4,10 @@ package games.ZweiTausendAchtundVierzig;
 import controllers.MC.MCAgentN;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.PlayAgent;
+import games.EvalResult;
 import games.Evaluator;
 import games.GameBoard;
 import games.ZweiTausendAchtundVierzig.Heuristic.Evaluator2048_EA;
-import params.MCParams;
 //import params.MCTSExpectimaxParams;
 import params.ParMC;
 import params.ParMCTSE;
@@ -43,7 +43,7 @@ public class Evaluator2048_BoardPositions extends Evaluator{
     }
 
     @Override
-    protected boolean evalAgent(PlayAgent pa) {
+    protected EvalResult evalAgent(PlayAgent pa) {
     	m_PlayAgent = pa;
         //find new realistic gameStates
         if(ConfigEvaluator.GENERATENEWGAMESTATES) {
@@ -115,7 +115,7 @@ public class Evaluator2048_BoardPositions extends Evaluator{
             }
         }
 
-        return true;
+        return new EvalResult();
     }
 
     private ResultContainer analyseGameStateGroup(List<StateObserver2048> gameStateGroup) {
@@ -401,7 +401,6 @@ public class Evaluator2048_BoardPositions extends Evaluator{
 //        throw new RuntimeException("getLastResult is not yet implemented for Evaluator2048_BoardPositions");
 //    }
 
-    @Override
     public String getMsg() {
         return "use this spreadsheet to analyse output: https://docs.google.com/spreadsheets/d/1fAX-gwf4keZut4vuAZ2GQro5ubiLOeVvwhzn74zPTKs/edit?usp=sharing";
     }

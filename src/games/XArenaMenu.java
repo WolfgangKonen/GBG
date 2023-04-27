@@ -5,6 +5,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serial;
 
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -51,17 +52,17 @@ public class XArenaMenu extends JMenuBar {
 	private static final String TIPLOAD = "Load agent from disk. All lookup-tables and configurations of the agent "
 			+ "will be loaded and assigned to the selected agent";
 
+	@Serial
 	private static final long serialVersionUID = -7247378225730684090L;
 
-	private Arena m_arena;
+	private final Arena m_arena;
 
 	// private JRadioButtonMenuItem rbMenuItem;
 	// private JCheckBoxMenuItem cbMenuItem;
-	//	private JFrame m_frame;
-	private int selectedAgent = 0;
-	private int numPlayers;
-	private boolean winCompVisible = false;
-	//private TournamentSystemGUI tournamentSystemGUI = null;
+	//private JFrame m_frame;
+	// private final int selectedAgent = 0;
+	// private boolean winCompVisible = false;
+	private final int numPlayers;
 	private TSSettingsGUI2 mTSSettingsGUI2 = null;
 
 	public XArenaMenu(Arena arena) {
@@ -620,7 +621,7 @@ public class XArenaMenu extends JMenuBar {
 			printStatus("Running Quick Evaluation of PlayAgent "+index+" ...");
 			// problem: this text only appears in the status bar when the action handler is left
 			// ... and then it is usually obsolete, since it is already overwritten by 
-			// ... printStatus(qEvaluator.getShortMsg()) (see below)
+			// ... printStatus(eRes.getMsg()) (see below)
 			
 			// measure the number of moves per second for agent pa by calling pa.getNextAction2()
 			// as often as possible within one second.
@@ -656,14 +657,14 @@ public class XArenaMenu extends JMenuBar {
 				pa.setStopEval(epiLength);
 				int verb = 0;
 				Evaluator qEvaluator = m_arena.m_xab.m_arena.makeEvaluator(pa,m_arena.gb,0,qem,verb);
-		        qEvaluator.eval(pa);
-				str = qEvaluator.getMsg();
+		        EvalResult eRes = qEvaluator.eval(pa);
+				str = eRes.getMsg();
 				System.out.println(str);
-				printStatus(qEvaluator.getShortMsg());		
+				printStatus(eRes.getMsg());
 
 				long elapsedMs = (System.currentTimeMillis() - startTime);
 				double elapsedTime = (double) elapsedMs / 1000.0;
-				System.out.println("Quick eval runtime:  " + elapsedTime + " sec,     lastResult="+qEvaluator.getLastResult());
+				System.out.println("Quick eval runtime:  " + elapsedTime + " sec,     lastResult="+eRes.getResult());
 			} catch (RuntimeException e) {
 				m_arena.showMessage( e.getMessage(), 
 						"Error", JOptionPane.ERROR_MESSAGE);

@@ -6,10 +6,7 @@ import controllers.MaxNAgent;
 import controllers.PlayAgent;
 import controllers.PlayAgtVector;
 import controllers.RandomAgent;
-import games.Evaluator;
-import games.GameBoard;
-import games.StateObservation;
-import games.XArenaFuncs;
+import games.*;
 import games.CFour.openingBook.BookSum;
 import params.ParMCTS;
 import params.ParMaxN;
@@ -103,12 +100,14 @@ public class EvaluatorC4 extends Evaluator {
     }
 
     @Override
-    protected boolean evalAgent(PlayAgent pa) {
+    protected EvalResult evalAgent(PlayAgent pa) {
         double trainingThreshold = 0.8;
         this.playAgent = pa;
         //Disable evaluation by using mode -1
         if (m_mode == -1) {
-            return true;
+            m_msg = "No evaluation done ";
+            lastResult = 0.0;
+            return new EvalResult(lastResult, true, m_msg, m_mode, Double.NaN);
         }
 
         //Disable logging for the final evaluation after training
@@ -160,7 +159,7 @@ public class EvaluatorC4 extends Evaluator {
             	if (/*playAgent instanceof TDNTuple2Agt ||*/ playAgent instanceof NTupleBase) {
             		// we can only call the parallel version, if playAgent's getNextAction2 is 
             		// thread-safe, which is the case for TDNTuple2Agt, TDNTuple3Agt and SarsaAgt. 
-            		// Also we have to construct MCTS opponent inside the callables, otherwise
+            		// Also, we have to construct MCTS opponent inside the callables, otherwise
             		// we are not thread-safe as well:
                     result = competeAgainstMCTS_diffStates_PAR(playAgent, numEpisodes);
             	} else {
@@ -181,7 +180,7 @@ public class EvaluatorC4 extends Evaluator {
         		result = competeAgainstOpponent_diffStates(playAgent, getTDReferee(), m_gb, numEpisodes);
                 break;
             default:
-                return false;
+                throw new RuntimeException("Invalid m_mode = "+m_mode);
         }
 
 
@@ -201,7 +200,7 @@ public class EvaluatorC4 extends Evaluator {
             }
         }
 
-        return result >= trainingThreshold;
+        return new EvalResult(result, lastResult>trainingThreshold, m_msg, m_mode, trainingThreshold);
     }
 
     /**
@@ -419,7 +418,7 @@ public class EvaluatorC4 extends Evaluator {
                 if(verbose == 0) {
                     System.out.println("Finished evaluation " + gameNumber + " after " + (System.currentTimeMillis() - gameStartTime) + "ms. ");
                 }
-                lastResult = Double.valueOf(success);
+                lastResult = success;
                 return lastResult;
             });
         }
@@ -441,7 +440,7 @@ public class EvaluatorC4 extends Evaluator {
         // reduce results (here: calculate average success)
         double averageSuccess = 0; 
         for(Double suc : successObservers) {
-            averageSuccess += suc.doubleValue();
+            averageSuccess += suc;
         }
         averageSuccess/= startAction.length;
 
@@ -487,19 +486,19 @@ public class EvaluatorC4 extends Evaluator {
 
     @Override
     public String getPrintString() {
-        switch (m_mode) {
-        	// Note: the best result is always 1.0 here, because the start state is in all cases
-        	// such that the agent to be evaluated can win if he plays perfect.
-            case 0:  return "success against MCTS (best is 1.0): ";
-            case 1:  return "success against Random (best is 1.0): ";
-            case 2:  return "success against Max-N (best is 1.0): ";
-            case 3:  return "success against AlphaBetaAgent (best is 1.0): ";
-            case 4:  return "success against AlphaBetaAgent (" + numStartStates + " diff. start states, best is 1.0): ";
-            case 5:  return "success against AlphaBetaAgentDistantLoss (best is 1.0): ";
-            case 10: return "success against MCTS (" + numStartStates + " diff. start states, best is 1.0): ";
-            case 11: return "success against TDReferee (" + numStartStates + " diff. start states, expected 0.0): ";
-            default: return null;
-        }
+        return switch (m_mode) {
+            // Note: the best result is always 1.0 here, because the start state is in all cases
+            // such that the agent to be evaluated can win if he plays perfect.
+            case 0 -> "success against MCTS (best is 1.0): ";
+            case 1 -> "success against Random (best is 1.0): ";
+            case 2 -> "success against Max-N (best is 1.0): ";
+            case 3 -> "success against AlphaBetaAgent (best is 1.0): ";
+            case 4 -> "success against AlphaBetaAgent (" + numStartStates + " diff. start states, best is 1.0): ";
+            case 5 -> "success against AlphaBetaAgentDistantLoss (best is 1.0): ";
+            case 10 -> "success against MCTS (" + numStartStates + " diff. start states, best is 1.0): ";
+            case 11 -> "success against TDReferee (" + numStartStates + " diff. start states, expected 0.0): ";
+            default -> null;
+        };
     }
 
 	@Override
@@ -521,17 +520,17 @@ public class EvaluatorC4 extends Evaluator {
 
     @Override
     public String getPlotTitle() {
-        switch (m_mode) {
-            case 0:  return "success against MCTS";
-            case 1:  return "success against Random";
-            case 2:  return "success against Max-N";
-            case 3:  return "success against AlphaBeta";
-            case 4:  return "success against AlphaBeta, dStart";
-            case 5:  return "success against AlphaBetaDL";
-            case 10: return "success against MCTS, dStart";
-            case 11: return "success against TDReferee";
-            default: return null;
-        }
+        return switch (m_mode) {
+            case 0 -> "success against MCTS";
+            case 1 -> "success against Random";
+            case 2 -> "success against Max-N";
+            case 3 -> "success against AlphaBeta";
+            case 4 -> "success against AlphaBeta, dStart";
+            case 5 -> "success against AlphaBetaDL";
+            case 10 -> "success against MCTS, dStart";
+            case 11 -> "success against TDReferee";
+            default -> null;
+        };
     }
 
  	// --- implemented by Evaluator ---
@@ -548,7 +547,6 @@ public class EvaluatorC4 extends Evaluator {
     private static String getCurrentTimeStamp() {
         SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
         Date now = new Date();
-        String strDate = sdfDate.format(now);
-        return strDate;
+        return sdfDate.format(now);
     }
 }

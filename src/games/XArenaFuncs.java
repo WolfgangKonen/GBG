@@ -666,6 +666,8 @@ public class XArenaFuncs {
 		int numEval; // evaluate the trained agent every numEval games
 		long elapsedMs;
 		int gameNum = 0;
+		EvalResult 	eresQ = new EvalResult(),
+					eresT = new EvalResult();
 
 		maxGameNum = xab.getGameNumber();
 
@@ -771,14 +773,14 @@ public class XArenaFuncs {
 				// construct 'qa' anew (possibly wrapped agent for eval)
 				//qa = wrapAgent(pa, xab.oPar[n], xab.wrPar[n], xab.maxnPar[n], gb.getStateObs());
 
-				m_evaluatorQ.eval(qa);		// throws RuntimeException, if TDReferee.agt.zip is not found
+				eresQ = m_evaluatorQ.eval(qa);		// throws RuntimeException, if TDReferee.agt.zip is not found
 				if (doTrainEvaluation) {
-					m_evaluatorT.eval(qa);	// throws RuntimeException, if TDReferee.agt.zip is not found
+					eresT = m_evaluatorT.eval(qa);	// throws RuntimeException, if TDReferee.agt.zip is not found
 				}
 
 				// update line chart plot:
 				if (lChart != null) 
-					lChart.updateChartPlot(gameNum, m_evaluatorQ, m_evaluatorT, doTrainEvaluation, false);
+					lChart.updateChartPlot(gameNum, eresQ, eresT, doTrainEvaluation, false);
 
 				// update weight / TC factor distribution plot:
 				if (wChart != null)	wChart.updateChartPlot(gameNum, pa, per);
@@ -795,27 +797,28 @@ public class XArenaFuncs {
 				startTime = System.currentTimeMillis();
 			}
 
-			if (stopTest > 0 && (gameNum - 1) % numEval == 0 && stopEval > 0) {
-				qa = pa;
-				// --- OLD, no longer needed, since pa is already wrapped, if wrapping is activated: ---
-				// construct 'qa' anew (possibly wrapped agent for eval)
-				//qa = wrapAgent(pa, xab.oPar[n], xab.wrPar[n], xab.maxnPar[n], gb.getStateObs());
-
-				if (doTrainEvaluation) {
-					m_evaluatorT.eval(qa);
-					m_evaluatorT.goalReached(gameNum);
-				}
-
-				m_evaluatorQ.eval(qa);
-
-				elapsedMs = (System.currentTimeMillis() - startTime);
-				pa.incrementDurationEvaluationMs(elapsedMs);
-				startTime = System.currentTimeMillis();
-
-				if (m_evaluatorQ.goalReached(gameNum))
-					break; // out of while
-
-			}
+			// --- obsolete, we strip off stopTest ---
+//			if (stopTest > 0 && (gameNum - 1) % numEval == 0 && stopEval > 0) {
+//				qa = pa;
+//				// --- OLD, no longer needed, since pa is already wrapped, if wrapping is activated: ---
+//				// construct 'qa' anew (possibly wrapped agent for eval)
+//				//qa = wrapAgent(pa, xab.oPar[n], xab.wrPar[n], xab.maxnPar[n], gb.getStateObs());
+//
+//				if (doTrainEvaluation) {
+//					m_evaluatorT.eval(qa);
+//					m_evaluatorT.goalReached(gameNum);
+//				}
+//
+//				m_evaluatorQ.eval(qa);
+//
+//				elapsedMs = (System.currentTimeMillis() - startTime);
+//				pa.incrementDurationEvaluationMs(elapsedMs);
+//				startTime = System.currentTimeMillis();
+//
+//				if (m_evaluatorQ.goalReached(gameNum))
+//					break; // out of while
+//
+//			}
 		} // while
 
 		// Debug only
@@ -841,16 +844,18 @@ public class XArenaFuncs {
 		// m_evaluator2.eval();
 		// Evaluator2 m_evaluator2New = new Evaluator2(pa,0,2);
 		// m_evaluator2New.eval();
-		if (stopTest > 0 && stopEval > 0) {
-			System.out.println(m_evaluatorQ.getGoalMsg(gameNum));
-			if (doTrainEvaluation)
-				System.out.println(m_evaluatorT.getGoalMsg(gameNum));
-		}
 
-		System.out.println("final " + m_evaluatorQ.getMsg());
-		if (doTrainEvaluation && m_evaluatorT.getMsg() != null)
-			System.out.println("final " + m_evaluatorT.getMsg());
-		// getMsg() might be null if evaluator mode = -1 (no evaluation)
+		// --- deprecated ---
+//		if (stopTest > 0 && stopEval > 0) {
+//			System.out.println(m_evaluatorQ.getGoalMsg(gameNum));
+//			if (doTrainEvaluation)
+//				System.out.println(m_evaluatorT.getGoalMsg(gameNum));
+//		}
+
+		System.out.println("final " + eresQ.getMsg());
+		if (doTrainEvaluation && eresT.getMsg() != null)
+			System.out.println("final " + eresT.getMsg());
+		// getMsg() might return null if evaluator mode = -1 (no evaluation)
 
 		long actionNum = pa.getNumLrnActions();
 		double totalTrainSec = (double) pa.getDurationTrainingMs() / 1000.0;
@@ -939,6 +944,8 @@ public class XArenaFuncs {
 		long elapsedMs;
 		int stopEval = 0;
 		boolean doTrainEvaluation = false;
+		EvalResult 	eresQ = new EvalResult(),
+					eresT = new EvalResult();
 
 		int trainNum = xab.getTrainNumber();
 		int maxGameNum = xab.getGameNumber();
@@ -1034,11 +1041,11 @@ public class XArenaFuncs {
 					// construct 'qa' anew (possibly wrapped agent for eval)
 					//qa = wrapAgent(pa, xab.oPar[n],  xab.wrPar[n], xab.maxnPar[n], gb.getStateObs());
 
-					m_evaluatorQ.eval(qa);			// throws RuntimeException, if TDReferee.agt.zip is not found
-					evalQ = m_evaluatorQ.getLastResult();
+					eresQ = m_evaluatorQ.eval(qa);			// throws RuntimeException, if TDReferee.agt.zip is not found
+					evalQ = eresQ.getResult();
 					if (doTrainEvaluation) {
-						m_evaluatorT.eval(qa);		// throws RuntimeException, if TDReferee.agt.zip is not found
-						evalT = m_evaluatorT.getLastResult();
+						eresT = m_evaluatorT.eval(qa);		// throws RuntimeException, if TDReferee.agt.zip is not found
+						evalT = eresT.getResult();
 					}
 
 					// gather information for later printout to
@@ -1082,11 +1089,11 @@ public class XArenaFuncs {
 			//qa = wrapAgent(pa, xab.oPar[n], xab.wrPar[n], xab.maxnPar[n], gb.getStateObs());
 
 			// final evaluation:
-			m_evaluatorQ.eval(qa);
-			oQ.add(m_evaluatorQ.getLastResult());
+			eresQ = m_evaluatorQ.eval(qa);
+			oQ.add(eresQ.getResult());
 			if (doTrainEvaluation) {
-				m_evaluatorT.eval(qa);
-				oT.add(m_evaluatorT.getLastResult());
+				eresT = m_evaluatorT.eval(qa);
+				oT.add(eresT.getResult());
 			}
 
 			elapsedMs = (System.currentTimeMillis() - startTime);	// ms spent for final evaluation
@@ -1102,24 +1109,24 @@ public class XArenaFuncs {
 			}
 		} // for (i)
 
-		if (m_evaluatorQ.m_mode != (-1))
+		if (eresQ.getMode() != (-1))
 		// m_mode=-1 signals: 'no evaluation done' --> oT did not receive
 		// evaluation results
 		{
-			System.out.println("Avg. " + m_evaluatorQ.getPrintString() + frm3.format(oQ.getMean()) + " +- "
+			System.out.println("Avg. " + eresQ.getMsg() + frm3.format(oQ.getMean()) + " +- "
 					+ frm.format(oQ.getStd()));
 		}
-		if (doTrainEvaluation && m_evaluatorT.m_mode != (-1))
+		if (doTrainEvaluation && eresT.getMode() != (-1))
 		// m_mode=-1 signals: 'no evaluation done' --> oT did not receive
 		// evaluation results
 		{
-			System.out.println("Avg. " + m_evaluatorT.getPrintString() + frm3.format(oT.getMean()) + " +- "
+			System.out.println("Avg. " + eresT.getMsg() + frm3.format(oT.getMean()) + " +- "
 					+ frm.format(oT.getStd()));
 		}
-		if (m_evaluatorQ.m_mode == (-1)) {
+		if (eresQ.getMode() == (-1)) {
 			this.lastMsg = "Warning: No evaluation done (Quick Eval Mode = -1)";
 		} else {
-			this.lastMsg = (m_evaluatorQ.getPrintString() + frm2.format(oQ.getMean()) + " +- "
+			this.lastMsg = (eresQ.getMsg() + frm2.format(oQ.getMean()) + " +- "
 					+ frm1.format(oQ.getStd()) + "");
 		}
 

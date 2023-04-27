@@ -30,6 +30,7 @@ public class SingleTrainer {
         long elapsedMs;
         int stopEval = 0;
         MTrain mTrain;
+        EvalResult eresQ, eresT;
         double evalQ, evalT = 0.0;
 
         // Construct agent anew with the settings of xab. Necessary to build a new set of random n-tuples in each run
@@ -86,11 +87,11 @@ public class SingleTrainer {
 
                 xab.setGameNumber(gameNum);
 
-                m_evaluatorQ.eval(pa);
-                evalQ = m_evaluatorQ.getLastResult();
+                eresQ = m_evaluatorQ.eval(pa);
+                evalQ = eresQ.getResult();
                 if (doTrainEvaluation) {
-                    m_evaluatorT.eval(pa);
-                    evalT = m_evaluatorT.getLastResult();
+                    eresT = m_evaluatorT.eval(pa);
+                    evalT = eresT.getResult();
                 }
 
                 // gather information for later printout to agents/gameName/csv/multiTrain.csv.
@@ -112,12 +113,12 @@ public class SingleTrainer {
         } // while
 
 
-        m_evaluatorQ.eval(pa);
-        evalQ = m_evaluatorQ.getLastResult();
+        eresQ = m_evaluatorQ.eval(pa);
+        evalQ = eresQ.getResult();
         oQ.add(evalQ);
         if (doTrainEvaluation) {
-            m_evaluatorT.eval(pa);
-            evalT = m_evaluatorT.getLastResult();
+            eresT = m_evaluatorT.eval(pa);
+            evalT = eresT.getResult();
             oT.add(evalT);
         }
 

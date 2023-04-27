@@ -3,6 +3,7 @@ package games.ZweiTausendAchtundVierzig;
 import controllers.MC.MCAgentN;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.PlayAgent;
+import games.EvalResult;
 import games.Evaluator;
 import games.GameBoard;
 import games.Arena;
@@ -63,11 +64,13 @@ public class Evaluator2048 extends Evaluator {
     }
 
     @Override
-    public boolean evalAgent(PlayAgent pa) {
+    public EvalResult evalAgent(PlayAgent pa) {
     	m_PlayAgent = pa;
         //Disable evaluation by using mode -1
         if (m_mode == -1) {
-            return true;
+            m_msg = "no evaluation done ";
+            lastResult = Double.NaN;
+            return new EvalResult(Double.NaN, true, "no evaluation done ", m_mode, Double.NaN);
         }
 		int cumEmpty;
 		ArrayList<PStats> psList = new ArrayList<>();
@@ -272,8 +275,9 @@ public class Evaluator2048 extends Evaluator {
         
         this.eResult = new EResult(nPly, ConfigEvaluator.NUMBEREVALUATIONS, minScore, maxScore, lastResult, medianScore,
         		standarddeviation, avgGameDur, avgMovPerGame, movesPerSec, tiles);
-        
-        return lastResult > ConfigEvaluator.MINPOINTS;
+
+        boolean success = lastResult > ConfigEvaluator.MINPOINTS;
+        return new EvalResult(lastResult, success, m_msg, m_mode, ConfigEvaluator.MINPOINTS);
     }
 
     private PStats makePStats2048(int i, StateObserver2048 so2048, ACTIONS_VT actBest, int cumEmpty) {
@@ -286,8 +290,7 @@ public class Evaluator2048 extends Evaluator {
         return  new PStats(i, moveNum, so2048.getPlayer(), actNum, gameScore, nEmpty, cumEmpty, highestTile);
     }
 
-    @Override
-    public String getMsg() {
+    public String getLongMsg() {
         StringBuilder tilesString = new StringBuilder();
 		DecimalFormat frm = new DecimalFormat("00000");
 		DecimalFormat frm1 = new DecimalFormat("000");
@@ -440,7 +443,6 @@ public class Evaluator2048 extends Evaluator {
     	}
     }
     
-    @Override
     public String getShortMsg() {
         return "Quick Evaluation of "+ m_PlayAgent.getName() +": Average score "+ Math.round(lastResult);    	
     }

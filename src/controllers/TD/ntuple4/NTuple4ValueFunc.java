@@ -77,7 +77,7 @@ public class NTuple4ValueFunc implements Serializable {
 	private int horizon=0;
 	private transient LinkedList<EligStates>[] eList;
 
-	private final boolean PRINTNTUPLES = false;	// /WK/ control the file printout of n-tuples (when loading agents)
+	private final boolean PRINTNTUPLES = true;	// /WK/ control the file printout of n-tuples (when loading agents)
 	private final DecimalFormat frmS = new DecimalFormat("+0.00000;-0.00000");
 	
 	private final static double[] dbg3PArr = new double[3];

@@ -3,10 +3,7 @@ package games.ZweiTausendAchtundVierzig;
 import java.util.ArrayList;
 import controllers.AgentBase;
 import controllers.PlayAgent;
-import games.Arena;
-import games.Evaluator;
-import games.XArenaButtons;
-import games.XArenaFuncs;
+import games.*;
 import games.ZweiTausendAchtundVierzig.Evaluator2048.EResult;
 import starters.GBGLaunch;
 import tools.Types;
@@ -145,10 +142,10 @@ public class GBGBatch2048 {
 				int qem = xab.oPar[0].getQuickEvalMode();
 				int verb = 0;
 				qEvaluator = (Evaluator2048) xab.m_arena.makeEvaluator(pa, xab.m_arena.getGameBoard(), 0, qem, verb);
-				qEvaluator.eval(pa);
+				EvalResult eRes = qEvaluator.eval(pa);
 				eResult = qEvaluator.eResult;
 				erList.add(eResult);
-				str = qEvaluator.getMsg();
+				str = eRes.getMsg();
 				System.out.println(str);
 			} catch (RuntimeException e) {
 				e.printStackTrace(System.err);

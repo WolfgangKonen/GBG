@@ -4,6 +4,7 @@ import controllers.MC.MCAgentN;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.PlayAgent;
 import controllers.TD.ntuple2.TDNTuple3Agt;
+import games.EvalResult;
 import games.Evaluator;
 import games.GameBoard;
 import tools.Types;
@@ -12,10 +13,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
 
 import static java.nio.file.StandardOpenOption.APPEND;
 import static java.nio.file.StandardOpenOption.CREATE;
@@ -24,12 +23,12 @@ public class EvaluatorBlackJack extends Evaluator {
     /**
      * Evaluator for the game Othello. Depending on the value of parameter {@code mode} in constructor:
      * <ul>
-     * <li>  0: number of times agent chooses move from Basic-Strategy on a preconstructed game state
+     * <li>  0: number of times agent chooses move from Basic-Strategy on a pre-constructed game state
      * <li>  1: average payoff of agent
      * <li>  2: number of times agent chooses move from Basic-Strategy on a random game state
      * <li>  3: how many times agent is not choosing insurance
-     * <li>  4: percentage of times where agent did chose HIT (40 simple preconstructed situations) (best = 1.0)
-     * <li>  5: percentage of times where agent did chose STAND (60 simple preconstructed situations) (best = 1.0)
+     * <li>  4: percentage of times where agent did chose HIT (40 simple pre-constructed situations) (best = 1.0)
+     * <li>  5: percentage of times where agent did chose STAND (60 simple pre-constructed situations) (best = 1.0)
      * </ul>
      *
      */
@@ -39,14 +38,14 @@ public class EvaluatorBlackJack extends Evaluator {
     int countInsuranceTaken = 0;
     int possibleInsuranceWins = 0;
     int countNoInsuranceTaken = 0;
-    int insurenceSuccess = 0;
-    int noInsurenceButBlackJack = 0;
+    int insuranceSuccess = 0;
+    int noInsuranceButBlackJack = 0;
     int moves = 0;
     int movesFromBasicStrategy = 0;
     int playerBlackJack = 0;
     int dealerBlackJack = 0;
     private final String dir = "src/games/BlackJack/Stats";
-    private DecimalFormat frm = new DecimalFormat("#0.0000");
+    private final DecimalFormat frm = new DecimalFormat("#0.0000");
 
     public EvaluatorBlackJack(PlayAgent e_PlayAgent, GameBoard gb, int mode, int stopEval, int verbose) {
         super(e_PlayAgent, gb, mode, stopEval, verbose);
@@ -79,7 +78,7 @@ public class EvaluatorBlackJack extends Evaluator {
     /**
      * <p>
      * This method is used for quick-evaluation.
-     * Agent gets 20 preconstructed gamestates and needs to choose the next best action.
+     * Agent gets 20 pre-constructed game states and needs to choose the next best action.
      * Result of this evaluation is the percentage of how many times an agent
      * chooses an action suggested by basic strategy.
      * Taking the move suggested by basic strategy everytime results a perfect score of 1 (best)
@@ -166,7 +165,7 @@ public class EvaluatorBlackJack extends Evaluator {
 
 
     /**
-     * Agent will play 40 most simple preconstructed States. In every case Hit should be the obvious choice.
+     * Agent will play 40 most simple pre-constructed States. In every case Hit should be the obvious choice.
      * This should represent the most basic understanding of BlackJack
      * @param playAgent agent that gets evaluated
      * @return evaluation score
@@ -205,7 +204,7 @@ public class EvaluatorBlackJack extends Evaluator {
     }
 
     /**
-     * Agent will play 60 most simple preconstructed States. In every case STAND should be the obvious choice.
+     * Agent will play 60 most simple pre-constructed States. In every case STAND should be the obvious choice.
      * This should represent the most basic understanding of BlackJack
      * @param playAgent agent that gets evaluated
      * @return evaluation score
@@ -269,8 +268,8 @@ public class EvaluatorBlackJack extends Evaluator {
     public double simulateInsurance(PlayAgent playAgent){
 
         countInsuranceTaken = 0; possibleInsuranceWins = 0;
-        countNoInsuranceTaken = 0; insurenceSuccess = 0;
-        noInsurenceButBlackJack = 0;
+        countNoInsuranceTaken = 0; insuranceSuccess = 0;
+        noInsuranceButBlackJack = 0;
         StateObserverBlackJack so = new StateObserverBlackJack(1, NUM_ITER+30);
         so.getCurrentPlayer().setChips((NUM_ITER+30) * 10);
 
@@ -281,12 +280,12 @@ public class EvaluatorBlackJack extends Evaluator {
                 if (act == 6) {
                     countInsuranceTaken++;
                     if (so.getDealer().getActiveHand().checkForBlackJack() && so.getDealer().getActiveHand().getCards().get(0).rank == Card.Rank.ACE) {
-                        insurenceSuccess++;
+                        insuranceSuccess++;
                     }
                 } else if (act == 7) {
                     countNoInsuranceTaken++;
                     if (so.getDealer().getActiveHand().checkForBlackJack() && so.getDealer().getActiveHand().getCards().get(0).rank == Card.Rank.ACE) {
-                        noInsurenceButBlackJack++;
+                        noInsuranceButBlackJack++;
                     }
                 }
                 so.advance(Types.ACTIONS.fromInt(act));
@@ -306,7 +305,7 @@ public class EvaluatorBlackJack extends Evaluator {
      * Agent will play NUM_ITER hands
      * each action the Agent takes in phase (ASKFORINSURANCE and PLAYERONACTION) gets compared to what
      * the basic strategy suggests. Result of this evaluation is the percentage of how many times an agent
-     * chooses an action suggested by basic strategy in a random gamestate.
+     * chooses an action suggested by basic strategy in a random game state.
      * Taking the move suggested by basic strategy everytime results a perfect score of 1 (best)
      * Never taking the move suggested by basic strategy results in a score of 0 (worst)
      * @param playAgent agent that gets evaluated
@@ -342,7 +341,7 @@ public class EvaluatorBlackJack extends Evaluator {
     /**
      * Agent will play NUM_ITER hands
      * the result of this evaluation is the average payoff the agent achieves
-     * there are no best and worst results yet. However the higher the better.
+     * there are no best and worst results yet. However, the higher, the better.
      * BasicStrategyBlackJackAgent should achieve the best score
      * RandomAgent should achieve the worst score
      * @param playAgent agent that gets evaluated
@@ -371,84 +370,85 @@ public class EvaluatorBlackJack extends Evaluator {
         return avgPayOff /= NUM_ITER;
     }
 
-    public double evalAgentAvgPayoff(PlayAgent playAgent){
+    public EvalResult evalAgentAvgPayoff(PlayAgent playAgent, double thresh){
         lastResult = simulateAvgPayOff(playAgent);
         m_msg = "\nAgent has an average Pay-Off of : " + lastResult;
         m_msg += "\nAgent had : " + playerBlackJack + " Black Jacks ";
         m_msg += "\nthe dealer had : " + dealerBlackJack + " Black Jacks ";
-        return lastResult;
+        return new EvalResult(lastResult, lastResult>thresh, m_msg, m_mode, thresh);
     }
 
-    public double evalAgentRandomMovesFromBasicStrategy(PlayAgent playAgent){
+    public EvalResult evalAgentRandomMovesFromBasicStrategy(PlayAgent playAgent, double thresh){
         lastResult = simulateRandomMovesFromBasicStrategy(playAgent);
         m_msg = "\nnumber of moves : " + moves;
         m_msg += "\nnumber of moves suggested by Basic Strategy : " + movesFromBasicStrategy;
 
-        return lastResult;
+        return new EvalResult(lastResult, lastResult>thresh, m_msg, m_mode, thresh);
     }
 
-    public double evalAgentFixedMovesFromBasicStrategy(PlayAgent playAgent){
+    public EvalResult evalAgentFixedMovesFromBasicStrategy(PlayAgent playAgent, double thresh){
         lastResult = simulateFixedMovesFromBasicStrategy(playAgent);
         m_msg += "\nnumber of moves :" + moves;
         m_msg += "\nnumber of moves took suggested by Basic Strategy : " + movesFromBasicStrategy;
 
-        return lastResult;
+        return new EvalResult(lastResult, lastResult>thresh, m_msg, m_mode, thresh);
     }
 
-    public double evalAgentInsurance(PlayAgent playAgent){
+    public EvalResult evalAgentInsurance(PlayAgent playAgent, double thresh){
         lastResult = simulateInsurance(playAgent);
         m_msg += "Agent took insurance : " + countInsuranceTaken + " times -> this cost : " + countInsuranceTaken + " * 10 = " + (countInsuranceTaken*10);
-        m_msg += "\nAgent did not take insurance : " + countNoInsuranceTaken + " times when he had the oppertunity to do so";
+        m_msg += "\nAgent did not take insurance : " + countNoInsuranceTaken + " times when he had the opportunity to do so";
         m_msg += "\nPossible insurance-wins : " + possibleInsuranceWins + " times";
-        m_msg += "\nAgent took no insurance but dealer showed Black Jack : " + noInsurenceButBlackJack + " times";
-        m_msg += "\nAgent took insurance and dealer showed Black Jack : " + insurenceSuccess + " times -> this payed back : " + insurenceSuccess +  " * 30  = " + (insurenceSuccess*30);
+        m_msg += "\nAgent took no insurance but dealer showed Black Jack : " + noInsuranceButBlackJack + " times";
+        m_msg += "\nAgent took insurance and dealer showed Black Jack : " + insuranceSuccess + " times -> this payed back : " + insuranceSuccess +  " * 30  = " + (insuranceSuccess *30);
         System.out.println("last-Result" + lastResult);
-        return lastResult;
+        return new EvalResult(lastResult, lastResult>thresh, m_msg, m_mode, thresh);
     }
 
-    public double evalAgentSimpleHitMoves(PlayAgent playAgent){
+    public EvalResult evalAgentSimpleHitMoves(PlayAgent playAgent, double thresh){
         lastResult = simulateVerySimpleSituationsHit(playAgent);
-        return lastResult;
+        return new EvalResult(lastResult, lastResult>thresh, m_msg, m_mode, thresh);
     }
 
-    public double evalAgentSimpleStandMoves(PlayAgent playAgent){
+    public EvalResult evalAgentSimpleStandMoves(PlayAgent playAgent, double thresh){
         lastResult = simulateVerySimpleSituationsStand(playAgent);
-        return lastResult;
+        return new EvalResult(lastResult, lastResult>thresh, m_msg, m_mode, thresh);
     }
 
     @Override
-    protected boolean evalAgent(PlayAgent playAgent) {
+    protected EvalResult evalAgent(PlayAgent playAgent) {
         switch (m_mode){
+            case -1:
+                m_msg = "No evaluation done ";
+                lastResult = 0.0;
+                return new EvalResult(lastResult, true, m_msg, m_mode, Double.NaN);
             case 0:
-                return evalAgentFixedMovesFromBasicStrategy(playAgent) > 0.8;
+                return evalAgentFixedMovesFromBasicStrategy(playAgent, 0.8);
             case 1:
-                return evalAgentAvgPayoff(playAgent) > 0.5;
+                return evalAgentAvgPayoff(playAgent, 0.5);
             case 2:
-                return evalAgentRandomMovesFromBasicStrategy(playAgent) > 0.8;
+                return evalAgentRandomMovesFromBasicStrategy(playAgent, 0.8);
             case 3:
-                return evalAgentInsurance(playAgent) > 0.8;
+                return evalAgentInsurance(playAgent, 0.8);
             case 4:
-                return evalAgentSimpleHitMoves(playAgent) > .9;
+                return evalAgentSimpleHitMoves(playAgent, 0.9);
             case 5:
-                return evalAgentSimpleStandMoves(playAgent) > .9;
+                return evalAgentSimpleStandMoves(playAgent, 0.9);
             case 10:
                 //create statistics
-                logStatistics(playAgent);
-                break;
+                return logStatistics(playAgent);
             default:
-                m_msg = "no evaluation done";
-                break;
+                throw new RuntimeException("Invalid m_mode = "+m_mode);
         }
-        return false;
     }
 
 
     /**
-     * Writes multiple evaluations into .csv
-     * @param playAgent that gets evaluated
-     * output will written to ./Stats
+     * Writes multiple evaluations (different {@code j = m_mode}) into .csv. Output is written to ./Stats
+     * @param playAgent the agent to evaluate
+     * @return  the last evaluation result
      */
-    public void logStatistics(PlayAgent playAgent){
+    public EvalResult logStatistics(PlayAgent playAgent){
         //TODO: generalize more
 
         StringBuilder sb = new StringBuilder();
@@ -471,6 +471,7 @@ public class EvaluatorBlackJack extends Evaluator {
             sb.append('\n');
         }
 
+        EvalResult eRes = new EvalResult();
         for(int j = 4; j < 6; j++) {
             // ten evaluations
             for (int i = 0; i < 10; i++) {
@@ -481,13 +482,14 @@ public class EvaluatorBlackJack extends Evaluator {
                 sb.append(j);
                 sb.append(',');
                 switch (j) {
-                    case 0: sb.append(frm.format(evalAgentFixedMovesFromBasicStrategy(playAgent))); break;
-                    case 1: sb.append(frm.format(evalAgentAvgPayoff(playAgent))); break;
-                    case 2: sb.append(frm.format(evalAgentRandomMovesFromBasicStrategy(playAgent))); break;
-                    case 3: sb.append(frm.format(evalAgentInsurance(playAgent))); break;
-                    case 4: sb.append(frm.format(evalAgentSimpleHitMoves(playAgent))); break;
-                    case 5: sb.append(frm.format(evalAgentSimpleStandMoves(playAgent))); break;
+                    case 0 -> eRes = evalAgentFixedMovesFromBasicStrategy(playAgent, 0.8);
+                    case 1 -> eRes = evalAgentAvgPayoff(playAgent, 0.5);
+                    case 2 -> eRes = evalAgentRandomMovesFromBasicStrategy(playAgent, 0.8);
+                    case 3 -> eRes = evalAgentInsurance(playAgent, 0.8);
+                    case 4 -> eRes = evalAgentSimpleHitMoves(playAgent, 0.9);
+                    case 5 -> eRes = evalAgentSimpleStandMoves(playAgent, 0.9);
                 }
+                sb.append(frm.format(eRes));
                 sb.append(',');
                 sb.append(getCurrentTimeStamp());
                 sb.append(',');
@@ -502,10 +504,12 @@ public class EvaluatorBlackJack extends Evaluator {
             e.printStackTrace();
         }
 
+        return eRes;
+
     }
 
     /**
-     * Helperfunction to get agent-settings-headlines as String. (used to write them in .csv)
+     * helper function to get agent-settings-headlines as String. (used to write them in .csv)
      * @param playAgent that gets evaluated
      * @return Agent-settings-headlines as String
      */
@@ -518,14 +522,14 @@ public class EvaluatorBlackJack extends Evaluator {
             return "iterations,tree-depth,rollout-depth,stop-on-round-over";
         }
         if(playAgent instanceof TDNTuple3Agt){
-            return "alpha-init,alpha-final,epsilon-init,epsilon-final,gamma,lamda";
+            return "alpha-init,alpha-final,epsilon-init,epsilon-final,gamma,lambda";
         }
 
         return "";
     }
 
     /**
-     * Helperfunction to get agent-settings as String. (used to write them in .csv)
+     * helper function to get agent-settings as String. (used to write them in .csv)
      * @param playAgent that gets evaluated
      * @return Agent-settings as String
      */
@@ -544,7 +548,7 @@ public class EvaluatorBlackJack extends Evaluator {
         }
         if(playAgent instanceof TDNTuple3Agt){
             //TODO: get params from config
-            return "alpha-init,alpha-final,epsilon-init,epsilon-final,gamma,lamda";
+            return "alpha-init,alpha-final,epsilon-init,epsilon-final,gamma,lambda";
         }
         return "";
     }
@@ -567,67 +571,71 @@ public class EvaluatorBlackJack extends Evaluator {
 
     @Override
     public String getPrintString() {
-        switch (m_mode) {
-            case 0: return "percentage of moves took suggested by Basic-Strategy in perconstructed States(best = 1.0): ";
-            case 1: return "average payoff of agent (the higher the better): ";
-            case 2: return "percentage of moves took suggested by Basic-Strategy in random States(best = 1.0): ";
-            case 3: return "percentage of times where agent did not chose insurance (best = 1.0): ";
-            case 4: return "percentage of times where agent did chose HIT (40 simple preconstructed situations) (best = 1.0): ";
-            case 5: return "percentage of times where agent did chose STAND (60 simple preconstructed situations) (best = 1.0):";
-            default: return "no evaluation done ";
-        }
+        return switch (m_mode) {
+            case 0 -> "percentage of moves took suggested by Basic-Strategy in pre-constructed States(best = 1.0): ";
+            case 1 -> "average payoff of agent (the higher the better): ";
+            case 2 -> "percentage of moves took suggested by Basic-Strategy in random States(best = 1.0): ";
+            case 3 -> "percentage of times where agent did not chose insurance (best = 1.0): ";
+            case 4 -> "percentage of times where agent did chose HIT (40 simple pre-constructed situations) (best = 1.0): ";
+            case 5 -> "percentage of times where agent did chose STAND (60 simple pre-constructed situations) (best = 1.0):";
+            case 10-> "log statistics";
+            default -> "no evaluation done ";
+        };
     }
 
 
     @Override
     public String getTooltipString() {
         return  "<html>"
-                + "0 : percentage of moves took suggested by Basic-Strategy in perconstructed States(best = 1.0)<br>"
+                + "-1: no evaluation<br>"
+                + "0 : percentage of moves took suggested by Basic-Strategy in pre-constructed States(best = 1.0)<br>"
                 + "1 : average payoff of agent (the higher the better)<br>"
                 + "2 : percentage of moves took suggested by Basic-Strategy in random States(best = 1.0)<br>"
                 + "3 : percentage of times where agent did not chose insurance (best = 1.0)<br>"
-                + "4 : percentage of times where agent did chose HIT (40 simple preconstructed situations) (best = 1.0)<br>"
-                + "5 : percentage of times where agent did chose STAND (60 simple preconstructed situations) (best = 1.0)<br>"
+                + "4 : percentage of times where agent did chose HIT (40 simple pre-constructed situations) (best = 1.0)<br>"
+                + "5 : percentage of times where agent did chose STAND (60 simple pre-constructed situations) (best = 1.0)<br>"
+                + "10: log statistics"
                 + "</html>";
     }
 
     @Override
     public String getPlotTitle() {
-        switch (m_mode) {
-            case 0: return "moves from Basic Strategy fixed";
-            case 1: return "Average payoff";
-            case 2: return "moves from Basic Strategy random ";
-            case 3: return "Insurance";
-            case 4: return "simple HIT moves";
-            case 5: return "simple STAND moves";
-            default: return "no evaluation done ";
-        }
+        return switch (m_mode) {
+            case 0 -> "moves from Basic Strategy fixed";
+            case 1 -> "Average payoff";
+            case 2 -> "moves from Basic Strategy random ";
+            case 3 -> "Insurance";
+            case 4 -> "simple HIT moves";
+            case 5 -> "simple STAND moves";
+            case 10-> "log statistics";
+            default -> "no evaluation done ";
+        };
     }
 
     private static String getCurrentTimeStamp() {
         SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
         Date now = new Date();
-        String strDate = sdfDate.format(now);
-        return strDate;
+        return sdfDate.format(now);
     }
 
-    /**
-     * fixes multiline-String for .csv output
-     * @param data string that needs to get fixed
-     * @return fixed data String
-     */
-    public String fixString(String data) {
-        String fix = data.replaceAll("\\R", "_");
-        if (data.contains(",") || data.contains("\"") || data.contains("'")) {
-            data = data.replace("\"", "\"\"");
-            fix = "\"" + data + "\"";
-        }
-        return fix;
-    }
+    // --- never used ---
+//    /**
+//     * fixes multiline-String for .csv output
+//     * @param data string that needs to get fixed
+//     * @return fixed data String
+//     */
+//    public String fixString(String data) {
+//        String fix = data.replaceAll("\\R", "_");
+//        if (data.contains(",") || data.contains("\"") || data.contains("'")) {
+//            data = data.replace("\"", "\"\"");
+//            fix = "\"" + data + "\"";
+//        }
+//        return fix;
+//    }
 
     /**
      * writes an evaluation to agentName.csv
-     * @param s evaluationdata
+     * @param s evaluation data
      * @param agentName name of agent that got evaluated
      */
     private void write(final String s, String agentName) throws IOException {

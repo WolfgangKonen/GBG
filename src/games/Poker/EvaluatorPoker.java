@@ -3,13 +3,8 @@ package games.Poker;
 import controllers.PlayAgent;
 import controllers.PlayAgtVector;
 import controllers.RandomAgent;
-import games.Evaluator;
-import games.GameBoard;
-import games.StateObservation;
-import games.XArenaFuncs;
+import games.*;
 import tools.ScoreTuple;
-
-import java.util.ArrayList;
 
 /**
  * Evaluator for Poker
@@ -17,13 +12,10 @@ import java.util.ArrayList;
 public class EvaluatorPoker extends Evaluator {
 
 	private final RandomAgent randomAgent = new RandomAgent("Random");
-	private final RandomAgent randomAgent2 = new RandomAgent("Random");
-	private final RandomAgent randomAgent3 = new RandomAgent("Random");
+//	private final RandomAgent randomAgent2 = new RandomAgent("Random");
+//	private final RandomAgent randomAgent3 = new RandomAgent("Random");
 
 	protected double[] m_thresh={0.1}; // threshold for each value of m_mode
-
-	protected static ArrayList<StateObserverPoker> diffStartList = null;
-
 
 	public EvaluatorPoker(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
 		super(e_PlayAgent, gb, mode, stopEval, verbose);
@@ -36,32 +28,36 @@ public class EvaluatorPoker extends Evaluator {
 	}
 
 	@Override
-	public boolean evalAgent(PlayAgent playAgent) {
+	public EvalResult evalAgent(PlayAgent playAgent) {
 		m_PlayAgent = playAgent;
 		switch(m_mode) {
 			case -1:
 				m_msg = "no evaluation done ";
 				lastResult = Double.NaN;
-				return false;
-			case 0:  return evalAgent1(m_PlayAgent,new PlayAgent[] {randomAgent},m_gb)>m_thresh[0];
-			default: return false;
+				return new EvalResult(lastResult, true, m_msg, m_mode, Double.NaN);
+			case 0:  return evalAgent1(m_PlayAgent,new PlayAgent[] {randomAgent},m_gb,m_thresh[0]);
+			default: throw new RuntimeException("Invalid m_mode = "+m_mode);
 		}
 	}
 
-	public void evalAgentSpecificState(PlayAgent playAgent,StateObserverPoker so) {
-		m_PlayAgent = playAgent;
-		PlayAgent[] pavec = new PlayAgent[] {playAgent,randomAgent,randomAgent2,randomAgent3};
-		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(pavec), so, 100, 2, null);
-		lastResult = sc.scTup[0];
-		m_msg = playAgent.getName()+": "+getPrintString() + lastResult;
-		System.out.println(m_msg);
-	}
+	// --- never used ---
+//	public void evalAgentSpecificState(PlayAgent playAgent,StateObserverPoker so) {
+//		m_PlayAgent = playAgent;
+//		PlayAgent[] pavec = new PlayAgent[] {playAgent,randomAgent,randomAgent2,randomAgent3};
+//		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(pavec), so, 100, 2, null);
+//		lastResult = sc.scTup[0];
+//		m_msg = playAgent.getName()+": "+getPrintString() + lastResult;
+//		System.out.println(m_msg);
+//	}
 
-	public double evalAgent1(PlayAgent playAgent, PlayAgent opponent,PlayAgent opponent2,PlayAgent opponent3, GameBoard gb) {
-		PlayAgent[] pavec = new PlayAgent[] {opponent,opponent2,opponent3};
-		return evalAgent1(playAgent, pavec,  gb);
-	}
-	public double evalAgent1(PlayAgent playAgent, PlayAgent[] opponents, GameBoard gb) {
+	// --- never used ---
+//	public EvalResult evalAgent1(PlayAgent playAgent, PlayAgent opponent,PlayAgent opponent2,PlayAgent opponent3,
+//							 GameBoard gb, double thresh) {
+//		PlayAgent[] pavec = new PlayAgent[] {opponent,opponent2,opponent3};
+//		return evalAgent1(playAgent, pavec,  gb, thresh);
+//	}
+
+	public EvalResult evalAgent1(PlayAgent playAgent, PlayAgent[] opponents, GameBoard gb, double thresh) {
 		StateObservation so = gb.getDefaultStartState();
 		PlayAgent[] pavec = new PlayAgent[opponents.length+1];
 		int i = 0;
@@ -73,7 +69,7 @@ public class EvaluatorPoker extends Evaluator {
 		lastResult = sc.scTup[0];
 		m_msg = playAgent.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>0) System.out.println(m_msg);
-		return lastResult;
+		return new EvalResult(lastResult, lastResult>thresh, m_msg, m_mode, thresh);
 	}
 
 
