@@ -25,11 +25,11 @@ import controllers.PlayAgent;
 //		* <p>
 abstract public class Evaluator {
 	private EvalResult thisEval;
-	private int gnumTrue;
-	private int m_stopEval;
-	private int m_counter;
+	private int m_counter;			// counts the number of successful calls to eval().
     private AgentLoader agtLoader = null;
-	
+	//private int gnumTrue;			// obsolete
+	//private int m_stopEval;		// obsolete now (stopEval only used with new meaning in ParOther)
+
 	// these variables may be used by derived classes:
 	//
 	protected PlayAgent m_PlayAgent;
@@ -40,7 +40,7 @@ abstract public class Evaluator {
 	 */
 	protected double lastResult=0.0;
 	/**
-	 * Derived classes write an info string of the last call to method 
+	 * Derived classes write a one-line info string describing the result of the last call to method
 	 * {@link #evalAgent(PlayAgent)} to this variable {@code #m_msg}
 	 */
 	protected String m_msg="";
@@ -55,34 +55,31 @@ abstract public class Evaluator {
     protected GameBoard m_gb;
 
 	/**
-	 * 
-	 * @param e_PlayAgent	the agent to evaluate
-	 * @param stopEval		how many successful calls to {@link #eval(PlayAgent)} are needed
-	 * 						until {@code goalReached(int)} returns true
+	 *  @param e_PlayAgent    the agent to evaluate
+	 *
 	 */
-	public Evaluator(PlayAgent e_PlayAgent, GameBoard gb, int mode, int stopEval) {
-		initEvaluator(e_PlayAgent, gb, mode,stopEval);
+	public Evaluator(PlayAgent e_PlayAgent, GameBoard gb, int mode) {
+		initEvaluator(e_PlayAgent, gb, mode);
 	}
-	public Evaluator(PlayAgent e_PlayAgent, GameBoard gb, int mode, int stopEval,int verbose) {
-		initEvaluator(e_PlayAgent, gb, mode,stopEval);
+	public Evaluator(PlayAgent e_PlayAgent, GameBoard gb, int mode, int verbose) {
+		initEvaluator(e_PlayAgent, gb, mode);
 		this.verbose = verbose;
 	}
-	private void initEvaluator(PlayAgent e_PlayAgent, GameBoard gb, int mode, int stopEval) {
+	private void initEvaluator(PlayAgent e_PlayAgent, GameBoard gb, int mode) {
 		m_PlayAgent = e_PlayAgent;
 		m_gb = gb;
 		if (!isAvailableMode(mode)) 
 			throw new RuntimeException(this.getClass().getSimpleName()+": Value mode = "+mode+" is not allowed!");
 		m_mode = mode;
 		thisEval = new EvalResult();
-		m_stopEval=stopEval;
 		m_counter=0;
-		gnumTrue=-2;
+		//m_stopEval=stopEval;
+		//gnumTrue=-2;
 	}
 	
 	/**
 	 * Calls {@link #evalAgent(PlayAgent) evalAgent} which returns {@link EvalResult}. It counts
-	 * the number of consecutive successes. If this number reaches m_stopEval, the 
-	 * method {@code goalReached(int)} will return true.
+	 * in member {@code m_counter} the number of consecutive successes.
 	 * @return
 	 * 		the evaluation result from {@link #evalAgent(PlayAgent)}
 	 */
@@ -99,7 +96,7 @@ abstract public class Evaluator {
 	/**
 	 * This function has to be implemented by the derived classes. It implements the evaluation
 	 * of playAgent.
-	 * It should write its results on protected members {@link #lastResult} and {@link #m_msg}.
+	 * It returns its results in a {@link EvalResult} object.
 	 * 
 	 * @param playAgent the agent to be evaluated
 	 * @return
@@ -123,6 +120,13 @@ abstract public class Evaluator {
 //		}
 //		return false;
 //	}
+
+	/**
+	 * @return how often the call to {@link #eval(PlayAgent)} returned with {@code success == true}
+	 */
+	public int getCounter() {
+		return m_counter;
+	}
 
 	/**
 	 * 
@@ -177,7 +181,7 @@ abstract public class Evaluator {
 	
 	/**
 	 * @return the allowed values for parameter {@code mode} in a call to Evaluator constructor or 
-	 *     to {@link Arena#makeEvaluator(PlayAgent, GameBoard, int, int, int) Arena.makeEvaluator(...)}.  <br>   
+	 *     to {@link Arena#makeEvaluator(PlayAgent, GameBoard, int, int) Arena.makeEvaluator(...)}.  <br>
 	 *     If an Evaluator does not use {@code mode}, it should return an {@code int[]} 
 	 *     containing just 0.
 	 */
@@ -220,18 +224,11 @@ abstract public class Evaluator {
 	 */
 	abstract public int getTrainEvalMode();
 	
-//	/**
-//	 * @return the optional third evaluator mode which may be used in multiTrain.
-//	 * 		If the mode returned here equals to the mode of one of the other two 
-//	 * 		Evaluator objects, the third Evaluator will be skipped.
-//	 */
-//	abstract public int getMultiTrainEvalMode();
-	
 	/**
 	 * A one-line info string characterizing the Evaluator and its specific mode {@code m_mode}.
-	 * Is used to <b>build</b> the evaluation message on {@code m_msg} (with the evaluation result), but does
+	 * Is used to <b>build</b> the evaluation message on {@link #m_msg} (combining with the evaluation result), but does
 	 * <b>not</b> contain the evaluation result itself.
-	 * @return a one line info string
+	 * @return a one-line info string
 	 */
 	abstract public String getPrintString();
 	

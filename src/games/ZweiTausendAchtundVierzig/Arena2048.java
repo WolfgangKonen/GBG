@@ -10,8 +10,6 @@ import games.ZweiTausendAchtundVierzig.Heuristic.Evaluator2048_EA;
 
 import java.io.IOException;
 
-import javax.swing.*;
-
 public class Arena2048 extends Arena {
 	public Arena2048(String title, boolean withUI) {
 		super(title,withUI);		
@@ -39,29 +37,26 @@ public class Arena2048 extends Arena {
     }
     /**
      * Factory pattern method: make a new Evaluator
-     * @param pa		the agent to evaluate
-     * @param gb		the game board
-     * @param stopEval	the number of successful evaluations needed to reach the
-     * 					evaluator goal (may be used during training to stop it
-     * 					prematurely)
-     * @param mode		which evaluator mode: 0,1,2. Throws a runtime exception
+     * @param pa        the agent to evaluate
+     * @param gb        the game board
+     * @param mode        which evaluator mode: 0,1,2. Throws a runtime exception
      * 					if {@code mode} is not in the set {@link Evaluator#getAvailableModes()}.
-     * @param verbose	how verbose or silent the evaluator is
+     * @param verbose    how verbose or silent the evaluator is
      * @return
      */
-    public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
-    	return makeEvaluator(pa, gb, stopEval, mode, verbose, this);
+    public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int mode, int verbose) {
+    	return makeEvaluator(pa, gb, mode, verbose, this);
     }
-    public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose, Arena ar) {
+    public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int mode, int verbose, Arena ar) {
         switch (mode) {
         	case -1:
-                return new Evaluator2048(pa, gb, stopEval, -1, verbose,ar);
+                return new Evaluator2048(pa, gb, -1, verbose,ar);
             case 0:
-                return new Evaluator2048(pa, gb, stopEval, 0, verbose,ar);
+                return new Evaluator2048(pa, gb, 0, verbose,ar);
             case 1:
-                return new Evaluator2048_BoardPositions(pa, gb, stopEval, verbose);
+                return new Evaluator2048_BoardPositions(pa, gb, verbose);
             case 2:
-                return new Evaluator2048_EA(pa, gb, stopEval, verbose);
+                return new Evaluator2048_EA(pa, gb, verbose);
             default:
                 throw new RuntimeException("Mode " + mode + " is not allowed for 2048");
         }

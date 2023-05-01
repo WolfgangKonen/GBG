@@ -47,7 +47,7 @@ public class SingleTrainer {
 
 
         int qem = xab.oPar[n].getQuickEvalMode();
-        m_evaluatorQ = xab.m_arena.makeEvaluator(pa, gb, stopEval, qem, 1);
+        m_evaluatorQ = xab.m_arena.makeEvaluator(pa, gb, qem, 1);
         //
         // doTrainEvaluation flags whether Train Evaluator is executed:
         // Evaluator m_evaluatorT is only constructed and evaluated, if in tab 'Other pars'
@@ -55,7 +55,7 @@ public class SingleTrainer {
         int tem = xab.oPar[n].getTrainEvalMode();
         doTrainEvaluation = (tem != -1);
         if (doTrainEvaluation)
-            m_evaluatorT = xab.m_arena.makeEvaluator(pa, gb, stopEval, tem, 1);
+            m_evaluatorT = xab.m_arena.makeEvaluator(pa, gb, tem, 1);
 
         System.out.println(pa.stringDescr());
         System.out.println(pa.stringDescr2());

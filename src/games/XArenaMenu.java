@@ -656,7 +656,7 @@ public class XArenaMenu extends JMenuBar {
 				int epiLength = m_arena.m_xab.oPar[index].getStopEval();
 				pa.setStopEval(epiLength);
 				int verb = 0;
-				Evaluator qEvaluator = m_arena.m_xab.m_arena.makeEvaluator(pa,m_arena.gb,0,qem,verb);
+				Evaluator qEvaluator = m_arena.m_xab.m_arena.makeEvaluator(pa,m_arena.gb, qem,verb);
 		        EvalResult eRes = qEvaluator.eval(pa);
 				str = eRes.getMsg();
 				System.out.println(str);

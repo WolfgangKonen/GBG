@@ -189,7 +189,7 @@ public class TDNTuple3AgtTest extends GBGBatch {
                             new ExpectimaxNWrapper(pa, nply);
 
             int qem = arenaTrain.m_xab.oPar[0].getQuickEvalMode();
-            m_evaluatorQ = arenaTrain.m_xab.m_arena.makeEvaluator(pa,gb,stopEval,qem,-1);
+            m_evaluatorQ = arenaTrain.m_xab.m_arena.makeEvaluator(pa,gb, qem,-1);
 
             for (int i=0; i<nRuns; i++) {
                 EvalResult eRes = m_evaluatorQ.eval(qa);

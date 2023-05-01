@@ -42,17 +42,14 @@ public class ArenaBlackJack extends Arena {
      *
      * @param pa       the agent to evaluate
      * @param gb       the game board
-     * @param stopEval the number of successful evaluations needed to reach the
-     *                 evaluator goal (may be used during training to stop it
-     *                 prematurely)
      * @param mode     which evaluator mode: 0,1,2,3,4,5. Throws a runtime exception
      *                 if {@code mode} is not in the set {@link Evaluator#getAvailableModes()}.
      * @param verbose  how verbose or silent the evaluator is
      * @return		   the evaluator
      */
     @Override
-    public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
-        return new EvaluatorBlackJack(pa, gb, mode, stopEval, verbose);
+    public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int mode, int verbose) {
+        return new EvaluatorBlackJack(pa, gb, mode, verbose);
     }
 
     /**

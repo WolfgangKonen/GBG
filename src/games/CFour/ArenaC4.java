@@ -1,9 +1,6 @@
 package games.CFour;
 
-import java.awt.Color;
 import java.io.IOException;
-
-import javax.swing.JFrame;
 
 import controllers.PlayAgent;
 import games.Arena;
@@ -17,7 +14,7 @@ import games.XNTupleFuncs;
  * from the general class {@link Arena}. It only overrides 
  * the abstract methods <ul>
  * <li> {@link Arena#makeGameBoard()}, 
- * <li> {@link Arena#makeEvaluator(PlayAgent, GameBoard, int, int, int)}, and 
+ * <li> {@link Arena#makeEvaluator(PlayAgent, GameBoard, int, int)}, and
  * <li> {@link Arena#makeFeatureClass(int)}, 
  * <li> {@link Arena#makeXNTupleFuncs()}, 
  * </ul> 
@@ -57,19 +54,16 @@ public class ArenaC4 extends Arena   {
 	}
 	/**
 	 * Factory pattern method: make a new Evaluator
-	 * @param pa		the agent to evaluate
-	 * @param gb		the game board
-	 * @param stopEval	the number of successful evaluations needed to reach the 
-	 * 					evaluator goal (may be used during training to stop it 
-	 * 					prematurely)
-	 * @param mode		which evaluator mode: 0,1,2,9. Throws a runtime exception 
+	 * @param pa        the agent to evaluate
+	 * @param gb        the game board
+	 * @param mode        which evaluator mode: 0,1,2,9. Throws a runtime exception
 	 * 					if {@code mode} is not in the set {@link Evaluator#getAvailableModes()}.
-	 * @param verbose	how verbose or silent the evaluator is
+	 * @param verbose    how verbose or silent the evaluator is
 	 * @return
 	 */
-	public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
+	public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int mode, int verbose) {
 //		if (mode==-1) mode=EvaluatorC4.getDefaultEvalMode();
-		return new EvaluatorC4(pa,gb,stopEval,mode,verbose);
+		return new EvaluatorC4(pa,gb, mode,verbose);
 	}
 	
 	public Feature makeFeatureClass(int featmode) {

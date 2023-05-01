@@ -30,8 +30,8 @@ public class ArenaYavalath extends Arena {
     }
 
     @Override
-    public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
-        return new EvaluatorYavalath(pa,gb,stopEval,mode);
+    public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int mode, int verbose) {
+        return new EvaluatorYavalath(pa,gb, mode);
     }
 
 //    @Override

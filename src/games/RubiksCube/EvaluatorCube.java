@@ -31,28 +31,15 @@ public class EvaluatorCube extends Evaluator {
 	 */
 	protected double[] m_thresh={0.0,0.85,0.9}; 		// thresholds for m_mode=-1,0,1
 
-	// --- never used ---
-//	public EvaluatorCube(PlayAgent pa, GameBoard gb, int stopEval) {
-//		super(pa, gb, 0, stopEval);
-//		initEvaluator(gb);			// might change CubeConfig.pMax
-//		ecp = new EvalCubeParams(pa);		// construct with actual CubeConfig.pMax
-//	}
-//
-//	public EvaluatorCube(PlayAgent pa, GameBoard gb, int stopEval, int mode) {
-//		super(pa, gb, mode, stopEval);
-//		initEvaluator(gb);			// might change CubeConfig.pMin and .pMax
-//		ecp = new EvalCubeParams(pa);		// construct with actual CubeConfig.pMax and with epiLength = pa.getParOther().getStopEval()
-//	}
-
-	public EvaluatorCube(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
-		super(pa, gb, mode, stopEval, verbose);
+	public EvaluatorCube(PlayAgent pa, GameBoard gb, int mode, int verbose) {
+		super(pa, gb, mode, verbose);
 		initEvaluator(gb);			// might change CubeConfig.pMin and .pMax
 		ecp = new EvalCubeParams(pa);		// construct with actual CubeConfig.pMax and with epiLength = pa.getParOther().getStopEval()
 	}
 
-	public EvaluatorCube(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose,
+	public EvaluatorCube(PlayAgent pa, GameBoard gb, int mode, int verbose,
 						 EvalCubeParams evalCubePar) {
-		super(pa, gb, mode, stopEval, verbose);
+		super(pa, gb, mode, verbose);
 		initEvaluator(gb);			// might change CubeConfig.pMin and .pMax
 		this.ecp = new EvalCubeParams(evalCubePar);
 	}
@@ -68,7 +55,7 @@ public class EvaluatorCube extends Evaluator {
 	/**
 	 * @return true if evaluateAgentX is above {@link #m_thresh}.
 	 * The choice for {@link #m_thresh} is made with 4th parameter mode in 
-	 * {@link #EvaluatorCube(PlayAgent, GameBoard, int, int, int)} [default: mode=0].
+	 * {@link #EvaluatorCube(PlayAgent, GameBoard, int, int)} [default: mode=0].
 	 */
 	@Override
 	public EvalResult evalAgent(PlayAgent playAgent) {

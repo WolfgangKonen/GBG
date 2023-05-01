@@ -613,7 +613,7 @@ public class MctseWrapperTest extends GBGBatch {
                         startTime = System.currentTimeMillis();
 
                         if (mode<10) {
-                            EvaluatorEWN m_eval = new EvaluatorEWN(qa, gb, 0, mode, 0);
+                            EvaluatorEWN m_eval = new EvaluatorEWN(qa, gb, mode, 0);
                             EvalResult eRes = m_eval.eval(qa);
                             winrate = (1+eRes.getResult())/2;
                             System.out.print(m_eval.getPrintString() + ",  winrate="+frm.format(winrate));

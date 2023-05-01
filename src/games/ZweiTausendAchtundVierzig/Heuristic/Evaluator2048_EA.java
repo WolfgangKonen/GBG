@@ -1,10 +1,10 @@
 package games.ZweiTausendAchtundVierzig.Heuristic;
 
 import controllers.PlayAgent;
+import games.Arena;
 import games.EvalResult;
 import games.Evaluator;
 import games.GameBoard;
-import games.ZweiTausendAchtundVierzig.Arena2048;
 import games.ZweiTausendAchtundVierzig.ConfigEvaluator;
 import games.ZweiTausendAchtundVierzig.Evaluator2048;
 import games.ZweiTausendAchtundVierzig.Evaluator2048_BoardPositions;
@@ -14,7 +14,7 @@ import tools.cmaes.CMAEvolutionStrategy;
  * Evolutionary algorithm (EA) evaluator for 2048: 
  * <p>
  * Note that the mode-selection for 2048 evaluators is done in 
- * {@link Arena2048#makeEvaluator(PlayAgent, GameBoard, int, int, int) Arena[Train]2048.makeEvaluator(...)}.
+ * {@link Arena#makeEvaluator(PlayAgent, GameBoard, int, int) Arena[Train]2048.makeEvaluator(...)}.
  * <p>
  * Created by Johannes Kutsch, TH Koeln, 2016-12.
  * 
@@ -25,8 +25,8 @@ public class Evaluator2048_EA extends Evaluator {
     private HeuristicSettings2048 fitfun = new HeuristicSettings2048();
     private CMAEvolutionStrategy cma = new CMAEvolutionStrategy();
 
-    public Evaluator2048_EA(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int verbose) {
-        super(e_PlayAgent, gb, 2, stopEval, verbose);
+    public Evaluator2048_EA(PlayAgent e_PlayAgent, GameBoard gb, int verbose) {
+        super(e_PlayAgent, gb, 2, verbose);
     }
 
     @Override

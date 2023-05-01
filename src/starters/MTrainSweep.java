@@ -59,7 +59,7 @@ public class MTrainSweep {
         PlayAgent pa = null;
         int stopEval = 0;
         int qem = xab.oPar[n].getQuickEvalMode();
-        m_evaluatorQ = xab.m_arena.makeEvaluator(pa,gb,stopEval,qem,1);
+        m_evaluatorQ = xab.m_arena.makeEvaluator(pa,gb, qem,1);
 
         System.out.println("*** Starting multiTrain_M with trainNum = "+trainNum+" ***");
 

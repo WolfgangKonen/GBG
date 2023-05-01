@@ -128,7 +128,7 @@ public class MCubeIterSweep extends GBGBatch {
             long startTime = System.currentTimeMillis();
             GameBoardCube gb = (GameBoardCube) arenaTrain.getGameBoard();
             int qem = 1;
-            m_evaluatorQ = arenaTrain.makeEvaluator(qa,gb,0,qem,1);
+            m_evaluatorQ = arenaTrain.makeEvaluator(qa,gb, qem,1);
             EvalResult eRes = m_evaluatorQ.eval(qa);
             double evalSec = (System.currentTimeMillis() - startTime)/1000.0;
             System.out.print("Avg.success: "+eRes.getResult()+" for pMin..pMax="+pMinEval+".."+pMaxEval);
@@ -211,7 +211,7 @@ public class MCubeIterSweep extends GBGBatch {
                         double avgPercSolved = 0.0;
                         for (int p = pMin; p <= pMax; p++) {
                             EvalCubeParams ecp = new EvalCubeParams(p, p, ee, CubeConfig.EvalNmax);
-                            EvaluatorCube m_eval = new EvaluatorCube(qa, gb, 0, 1, 0, ecp);
+                            EvaluatorCube m_eval = new EvaluatorCube(qa, gb, 1, 0, ecp);
                             EvalResult eRes = m_eval.evalAgent(qa);
                             percSolved = eRes.getResult();
                             System.out.println(eRes.getMsg());

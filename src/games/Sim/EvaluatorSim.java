@@ -26,8 +26,8 @@ public class EvaluatorSim extends Evaluator {
 //		super(e_PlayAgent, mode, stopEval);
 //	}
 	
-	public EvaluatorSim(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
-		super(e_PlayAgent, gb, mode, stopEval, verbose);
+	public EvaluatorSim(PlayAgent e_PlayAgent, GameBoard gb, int mode, int verbose) {
+		super(e_PlayAgent, gb, mode, verbose);
 		this.m_gb = gb;
 	}
 

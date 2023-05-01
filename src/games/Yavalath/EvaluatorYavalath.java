@@ -21,13 +21,13 @@ public class EvaluatorYavalath extends Evaluator {
     private MCTSAgentT mctsAgentT;
     protected static ArrayList<StateObserverYavalath> diffStartList;
 
-    public EvaluatorYavalath(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode){
-        super(e_PlayAgent,gb,mode,stopEval);
+    public EvaluatorYavalath(PlayAgent e_PlayAgent, GameBoard gb, int mode){
+        super(e_PlayAgent,gb,mode);
         initEvaluator();
     }
 
-    public EvaluatorYavalath(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose){
-        super(e_PlayAgent,gb,mode,stopEval,verbose);
+    public EvaluatorYavalath(PlayAgent e_PlayAgent, GameBoard gb, int mode, int verbose){
+        super(e_PlayAgent,gb,mode, verbose);
         initEvaluator();
     }
 

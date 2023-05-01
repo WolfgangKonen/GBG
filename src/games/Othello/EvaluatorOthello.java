@@ -56,20 +56,8 @@ public class EvaluatorOthello extends Evaluator {
 	 */
 	protected static int NPLY_DS = 4;
 
-	// --- never used ---
-//    public EvaluatorOthello(PlayAgent e_PlayAgent, GameBoard gb, int stopEval) {
-//		super(e_PlayAgent, gb, 1, stopEval);		// default mode: 1
-//		initEvaluator();
-//	}
-//
-//    public EvaluatorOthello(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode) {
-//		super(e_PlayAgent, gb, mode, stopEval);
-//		initEvaluator();
-//	}
-    
-    
-	public EvaluatorOthello(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
-		super(e_PlayAgent, gb, mode, stopEval, verbose);
+	public EvaluatorOthello(PlayAgent e_PlayAgent, GameBoard gb, int mode, int verbose) {
+		super(e_PlayAgent, gb, mode, verbose);
 		initEvaluator();
 	}
 	

@@ -17,8 +17,8 @@ public class EvaluatorPoker extends Evaluator {
 
 	protected double[] m_thresh={0.1}; // threshold for each value of m_mode
 
-	public EvaluatorPoker(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
-		super(e_PlayAgent, gb, mode, stopEval, verbose);
+	public EvaluatorPoker(PlayAgent e_PlayAgent, GameBoard gb, int mode, int verbose) {
+		super(e_PlayAgent, gb, mode, verbose);
 		initEvaluator(gb);
 	}
 	

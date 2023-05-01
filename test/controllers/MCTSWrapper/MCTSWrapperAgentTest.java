@@ -217,7 +217,7 @@ public class MCTSWrapperAgentTest extends GBGBatch {
                         double avgPercSolved=0.0;
                         for (int p=pMin; p<=pMax; p++) {
                             EvalCubeParams ecp = new EvalCubeParams(p, p, ee, CubeConfig.EvalNmax);
-                            EvaluatorCube m_eval = new EvaluatorCube(qa, gb, 0, 1, 0, ecp);
+                            EvaluatorCube m_eval = new EvaluatorCube(qa, gb, 1, 0, ecp);
                             EvalResult eRes = m_eval.evalAgent(qa);
                             percSolved = eRes.getResult();
                             System.out.println(eRes.getMsg());

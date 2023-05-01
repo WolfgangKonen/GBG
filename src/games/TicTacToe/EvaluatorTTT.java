@@ -33,19 +33,8 @@ public class EvaluatorTTT extends Evaluator {
 	 */
 	protected static ArrayList<StateObserverTTT> diffStartList = null;
 
-	// --- never used ---
-//	public EvaluatorTTT(PlayAgent e_PlayAgent, GameBoard gb, int stopEval) {
-//		super(e_PlayAgent, gb, 1, stopEval);
-//		initEvaluator(gb);
-//	}
-//
-//	public EvaluatorTTT(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode) {
-//		super(e_PlayAgent, gb, mode, stopEval);
-//		initEvaluator(gb);
-//	}
-
-	public EvaluatorTTT(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
-		super(e_PlayAgent, gb, mode, stopEval, verbose);
+	public EvaluatorTTT(PlayAgent e_PlayAgent, GameBoard gb, int mode, int verbose) {
+		super(e_PlayAgent, gb, mode, verbose);
 		//initEvaluator(gb);
 	}
 	
@@ -77,7 +66,7 @@ public class EvaluatorTTT extends Evaluator {
 	 * 
 	 * @return true if evaluateAgentX is above m_thresh.<br>
 	 * The choice for X=1 or 2 is made with 3rd parameter mode in 
-	 * {@link #EvaluatorTTT(PlayAgent, GameBoard, int, int, int)} [default mode=1].<p>
+	 * {@link #EvaluatorTTT(PlayAgent, GameBoard, int, int)} [default mode=1].<p>
 	 * 
 	 * If mode==0, then m_thresh=0.8 (best: 0.9, worst: 0.0) <br>
 	 * If mode==1 or 2, then m_thresh=-0.15 (best: 0.0, worst: -1.0)

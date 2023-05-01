@@ -1,6 +1,7 @@
 package games;
 
 import controllers.PlayAgent;
+import games.ZweiTausendAchtundVierzig.EResult2048;
 
 /**
  * Result of a call to {@link Evaluator#eval(PlayAgent)}, it holds
@@ -13,11 +14,11 @@ import controllers.PlayAgent;
  * </ul>
  */
 public class EvalResult {
-    private double result = 0.0;        // the evaluation result
-    private boolean success = false;    // whether result > thresh
-    private String msg = null;          // the evaluation message
-    private int mode = 0;               // the mode of the Evaluator
-    private double thresh = 0.0;        // the threshold for this mode, passed in from Evaluator
+    protected double result = 0.0;        // the evaluation result
+    protected boolean success = false;    // whether result > thresh
+    protected String msg = null;          // the evaluation message
+    protected int mode = 0;               // the mode of the Evaluator
+    protected double thresh = 0.0;        // the threshold for this mode, passed in from Evaluator
 
     /**
      * The default constructor has {@code this.msg = null} which signals that this {@code EvalResult} object
@@ -43,7 +44,20 @@ public class EvalResult {
         return success;
     }
 
+    /**
+     * @return one-line string describing evaluation result
+     */
     public String getMsg() {
+        return msg;
+    }
+
+    /**
+     * The default is to return {@code msg}. May be overridden by derived classes to return a multi-line report
+     * of the evaluation result.
+     * @return  multi-line string (report) of evaluation result
+     * @see EResult2048
+     */
+    public String getReport() {
         return msg;
     }
 

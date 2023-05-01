@@ -62,8 +62,8 @@ public class EvaluatorHex extends Evaluator {
     private PrintWriter logFile;
     private StringBuilder logSB;
 
-    public EvaluatorHex(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
-        super(e_PlayAgent, gb, mode, stopEval, verbose);
+    public EvaluatorHex(PlayAgent e_PlayAgent, GameBoard gb, int mode, int verbose) {
+        super(e_PlayAgent, gb, mode, verbose);
         if (verbose == 1) {
             System.out.println("Using evaluation mode " + mode);
         }

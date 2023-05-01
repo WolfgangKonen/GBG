@@ -47,8 +47,8 @@ public class EvaluatorBlackJack extends Evaluator {
     private final String dir = "src/games/BlackJack/Stats";
     private final DecimalFormat frm = new DecimalFormat("#0.0000");
 
-    public EvaluatorBlackJack(PlayAgent e_PlayAgent, GameBoard gb, int mode, int stopEval, int verbose) {
-        super(e_PlayAgent, gb, mode, stopEval, verbose);
+    public EvaluatorBlackJack(PlayAgent e_PlayAgent, GameBoard gb, int mode, int verbose) {
+        super(e_PlayAgent, gb, mode, verbose);
     }
 
 

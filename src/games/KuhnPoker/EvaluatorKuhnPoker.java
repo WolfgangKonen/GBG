@@ -23,8 +23,8 @@ public class EvaluatorKuhnPoker extends Evaluator {
 //	protected static ArrayList<StateObserverKuhnPoker> diffStartList = null;
 
 
-	public EvaluatorKuhnPoker(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
-		super(e_PlayAgent, gb, mode, stopEval, verbose);
+	public EvaluatorKuhnPoker(PlayAgent e_PlayAgent, GameBoard gb, int mode, int verbose) {
+		super(e_PlayAgent, gb, mode, verbose);
 		//initEvaluator(gb);
 	}
 	

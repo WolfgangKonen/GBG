@@ -284,8 +284,8 @@ public class Experiment {
         int maxGameNum = 100000;
         int gameNum;
 
-        int stopTest = oPar.getStopTest();
-        int stopEval = oPar.getStopEval();
+        //int stopTest = oPar.getStopTest();
+        //int stopEval = oPar.getStopEval();
         int qem = oPar.getQuickEvalMode();
         int verbose = 1;
         int tem = oPar.getTrainEvalMode();
@@ -305,7 +305,7 @@ public class Experiment {
         tds = trainAgent(tds,gb,savePath);
 
         // Evaluator with quick evaluation
-        Evaluator m_evaluatorQ = new EvaluatorKuhnPoker(tds,gb,stopEval,qem,verbose);
+        Evaluator m_evaluatorQ = new EvaluatorKuhnPoker(tds,gb, qem,verbose);
 
         //// train
         //// basically we could utilize m_xfun.train(n,agentN, m_xab, gb) but unfortunatelly this is using a lot of Arena functions that woul require a lot of config stuff.

@@ -24,19 +24,13 @@ public class EvaluatorEWN extends Evaluator {
     protected static ArrayList<StateObserverEWN> diffStartList = null;
     //protected static int NPLY_DS = 4;
 
-    // --- never used
-//  public EvaluatorEWN(PlayAgent e_PlayAgent, GameBoard gb, int stopEval) {
-//        super(e_PlayAgent, gb, 1, stopEval);
-//        initEvaluator();
-//  }
-
-    public EvaluatorEWN(PlayAgent e_PlayAgent, GameBoard gb, int stopEval  , int mode) {
-        super(e_PlayAgent, gb, mode,stopEval);
+    public EvaluatorEWN(PlayAgent e_PlayAgent, GameBoard gb, int mode) {
+        super(e_PlayAgent, gb, mode);
         initEvaluator();
     }
 
-    public EvaluatorEWN(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
-        super(e_PlayAgent, gb, mode, stopEval, verbose);
+    public EvaluatorEWN(PlayAgent e_PlayAgent, GameBoard gb, int mode, int verbose) {
+        super(e_PlayAgent, gb, mode, verbose);
         initEvaluator();
     }
 

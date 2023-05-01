@@ -1368,17 +1368,13 @@ abstract public class Arena implements Runnable {
 	 *            the agent to evaluate
 	 * @param gb
 	 *            the game board
-	 * @param stopEval
-	 *            the number of successful evaluations needed to reach the
-	 *            evaluator goal (this may be used during training to stop it
-	 *            prematurely)
 	 * @param mode
-	 *            which evaluator mode. 
+	 *            which evaluator mode.
 	 * @param verbose
 	 *            how verbose or silent the evaluator is
 	 * @return the evaluator
 	 */
-	abstract public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose);
+	abstract public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int mode, int verbose);
 
 	/**
 	 * Factory pattern method: make a new {@link Feature} tailored to a specific
@@ -1473,9 +1469,9 @@ abstract public class Arena implements Runnable {
 
 						if (m_xfun.m_PlayAgents[n] != null) {
 							pa = m_xfun.m_PlayAgents[n];
-							Evaluator m_evaluator = makeEvaluator(pa,gb,0,m_xab.oPar[n].getQuickEvalMode(),1);
+							Evaluator m_evaluator = makeEvaluator(pa,gb, m_xab.oPar[n].getQuickEvalMode(),1);
 							EvalResult eRes =  m_evaluator.eval(pa);
-							System.out.println("final "+eRes.getMsg());
+							System.out.println("final "+eRes.getReport());
 							m_xfun.m_PlayAgents[n].setAgentState(PlayAgent.AgentState.TRAINED);
 							m_xab.setOParFrom(n,pa.getParOther());
 							setStatusMessage("final "+eRes.getMsg());

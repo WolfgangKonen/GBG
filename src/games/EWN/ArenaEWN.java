@@ -26,8 +26,8 @@ public class ArenaEWN extends Arena {
     }
 
     @Override
-    public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
-        return new EvaluatorEWN(pa,gb,stopEval,mode,verbose);
+    public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int mode, int verbose) {
+        return new EvaluatorEWN(pa,gb, mode,verbose);
     }
 
     /**

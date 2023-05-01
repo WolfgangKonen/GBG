@@ -6,8 +6,6 @@ import controllers.TD.ntuple4.TDNTuple4Agt;
 import games.Arena;
 import games.Evaluator;
 import games.StateObservation;
-import params.MCParams;
-import params.ParMC;
 import starters.MCubeIterSweep;
 import starters.SetupGBG;
 import org.junit.Test;
@@ -61,7 +59,7 @@ public class CubeTrain_Test {
         // Step 2
         int qem = 1;
         arenaTrain.m_xab.oPar[0].setpMaxRubiks(pMaxEval);
-        m_evaluatorQ = arenaTrain.makeEvaluator(pa,gb,0,qem,1);
+        m_evaluatorQ = arenaTrain.makeEvaluator(pa,gb, qem,1);
         m_evaluatorQ.eval(pa);
 
         // Step 3
@@ -133,7 +131,7 @@ public class CubeTrain_Test {
         int qem = 1;
         arenaTrain.m_xab.oPar[0].setpMaxRubiks(pMaxEval);
         arenaTrain.m_xab.oPar[0].setEpisodeLength(epiLengthTrain);
-        m_evaluatorQ = arenaTrain.makeEvaluator(pa,gb,30,qem,1);
+        m_evaluatorQ = arenaTrain.makeEvaluator(pa,gb, qem,1);
         m_evaluatorQ.eval(pa);
 
         // Step 3: check value function

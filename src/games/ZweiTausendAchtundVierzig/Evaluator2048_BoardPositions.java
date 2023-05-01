@@ -4,6 +4,7 @@ package games.ZweiTausendAchtundVierzig;
 import controllers.MC.MCAgentN;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.PlayAgent;
+import games.Arena;
 import games.EvalResult;
 import games.Evaluator;
 import games.GameBoard;
@@ -27,7 +28,7 @@ import static java.util.Arrays.deepEquals;
  * Board-position evaluator for 2048: 
  * <p>
  * Note that the mode-selection for 2048 evaluators is done in 
- * {@link Arena2048#makeEvaluator(PlayAgent, GameBoard, int, int, int) Arena[Train]2048.makeEvaluator(...)}.
+ * {@link Arena#makeEvaluator(PlayAgent, GameBoard, int, int) Arena[Train]2048.makeEvaluator(...)}.
  * <p>
  * Created by Johannes Kutsch, TH Koeln, 2016-12.
  * 
@@ -38,8 +39,8 @@ public class Evaluator2048_BoardPositions extends Evaluator{
     private Random random = new Random();
     private ExecutorService executorService = Executors.newWorkStealingPool();
 
-    public Evaluator2048_BoardPositions(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int verbose) {
-        super(e_PlayAgent, gb, 1, stopEval, verbose);
+    public Evaluator2048_BoardPositions(PlayAgent e_PlayAgent, GameBoard gb, int verbose) {
+        super(e_PlayAgent, gb, 1, verbose);
     }
 
     @Override
