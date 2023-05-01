@@ -11,10 +11,7 @@ import controllers.PlayAgent;
 import controllers.PlayAgtVector;
 import controllers.RandomAgent;
 import controllers.MCTS.MCTSAgentT;
-import games.Evaluator;
-import games.GameBoard;
-import games.StateObservation;
-import games.XArenaFuncs;
+import games.*;
 import games.Hex.StateObserverHex;
 import params.ParMCTS;
 import params.ParMaxN;
@@ -36,7 +33,7 @@ import tools.ScoreTuple;
  */
 public class EvaluatorNim2P extends Evaluator {
  	private static final int[] AVAILABLE_MODES = {-1,0,1,2,3,4,11};
-	private RandomAgent random_agent = new RandomAgent("Random");
+	private final RandomAgent random_agent = new RandomAgent("Random");
 	private MaxNAgent maxNAgent = null;
     private MCTSAgentT mctsAgent = null;
 	protected double[] m_thresh={0.8,-0.15,-0.15}; // threshold for each value of m_mode
@@ -44,19 +41,9 @@ public class EvaluatorNim2P extends Evaluator {
 //	private int m_mode;						// now in Evaluator
 //	private AgentLoader agtLoader = null;	// now in Evaluator
 //	private GameBoard m_gb;					// now in Evaluator
-	
-	public EvaluatorNim2P(PlayAgent e_PlayAgent, GameBoard gb, int stopEval) {
-		super(e_PlayAgent, gb, 1, stopEval);
-		initEvaluator(gb);
-	}
 
-	public EvaluatorNim2P(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode) {
-		super(e_PlayAgent, gb, mode, stopEval);
-		initEvaluator(gb);
-	}
-
-	public EvaluatorNim2P(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
-		super(e_PlayAgent, gb, mode, stopEval, verbose);
+	public EvaluatorNim2P(PlayAgent e_PlayAgent, GameBoard gb, int mode, int verbose) {
+		super(e_PlayAgent, gb, mode, verbose);
 		initEvaluator(gb);
 	}
 	
@@ -85,7 +72,7 @@ public class EvaluatorNim2P extends Evaluator {
 	 * If mode==1 or 2, then m_thresh=-0.15 (best: 0.0, worst: -1.0)
 	 */
 	@Override
-	public boolean evalAgent(PlayAgent playAgent) {
+	public EvalResult evalAgent(PlayAgent playAgent) {
 		m_PlayAgent = playAgent;
 		if (m_mode==1 || m_mode==2) {
 			StateObserverNim so = (StateObserverNim) m_gb.getDefaultStartState();
@@ -94,76 +81,76 @@ public class EvaluatorNim2P extends Evaluator {
 			if (depth<heapsum)
 				System.out.println("Warning: Max-N depth = "+depth+" is smaller than required: heap sum ="+heapsum+" !");
 		}
-		switch(m_mode) {
-		case 0:  return evaluateAgent0(m_PlayAgent,m_gb)>m_thresh[0];
-		case 1:  return evaluateAgent1(m_PlayAgent,maxNAgent,m_gb)>m_thresh[1];
-		case 2:  return evaluateAgent2(m_PlayAgent,maxNAgent,m_gb)>m_thresh[2];
-		case 3:  return evaluateAgent1(m_PlayAgent,mctsAgent,m_gb)>m_thresh[1];
-		case 4:  return evaluateAgent2(m_PlayAgent,mctsAgent,m_gb)>m_thresh[2];
-		case 11: 
-			//	Evaluator.getTDReferee throws RuntimeException, if TDReferee.agt.zip is not found:
-			return evaluateAgent2(m_PlayAgent,getTDReferee(),m_gb)>m_thresh[2];
-		default: return false;
-		}
+		return switch (m_mode) {
+			case 0 -> evaluateAgent0(m_PlayAgent, m_gb, m_thresh[0]);
+			case 1 -> evaluateAgent1(m_PlayAgent, maxNAgent, m_gb, m_thresh[1]);
+			case 2 -> evaluateAgent2(m_PlayAgent, maxNAgent, m_gb, m_thresh[2]);
+			case 3 -> evaluateAgent1(m_PlayAgent, mctsAgent, m_gb, m_thresh[1]);
+			case 4 -> evaluateAgent2(m_PlayAgent, mctsAgent, m_gb, m_thresh[2]);
+			case 11 ->
+					//	Evaluator.getTDReferee throws RuntimeException, if TDReferee.agt.zip is not found:
+					evaluateAgent2(m_PlayAgent, getTDReferee(), m_gb, m_thresh[2]);
+			default -> throw new RuntimeException("Invalid m_mode = " + m_mode);
+		};
 	}
 	
 	/**	
 	 * competeBoth against random
- 	 * @param pa
-	 * @param gb		needed to get a default start state (competeBoth)
- 	 * @return
+ 	 * @param pa	the play agent
+	 * @param gb	needed to get a default start state (competeBoth)
+ 	 * @return		the evaluation result
 	 */
- 	private double evaluateAgent0(PlayAgent pa, GameBoard gb) {
+ 	private EvalResult evaluateAgent0(PlayAgent pa, GameBoard gb, double thresh) {
  		StateObservation so = gb.getDefaultStartState();
 //		lastResult = XArenaFuncs.competeBoth(pa, random_agent, so, 100, 0, gb);
 		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pa,random_agent), so, 100, 0);
 		lastResult = sc.scTup[0];
 		m_msg = pa.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>0) System.out.println(m_msg);
-		return lastResult;
+		return new EvalResult(lastResult, lastResult>thresh, m_msg, m_mode, thresh);
 	}
 
  	/**
  	 * competeBoth against opponent, from default start state	
- 	 * @param pa
- 	 * @param opponent
+	 * @param pa		the play agent
+ 	 * @param opponent	the opponent
 	 * @param gb		needed to get default start state (competeBoth)
- 	 * @return
+	 * @return			the evaluation result
 	 */
- 	private double evaluateAgent1(PlayAgent pa, PlayAgent opponent, GameBoard gb) {
+ 	private EvalResult evaluateAgent1(PlayAgent pa, PlayAgent opponent, GameBoard gb, double thresh) {
  		StateObservation so = gb.getDefaultStartState();
 		if (opponent == null) {
 			gb.getArena().showMessage("ERROR: no opponent","Load Error", JOptionPane.ERROR_MESSAGE);
 			lastResult = Double.NaN;
-			return lastResult;
+			return new EvalResult(lastResult, false, m_msg, m_mode, thresh);
 		}
 //		lastResult = XArenaFuncs.competeBoth(pa, opponent, so, 1, 0, gb);
 		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pa,opponent), so, 10, 0);
 		lastResult = sc.scTup[0];
 		m_msg = pa.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>0) System.out.println(m_msg);
-		return lastResult;
+		return new EvalResult(lastResult, lastResult>thresh, m_msg, m_mode, thresh);
 	}
  	
  	/**
  	 * competeBoth against opponent, from different start states	
- 	 * @param pa
- 	 * @param opponent
-	 * @param gb		needed to get the start states 
- 	 * @return
+	 * @param pa		the play agent
+	 * @param opponent	the opponent
+	 * @param gb		needed to get the start states
+	 * @return			the evaluation result
  	 */
- 	private double evaluateAgent2(PlayAgent pa, PlayAgent opponent, GameBoard gb) {
+ 	private EvalResult evaluateAgent2(PlayAgent pa, PlayAgent opponent, GameBoard gb, double thresh) {
 		int competeNum=1;
-		double[] res;
+//		double[] res;
 //		double resX, resO;
-        double success = 0;
+        double success;
         double averageSuccess = 0; 
 		
 		if (opponent == null) {
 			gb.getArena().showMessage("ERROR: no opponent","Load Error", JOptionPane.ERROR_MESSAGE);
 			lastResult = Double.NaN;
 			m_msg = "EvaluatorNim: opponent is null!";
-			return lastResult;
+			return new EvalResult(lastResult, false, m_msg, m_mode, thresh);
 		} 
 
 		lastResult=0;
@@ -192,7 +179,7 @@ public class EvaluatorNim2P extends Evaluator {
 		m_msg = pa.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>0) System.out.println(m_msg);		// this.verbose is def'd in Evaluator
 		
-		return lastResult;
+		return new EvalResult(lastResult, lastResult>thresh, m_msg, m_mode, thresh);
 	}
  	
  	// --- implemented by Evaluator ---
@@ -234,16 +221,15 @@ public class EvaluatorNim2P extends Evaluator {
 		return 3;
 	}
 	private String getBestResultString(int mode) {
-		DecimalFormat df = new DecimalFormat();				
-		df = (DecimalFormat) NumberFormat.getNumberInstance(Locale.UK);		
+		DecimalFormat df = (DecimalFormat) NumberFormat.getNumberInstance(Locale.UK);
 		df.applyPattern("0.00");  
 		switch (mode) {
 		case 0:  				// random agent, competeBoth
 			// a rough estimate of the probability that RandomAgent wins: in one half of the 
-			// competeBoth games, RandomAgent will always loose, in the other half it may 
+			// competeBoth games, RandomAgent will always lose, in the other half it may
 			// win if it chooses by accident always a correct move: If there are exactly MAX_MINUS+1
 			// items left on 1 heap and the other agent moves, the probability for RandomAgent
-			// to win is pLastMoveWin=(1/mx)*(1/mx+...+1/1), averaging over 1,2,..,mx=MAX_MINUS items  
+			// to win is pLastMoveWin=(1/mx)*(1/mx+...+1/1), averaging over 1,2,...,mx=MAX_MINUS items
 			// taken by the other agent. nMoves is the number
 			// of moves that RandomAgent has to make to reach MAX_MINUS+1. The probability
 			// to guess the correct move is in each case (1/MAX_MINUS). So the total probability that 
@@ -269,15 +255,15 @@ public class EvaluatorNim2P extends Evaluator {
 	@Override
 	public String getPrintString() {
 		String strBest = getBestResultString(m_mode);
-		switch (m_mode) {
-		case 0:  return "success rate (randomAgent, best is "+strBest+"): ";
-		case 1:  return "success rate (Max-N, best is "+strBest+"): ";
-		case 2:  return "success rate (Max-N, different starts, best is "+strBest+"): ";
-		case 3:  return "success rate (MCTS, best is "+strBest+"): ";	
-		case 4:  return "success rate (MCTS, different starts, best is "+strBest+"): ";	
-		case 11: return "success rate (TDReferee, different starts, best is "+strBest+"): ";
-		default: return null;
-		}
+		return switch (m_mode) {
+			case 0 -> "success rate (randomAgent, best is " + strBest + "): ";
+			case 1 -> "success rate (Max-N, best is " + strBest + "): ";
+			case 2 -> "success rate (Max-N, different starts, best is " + strBest + "): ";
+			case 3 -> "success rate (MCTS, best is " + strBest + "): ";
+			case 4 -> "success rate (MCTS, different starts, best is " + strBest + "): ";
+			case 11 -> "success rate (TDReferee, different starts, best is " + strBest + "): ";
+			default -> null;
+		};
 	}
 	
 	@Override
@@ -295,15 +281,15 @@ public class EvaluatorNim2P extends Evaluator {
 
 	@Override
 	public String getPlotTitle() {
-		switch (m_mode) {
-		case 0:  return "success against Random";
-		case 1:  return "success against Max-N";
-		case 2:  return "success against Max-N, dStart";
-		case 3:  return "success against MCTS";
-		case 4:  return "success against MCTS, dStart";
-		case 11: return "success TDReferee";		
-		default: return null;
-		}
+		return switch (m_mode) {
+			case 0 -> "success against Random";
+			case 1 -> "success against Max-N";
+			case 2 -> "success against Max-N, dStart";
+			case 3 -> "success against MCTS";
+			case 4 -> "success against MCTS, dStart";
+			case 11 -> "success TDReferee";
+			default -> null;
+		};
 	}
 
 }

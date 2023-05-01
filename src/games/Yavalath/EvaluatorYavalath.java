@@ -5,10 +5,7 @@ import controllers.MaxNAgent;
 import controllers.PlayAgent;
 import controllers.PlayAgtVector;
 import controllers.RandomAgent;
-import games.Evaluator;
-import games.GameBoard;
-import games.StateObservation;
-import games.XArenaFuncs;
+import games.*;
 import params.ParMCTS;
 import params.ParMaxN;
 import params.ParOther;
@@ -24,13 +21,13 @@ public class EvaluatorYavalath extends Evaluator {
     private MCTSAgentT mctsAgentT;
     protected static ArrayList<StateObserverYavalath> diffStartList;
 
-    public EvaluatorYavalath(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode){
-        super(e_PlayAgent,gb,mode,stopEval);
+    public EvaluatorYavalath(PlayAgent e_PlayAgent, GameBoard gb, int mode){
+        super(e_PlayAgent,gb,mode);
         initEvaluator();
     }
 
-    public EvaluatorYavalath(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose){
-        super(e_PlayAgent,gb,mode,stopEval,verbose);
+    public EvaluatorYavalath(PlayAgent e_PlayAgent, GameBoard gb, int mode, int verbose){
+        super(e_PlayAgent,gb,mode, verbose);
         initEvaluator();
     }
 
@@ -63,11 +60,11 @@ public class EvaluatorYavalath extends Evaluator {
     }
 
     @Override
-    public boolean evalAgent(PlayAgent playAgent) {
+    public EvalResult evalAgent(PlayAgent playAgent) {
         m_PlayAgent = playAgent;
 
         if(diffStartList==null){
-            diffStartList = new ArrayList<StateObserverYavalath>();
+            diffStartList = new ArrayList<>();
             diffStartList = addAll1PlyStates(diffStartList);
         }
 
@@ -75,18 +72,19 @@ public class EvaluatorYavalath extends Evaluator {
             case -1:
                 m_msg = "No evaluation done ";
                 lastResult = 0.0;
-                return false;
-            case 0: return evaluateAgainstOpponent(m_PlayAgent, randomAgent, false, 10) > 0.0;
-            case 1: return evaluateAgainstOpponent(m_PlayAgent, maxNAgent, false, 10) > 0.0;
-            case 2: return evaluateAgainstOpponent(m_PlayAgent, mctsAgentT,false,10) > 0.0;
-            case 3: return evaluateAgainstOpponent(m_PlayAgent,maxNAgent,true,1) >0.0;
-            case 4: return evaluateAgainstOpponent(m_PlayAgent, mctsAgentT,true, 1) > 0.0;
-            default: return false;
+                return new EvalResult(lastResult, true, m_msg, m_mode, Double.NaN);
+            case 0: return evaluateAgainstOpponent(m_PlayAgent, randomAgent, false, 10,0.0);
+            case 1: return evaluateAgainstOpponent(m_PlayAgent, maxNAgent, false, 10, 0.0);
+            case 2: return evaluateAgainstOpponent(m_PlayAgent, mctsAgentT,false,10, 0.0);
+            case 3: return evaluateAgainstOpponent(m_PlayAgent,maxNAgent,true,1, 0.0);
+            case 4: return evaluateAgainstOpponent(m_PlayAgent, mctsAgentT,true, 1, 0.0);
+            default: throw new RuntimeException("Invalid m_mode = "+m_mode);
         }
 
     }
 
-    private double evaluateAgainstOpponent(PlayAgent playAgent, PlayAgent opponent, boolean diffStarts, int numEpisodes) {
+    private EvalResult evaluateAgainstOpponent(PlayAgent playAgent, PlayAgent opponent,
+                                               boolean diffStarts, int numEpisodes, double thresh) {
         StateObservation so = m_gb.getDefaultStartState();
 
         int n = m_gb.getStateObs().getNumPlayers();
@@ -105,7 +103,7 @@ public class EvaluatorYavalath extends Evaluator {
         }
         lastResult = scMean.scTup[0];
         m_msg = playAgent.getName()+": " +getPrintString() + lastResult;
-        return  lastResult;
+        return  new EvalResult(lastResult, lastResult>thresh, m_msg, m_mode, thresh);
 
     }
 
@@ -126,15 +124,15 @@ public class EvaluatorYavalath extends Evaluator {
 
     @Override
     public String getPrintString() {
-        switch (m_mode){
-            case -1: return "no evaluation done ";
-            case 0:  return "success against Random (best is 1.0)";
-            case 1: return "success against MaxN (best is 1.0)";
-            case 2: return "success against MCTS (best is 1.0)";
-            case 3: return "success against MaxN, diff starts (best is 1.0)";
-            case 4: return "success aginst MCTS, diff starts (best is 1.0)";
-            default: return null;
-        }
+        return switch (m_mode) {
+            case -1 -> "no evaluation done ";
+            case 0 -> "success against Random (best is 1.0)";
+            case 1 -> "success against MaxN (best is 1.0)";
+            case 2 -> "success against MCTS (best is 1.0)";
+            case 3 -> "success against MaxN, diff starts (best is 1.0)";
+            case 4 -> "success aginst MCTS, diff starts (best is 1.0)";
+            default -> null;
+        };
 
     }
 
@@ -151,13 +149,13 @@ public class EvaluatorYavalath extends Evaluator {
 
     @Override
     public String getPlotTitle() {
-        switch (m_mode){
-            case 0: return "success against Random";
-            case 1: return "success against MaxN";
-            case 2: return "success against MCTS";
-            case 3: return "success against MaxN, diff starts";
-            case 4: return "success against MCTS, diff starts";
-            default: return null;
-        }
+        return switch (m_mode) {
+            case 0 -> "success against Random";
+            case 1 -> "success against MaxN";
+            case 2 -> "success against MCTS";
+            case 3 -> "success against MaxN, diff starts";
+            case 4 -> "success against MCTS, diff starts";
+            default -> null;
+        };
     }
 }

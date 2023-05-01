@@ -181,7 +181,7 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
 		int i=(iAction-j)/3;		// reverse: iAction = 3*i + j
 		
 		assert m_Table[i][j]==0 : "The desired move would alter an already occupied field!";
-    	m_Table[i][j] = m_Player;
+		m_Table[i][j] = m_Player;
     	
     	setAvailableActions(); 		// IMPORTANT: adjust the available actions (have reduced by one)
     	

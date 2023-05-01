@@ -35,8 +35,8 @@ public class ArenaKuhnPoker extends Arena   {
 	}
 
 
-	public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
-		return new EvaluatorKuhnPoker(pa,gb,stopEval,mode,verbose);
+	public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int mode, int verbose) {
+		return new EvaluatorKuhnPoker(pa,gb, mode,verbose);
 	}
 	
 	public Feature makeFeatureClass(int featmode) {

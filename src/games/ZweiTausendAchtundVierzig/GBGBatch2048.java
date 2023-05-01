@@ -3,11 +3,7 @@ package games.ZweiTausendAchtundVierzig;
 import java.util.ArrayList;
 import controllers.AgentBase;
 import controllers.PlayAgent;
-import games.Arena;
-import games.Evaluator;
-import games.XArenaButtons;
-import games.XArenaFuncs;
-import games.ZweiTausendAchtundVierzig.Evaluator2048.EResult;
+import games.*;
 import starters.GBGLaunch;
 import tools.Types;
 
@@ -111,8 +107,8 @@ public class GBGBatch2048 {
 		PlayAgent pa = null;
 		PlayAgent[] paVector;
 		Evaluator2048 qEvaluator = null;
-		EResult eResult;
-		ArrayList<EResult> erList = new ArrayList<>();
+		EResult2048 eResult;
+		ArrayList<EResult2048> erList = new ArrayList<>();
 		String str;
 		boolean res = this.t_Game.loadAgent(0, filePath);		
 		if (!res) {
@@ -144,11 +140,11 @@ public class GBGBatch2048 {
 				System.out.println("nPly: " + nPly1);
 				int qem = xab.oPar[0].getQuickEvalMode();
 				int verb = 0;
-				qEvaluator = (Evaluator2048) xab.m_arena.makeEvaluator(pa, xab.m_arena.getGameBoard(), 0, qem, verb);
-				qEvaluator.eval(pa);
+				qEvaluator = (Evaluator2048) xab.m_arena.makeEvaluator(pa, xab.m_arena.getGameBoard(), qem, verb);
+				EvalResult eRes = qEvaluator.eval(pa);
 				eResult = qEvaluator.eResult;
 				erList.add(eResult);
-				str = qEvaluator.getMsg();
+				str = eRes.getMsg();
 				System.out.println(str);
 			} catch (RuntimeException e) {
 				e.printStackTrace(System.err);

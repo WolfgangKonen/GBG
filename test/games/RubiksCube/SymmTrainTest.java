@@ -1,9 +1,8 @@
 package games.RubiksCube;
 
-import controllers.MCTSWrapper.MCTSWrapperAgent;
-import controllers.MCTSWrapper.stateApproximation.PlayAgentApproximator;
 import controllers.PlayAgent;
 import controllers.TD.ntuple4.TDNTuple4Agt;
+import games.EvalResult;
 import org.junit.Test;
 import params.ParNT;
 import params.ParOther;
@@ -113,12 +112,12 @@ public class SymmTrainTest extends CubeTrain_Test {
             // Step 3
             int qem = 1;
             arenaTrain.m_xab.oPar[0].setpMaxRubiks(pMaxEval);
-            m_evaluatorQ = arenaTrain.makeEvaluator(pa,gb,0,qem,1);
-            m_evaluatorQ.eval(pa);
-            System.out.println("Avg.success: "+m_evaluatorQ.getLastResult()+" for pMax="+pMaxEval);
+            m_evaluatorQ = arenaTrain.makeEvaluator(pa,gb, qem,1);
+            EvalResult eresQ = m_evaluatorQ.eval(pa);
+            System.out.println("Avg.success: "+eresQ.getResult()+" for pMax="+pMaxEval);
 
             // Step 4
-            mcube = new MCube(0, agtFile, pa.getGameNum(), nsymArr[i], 1, pMaxEval, m_evaluatorQ.getLastResult(), 0.0, trainSec, 0,0);
+            mcube = new MCube(0, agtFile, pa.getGameNum(), nsymArr[i], 1, pMaxEval, eresQ.getResult(), 0.0, trainSec, 0,0);
             mcList.add(mcube);
 
             s = mcube.printMCubeList(csvName, mcList, pa, agtFile, arenaTrain, "", "");

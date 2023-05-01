@@ -1,5 +1,6 @@
 package gui;
 
+import games.EvalResult;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartFrame;
 import org.jfree.chart.JFreeChart;
@@ -94,16 +95,16 @@ public class LineChartSuccess extends XYSeriesCollection
 	/**
 	 * 
 	 * @param gameNum
-	 * @param m_evaluatorQ
-	 * @param m_evaluatorT
+	 * @param evalQ
+	 * @param evalT
 	 * @param doTrainEvaluation
 	 * @param visibleFlag	true: make window visible on every call; false: only on first call
 	 */
-	public void updateChartPlot(int gameNum, Evaluator m_evaluatorQ, 
-			Evaluator m_evaluatorT, boolean doTrainEvaluation, boolean visibleFlag) {
-		this.getSeries(0).add((double)gameNum, m_evaluatorQ.getLastResult());
+	public void updateChartPlot(int gameNum, EvalResult evalQ,
+			EvalResult evalT, boolean doTrainEvaluation, boolean visibleFlag) {
+		this.getSeries(0).add((double)gameNum, evalQ.getResult());
 		if (doTrainEvaluation && PLOTTRAINEVAL) {
-			this.getSeries(1).add((double)gameNum, m_evaluatorT.getLastResult());
+			this.getSeries(1).add((double)gameNum, evalT.getResult());
 		}
 		
 		// this little logic allows with visibleFlag==false, that the plot window is only made 

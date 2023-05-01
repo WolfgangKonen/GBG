@@ -6,7 +6,6 @@ import games.Evaluator;
 import games.Feature;
 import games.GameBoard;
 import games.XNTupleFuncs;
-import games.CFour.FeatureC4;
 
 public class ArenaOthello extends Arena {
 
@@ -36,8 +35,8 @@ public class ArenaOthello extends Arena {
 	 * @return Factory pattern to create a new Evaluator
 	 */
 	@Override
-	public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
-		return new EvaluatorOthello(pa,gb,stopEval,mode,verbose);
+	public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int mode, int verbose) {
+		return new EvaluatorOthello(pa,gb, mode,verbose);
 	}
 
 	/**

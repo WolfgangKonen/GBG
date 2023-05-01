@@ -152,98 +152,104 @@ public class XArenaFuncs {
 		updateParams(n,m_xab);
 
 		try {
-			if (sAgent.equals("TDS")) {
-				Feature feat = m_xab.m_arena.makeFeatureClass(m_xab.tdPar[n].getFeatmode());
-				pa = new TDAgent(sAgent, m_xab.tdPar[n], m_xab.oPar[n], feat, maxGameNum);
-			} else if (sAgent.equals("RHEA-SI")) {
-				pa = new RheaAgentSI(sAgent, null);
-			} else if (sAgent.equals("TD-Ntuple-3")) {
-				XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
-				NTupleFactory ntupfac = new NTupleFactory();
-				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
-				pa = new TDNTuple3Agt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
-						m_xab.oPar[n], nTuples, xnf, maxGameNum);
-			} else if (sAgent.equals("TD-Ntuple-4")) {
-				XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
-				NTuple4Factory ntupfac = new NTuple4Factory();
-				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
-				pa = new TDNTuple4Agt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
-						m_xab.oPar[n],m_xab.rbPar[n], m_xab.wrPar[n], nTuples, xnf, maxGameNum);
-				//((TDNTuple4Agt) pa).setRewardParsFromParTD();
-				m_xab.m_arena.gb.updateParams();
-			} else if (sAgent.equals("Sarsa")) {
-				XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
-				NTupleFactory ntupfac = new NTupleFactory();
-				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
-				// int numOutputs =
-				// m_xab.m_game.gb.getDefaultStartState().getAllAvailableActions().size();
-				ArrayList<ACTIONS> allAvailActions = m_xab.m_arena.gb.getDefaultStartState().getAllAvailableActions();
-				pa = new SarsaAgt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
-						m_xab.oPar[n], nTuples, xnf, allAvailActions, maxGameNum);
-			} else if (sAgent.equals("Sarsa-4")) {
-				XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
-				NTuple4Factory ntupfac = new NTuple4Factory();
-				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
-				ArrayList<ACTIONS> allAvailActions = m_xab.m_arena.gb.getDefaultStartState().getAllAvailableActions();
-				pa = new Sarsa4Agt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
-						m_xab.oPar[n], nTuples, xnf, allAvailActions, maxGameNum);
-			} else if (sAgent.equals("Qlearn-4")) {
-				XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
-				NTuple4Factory ntupfac = new NTuple4Factory();
-				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
-				ArrayList<ACTIONS> allAvailActions = m_xab.m_arena.gb.getDefaultStartState().getAllAvailableActions();
-				pa = new QLearn4Agt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
-						m_xab.oPar[n], nTuples, xnf, allAvailActions, maxGameNum);
-			} else if (sAgent.equals("Max-N")) {
-				pa = new MaxNAgent(sAgent, m_xab.maxnPar[n], m_xab.oPar[n]);
-			} else if (sAgent.equals("Expectimax-N")) {
-				pa = new ExpectimaxNAgent(sAgent, m_xab.maxnPar[n], m_xab.oPar[n]);
-			} else if (sAgent.equals("Random")) {
-				pa = new RandomAgent(sAgent, m_xab.oPar[n]);
-			} else if (sAgent.equals("MCTS")) {
-				pa = new MCTSAgentT(sAgent, null, m_xab.mctsPar[n], m_xab.oPar[n]);
-			} else if (sAgent.equals("MCTS Expectimax")) {
-				pa = new MCTSExpectimaxAgt(sAgent, m_xab.mctsePar[n], m_xab.oPar[n]);
-			} else if (sAgent.equals("Human")) {
-				pa = new HumanPlayer(sAgent);
-			} else if (sAgent.equals("MC-N")) {
-				pa = new MCAgentN(sAgent, m_xab.mcPar[n], m_xab.oPar[n]);
-			} else if (sAgent.equals("AlphaBeta")) {// CFour only, see gui_agent_list in XArenaButtonsGui
-				AlphaBetaAgent alphaBetaStd = new AlphaBetaAgent(new BookSum()); 	  // no search for distant losses
-				alphaBetaStd.instantiateAfterLoading();
-				pa = alphaBetaStd;
-			} else if (sAgent.equals("AlphaBeta-DL")) {
-				AlphaBetaAgent alphaBetaStd = new AlphaBetaAgent(new BookSum(),1000); // search for distant losses
-				alphaBetaStd.instantiateAfterLoading();
-				pa = alphaBetaStd;
-			} else if (sAgent.equals("Bouton")) { 	// Nim only, see gui_agent_list in XArenaButtonsGui
-				pa = new BoutonAgent(sAgent);
-			} else if (sAgent.equals("DaviNim")) { 	// Nim3P only, see gui_agent_list in XArenaButtonsGui
-				pa = new DaviNimAgent(sAgent, m_xab.oPar[n]);
-			} else if (sAgent.equals("HeurPlayer")) { // Othello only, see gui_agent_list in XArenaButtonsGui
-				pa = new BenchMarkPlayer("HeurPlayer", 0);
-			} else if (sAgent.equals("BenchPlayer")) { // Othello only, see gui_agent_list in XArenaButtonsGui
-				pa = new BenchMarkPlayer("BenchPlayer", 1);
-			} else if (sAgent.equals("Edax2")) {// Othello only, see gui_agent_list in XArenaButtonsGui
-				pa = new Edax2(sAgent, m_xab.edPar[n]);
-			} else if (sAgent.equals("DAVI2")) { // RubiksCube only, see gui_agent_list in XArenaButtonsGui
-				pa = new DAVI2Agent(sAgent, m_xab.oPar[n]);
-			} else if (sAgent.equals("DAVI3")) { // RubiksCube only, see gui_agent_list in XArenaButtonsGui
-				XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
-				NTupleFactory ntupfac = new NTupleFactory();
-				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
-				pa = new DAVI3Agent(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
-						m_xab.oPar[n], nTuples, xnf, maxGameNum);
-			} else if (sAgent.equals("DAVI4")) { // RubiksCube only, see gui_agent_list in XArenaButtonsGui
-				XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
-				NTuple4Factory ntupfac = new NTuple4Factory();
-				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
-				pa = new DAVI4Agent(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
-						m_xab.oPar[n], nTuples, xnf, maxGameNum, m_xab.m_arena);
-			} else if(sAgent.equals("BSBJA")) { // Black Jack only, see gui_agent_list in XArenaButtonsGui
-				pa = new BasicStrategyBlackJackAgent();
-			} else if(sAgent.equals("KuhnOptimal")) { // KuhnPoker only, see gui_agent_list in XArenaButtonsGui
-				pa = new KuhnPokerAgent("KuhnOptimal");
+			switch (sAgent) {
+				case "TDS" -> {
+					Feature feat = m_xab.m_arena.makeFeatureClass(m_xab.tdPar[n].getFeatmode());
+					pa = new TDAgent(sAgent, m_xab.tdPar[n], m_xab.oPar[n], feat, maxGameNum);
+				}
+				case "RHEA-SI" -> pa = new RheaAgentSI(sAgent, null);
+				case "TD-Ntuple-3" -> {
+					XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
+					NTupleFactory ntupfac = new NTupleFactory();
+					int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
+					pa = new TDNTuple3Agt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
+							m_xab.oPar[n], nTuples, xnf, maxGameNum);
+				}
+				case "TD-Ntuple-4" -> {
+					XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
+					NTuple4Factory ntupfac = new NTuple4Factory();
+					int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
+					pa = new TDNTuple4Agt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
+							m_xab.oPar[n], m_xab.rbPar[n], m_xab.wrPar[n], nTuples, xnf, maxGameNum);
+					//((TDNTuple4Agt) pa).setRewardParsFromParTD();
+					m_xab.m_arena.gb.updateParams();
+				}
+				case "Sarsa" -> {
+					XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
+					NTupleFactory ntupfac = new NTupleFactory();
+					int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
+					// int numOutputs =
+					// m_xab.m_game.gb.getDefaultStartState().getAllAvailableActions().size();
+					ArrayList<ACTIONS> allAvailActions = m_xab.m_arena.gb.getDefaultStartState().getAllAvailableActions();
+					pa = new SarsaAgt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
+							m_xab.oPar[n], nTuples, xnf, allAvailActions, maxGameNum);
+				}
+				case "Sarsa-4" -> {
+					XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
+					NTuple4Factory ntupfac = new NTuple4Factory();
+					int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
+					ArrayList<ACTIONS> allAvailActions = m_xab.m_arena.gb.getDefaultStartState().getAllAvailableActions();
+					pa = new Sarsa4Agt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
+							m_xab.oPar[n], nTuples, xnf, allAvailActions, maxGameNum);
+				}
+				case "Qlearn-4" -> {
+					XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
+					NTuple4Factory ntupfac = new NTuple4Factory();
+					int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
+					ArrayList<ACTIONS> allAvailActions = m_xab.m_arena.gb.getDefaultStartState().getAllAvailableActions();
+					pa = new QLearn4Agt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
+							m_xab.oPar[n], nTuples, xnf, allAvailActions, maxGameNum);
+				}
+				case "Max-N" -> pa = new MaxNAgent(sAgent, m_xab.maxnPar[n], m_xab.oPar[n]);
+				case "Expectimax-N" -> pa = new ExpectimaxNAgent(sAgent, m_xab.maxnPar[n], m_xab.oPar[n]);
+				case "Random" -> pa = new RandomAgent(sAgent, m_xab.oPar[n]);
+				case "MCTS" -> pa = new MCTSAgentT(sAgent, null, m_xab.mctsPar[n], m_xab.oPar[n]);
+				case "MCTS Expectimax" -> pa = new MCTSExpectimaxAgt(sAgent, m_xab.mctsePar[n], m_xab.oPar[n]);
+				case "Human" -> pa = new HumanPlayer(sAgent);
+				case "MC-N" -> pa = new MCAgentN(sAgent, m_xab.mcPar[n], m_xab.oPar[n]);
+				case "AlphaBeta" -> {// CFour only, see gui_agent_list in XArenaButtonsGui
+					AlphaBetaAgent alphaBetaStd = new AlphaBetaAgent(new BookSum());      // no search for distant losses
+
+					alphaBetaStd.instantiateAfterLoading();
+					pa = alphaBetaStd;
+				}
+				case "AlphaBeta-DL" -> {
+					AlphaBetaAgent alphaBetaStd = new AlphaBetaAgent(new BookSum(), 1000); // search for distant losses
+
+					alphaBetaStd.instantiateAfterLoading();
+					pa = alphaBetaStd;
+				}
+				case "Bouton" ->    // Nim only, see gui_agent_list in XArenaButtonsGui
+						pa = new BoutonAgent(sAgent);
+				case "DaviNim" ->    // Nim3P only, see gui_agent_list in XArenaButtonsGui
+						pa = new DaviNimAgent(sAgent, m_xab.oPar[n]);
+				case "HeurPlayer" ->  // Othello only, see gui_agent_list in XArenaButtonsGui
+						pa = new BenchMarkPlayer("HeurPlayer", 0);
+				case "BenchPlayer" ->  // Othello only, see gui_agent_list in XArenaButtonsGui
+						pa = new BenchMarkPlayer("BenchPlayer", 1);
+				case "Edax2" -> // Othello only, see gui_agent_list in XArenaButtonsGui
+						pa = new Edax2(sAgent, m_xab.edPar[n]);
+				case "DAVI2" ->  // RubiksCube only, see gui_agent_list in XArenaButtonsGui
+						pa = new DAVI2Agent(sAgent, m_xab.oPar[n]);
+				case "DAVI3" -> { // RubiksCube only, see gui_agent_list in XArenaButtonsGui
+					XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
+					NTupleFactory ntupfac = new NTupleFactory();
+					int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
+					pa = new DAVI3Agent(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
+							m_xab.oPar[n], nTuples, xnf, maxGameNum);
+				}
+				case "DAVI4" -> { // RubiksCube only, see gui_agent_list in XArenaButtonsGui
+					XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
+					NTuple4Factory ntupfac = new NTuple4Factory();
+					int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
+					pa = new DAVI4Agent(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
+							m_xab.oPar[n], nTuples, xnf, maxGameNum, m_xab.m_arena);
+				}
+				case "BSBJA" ->  // Black Jack only, see gui_agent_list in XArenaButtonsGui
+						pa = new BasicStrategyBlackJackAgent();
+				case "KuhnOptimal" ->  // KuhnPoker only, see gui_agent_list in XArenaButtonsGui
+						pa = new KuhnPokerAgent("KuhnOptimal");
+				default -> throw new RuntimeException("Unknown agent name " + sAgent);
 			}
 		} catch (Exception e) {
 			m_Arena.showMessage(e.getClass().getName() + ": " + e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
@@ -657,15 +663,15 @@ public class XArenaFuncs {
 	 * @return the trained PlayAgent
 	 */
 	public PlayAgent train(int n, String sAgent, XArenaButtons xab, GameBoard gb)  {
-		int stopTest; // 0: do not call Evaluator during training;
-						// >0: call Evaluator after every stopTest training
-						// games
-		int stopEval; // 0: do not stop on Evaluator;
-						// >0: stop, if Evaluator stays true for stopEval games
+//		int stopTest; 	// 0: do not call Evaluator during training;
+//						// >0: call Evaluator after every stopTest training
+//						// games
 		int maxGameNum; // maximum number of training games
 		int numEval; // evaluate the trained agent every numEval games
 		long elapsedMs;
 		int gameNum = 0;
+		EvalResult 	eresQ = new EvalResult(),
+					eresT = new EvalResult();
 
 		maxGameNum = xab.getGameNumber();
 
@@ -717,10 +723,8 @@ public class XArenaFuncs {
 		pa.setGameNum(0);
 		System.out.println(pa.printTrainStatus());
 
-		stopTest = xab.oPar[n].getStopTest();
-		stopEval = xab.oPar[n].getStopEval();
 		int qem = xab.oPar[n].getQuickEvalMode();
-		m_evaluatorQ = xab.m_arena.makeEvaluator(pa, gb, stopEval, qem, 1);
+		m_evaluatorQ = xab.m_arena.makeEvaluator(pa, gb, qem, 1);
 		int tem = xab.oPar[n].getTrainEvalMode();
 		//
 		// doTrainEvaluation flags whether Train Evaluator is executed:
@@ -729,7 +733,7 @@ public class XArenaFuncs {
 		// the choice box 'Train Eval Mode' is not -1 ("none").
 		boolean doTrainEvaluation = (tem != -1);
 		if (doTrainEvaluation) {
-			m_evaluatorT = xab.m_arena.makeEvaluator(pa, gb, stopEval, tem, 1);
+			m_evaluatorT = xab.m_arena.makeEvaluator(pa, gb, tem, 1);
 		}
 
 		// initialization line chart plot:
@@ -771,14 +775,14 @@ public class XArenaFuncs {
 				// construct 'qa' anew (possibly wrapped agent for eval)
 				//qa = wrapAgent(pa, xab.oPar[n], xab.wrPar[n], xab.maxnPar[n], gb.getStateObs());
 
-				m_evaluatorQ.eval(qa);		// throws RuntimeException, if TDReferee.agt.zip is not found
+				eresQ = m_evaluatorQ.eval(qa);		// throws RuntimeException, if TDReferee.agt.zip is not found
 				if (doTrainEvaluation) {
-					m_evaluatorT.eval(qa);	// throws RuntimeException, if TDReferee.agt.zip is not found
+					eresT = m_evaluatorT.eval(qa);	// throws RuntimeException, if TDReferee.agt.zip is not found
 				}
 
 				// update line chart plot:
 				if (lChart != null) 
-					lChart.updateChartPlot(gameNum, m_evaluatorQ, m_evaluatorT, doTrainEvaluation, false);
+					lChart.updateChartPlot(gameNum, eresQ, eresT, doTrainEvaluation, false);
 
 				// update weight / TC factor distribution plot:
 				if (wChart != null)	wChart.updateChartPlot(gameNum, pa, per);
@@ -795,27 +799,28 @@ public class XArenaFuncs {
 				startTime = System.currentTimeMillis();
 			}
 
-			if (stopTest > 0 && (gameNum - 1) % numEval == 0 && stopEval > 0) {
-				qa = pa;
-				// --- OLD, no longer needed, since pa is already wrapped, if wrapping is activated: ---
-				// construct 'qa' anew (possibly wrapped agent for eval)
-				//qa = wrapAgent(pa, xab.oPar[n], xab.wrPar[n], xab.maxnPar[n], gb.getStateObs());
-
-				if (doTrainEvaluation) {
-					m_evaluatorT.eval(qa);
-					m_evaluatorT.goalReached(gameNum);
-				}
-
-				m_evaluatorQ.eval(qa);
-
-				elapsedMs = (System.currentTimeMillis() - startTime);
-				pa.incrementDurationEvaluationMs(elapsedMs);
-				startTime = System.currentTimeMillis();
-
-				if (m_evaluatorQ.goalReached(gameNum))
-					break; // out of while
-
-			}
+			// --- obsolete, we strip off stopTest ---
+//			if (stopTest > 0 && (gameNum - 1) % numEval == 0 && stopEval > 0) {
+//				qa = pa;
+//				// --- OLD, no longer needed, since pa is already wrapped, if wrapping is activated: ---
+//				// construct 'qa' anew (possibly wrapped agent for eval)
+//				//qa = wrapAgent(pa, xab.oPar[n], xab.wrPar[n], xab.maxnPar[n], gb.getStateObs());
+//
+//				if (doTrainEvaluation) {
+//					m_evaluatorT.eval(qa);
+//					m_evaluatorT.goalReached(gameNum);
+//				}
+//
+//				m_evaluatorQ.eval(qa);
+//
+//				elapsedMs = (System.currentTimeMillis() - startTime);
+//				pa.incrementDurationEvaluationMs(elapsedMs);
+//				startTime = System.currentTimeMillis();
+//
+//				if (m_evaluatorQ.goalReached(gameNum))
+//					break; // out of while
+//
+//			}
 		} // while
 
 		// Debug only
@@ -841,16 +846,18 @@ public class XArenaFuncs {
 		// m_evaluator2.eval();
 		// Evaluator2 m_evaluator2New = new Evaluator2(pa,0,2);
 		// m_evaluator2New.eval();
-		if (stopTest > 0 && stopEval > 0) {
-			System.out.println(m_evaluatorQ.getGoalMsg(gameNum));
-			if (doTrainEvaluation)
-				System.out.println(m_evaluatorT.getGoalMsg(gameNum));
-		}
 
-		System.out.println("final " + m_evaluatorQ.getMsg());
-		if (doTrainEvaluation && m_evaluatorT.getMsg() != null)
-			System.out.println("final " + m_evaluatorT.getMsg());
-		// getMsg() might be null if evaluator mode = -1 (no evaluation)
+		// --- deprecated ---
+//		if (stopTest > 0 && stopEval > 0) {
+//			System.out.println(m_evaluatorQ.getGoalMsg(gameNum));
+//			if (doTrainEvaluation)
+//				System.out.println(m_evaluatorT.getGoalMsg(gameNum));
+//		}
+
+		System.out.println("final " + eresQ.getMsg());
+		if (doTrainEvaluation && eresT.getMsg() != null)
+			System.out.println("final " + eresT.getMsg());
+		// getMsg() might return null if evaluator mode = -1 (no evaluation)
 
 		long actionNum = pa.getNumLrnActions();
 		double totalTrainSec = (double) pa.getDurationTrainingMs() / 1000.0;
@@ -937,8 +944,9 @@ public class XArenaFuncs {
 		String userTitle1 = "", userTitle2 = "";
 		double userValue1 = 0., userValue2 = 0.0;
 		long elapsedMs;
-		int stopEval = 0;
 		boolean doTrainEvaluation = false;
+		EvalResult 	eresQ = new EvalResult(),
+					eresT = new EvalResult();
 
 		int trainNum = xab.getTrainNumber();
 		int maxGameNum = xab.getGameNumber();
@@ -993,7 +1001,7 @@ public class XArenaFuncs {
 								// 'gameNum%numEval' below
 			
 			int qem = xab.oPar[n].getQuickEvalMode();
-			m_evaluatorQ = xab.m_arena.makeEvaluator(pa, gb, stopEval, qem, 1);
+			m_evaluatorQ = xab.m_arena.makeEvaluator(pa, gb, qem, 1);
 			int tem = xab.oPar[n].getTrainEvalMode();
 			//
 			// doTrainEvaluation flags whether Train Evaluator is executed:
@@ -1002,7 +1010,7 @@ public class XArenaFuncs {
 			// the choice box 'Train Eval Mode' is not -1 ("none").
 			doTrainEvaluation = (tem != -1);
 			if (doTrainEvaluation)
-				m_evaluatorT = xab.m_arena.makeEvaluator(pa, gb, stopEval, tem, 1);
+				m_evaluatorT = xab.m_arena.makeEvaluator(pa, gb, tem, 1);
 
 			// if (i==0) {
 			System.out.println(pa.stringDescr());
@@ -1034,11 +1042,11 @@ public class XArenaFuncs {
 					// construct 'qa' anew (possibly wrapped agent for eval)
 					//qa = wrapAgent(pa, xab.oPar[n],  xab.wrPar[n], xab.maxnPar[n], gb.getStateObs());
 
-					m_evaluatorQ.eval(qa);			// throws RuntimeException, if TDReferee.agt.zip is not found
-					evalQ = m_evaluatorQ.getLastResult();
+					eresQ = m_evaluatorQ.eval(qa);			// throws RuntimeException, if TDReferee.agt.zip is not found
+					evalQ = eresQ.getResult();
 					if (doTrainEvaluation) {
-						m_evaluatorT.eval(qa);		// throws RuntimeException, if TDReferee.agt.zip is not found
-						evalT = m_evaluatorT.getLastResult();
+						eresT = m_evaluatorT.eval(qa);		// throws RuntimeException, if TDReferee.agt.zip is not found
+						evalT = eresT.getResult();
 					}
 
 					// gather information for later printout to
@@ -1082,11 +1090,11 @@ public class XArenaFuncs {
 			//qa = wrapAgent(pa, xab.oPar[n], xab.wrPar[n], xab.maxnPar[n], gb.getStateObs());
 
 			// final evaluation:
-			m_evaluatorQ.eval(qa);
-			oQ.add(m_evaluatorQ.getLastResult());
+			eresQ = m_evaluatorQ.eval(qa);
+			oQ.add(eresQ.getResult());
 			if (doTrainEvaluation) {
-				m_evaluatorT.eval(qa);
-				oT.add(m_evaluatorT.getLastResult());
+				eresT = m_evaluatorT.eval(qa);
+				oT.add(eresT.getResult());
 			}
 
 			elapsedMs = (System.currentTimeMillis() - startTime);	// ms spent for final evaluation
@@ -1102,24 +1110,24 @@ public class XArenaFuncs {
 			}
 		} // for (i)
 
-		if (m_evaluatorQ.m_mode != (-1))
+		if (eresQ.getMode() != (-1))
 		// m_mode=-1 signals: 'no evaluation done' --> oT did not receive
 		// evaluation results
 		{
-			System.out.println("Avg. " + m_evaluatorQ.getPrintString() + frm3.format(oQ.getMean()) + " +- "
+			System.out.println("Avg. " + eresQ.getMsg() + frm3.format(oQ.getMean()) + " +- "
 					+ frm.format(oQ.getStd()));
 		}
-		if (doTrainEvaluation && m_evaluatorT.m_mode != (-1))
+		if (doTrainEvaluation && eresT.getMode() != (-1))
 		// m_mode=-1 signals: 'no evaluation done' --> oT did not receive
 		// evaluation results
 		{
-			System.out.println("Avg. " + m_evaluatorT.getPrintString() + frm3.format(oT.getMean()) + " +- "
+			System.out.println("Avg. " + eresT.getMsg() + frm3.format(oT.getMean()) + " +- "
 					+ frm.format(oT.getStd()));
 		}
-		if (m_evaluatorQ.m_mode == (-1)) {
+		if (eresQ.getMode() == (-1)) {
 			this.lastMsg = "Warning: No evaluation done (Quick Eval Mode = -1)";
 		} else {
-			this.lastMsg = (m_evaluatorQ.getPrintString() + frm2.format(oQ.getMean()) + " +- "
+			this.lastMsg = (eresQ.getMsg() + frm2.format(oQ.getMean()) + " +- "
 					+ frm1.format(oQ.getStd()) + "");
 		}
 

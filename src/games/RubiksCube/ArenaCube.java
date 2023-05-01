@@ -11,7 +11,7 @@ import games.RubiksCube.CubeConfig.TwistType;
  * from the general class {@link Arena} . It only overrides
  * the abstract methods <ul>
  * <li> {@link Arena#makeGameBoard()}, 
- * <li> {@link Arena#makeEvaluator(PlayAgent, GameBoard, int, int, int)}, and 
+ * <li> {@link Arena#makeEvaluator(PlayAgent, GameBoard, int, int)}, and
  * <li> {@link Arena#makeFeatureClass(int)}, 
  * </ul> such that 
  * these factory methods return objects of class {@link GameBoardCube}, 
@@ -75,17 +75,16 @@ public class ArenaCube extends Arena   {
 
 	/**
 	 * Factory pattern method: make a new Evaluator
-	 * @param pa		the agent to evaluate
-	 * @param gb		the game board
-	 * @param stopEval	maximum episode length {@code epiLength} during evaluation
-	 * @param mode		which evaluator mode: -1,0,1. Throws a runtime exception
+	 * @param pa        the agent to evaluate
+	 * @param gb        the game board
+	 * @param mode        which evaluator mode: -1,0,1. Throws a runtime exception
 	 * 					if {@code mode} is not in the set {@link Evaluator#getAvailableModes()}.
-	 * @param verbose	how verbose or silent the evaluator is
+	 * @param verbose    how verbose or silent the evaluator is
 	 * @return			the new evaluator
 	 */
 	@Override
-	public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
-		return new EvaluatorCube(pa,gb,stopEval,mode,verbose);
+	public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int mode, int verbose) {
+		return new EvaluatorCube(pa,gb, mode,verbose);
 	}
 
 	@Override

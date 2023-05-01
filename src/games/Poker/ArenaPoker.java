@@ -1,12 +1,10 @@
 package games.Poker;
 
-import TournamentSystem.tools.TSGameDataTransfer;
 import controllers.PlayAgent;
 import games.*;
 import tools.Types;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 
@@ -38,8 +36,8 @@ public class ArenaPoker extends Arena   {
 	}
 
 
-	public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
-		return new EvaluatorPoker(pa,gb,stopEval,mode,0);
+	public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int mode, int verbose) {
+		return new EvaluatorPoker(pa,gb, mode,0);
 	}
 	
 	public Feature makeFeatureClass(int featmode) {

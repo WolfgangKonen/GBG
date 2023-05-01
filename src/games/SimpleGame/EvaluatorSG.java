@@ -1,6 +1,7 @@
 package games.SimpleGame;
 
 import controllers.PlayAgent;
+import games.EvalResult;
 import games.Evaluator;
 import games.GameBoard;
 import games.StateObservation;
@@ -18,12 +19,12 @@ public class EvaluatorSG extends Evaluator {
 	private final int NUMEPISODES=10000;
 	protected double[] m_thresh={5.0, 0.9}; // threshold for each value of m_mode
 
-	public EvaluatorSG(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
-		super(e_PlayAgent, gb, mode, stopEval, verbose);
-		initEvaluator(gb);
+	public EvaluatorSG(PlayAgent e_PlayAgent, GameBoard gb, int mode, int verbose) {
+		super(e_PlayAgent, gb, mode, verbose);
+		//initEvaluator(gb);
 	}
 	
-	private void initEvaluator(GameBoard gb) { 	}
+//	private void initEvaluator(GameBoard gb) { 	}
 	
 
 	/**
@@ -32,23 +33,23 @@ public class EvaluatorSG extends Evaluator {
 	 * 
 	 * @return true if evaluateAgentX is above m_thresh.<br>
 	 * The choice for X=1 or 2 is made with 3rd parameter mode in 
-	 * {@link #EvaluatorSG(PlayAgent, GameBoard, int, int, int)} [default mode=1].<p>
+	 * {@link #EvaluatorSG(PlayAgent, GameBoard, int, int)} [default mode=1].<p>
 	 * 
 	 * If mode==0, then m_thresh=0.8 (best: 0.9, worst: 0.0) <br>
 	 * If mode==1 or 2, then m_thresh=-0.15 (best: 0.0, worst: -1.0)
 	 */
 	@Override
-	public boolean evalAgent(PlayAgent playAgent) {
+	public EvalResult evalAgent(PlayAgent playAgent) {
 
 		m_PlayAgent = playAgent;
 		switch(m_mode) {
 		case -1: 
 			m_msg = "no evaluation done ";
 			lastResult = Double.NaN;
-			return false;
-		case 0:  return evaluateAgent0(m_PlayAgent,m_gb)>m_thresh[0];
-		case 1:  return evaluateAgent1(m_PlayAgent,m_gb)>m_thresh[1];
-		default: return false;
+			return new EvalResult(lastResult, true, m_msg, m_mode, Double.NaN);
+		case 0:  return evaluateAgent0(m_PlayAgent,m_gb,m_thresh[0]);
+		case 1:  return evaluateAgent1(m_PlayAgent,m_gb,m_thresh[1]);
+		default: throw new RuntimeException("Invalid m_mode = "+m_mode);
 		}
 	}
 	
@@ -58,7 +59,7 @@ public class EvaluatorSG extends Evaluator {
 	 * @param gb		needed to get a default start state (competeBoth)
  	 * @return average reward
 	 */
- 	private double evaluateAgent0(PlayAgent pa, GameBoard gb) {
+ 	private EvalResult evaluateAgent0(PlayAgent pa, GameBoard gb, double thresh) {
  		double avgReward=0.0;
  		for (int i=0; i<NUMEPISODES; i++) {
 			StateObservation so = gb.getDefaultStartState();
@@ -69,7 +70,7 @@ public class EvaluatorSG extends Evaluator {
 		lastResult = avgReward/NUMEPISODES;
 		m_msg = pa.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>0) System.out.println(m_msg);
-		return lastResult;
+		return new EvalResult(lastResult, lastResult>thresh, m_msg, m_mode, thresh);
 	}
 
 	/**
@@ -78,7 +79,7 @@ public class EvaluatorSG extends Evaluator {
 	 * @param gb		needed to get a default start state (competeBoth)
 	 * @return percent correct decisions
 	 */
-	private double evaluateAgent1(PlayAgent pa, GameBoard gb) {
+	private EvalResult evaluateAgent1(PlayAgent pa, GameBoard gb, double thresh) {
 		double percCorrect=0.0;
 		for (int i=0; i<NUMEPISODES; i++) {
 			StateObserverSG so = (StateObserverSG) gb.getDefaultStartState();
@@ -95,7 +96,7 @@ public class EvaluatorSG extends Evaluator {
 		lastResult = percCorrect/NUMEPISODES;
 		m_msg = pa.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>0) System.out.println(m_msg);
-		return lastResult;
+		return new EvalResult(lastResult, lastResult>thresh, m_msg, m_mode, thresh);
 	}
 
 

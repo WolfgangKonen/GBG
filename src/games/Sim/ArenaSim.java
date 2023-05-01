@@ -8,12 +8,6 @@ import games.Evaluator;
 import games.Feature;
 import games.GameBoard;
 import games.XNTupleFuncs;
-import games.Hex.HexConfig;
-import games.RubiksCube.GameBoardCube;
-import games.TicTacToe.ArenaTTT;
-import games.TicTacToe.EvaluatorTTT;
-import games.TicTacToe.FeatureTTT;
-import games.TicTacToe.XNTupleFuncsTTT;
 
 
 public class ArenaSim extends Arena{
@@ -44,8 +38,8 @@ public class ArenaSim extends Arena{
 	}
 
 	@Override
-	public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
-		return new EvaluatorSim(pa,gb,stopEval,mode,verbose);
+	public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int mode, int verbose) {
+		return new EvaluatorSim(pa,gb, mode,verbose);
 	}
 
 	public Feature makeFeatureClass(int featmode) {

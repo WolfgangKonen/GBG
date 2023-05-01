@@ -8,6 +8,7 @@ import games.Arena;
 import games.EWN.EvaluatorEWN;
 import games.EWN.GameBoardEWN;
 import games.EWN.StateObserverEWN;
+import games.EvalResult;
 import games.KuhnPoker.GameBoardKuhnPoker;
 import games.KuhnPoker.StateObserverKuhnPoker;
 import games.StateObservation;
@@ -612,9 +613,9 @@ public class MctseWrapperTest extends GBGBatch {
                         startTime = System.currentTimeMillis();
 
                         if (mode<10) {
-                            EvaluatorEWN m_eval = new EvaluatorEWN(qa, gb, 0, mode, 0);
-                            m_eval.eval(qa);
-                            winrate = (1+m_eval.getLastResult())/2;
+                            EvaluatorEWN m_eval = new EvaluatorEWN(qa, gb, mode, 0);
+                            EvalResult eRes = m_eval.eval(qa);
+                            winrate = (1+eRes.getResult())/2;
                             System.out.print(m_eval.getPrintString() + ",  winrate="+frm.format(winrate));
                         } else {
                             assert scaPar[0].equals("3x3 2-Player") : "[innerEWNTest] Error: mode>=10 only viable for 3x3 EWN";

@@ -1294,9 +1294,9 @@ abstract public class Arena implements Runnable {
 	 * @return true, if there is at least one human agent in the game
 	 */
 	public boolean hasHumanAgent() {
-		// the member variable hasHumanAgentB is set to null at the beginning of Arena.run(). It has the purpose that
-		// the lengthy if-part below with fetchAgents is called only once per pass through run() (and not with every
-		// call to gb.updateBoard() in the case of taskState==PLAY)
+		// the member variable hasHumanAgentB is set to null at the beginning of while-loop inArena.run(). It has the
+		// purpose that the lengthy if-part below with fetchAgents is called only once per while-loop (and not with
+		// every call to gb.updateBoard() in the case of taskState==PLAY)
 		if (hasHumanAgentB ==null) {
 			hasHumanAgentB = false;
 			PlayAgent[] paVector2 = m_xfun.fetchAgents(m_xab);
@@ -1368,17 +1368,13 @@ abstract public class Arena implements Runnable {
 	 *            the agent to evaluate
 	 * @param gb
 	 *            the game board
-	 * @param stopEval
-	 *            the number of successful evaluations needed to reach the
-	 *            evaluator goal (this may be used during training to stop it
-	 *            prematurely)
 	 * @param mode
-	 *            which evaluator mode. 
+	 *            which evaluator mode.
 	 * @param verbose
 	 *            how verbose or silent the evaluator is
 	 * @return the evaluator
 	 */
-	abstract public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose);
+	abstract public Evaluator makeEvaluator(PlayAgent pa, GameBoard gb, int mode, int verbose);
 
 	/**
 	 * Factory pattern method: make a new {@link Feature} tailored to a specific
@@ -1473,12 +1469,12 @@ abstract public class Arena implements Runnable {
 
 						if (m_xfun.m_PlayAgents[n] != null) {
 							pa = m_xfun.m_PlayAgents[n];
-							Evaluator m_evaluator2 = makeEvaluator(pa,gb,0,m_xab.oPar[n].getQuickEvalMode(),1);
-							m_evaluator2.eval(pa);
-							System.out.println("final "+m_evaluator2.getMsg());
+							Evaluator m_evaluator = makeEvaluator(pa,gb, m_xab.oPar[n].getQuickEvalMode(),1);
+							EvalResult eRes =  m_evaluator.eval(pa);
+							System.out.println("final "+eRes.getReport());
 							m_xfun.m_PlayAgents[n].setAgentState(PlayAgent.AgentState.TRAINED);
 							m_xab.setOParFrom(n,pa.getParOther());
-							setStatusMessage("final "+m_evaluator2.getMsg());
+							setStatusMessage("final "+eRes.getMsg());
 							//System.out.println("Duration training: " + ((double)pa.getDurationTrainingMs()/1000));
 							//System.out.println("Duration evaluation: " + ((double)pa.getDurationEvaluationMs()/1000));
 						} else {

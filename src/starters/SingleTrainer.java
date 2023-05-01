@@ -30,6 +30,7 @@ public class SingleTrainer {
         long elapsedMs;
         int stopEval = 0;
         MTrain mTrain;
+        EvalResult eresQ, eresT;
         double evalQ, evalT = 0.0;
 
         // Construct agent anew with the settings of xab. Necessary to build a new set of random n-tuples in each run
@@ -46,7 +47,7 @@ public class SingleTrainer {
 
 
         int qem = xab.oPar[n].getQuickEvalMode();
-        m_evaluatorQ = xab.m_arena.makeEvaluator(pa, gb, stopEval, qem, 1);
+        m_evaluatorQ = xab.m_arena.makeEvaluator(pa, gb, qem, 1);
         //
         // doTrainEvaluation flags whether Train Evaluator is executed:
         // Evaluator m_evaluatorT is only constructed and evaluated, if in tab 'Other pars'
@@ -54,7 +55,7 @@ public class SingleTrainer {
         int tem = xab.oPar[n].getTrainEvalMode();
         doTrainEvaluation = (tem != -1);
         if (doTrainEvaluation)
-            m_evaluatorT = xab.m_arena.makeEvaluator(pa, gb, stopEval, tem, 1);
+            m_evaluatorT = xab.m_arena.makeEvaluator(pa, gb, tem, 1);
 
         System.out.println(pa.stringDescr());
         System.out.println(pa.stringDescr2());
@@ -86,11 +87,11 @@ public class SingleTrainer {
 
                 xab.setGameNumber(gameNum);
 
-                m_evaluatorQ.eval(pa);
-                evalQ = m_evaluatorQ.getLastResult();
+                eresQ = m_evaluatorQ.eval(pa);
+                evalQ = eresQ.getResult();
                 if (doTrainEvaluation) {
-                    m_evaluatorT.eval(pa);
-                    evalT = m_evaluatorT.getLastResult();
+                    eresT = m_evaluatorT.eval(pa);
+                    evalT = eresT.getResult();
                 }
 
                 // gather information for later printout to agents/gameName/csv/multiTrain.csv.
@@ -112,12 +113,12 @@ public class SingleTrainer {
         } // while
 
 
-        m_evaluatorQ.eval(pa);
-        evalQ = m_evaluatorQ.getLastResult();
+        eresQ = m_evaluatorQ.eval(pa);
+        evalQ = eresQ.getResult();
         oQ.add(evalQ);
         if (doTrainEvaluation) {
-            m_evaluatorT.eval(pa);
-            evalT = m_evaluatorT.getLastResult();
+            eresT = m_evaluatorT.eval(pa);
+            evalT = eresT.getResult();
             oT.add(evalT);
         }
 

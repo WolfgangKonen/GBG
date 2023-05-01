@@ -8,10 +8,7 @@ import controllers.PlayAgent;
 import controllers.PlayAgtVector;
 import controllers.RandomAgent;
 import controllers.MCTS.MCTSAgentT;
-import games.Evaluator;
-import games.GameBoard;
-import games.StateObservation;
-import games.XArenaFuncs;
+import games.*;
 import games.Othello.BenchmarkPlayer.BenchMarkPlayer;
 import params.ParMaxN;
 import params.ParOther;
@@ -35,7 +32,7 @@ import tools.Types.ACTIONS;
  * The value of {@code mode} is set in the constructor. <p>
  * Competition is done in all roles for {@code numEpisodes=10} episodes. <br>
  * For 'different starts' see {@link #diffStartList}. In that case we use {@code numEpisodes=1}, because we have already
- * many different start states.
+ * many start states.
  */
 public class EvaluatorOthello extends Evaluator {
 
@@ -59,20 +56,8 @@ public class EvaluatorOthello extends Evaluator {
 	 */
 	protected static int NPLY_DS = 4;
 
-	
-    public EvaluatorOthello(PlayAgent e_PlayAgent, GameBoard gb, int stopEval) {
-		super(e_PlayAgent, gb, 1, stopEval);		// default mode: 1
-		initEvaluator();
-	}
-    
-    public EvaluatorOthello(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode) {
-		super(e_PlayAgent, gb, mode, stopEval);
-		initEvaluator();
-	}
-    
-    
-	public EvaluatorOthello(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose) {
-		super(e_PlayAgent, gb, mode, stopEval, verbose);
+	public EvaluatorOthello(PlayAgent e_PlayAgent, GameBoard gb, int mode, int verbose) {
+		super(e_PlayAgent, gb, mode, verbose);
 		initEvaluator();
 	}
 	
@@ -102,7 +87,7 @@ public class EvaluatorOthello extends Evaluator {
 		return diffStartList;
 	}
 	
-	public boolean evalAgent(PlayAgent playAgent){
+	public EvalResult evalAgent(PlayAgent playAgent){
 		boolean diffStarts = true;
 		int numEpisodes = (m_mode>11) ?  1 : 10;			// number of episodes in evaluation competition.
 				// We take in the diffStarts-modes 19,20,21 only numEpisodes=1, since we have there 244 different
@@ -121,21 +106,21 @@ public class EvaluatorOthello extends Evaluator {
 		case -1:
 			m_msg = "no evaluation done ";
 			lastResult = 0.0;
-			return false;
-		case 0: return evaluateAgainstOpponent(m_PlayAgent, randomAgent, false, numEpisodes) > 0.0;
-		case 1:	return evaluateAgainstOpponent(m_PlayAgent,   maxNAgent, false, numEpisodes) > 0.0;
-		case 2:	return evaluateAgainstOpponent(m_PlayAgent,   mctsAgent, false, numEpisodes) > 0.0;
-		case 9:	return evaluateAgainstOpponent(m_PlayAgent, benchPlayer, false, numEpisodes) > 0.0;
-		case 10:return evaluateAgainstOpponent(m_PlayAgent,  heurPlayer, false, numEpisodes) > 0.0;
+			return new EvalResult(lastResult, true, m_msg, m_mode, Double.NaN);
+		case 0: return evaluateAgainstOpponent(m_PlayAgent, randomAgent, false, numEpisodes, 0.0);
+		case 1:	return evaluateAgainstOpponent(m_PlayAgent,   maxNAgent, false, numEpisodes, 0.0);
+		case 2:	return evaluateAgainstOpponent(m_PlayAgent,   mctsAgent, false, numEpisodes, 0.0);
+		case 9:	return evaluateAgainstOpponent(m_PlayAgent, benchPlayer, false, numEpisodes, 0.0);
+		case 10:return evaluateAgainstOpponent(m_PlayAgent,  heurPlayer, false, numEpisodes, 0.0);
 		case 11: 
 			//	Evaluator.getTDReferee throws RuntimeException, if TDReferee.agt.zip is not found:
-			return evaluateAgainstOpponent(m_PlayAgent, this.getTDReferee(), false, numEpisodes) > 0.0;
-		case 19:return evaluateAgainstOpponent(m_PlayAgent, benchPlayer, diffStarts, numEpisodes) > 0.0;
-		case 20:return evaluateAgainstOpponent(m_PlayAgent,  heurPlayer, diffStarts, numEpisodes) > 0.0;
+			return evaluateAgainstOpponent(m_PlayAgent, this.getTDReferee(), false, numEpisodes, 0.0);
+		case 19:return evaluateAgainstOpponent(m_PlayAgent, benchPlayer, diffStarts, numEpisodes, 0.0);
+		case 20:return evaluateAgainstOpponent(m_PlayAgent,  heurPlayer, diffStarts, numEpisodes, 0.0);
 		case 21: 
 			//	Evaluator.getTDReferee throws RuntimeException, if TDReferee.agt.zip is not found:
-			return evaluateAgainstOpponent(m_PlayAgent, this.getTDReferee(), diffStarts, numEpisodes) > 0.0;
-		default: return false;
+			return evaluateAgainstOpponent(m_PlayAgent, this.getTDReferee(), diffStarts, numEpisodes, 0.0);
+		default: throw new RuntimeException("Invalid m_mode = "+m_mode);
 		}		
 	}
 	
@@ -148,11 +133,12 @@ public class EvaluatorOthello extends Evaluator {
 	 * @param diffStarts	If true, select in each of the {@code numEpisodes} competitions <b>every</b>
 	 * 						element from {@link #diffStartList} and play two episodes: 
 	 * 						{@code playAgent} vs. {@code opponent} and {@code opponent} vs. {@code playAgent}.
-	 * 						If false, start always from default start state and play in both roles.  
+	 * 						If false, always start from default start state and play in both roles.
 	 * @param numEpisodes number of episodes played during evaluation
 	 * @return a {@link ScoreTuple} with two elements, holding the average score for {@code playAgent} and {@code opponent}. 
 	 */
-	private double evaluateAgainstOpponent(PlayAgent playAgent, PlayAgent opponent, boolean diffStarts, int numEpisodes) {
+	private EvalResult evaluateAgainstOpponent(PlayAgent playAgent, PlayAgent opponent, boolean diffStarts,
+										   int numEpisodes, double thresh) {
 		StateObservation so = m_gb.getDefaultStartState();
 		int N = so.getNumPlayers();
 		ScoreTuple scMean = new ScoreTuple(N);
@@ -170,45 +156,45 @@ public class EvaluatorOthello extends Evaluator {
 			}	
 			System.out.println("count = "+ count);
 		} 
-		else 		// start always from default start state
+		else 		// always start from default start state
 		{
 			scMean = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent), so, numEpisodes, 0);
 		}
 		lastResult = scMean.scTup[0];
 		m_msg = playAgent.getName()+": "+getPrintString() + lastResult; 
-	    return lastResult;
+	    return new EvalResult(lastResult, lastResult>thresh, m_msg, m_mode, thresh);
     }
 	 
-	/**
-	 * This method is deprecated since it has much more fluctuation than 
-	 * {@link #evaluateAgainstOpponent(PlayAgent, PlayAgent, boolean, int) evaluateAgainstOpponent}.
-	 * <p>
-	 * Evaluate {@link PlayAgent} {@code playAgent} vs. {@code opponent}, both playing in both roles.
-	 * Perform {@code numEpisodes} such competitions and average results.
-	 *
-	 * @param playAgent agent to be evaluated
-	 * @param opponent agent against which {@code playAgent} plays.
-	 * @param diffStarts	If false, start from default start state. If true, select in each of the {@code numEpisodes}
-	 * 						competitions a random start state according to {@link GameBoardOthello#chooseStartState()}.
-	 * @param numEpisodes number of episodes played during evaluation
-	 * @return a {@link ScoreTuple} with two elements, holding the average score for {@code playAgent} and {@code opponent}. 
-	 */
-	@Deprecated
-	private double evaluateAgainstOpponent_OLD(PlayAgent playAgent, PlayAgent opponent, boolean diffStarts, int numEpisodes) {
-		StateObservation so = m_gb.getDefaultStartState();
-		int N = so.getNumPlayers();
-		ScoreTuple sc;
-		ScoreTuple scMean = new ScoreTuple(N);
-		double sWeight = 1 / (double) numEpisodes;
-		for (int c=0; c<numEpisodes; c++) {
-			if (diffStarts) so = m_gb.chooseStartState();	// choose a different start state in each pass
-			sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent), so, 1, 0);
-			scMean.combine(sc, ScoreTuple.CombineOP.AVG, 0, sWeight);
-		}
-		lastResult = scMean.scTup[0];
-		m_msg = playAgent.getName()+": "+getPrintString() + lastResult; 
-	    return lastResult;
-    }
+//	/**
+//	 * This method is deprecated since it has much more fluctuation than
+//	 * {@link #evaluateAgainstOpponent(PlayAgent, PlayAgent, boolean, int, double) evaluateAgainstOpponent}.
+//	 * <p>
+//	 * Evaluate {@link PlayAgent} {@code playAgent} vs. {@code opponent}, both playing in both roles.
+//	 * Perform {@code numEpisodes} such competitions and average results.
+//	 *
+//	 * @param playAgent agent to be evaluated
+//	 * @param opponent agent against which {@code playAgent} plays.
+//	 * @param diffStarts	If false, start from default start state. If true, select in each of the {@code numEpisodes}
+//	 * 						competitions a random start state according to {@link GameBoardOthello#chooseStartState()}.
+//	 * @param numEpisodes number of episodes played during evaluation
+//	 * @return a {@link ScoreTuple} with two elements, holding the average score for {@code playAgent} and {@code opponent}.
+//	 */
+//	@Deprecated
+//	private double evaluateAgainstOpponent_OLD(PlayAgent playAgent, PlayAgent opponent, boolean diffStarts, int numEpisodes) {
+//		StateObservation so = m_gb.getDefaultStartState();
+//		int N = so.getNumPlayers();
+//		ScoreTuple sc;
+//		ScoreTuple scMean = new ScoreTuple(N);
+//		double sWeight = 1 / (double) numEpisodes;
+//		for (int c=0; c<numEpisodes; c++) {
+//			if (diffStarts) so = m_gb.chooseStartState();	// choose a different start state in each pass
+//			sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent), so, 1, 0);
+//			scMean.combine(sc, ScoreTuple.CombineOP.AVG, 0, sWeight);
+//		}
+//		lastResult = scMean.scTup[0];
+//		m_msg = playAgent.getName()+": "+getPrintString() + lastResult;
+//	    return lastResult;
+//    }
 	 
 	  
 	@Override
@@ -228,19 +214,19 @@ public class EvaluatorOthello extends Evaluator {
 
 	@Override
 	public String getPrintString() {
-		switch (m_mode) {
-		case -1: return "no evaluation done ";
-		case 0:  return "success against Random (best is 1.0): ";
-		case 1:  return "success against Max-N (best is 1.0): ";
-		case 2:  return "success against MCTS (best is 1.0): ";
-		case 9:  return "success against BenchPlayer (best is 1.0): ";
-		case 10: return "success against HeurPlayer (best is 1.0): ";
-		case 11: return "success against TDReferee.agt.zip (expected 0.0): ";
-		case 19: return "success against BenchPlayer, diff starts (best is 1.0): ";
-		case 20: return "success against HeurPlayer, diff starts (best is 1.0): ";
-		case 21: return "success against TDReferee.agt.zip, diff starts (expected 0.0): ";
-		default: return null;
-		}
+		return switch (m_mode) {
+			case -1 -> "no evaluation done ";
+			case 0 -> "success against Random (best is 1.0): ";
+			case 1 -> "success against Max-N (best is 1.0): ";
+			case 2 -> "success against MCTS (best is 1.0): ";
+			case 9 -> "success against BenchPlayer (best is 1.0): ";
+			case 10 -> "success against HeurPlayer (best is 1.0): ";
+			case 11 -> "success against TDReferee.agt.zip (expected 0.0): ";
+			case 19 -> "success against BenchPlayer, diff starts (best is 1.0): ";
+			case 20 -> "success against HeurPlayer, diff starts (best is 1.0): ";
+			case 21 -> "success against TDReferee.agt.zip, diff starts (expected 0.0): ";
+			default -> null;
+		};
 	}
 
 	@Override
@@ -260,17 +246,17 @@ public class EvaluatorOthello extends Evaluator {
 
 	@Override
 	public String getPlotTitle() {
-		switch (m_mode) {
-          case 0:  return "success against Random";
-          case 1:  return "success against MaxN";
-          case 2:  return "success against MCTS";
-          case 9:  return "success against BenchPlayer";
-          case 10: return "success against HeurPlayer";
-          case 11: return "success against TDReferee"; 
-          case 19: return "success vs BenchPlayer, diff";
-          case 20: return "success vs HeurPlayer, diff";
-          case 21: return "success vs TDReferee, diff"; 
-          default: return null;
-		 }
+		return switch (m_mode) {
+			case 0 -> "success against Random";
+			case 1 -> "success against MaxN";
+			case 2 -> "success against MCTS";
+			case 9 -> "success against BenchPlayer";
+			case 10 -> "success against HeurPlayer";
+			case 11 -> "success against TDReferee";
+			case 19 -> "success vs BenchPlayer, diff";
+			case 20 -> "success vs HeurPlayer, diff";
+			case 21 -> "success vs TDReferee, diff";
+			default -> null;
+		};
 	}
 }

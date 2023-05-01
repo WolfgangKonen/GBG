@@ -5,12 +5,9 @@ import java.io.IOException;
 
 
 import controllers.*;
-import controllers.MCTS.MCTSAgentT;
-import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.PlayAgent.AgentState;
 import games.*;
 import params.ParMCTSE;
-import starters.GBGLaunch;
 import starters.MTrainSweep;
 import tools.Types;
 
@@ -141,7 +138,7 @@ public class Starter {
     }
 
     public void LogtoCsv(PlayAgent pa, String agentName) throws IOException{
-        EvaluatorEWN eve = new EvaluatorEWN(pa,arenaTrain.getGameBoard(),1,1);
+        EvaluatorEWN eve = new EvaluatorEWN(pa,arenaTrain.getGameBoard(), 1);
         FileWriter pw = new FileWriter("./"+arenaTrain.getGameBoard().getSubDir()+"Result.csv",true);
         double r = eve.evaluateFree(pa,Starter.t_Batch.getAgent(), false,100);
         double r2 = eve.evaluateFree(Starter.t_Batch.getAgent(),pa, false,100);

@@ -1,8 +1,8 @@
 package games.ZweiTausendAchtundVierzig;
 
-import controllers.MC.MCAgentN;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.PlayAgent;
+import games.EvalResult;
 import games.Evaluator;
 import games.GameBoard;
 import games.Arena;
@@ -11,13 +11,6 @@ import games.ZweiTausendAchtundVierzig.Heuristic.Evaluator2048_EA;
 import tools.Types;
 import tools.Types.ACTIONS_VT;
 
-import java.io.BufferedReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -27,7 +20,7 @@ import java.util.concurrent.Executors;
  * Base evaluator for 2048: average score from playing 50 episodes.
  * <p>
  * Note that the mode-selection for 2048 evaluators is done in 
- * {@link Arena2048#makeEvaluator(PlayAgent, GameBoard, int, int, int) Arena[Train]2048.makeEvaluator(...)}. <br>
+ * {@link Arena#makeEvaluator(PlayAgent, GameBoard, int, int) Arena[Train]2048.makeEvaluator(...)}. <br>
  * This class {@link Evaluator2048} is only called for {@code m_mode==-1} (just return true) and {@code m_mode==0}.
  * <p>
  * Created by Johannes Kutsch, TH Koeln, 2016. Adapted by Wolfgang Konen, 2018-2020.
@@ -48,26 +41,32 @@ public class Evaluator2048 extends Evaluator {
     private double movesPerSec;
     private int moves = 0;
     private final List<Integer> scores = new ArrayList<>();
+    /**
+     * {@code tiles} holds key-value pairs &lt K,V &gt . It counts in its value V for key K how many evaluation episodes
+     * end with a state having tile K as highest value.
+     */
     private final TreeMap<Integer, Integer> tiles = new TreeMap<>();
     private final int verbose;
     private final Arena ar;		// needed in eval_agent, if PStats.printPlayStats(psList, m_PlayAgent,ar) is called
     						// and needed in printEResultList
     
-    public EResult eResult; // holds 2048 evaluation results in one object. EResult is a nested class of this.
+    public EResult2048 eResult; // holds 2048 evaluation results in one object. EResult2048 is derived from EvalResult
 
 
-    public Evaluator2048(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int mode, int verbose, Arena ar) {
-        super(e_PlayAgent, gb, mode, stopEval, verbose);
+    public Evaluator2048(PlayAgent e_PlayAgent, GameBoard gb, int mode, int verbose, Arena ar) {
+        super(e_PlayAgent, gb, mode, verbose);
         this.verbose = verbose;
         this.ar = ar;
     }
 
     @Override
-    public boolean evalAgent(PlayAgent pa) {
+    public EvalResult evalAgent(PlayAgent pa) {
     	m_PlayAgent = pa;
         //Disable evaluation by using mode -1
         if (m_mode == -1) {
-            return true;
+            m_msg = "no evaluation done ";
+            lastResult = Double.NaN;
+            return new EvalResult(Double.NaN, true, "no evaluation done ", m_mode, Double.NaN);
         }
 		int cumEmpty;
 		ArrayList<PStats> psList = new ArrayList<>();
@@ -226,6 +225,7 @@ public class Evaluator2048 extends Evaluator {
         //evaluate games
         //Average Score
         for(StateObserver2048 so : stateObservers) {
+            // build the highest-tile statistics in tiles:
             tiles.merge(so.getHighestTileValue(), 1, Integer::sum);
 
             scores.add(so.score);
@@ -269,11 +269,14 @@ public class Evaluator2048 extends Evaluator {
         avgGameDur = Math.round((double) duration / (double)ConfigEvaluator.NUMBEREVALUATIONS);
         avgMovPerGame =  Math.round((double)moves / (double)ConfigEvaluator.NUMBEREVALUATIONS);
         movesPerSec = Math.round(moves/((double) duration /(double)1000));
-        
-        this.eResult = new EResult(nPly, ConfigEvaluator.NUMBEREVALUATIONS, minScore, maxScore, lastResult, medianScore,
-        		standarddeviation, avgGameDur, avgMovPerGame, movesPerSec, tiles);
-        
-        return lastResult > ConfigEvaluator.MINPOINTS;
+        boolean success = lastResult > ConfigEvaluator.MINPOINTS;
+        m_msg = "Quick Evaluation of "+ m_PlayAgent.getName() +": Average score "+ Math.round(lastResult);
+
+        this.eResult = new EResult2048(m_PlayAgent, nPly, ConfigEvaluator.NUMBEREVALUATIONS, minScore, maxScore, lastResult, medianScore,
+        		standarddeviation, avgGameDur, avgMovPerGame, movesPerSec, tiles,
+                lastResult, success, m_msg, m_mode, ConfigEvaluator.MINPOINTS);
+
+        return this.eResult;
     }
 
     private PStats makePStats2048(int i, StateObserver2048 so2048, ACTIONS_VT actBest, int cumEmpty) {
@@ -286,164 +289,58 @@ public class Evaluator2048 extends Evaluator {
         return  new PStats(i, moveNum, so2048.getPlayer(), actNum, gameScore, nEmpty, cumEmpty, highestTile);
     }
 
-    @Override
-    public String getMsg() {
-        StringBuilder tilesString = new StringBuilder();
-		DecimalFormat frm = new DecimalFormat("00000");
-		DecimalFormat frm1 = new DecimalFormat("000");
-		DecimalFormat frm2 = (DecimalFormat) NumberFormat.getNumberInstance(Locale.UK);		
-		frm2.applyPattern("#0.0%");  
+    // --- this is now EResult2048.getReport() ---
+//  public String getLongMsg() {
+//        StringBuilder tilesString = new StringBuilder();
+//		DecimalFormat frm = new DecimalFormat("00000");
+//		DecimalFormat frm1 = new DecimalFormat("000");
+//		DecimalFormat frm2 = (DecimalFormat) NumberFormat.getNumberInstance(Locale.UK);
+//		frm2.applyPattern("#0.0%");
+//
+//        for (Map.Entry<Integer, Integer> tile : tiles.entrySet()) {
+//            tilesString.append("\n").append(frm.format(tile.getKey().longValue()))
+//                    .append(", ").append(frm1.format(tile.getValue().longValue()))
+//                    .append("  (").append(frm2.format(tile.getValue().doubleValue() / ConfigEvaluator.NUMBEREVALUATIONS)).append(")");
+//        }
+//
+//        String agentSettings = "";
+//
+//        if(m_PlayAgent.getName().equals("MC-N")) {
+//            MCAgentN mcAgent = (MCAgentN)m_PlayAgent;
+//            agentSettings = "\nROLLOUTDEPTH: " + mcAgent.getParMC().getRolloutDepth() +
+//                    "\nITERATIONS: " + mcAgent.getParMC().getNumIter() +
+//                    "\nNUMBERAGENTS: " + mcAgent.getParMC().getNumAgents();
+//        } else if(m_PlayAgent.getName().equals("MCTS Expectimax")) {
+//            MCTSExpectimaxAgt mctsExpectimaxAgt = (MCTSExpectimaxAgt) m_PlayAgent;
+//            agentSettings = "\nROLLOUTDEPTH: " + mctsExpectimaxAgt.params.getRolloutDepth() +
+//                    "\nITERATIONS: " + mctsExpectimaxAgt.params.getNumIter() +
+//                    "\nMAXNODES:" + mctsExpectimaxAgt.params.getMaxNodes();
+//        }
+//
+//        return "\n\nSettings:" +
+//                "\nAgent Name: " + m_PlayAgent.getName() +
+//                agentSettings +
+//                "\nNumber of games: " + ConfigEvaluator.NUMBEREVALUATIONS +
+//                "\n" +
+//                "\nResults:" +
+//                "\nLowest score is: " + minScore +
+//                "\nAverage score is: " + Math.round(lastResult) + " +- " + Math.round(standarddeviation) +
+//                "\nMedian score is: " + Math.round(medianScore) +
+//                "\nHighest score is: " + maxScore +
+//                "\nAverage game duration: " +  avgGameDur + "ms" +
+//                "\nDuration of evaluation: " + Math.round(duration) + "s" +
+//				"\nAverage moves per game: " +  avgMovPerGame +
+//                "\nMoves per second: " + movesPerSec +
+//                "\n" +
+//                "\nHighest tiles: " +
+//                tilesString +
+//                "\n\n";
+//  }
 
-        for (Map.Entry<Integer, Integer> tile : tiles.entrySet()) {
-            tilesString.append("\n").append(frm.format(tile.getKey().longValue()))
-                    .append(", ").append(frm1.format(tile.getValue().longValue()))
-                    .append("  (").append(frm2.format(tile.getValue().doubleValue() / ConfigEvaluator.NUMBEREVALUATIONS)).append(")");
-        }
-
-        String agentSettings = "";
-
-        if(m_PlayAgent.getName().equals("MC-N")) {
-            MCAgentN mcAgent = (MCAgentN)m_PlayAgent;
-            agentSettings = "\nROLLOUTDEPTH: " + mcAgent.getParMC().getRolloutDepth() +
-                    "\nITERATIONS: " + mcAgent.getParMC().getNumIter() +
-                    "\nNUMBERAGENTS: " + mcAgent.getParMC().getNumAgents();
-        } else if(m_PlayAgent.getName().equals("MCTS Expectimax")) {
-            MCTSExpectimaxAgt mctsExpectimaxAgt = (MCTSExpectimaxAgt) m_PlayAgent;
-            agentSettings = "\nROLLOUTDEPTH: " + mctsExpectimaxAgt.params.getRolloutDepth() +
-                    "\nITERATIONS: " + mctsExpectimaxAgt.params.getNumIter() +
-                    "\nMAXNODES:" + mctsExpectimaxAgt.params.getMaxNodes();
-        }
-
-        return "\n\nSettings:" +
-                "\nAgent Name: " + m_PlayAgent.getName() +
-                agentSettings +
-                "\nNumber of games: " + ConfigEvaluator.NUMBEREVALUATIONS +
-                "\n" +
-                "\nResults:" +
-                "\nLowest score is: " + minScore +
-                "\nAverage score is: " + Math.round(lastResult) + " +- " + Math.round(standarddeviation) +
-                "\nMedian score is: " + Math.round(medianScore) +
-                "\nHighest score is: " + maxScore +
-                "\nAverage game duration: " +  avgGameDur + "ms" +
-                "\nDuration of evaluation: " + Math.round(duration) + "s" +
-				"\nAverage moves per game: " +  avgMovPerGame + 
-                "\nMoves per second: " + movesPerSec +
-                "\n" +
-                "\nHighest tiles: " +
-                tilesString +
-                "\n\n";
-    }
-    
-    /**
-     * This class collects 2048 evaluation results in one object. Such objects may be combined in
-     * {@code ArrayList<EResult>} from several runs, for later inspection and printout
-     *
-     */
-    public static class EResult {
-    	public int nPly;			// nPly
-    	public int numEval;			// number of evaluation games (episodes) for this nPly
-    	public double lowScore;		// lowest score
-    	public double higScore;		// highest score
-    	public double avgScore;		// average score
-    	public double medScore;		// median score
-    	public double stdDevScore;	// standard deviation of the scores
-    	public long avgGameDur;		// average game duration in ms
-    	public double avgMovPerGame;// average number of moves per game
-    	public double movesPerSec;	// average number of moves second 
-    	public double t16384_Perc;  // percentage of evaluation runs where tile 16384 is highest tile
-    	public TreeMap<Integer, Integer> tiles;
-    	String sep = ", ";
-    	
-    	public EResult(int nPly, int numEval, double lowScore, double higScore, double avgScore, double medScore, 
-    			double stdDevScore, long avgGameDur, double avgMovPerGame, double movesPerSec,  TreeMap<Integer, Integer> tiles) {
-    		this.nPly=nPly;
-    		this.numEval = numEval;
-    		this.lowScore = lowScore;
-    		this.higScore = higScore; 
-    		this.avgScore = avgScore;
-    		this.medScore = medScore; 
-    		this.stdDevScore = stdDevScore;
-    		this.avgGameDur = avgGameDur;
-    		this.avgMovPerGame = avgMovPerGame;
-    		this.movesPerSec = movesPerSec;
-    		this.tiles = tiles;
-    		this.t16384_Perc = 0.0;
-    		
-            for (Map.Entry<Integer,Integer> tile : tiles.entrySet()) {
-            	if (tile.getKey()==16384) {
-            		t16384_Perc = tile.getValue().doubleValue()/ConfigEvaluator.NUMBEREVALUATIONS;
-            	}
-            }
-
-
-    	}
-    	
-    	public void print(PrintWriter mtWriter)  {
-    		DecimalFormat frm0 = new DecimalFormat("#0000");
-    		DecimalFormat df, df2;
-    		df = (DecimalFormat) NumberFormat.getNumberInstance(Locale.UK);		
-    		df.applyPattern("#0000.0");  // now numbers formatted by df  appear with a decimal *point*
-    		df2 = (DecimalFormat) NumberFormat.getNumberInstance(Locale.UK);		
-    		df2.applyPattern("#0.000");  // now numbers formatted by df2 appear with a decimal *point*
-
-    		mtWriter.print(nPly + sep + numEval + sep);
-    		mtWriter.println(frm0.format(lowScore) + sep + frm0.format(avgScore) + sep + frm0.format(stdDevScore)
-    				+ sep + frm0.format(medScore) + sep + frm0.format(higScore) + sep + avgGameDur 
-    				+ sep + df.format(avgMovPerGame) + sep + frm0.format(movesPerSec) + sep + df2.format(t16384_Perc));
-    	}
-
-    	public void printEResultList(String csvName, ArrayList<EResult> erList, PlayAgent pa, Arena ar,
-    			String userTitle1, String userTitle2){
-    		PrintWriter erWriter = null;
-    		String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/"+ar.getGameName();
-    		String subDir = ar.getGameBoard().getSubDir();
-    		if (subDir != null){
-    			strDir += "/"+subDir;
-    		}
-    		strDir += "/csv";
-    		tools.Utils.checkAndCreateFolder(strDir);
-
-    		boolean retry=true;
-    		BufferedReader bufIn=new BufferedReader(new InputStreamReader(System.in));
-    		while (retry) {
-    			try {
-    				erWriter = new PrintWriter(new FileWriter(strDir+"/"+csvName,false));
-    				retry = false;
-    			} catch (IOException e) {
-    				try {
-    					// We may get here if file csvName is open in another application (e.g. Excel).
-    					// Here we give the user the chance to close the file in the other application:
-    				    System.out.print("*** Warning *** Could not open "+strDir+"/"+csvName+". Retry? (y/n): ");
-    				    String s = bufIn.readLine();
-    				    retry = (s.contains("y"));
-    				} catch (IOException e2) {
-    					e2.printStackTrace();					
-    				}
-    			}			
-    		}
-    		
-    		if (erWriter!=null) {
-    			erWriter.println(pa.stringDescr());		
-    			erWriter.println(pa.stringDescr2());
-    			
-    			erWriter.println("nPly"+sep+"numEval"+sep+"lowScore"+sep+"avgScore"+sep+"stdDevScore"+sep
-    					+"medScore"+sep+"higScore"+sep
-    					+"avgGameDur"+sep+"avgMovPerGame"+sep+"movesPerSec"+sep+"tile16kPerc");
-                for (EResult result : erList) {
-                    result.print(erWriter);
-                }
-
-    		    erWriter.close();
-    		} else {
-    			System.out.print("*** Warning *** Could not write "+strDir+"/"+csvName+".");
-    		}
-    	}
-    }
-    
-    @Override
-    public String getShortMsg() {
-        return "Quick Evaluation of "+ m_PlayAgent.getName() +": Average score "+ Math.round(lastResult);    	
-    }
+    // --- this is now EResult2048.getMsg() ---
+//  public String getShortMsg() {
+//        return "Quick Evaluation of "+ m_PlayAgent.getName() +": Average score "+ Math.round(lastResult);
+//  }
 
     @Override
     public int[] getAvailableModes() {

@@ -7,28 +7,29 @@ import controllers.PlayAgent;
  * Evaluates the performance of a {@link PlayAgent} in a game.<p>
  * 
  * Evaluator is an abstract class which evaluates when an agent meets a certain 
- * criterion for stopEval evaluator calls in succession. This criterion is met once when the
- * method boolean {@link #evalAgent(PlayAgent)} returns ‘true’. This abstract method {@link #evalAgent(PlayAgent)} is 
- * defined in child classes of Evaluator. The criterion might be for example a success 
- * rate better than -0.15 in a certain game against MaxNAgent (where 0 is the ideal success rate).
+ * criterion. This criterion is met once when the
+ * method {@link EvalResult} {@link #evalAgent(PlayAgent)} returns {@code true} in its member {@code success}.
+ * This abstract method {@link #evalAgent(PlayAgent)} is
+ * defined in child classes of Evaluator. The criterion might be for example a success rate better
+ * than -0.15 in a certain set of episodes against MaxNAgent (where 0 may be the ideal success rate).
  * <p>  
- * If the Evaluator state stays true for {@code stopEval} calls, then 
- * 		{@link Evaluator#goalReached(int)} 
- * sends a {@code true} signal to the caller, which the caller might use to terminate
- * the training prematurely. 
- * <p> 
  * This class is a base class; derived classes should implement concrete versions of
  * {@link #evalAgent(PlayAgent)}.
  * 
- * @author Wolfgang Konen, TH Koeln, Nov'16
+ * @author Wolfgang Konen, TH Koeln, 2016-2023
  */
+// * If the Evaluator state stays true for {@code stopEval} calls, then
+//		* 		{@link Evaluator#goalReached(int)}
+//		* sends a {@code true} signal to the caller, which the caller might use to terminate
+//		* the training prematurely.
+//		* <p>
 abstract public class Evaluator {
-	private boolean thisEval;
-	private int gnumTrue;
-	private int m_stopEval;
-	private int m_counter;
+	private EvalResult thisEval;
+	private int m_counter;			// counts the number of successful calls to eval().
     private AgentLoader agtLoader = null;
-	
+	//private int gnumTrue;			// obsolete
+	//private int m_stopEval;		// obsolete now (stopEval only used with new meaning in ParOther)
+
 	// these variables may be used by derived classes:
 	//
 	protected PlayAgent m_PlayAgent;
@@ -36,13 +37,11 @@ abstract public class Evaluator {
 	/**
 	 * Derived classes write the result (average success rate) of the last call to method 
 	 * {@link #evalAgent(PlayAgent)} to this variable {@code #lastResult}
-	 * @see #getLastResult()
 	 */
 	protected double lastResult=0.0;
 	/**
-	 * Derived classes write an info string of the last call to method 
+	 * Derived classes write a one-line info string describing the result of the last call to method
 	 * {@link #evalAgent(PlayAgent)} to this variable {@code #m_msg}
-	 * @see #getMsg()
 	 */
 	protected String m_msg="";
 	/**
@@ -54,48 +53,39 @@ abstract public class Evaluator {
 	 * May be used in derived classes for the same purposes. 
 	 */
     protected GameBoard m_gb;
-	
-	public class EvaluationResult {
-		public double lastResult;
-		public boolean success;
-		public String msg;
-	}
-	
+
 	/**
-	 * 
-	 * @param e_PlayAgent	the agent to evaluate
-	 * @param stopEval		how many successful calls to {@link #eval(PlayAgent)} are needed
-	 * 						until {@link #goalReached(int)} returns true
+	 *  @param e_PlayAgent    the agent to evaluate
+	 *
 	 */
-	public Evaluator(PlayAgent e_PlayAgent, GameBoard gb, int mode, int stopEval) {
-		initEvaluator(e_PlayAgent, gb, mode,stopEval);
+	public Evaluator(PlayAgent e_PlayAgent, GameBoard gb, int mode) {
+		initEvaluator(e_PlayAgent, gb, mode);
 	}
-	public Evaluator(PlayAgent e_PlayAgent, GameBoard gb, int mode, int stopEval,int verbose) {
-		initEvaluator(e_PlayAgent, gb, mode,stopEval);
+	public Evaluator(PlayAgent e_PlayAgent, GameBoard gb, int mode, int verbose) {
+		initEvaluator(e_PlayAgent, gb, mode);
 		this.verbose = verbose;
 	}
-	private void initEvaluator(PlayAgent e_PlayAgent, GameBoard gb, int mode, int stopEval) {
+	private void initEvaluator(PlayAgent e_PlayAgent, GameBoard gb, int mode) {
 		m_PlayAgent = e_PlayAgent;
 		m_gb = gb;
 		if (!isAvailableMode(mode)) 
 			throw new RuntimeException(this.getClass().getSimpleName()+": Value mode = "+mode+" is not allowed!");
 		m_mode = mode;
-		thisEval = false;
-		m_stopEval=stopEval;
+		thisEval = new EvalResult();
 		m_counter=0;
-		gnumTrue=-2;
+		//m_stopEval=stopEval;
+		//gnumTrue=-2;
 	}
 	
 	/**
-	 * Calls {@link #evalAgent(PlayAgent) evalAgent} which returns a boolean predicate (fail/success). It counts
-	 * the number of consecutive successes. If this number reaches m_stopEval, the 
-	 * method {@link #goalReached(int)} will return true.
+	 * Calls {@link #evalAgent(PlayAgent) evalAgent} which returns {@link EvalResult}. It counts
+	 * in member {@code m_counter} the number of consecutive successes.
 	 * @return
-	 * 		boolean predicate from {@link #evalAgent(PlayAgent)}
+	 * 		the evaluation result from {@link #evalAgent(PlayAgent)}
 	 */
-	public boolean eval(PlayAgent playAgent) {
+	public EvalResult eval(PlayAgent playAgent) {
 		thisEval = evalAgent(playAgent);
-		if (thisEval) {
+		if (thisEval.isSuccess()) {
 			m_counter++;
 		} else {
 			m_counter=0;
@@ -106,36 +96,38 @@ abstract public class Evaluator {
 	/**
 	 * This function has to be implemented by the derived classes. It implements the evaluation
 	 * of playAgent.
-	 * It should write its results on protected members {@link #lastResult} and {@link #m_msg}.
+	 * It returns its results in a {@link EvalResult} object.
 	 * 
 	 * @param playAgent the agent to be evaluated
 	 * @return
-	 *  	a boolean predicate (fail/success) for the result of the evaluation. 
-	 *  	Might be for example (avg.success &gt; -0.15) when playing TTT against MaxNAgent.
+	 *  	the evaluation result object (holds double result, String msg and more)
 	 *  
-	 * @see #getLastResult()
-	 * @see #getMsg()
+	 * @see EvalResult
 	 */
-	abstract protected boolean evalAgent(PlayAgent playAgent);
+	abstract protected EvalResult evalAgent(PlayAgent playAgent);
+
+	// --- obsolete, we strip off stopTest functionality ---
+//	/**
+//	 * Set member gnumTrue to gameNum if {@link #eval(PlayAgent)} has returned true for
+//	 * {@code stopEval} consecutive calls.
+//	 * @param gameNum	number of training games
+//	 * @return true if Evaluator stays true for {@code stopEval} calls, false else
+//	 */
+//	public boolean goalReached(int gameNum) {
+//		if (m_counter>=m_stopEval) {
+//			gnumTrue=gameNum;
+//			return true;
+//		}
+//		return false;
+//	}
 
 	/**
-	 * Set member gnumTrue to gameNum if {@link #eval(PlayAgent)} has returned true for 
-	 * {@code stopEval} consecutive calls. 
-	 * @param gameNum	number of training games
-	 * @return true if Evaluator stays true for {@code stopEval} calls, false else
+	 * @return how often the call to {@link #eval(PlayAgent)} returned with {@code success == true}
 	 */
-	public boolean goalReached(int gameNum) {			
-		if (m_counter>=m_stopEval) {
-			gnumTrue=gameNum;
-			return true;
-		}
-		return false;
+	public int getCounter() {
+		return m_counter;
 	}
 
-	// *** never used ***
-//	public boolean setState(boolean stateE) { thisEval = stateE; return stateE; }
-//	public boolean getState() { return thisEval; }
-	
 	/**
 	 * 
 	 * @return the agent stored in TDReferee.agt.zip 
@@ -147,45 +139,49 @@ abstract public class Evaluator {
 			throw new RuntimeException(agtLoader.getLoadMsg());
 		return agtLoader.getAgent();
 	}
-	/**
-	 * @return
-	 *  	the result from the last call to {@link #evalAgent(PlayAgent)}, which might be for example
-	 *  	the average success rate of games played against a MaxNAgent player.
-	 */
- 	public double getLastResult(){ 
- 		return lastResult; 
- 	}
 
-	/**
-	 * @return long message of evaluator result (may be multi-line) for {@code System.out}
-	 */
-	public String getMsg(){ 
- 		return m_msg;
- 	}  
-	
-	/**
-	 * If not overridden by derived class, this method returns {@link #getMsg()}.
-	 * 
-	 * @return short message of evaluator result (one line) for status window 
-	 */
-	public String getShortMsg() {
-		return getMsg();
-	}
-	
-	public String getGoalMsg(int gameNum) {
-		String msg;
-		if (gnumTrue==-2) {
-			msg = getClass().getName()+": Goal not yet reached";
-		} else {
-			msg = ", training stopped at gameNum="+gameNum;
-			msg = getClass().getName()+": Goal reached (stopEval="+m_stopEval+")"+msg;
-		}
-		return msg;
-	}
+	// --- now obsolete, we use EvalResult.getResult() and EvalResult.getMsg() instead ---
+//	/**
+//	 * @return
+//	 *  	the result from the last call to {@link #evalAgent(PlayAgent)}, which might be for example
+//	 *  	the average success rate of games played against a MaxNAgent player.
+//	 */
+// 	public double getLastResult(){
+// 		return lastResult;
+// 	}
+//
+//	/**
+//	 * @return long message of evaluator result (may be multi-line) for {@code System.out}
+//	 */
+//	public String getMsg(){
+// 		return m_msg;
+// 	}
+
+ 	// --- never used ---
+//	/**
+//	 * If not overridden by derived class, this method returns {@link #getMsg()}.
+//	 *
+//	 * @return short message of evaluator result (one line) for status window
+//	 */
+//	public String getShortMsg() {
+//		return getMsg();
+//	}
+
+	// --- obsolete, we strip off stopTest functionality ---
+//	public String getGoalMsg(int gameNum) {
+//		String msg;
+//		if (gnumTrue==-2) {
+//			msg = getClass().getName()+": Goal not yet reached";
+//		} else {
+//			msg = ", training stopped at gameNum="+gameNum;
+//			msg = getClass().getName()+": Goal reached (stopEval="+m_stopEval+")"+msg;
+//		}
+//		return msg;
+//	}
 	
 	/**
 	 * @return the allowed values for parameter {@code mode} in a call to Evaluator constructor or 
-	 *     to {@link Arena#makeEvaluator(PlayAgent, GameBoard, int, int, int) Arena.makeEvaluator(...)}.  <br>   
+	 *     to {@link Arena#makeEvaluator(PlayAgent, GameBoard, int, int) Arena.makeEvaluator(...)}.  <br>
 	 *     If an Evaluator does not use {@code mode}, it should return an {@code int[]} 
 	 *     containing just 0.
 	 */
@@ -228,15 +224,11 @@ abstract public class Evaluator {
 	 */
 	abstract public int getTrainEvalMode();
 	
-//	/**
-//	 * @return the optional third evaluator mode which may be used in multiTrain.
-//	 * 		If the mode returned here equals to the mode of one of the other two 
-//	 * 		Evaluator objects, the third Evaluator will be skipped.
-//	 */
-//	abstract public int getMultiTrainEvalMode();
-	
 	/**
-	 * @return a one line info message, depending on the evaluator's mode
+	 * A one-line info string characterizing the Evaluator and its specific mode {@code m_mode}.
+	 * Is used to <b>build</b> the evaluation message on {@link #m_msg} (combining with the evaluation result), but does
+	 * <b>not</b> contain the evaluation result itself.
+	 * @return a one-line info string
 	 */
 	abstract public String getPrintString();
 	

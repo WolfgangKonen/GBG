@@ -2,6 +2,7 @@ package games.RubiksCube;
 
 import java.util.ArrayList;
 import controllers.PlayAgent;
+import games.EvalResult;
 import games.Evaluator;
 import games.GameBoard;
 import games.StateObservation;
@@ -28,30 +29,17 @@ public class EvaluatorCube extends Evaluator {
 	/**
 	 * threshold for each value of m_mode
 	 */
-	protected double[] m_thresh={0.0,0.85,0.9}; // 
+	protected double[] m_thresh={0.0,0.85,0.9}; 		// thresholds for m_mode=-1,0,1
 
-	// --- never used ---
-//	public EvaluatorCube(PlayAgent pa, GameBoard gb, int stopEval) {
-//		super(pa, gb, 0, stopEval);
-//		initEvaluator(gb);			// might change CubeConfig.pMax
-//		ecp = new EvalCubeParams(pa);		// construct with actual CubeConfig.pMax
-//	}
-//
-//	public EvaluatorCube(PlayAgent pa, GameBoard gb, int stopEval, int mode) {
-//		super(pa, gb, mode, stopEval);
-//		initEvaluator(gb);			// might change CubeConfig.pMin and .pMax
-//		ecp = new EvalCubeParams(pa);		// construct with actual CubeConfig.pMax and with epiLength = pa.getParOther().getStopEval()
-//	}
-
-	public EvaluatorCube(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose) {
-		super(pa, gb, mode, stopEval, verbose);
+	public EvaluatorCube(PlayAgent pa, GameBoard gb, int mode, int verbose) {
+		super(pa, gb, mode, verbose);
 		initEvaluator(gb);			// might change CubeConfig.pMin and .pMax
 		ecp = new EvalCubeParams(pa);		// construct with actual CubeConfig.pMax and with epiLength = pa.getParOther().getStopEval()
 	}
 
-	public EvaluatorCube(PlayAgent pa, GameBoard gb, int stopEval, int mode, int verbose,
+	public EvaluatorCube(PlayAgent pa, GameBoard gb, int mode, int verbose,
 						 EvalCubeParams evalCubePar) {
-		super(pa, gb, mode, stopEval, verbose);
+		super(pa, gb, mode, verbose);
 		initEvaluator(gb);			// might change CubeConfig.pMin and .pMax
 		this.ecp = new EvalCubeParams(evalCubePar);
 	}
@@ -67,20 +55,20 @@ public class EvaluatorCube extends Evaluator {
 	/**
 	 * @return true if evaluateAgentX is above {@link #m_thresh}.
 	 * The choice for {@link #m_thresh} is made with 4th parameter mode in 
-	 * {@link #EvaluatorCube(PlayAgent, GameBoard, int, int, int)} [default: mode=0].
+	 * {@link #EvaluatorCube(PlayAgent, GameBoard, int, int)} [default: mode=0].
 	 */
 	@Override
-	public boolean evalAgent(PlayAgent playAgent) {
+	public EvalResult evalAgent(PlayAgent playAgent) {
 		assert (m_thresh.length >= AVAILABLE_MODES.length);
 		m_PlayAgent = playAgent;
 		switch(m_mode) {
 		case -1: 
 			m_msg = "no evaluation done ";
 			lastResult = Double.NaN;
-			return false;
-		case 0:  return evaluateAgent0(m_PlayAgent)>m_thresh[0];
-		case 1:  return evaluateAgent0(m_PlayAgent)>m_thresh[1];
-		default: return false;
+			return new EvalResult(lastResult, true, m_msg, m_mode, Double.NaN);
+		case 0:  return evaluateAgent0(m_PlayAgent, m_thresh[1]);
+		case 1:  return evaluateAgent0(m_PlayAgent, m_thresh[2]);
+		default: throw new RuntimeException("Invalid m_mode = "+m_mode);
 		}
 	}
 	
@@ -97,7 +85,7 @@ public class EvaluatorCube extends Evaluator {
  	 * @return the weighted average success on different sets of scrambled cubes. Currently, constant weights are
 	 * 			 hard-wired in source code.
 	 */
- 	private double evaluateAgent0(PlayAgent pa) {
+ 	private EvalResult evaluateAgent0(PlayAgent pa, double thresh) {
 		ArrayList<TStats> tsList = new ArrayList<>();
 		ArrayList<TAggreg> taggList = new ArrayList<>();
 		TStats tstats;
@@ -144,7 +132,7 @@ public class EvaluatorCube extends Evaluator {
 			TStats.printTAggregList(taggList);
 			//System.out.println((CubeConfig.boardVecType==BoardVecType.CUBESTATE) ? "CUBESTATE" : "CUBEPLUSACTION");
 		}
-		return lastResult;
+		return new EvalResult(lastResult, lastResult>thresh, m_msg, m_mode, thresh);
 	}
 
  	@Override

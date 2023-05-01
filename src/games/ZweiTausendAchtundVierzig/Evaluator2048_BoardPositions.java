@@ -4,10 +4,11 @@ package games.ZweiTausendAchtundVierzig;
 import controllers.MC.MCAgentN;
 import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.PlayAgent;
+import games.Arena;
+import games.EvalResult;
 import games.Evaluator;
 import games.GameBoard;
 import games.ZweiTausendAchtundVierzig.Heuristic.Evaluator2048_EA;
-import params.MCParams;
 //import params.MCTSExpectimaxParams;
 import params.ParMC;
 import params.ParMCTSE;
@@ -27,7 +28,7 @@ import static java.util.Arrays.deepEquals;
  * Board-position evaluator for 2048: 
  * <p>
  * Note that the mode-selection for 2048 evaluators is done in 
- * {@link Arena2048#makeEvaluator(PlayAgent, GameBoard, int, int, int) Arena[Train]2048.makeEvaluator(...)}.
+ * {@link Arena#makeEvaluator(PlayAgent, GameBoard, int, int) Arena[Train]2048.makeEvaluator(...)}.
  * <p>
  * Created by Johannes Kutsch, TH Koeln, 2016-12.
  * 
@@ -38,12 +39,12 @@ public class Evaluator2048_BoardPositions extends Evaluator{
     private Random random = new Random();
     private ExecutorService executorService = Executors.newWorkStealingPool();
 
-    public Evaluator2048_BoardPositions(PlayAgent e_PlayAgent, GameBoard gb, int stopEval, int verbose) {
-        super(e_PlayAgent, gb, 1, stopEval, verbose);
+    public Evaluator2048_BoardPositions(PlayAgent e_PlayAgent, GameBoard gb, int verbose) {
+        super(e_PlayAgent, gb, 1, verbose);
     }
 
     @Override
-    protected boolean evalAgent(PlayAgent pa) {
+    protected EvalResult evalAgent(PlayAgent pa) {
     	m_PlayAgent = pa;
         //find new realistic gameStates
         if(ConfigEvaluator.GENERATENEWGAMESTATES) {
@@ -115,7 +116,7 @@ public class Evaluator2048_BoardPositions extends Evaluator{
             }
         }
 
-        return true;
+        return new EvalResult();
     }
 
     private ResultContainer analyseGameStateGroup(List<StateObserver2048> gameStateGroup) {
@@ -401,7 +402,6 @@ public class Evaluator2048_BoardPositions extends Evaluator{
 //        throw new RuntimeException("getLastResult is not yet implemented for Evaluator2048_BoardPositions");
 //    }
 
-    @Override
     public String getMsg() {
         return "use this spreadsheet to analyse output: https://docs.google.com/spreadsheets/d/1fAX-gwf4keZut4vuAZ2GQro5ubiLOeVvwhzn74zPTKs/edit?usp=sharing";
     }
