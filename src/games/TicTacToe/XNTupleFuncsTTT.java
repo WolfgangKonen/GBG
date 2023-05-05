@@ -91,7 +91,8 @@ public class XNTupleFuncsTTT extends XNTupleBase implements XNTupleFuncs, Serial
 	 *    3 4 5
 	 *    6 7 8
 	 * </pre>
-	 * @return a vector of length {@link #getNumCells()}, holding for each board cell its 
+	 * @param so the stateObservation of the current game state
+	 * @return a vector of length {@link #getNumCells()}, holding for each board cell its
 	 * position value with 0:"O", 1=empty, 2="X".
 	 */
 	@Override
@@ -122,12 +123,15 @@ public class XNTupleFuncsTTT extends XNTupleBase implements XNTupleFuncs, Serial
 	@Override
 	public BoardVector[] symmetryVectors(BoardVector boardVector, int n) {
 		int i;
-		BoardVector[] equiv = new BoardVector[8];
+		if (n==0) n=8;
+		BoardVector[] equiv = new BoardVector[n];
 		equiv[0] = boardVector;
 		for (i = 1; i < 4; i++)
+			if (i>=n) break;
 			equiv[i] = rotate(equiv[i - 1]);
 		equiv[i] = flip(boardVector);
 		for (i=5; i < 8; i++)
+			if (i>=n) break;
 			equiv[i] = rotate(equiv[i - 1]);
 
 		return equiv;
@@ -148,6 +152,10 @@ public class XNTupleFuncsTTT extends XNTupleBase implements XNTupleFuncs, Serial
 	 * If actionKey is the key of a certain action in board equiv[0], then equivAction[i] is the key of the equivalent
 	 * action in the i'th equivalent board vector equiv[i]. <br>
 	 * Here, equiv[i] = {@link #symmetryVectors(BoardVector, int)}{@code [i]}.
+	 * <p>
+	 * Example: If the symmetry transformation 1 is a 90° clockwise rotation which maps fields 0,1,2 to 2,5,8 and the
+	 * action is 1 on board equiv[0], then the corresponding equivAction[1] is 5 (because placing a stone on field 1
+	 * on the original board corresponds to field 5 on the rotated board).
 	 */
 	public int[] symmetryActions(int actionKey) {
 		int numEquiv = actionArray.length;

@@ -6,19 +6,19 @@ import tools.Types;
 public class Helper {
 
     /**
-     * Concatenate from + to, e.g.  1, 4 &rArr; 104
+     * Concatenate from with to, e.g.  from=1, to=4 &rArr; 104
      * where [1][04] is the string;
      * @param from  index of board
      * @param to index of board
      * @return  ACTiON
      */
     public static Types.ACTIONS parseAction(int from, int to){
-        from *= 100; // 0 => 0   [1,...9] =&gt; x00  [10,...25] => xx00
+        from *= 100; // 0 => 0   [1,...9] => x00  [10,...25] => xx00
         return new Types.ACTIONS(from + to);
     }
 
     /**
-     * Parsing the action to an array of indices [from, to]
+     * Parse the action number to get the array of indices [from, to]
      * @param act   Action to parse
      * @return  Array of int [from, to]
      */
@@ -28,6 +28,14 @@ public class Helper {
         return new int[]{from,to};
     }
 
+    /**
+     * Return potential field increments: array of integers {@code dir} such that {@code newpos = pos + dir} is a
+     * possible new position for {@code player} (if still on the board, checked by {@link Token#setAvailableActions()})
+     * @param player    the player number (0,1,2,3), has to be less than {@link ConfigEWN#NUM_PLAYERS}
+     * @return  array of field increments
+     *
+     * @see Token#setAvailableActions()
+     */
     public static int[] getMoveDirection(int player){
         int size = ConfigEWN.BOARD_SIZE;
         switch(player){

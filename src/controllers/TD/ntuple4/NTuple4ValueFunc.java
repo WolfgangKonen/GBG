@@ -31,8 +31,9 @@ import tools.Types;
  * 
  * @see TDNTuple4Agt
  * @see Sarsa4Agt
+ * @see QLearn4Agt
  * 
- * @author Wolfgang Konen, TH Koeln, 2020
+ * @author Wolfgang Konen, TH Koeln, 2020 -2023
  */
 public class NTuple4ValueFunc implements Serializable {
 	/* Experimental Parameters: */

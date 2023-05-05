@@ -1,9 +1,12 @@
 package games.EWN;
 
 import games.*;
+import games.EWN.StateObserverHelper.Helper;
 import games.EWN.StateObserverHelper.Token;
 import games.EWN.config.ConfigEWN;
+import tools.Types;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.HashSet;
@@ -12,6 +15,8 @@ import java.util.HashSet;
 public class XNTupleFuncsEWN extends XNTupleBase implements XNTupleFuncs, Serializable {
 
     private final static int[] fixedModes ={0}; // fixed modes for tuple selection
+
+    @Serial
     private static final long serialVersionUID = 42L;
 
     public XNTupleFuncsEWN(){
@@ -31,12 +36,12 @@ public class XNTupleFuncsEWN extends XNTupleBase implements XNTupleFuncs, Serial
      */
     @Override
     public int getNumPositionValues() {
-        switch(ConfigEWN.CEll_CODING){
-            case 0: return ConfigEWN.NUM_PLAYERS +1;
-            case 1: return ConfigEWN.NUM_PLAYERS * 3 + 1;
-            case 2: return ConfigEWN.NUM_PLAYERS * 6 +1;
-            default: throw new RuntimeException("Cell_Coding only implements 0 and 1");
-        }
+        return switch (ConfigEWN.CELL_CODING) {
+            case 0 -> ConfigEWN.NUM_PLAYERS + 1;
+            case 1 -> ConfigEWN.NUM_PLAYERS * 3 + 1;
+            case 2 -> ConfigEWN.NUM_PLAYERS * 6 + 1;
+            default -> throw new RuntimeException("Cell_Coding only implements 0, 1 and 2");
+        };
 
 
     }
@@ -57,28 +62,23 @@ public class XNTupleFuncsEWN extends XNTupleBase implements XNTupleFuncs, Serial
     }
 
     /**
-     *
-     * Since we probably have each player with 6 tokens we can use
-     *
-     *  size = 3 Possible sizes {3,4,5,6}
-     *   <pre>
-     * 	 00 01 02
-     * 	 03 04 05    ---&gt;    00,01,02,03,04,05,06,07,08
-     * 	 06 07 08
-     * 	 </pre>
-     *
-     * 	   returns the board vector
-     * 	  <pre>
-     * 	   0,1,2,3,4,5,6,7,8
-     *
-     * 	  </pre>
+     * The board vector is an {@code int[]} vector where each entry corresponds to one
+     * cell of the board. In the case of 3x3 EWN the mapping is
+     * <pre>
+     *    0 1 2
+     *    3 4 5
+     *    6 7 8
+     * </pre>
      *
      * @param so the stateObservation of the current game state
-     * @return  a vector of length {@link #getNumCells() , holding for each cell its}
-     * position value with  0 = Black, 1 = white, 2 = blue, 3 = red 4 Empty
+     * @return a vector of length {@link #getNumCells()}, holding for each board cell its
+     * positional value. For example in the case of {@link ConfigEWN#CELL_CODING}==0, this is the player, i.e.
+     * 0 = Black, 1 = White (optional: 2 = Blue, 3 = Red, depending on N) and N = Empty, where
+     * N = {@link ConfigEWN#NUM_PLAYERS}.
      *
-     *
-     *
+     * @see #getVectorforNPositionalValues(int)
+     * @see #getVectorForNTimes3PositionalValues(int, int)
+     * @see #getVectorPosForNTimes6PositionalValues(int, int)
      */
     @Override
     public BoardVector getBoardVector(StateObservation so) {
@@ -86,24 +86,15 @@ public class XNTupleFuncsEWN extends XNTupleBase implements XNTupleFuncs, Serial
         int size = ((StateObserverEWN) so).getSize();
         Token[][] state = ((StateObserverEWN) so).getGameState();
         int[] vector = new int[size*size];
-        //Setting the gamestate players
+        //Setting the game state's players and values
         for(int i = 0, n=0; i < size; i++) {
             for (int j = 0; j < size; j++, n++) {
                 int player = state[i][j].getPlayer();
                 int value = state[i][j].getValue();
-                switch (ConfigEWN.CEll_CODING) {
-                    case 0: {
-                        vector[n] = getVectorforNPositionalValues(player);
-                        break;
-                    }
-                    case 1: {
-                        vector[n] = getVectorForNTimes3PositionalValues(player,value);
-                        break;
-                    }
-                    case 2: {
-                        vector[n] = getVectorPosForNTimes6PositionalValues(player,value);
-                        break;
-                    }
+                switch (ConfigEWN.CELL_CODING) {
+                    case 0 -> vector[n] = getVectorforNPositionalValues(player);
+                    case 1 -> vector[n] = getVectorForNTimes3PositionalValues(player, value);
+                    case 2 -> vector[n] = getVectorPosForNTimes6PositionalValues(player, value);
                 }
 
             }
@@ -112,61 +103,84 @@ public class XNTupleFuncsEWN extends XNTupleBase implements XNTupleFuncs, Serial
     }
 
     /**
-     * Each Token will be seen differently
-     * @param player
-     * @return number in range of [0,...,N*6] positional values
+     * Return the {@link BoardVector} entry for a token that belongs to {@code player}.
+     * Each token transmits to a {@link BoardVector} only its player (color), not its value.
+     *
+     * @param player a number in {0,...,N-1} with N = {@link ConfigEWN#NUM_PLAYERS}
+     * @return number in range {0,...,N} positional values, where N codes "empty field"
+     */
+    private int getVectorforNPositionalValues(int player){
+        // an empty field has player=-1
+        return player < 0 ? ConfigEWN.NUM_PLAYERS : player;
+    }
+
+    /**
+     * Return the {@link BoardVector} entry for a token that belongs to {@code player} and has value {@code value}.
+     * If there are 6 such values ({@link ConfigEWN#BOARD_SIZE}=4 or 5), these are grouped (0,1) &rArr 0, (2,3) &rArr 1
+     * and (4,5) &rArr 2. If there are 3 such values, they are taken directly.
+     *
+     * @param player a number in {0,...,N-1} with N = {@link ConfigEWN#NUM_PLAYERS}
+     * @return positional value b in range {0,...,3*N}, where b=3*{@code player}+val and b=3*N codes "empty field"
+     */
+    private int getVectorForNTimes3PositionalValues(int player, int value){
+        if (ConfigEWN.BOARD_SIZE>4) {
+            int offset =(value < 2 ? 0 : value < 4 ? 1 : 2);
+            return player < 0 ? ConfigEWN.NUM_PLAYERS*3 : (player*3+offset);
+        } else {
+            return player < 0 ? ConfigEWN.NUM_PLAYERS*3 : (player*3+value);
+        }
+    }
+
+    /**
+     * Return the {@link BoardVector} entry b for a token that belongs to {@code player} and has value {@code value}.<br>
+     * If there are 6 such values ({@link ConfigEWN#BOARD_SIZE}=4 or 5), we have b=6*{@code player}+{@code value} and
+     * b=6*N for "empty field". <br>
+     * If there are 3 such values, we have b=3*{@code player}+{@code value} and b=3*N for "empty field".
+     *
+     * @param player a number in {0,...,N-1} with N = {@link ConfigEWN#NUM_PLAYERS}
+     * @return positional value b in range {0,...,3*N} or {0,...,6*N}
      */
     private int getVectorPosForNTimes6PositionalValues(int player, int value){
         if (ConfigEWN.BOARD_SIZE > 4) {
-         return player < 0 ? ConfigEWN.NUM_PLAYERS * 6:player * 6 + value;
+            return player < 0 ? ConfigEWN.NUM_PLAYERS * 6 : (player*6+value);
         } else {
-            return player < 0 ? ConfigEWN.NUM_PLAYERS * 3:player * 3 + value;
+            return player < 0 ? ConfigEWN.NUM_PLAYERS * 3 : (player*3+value);
         }
-    }
-
-    /**
-     * Each token will be grouped with at least one other token
-     * @param player
-     * @return number in range of [0,...,N*3] positional values
-     */
-    private int getVectorForNTimes3PositionalValues(int player, int value){
-        int returnValue;
-        if(ConfigEWN.BOARD_SIZE>4){
-            int offset =(value < 2 ? 0 : value < 4 ? 1 : 2);
-            return player < 0 ? ConfigEWN.NUM_PLAYERS*3:(player * 3+offset);
-        }else{
-
-            return player < 0 ? ConfigEWN.NUM_PLAYERS*3:player*3+value;
-        }
-    }
-
-    /**
-     * Each token will be seen from players perspective only
-     * @param player
-     * @return number in range of [0,...,N] positional values
-     */
-    private int getVectorforNPositionalValues(int player){
-        return player < 0 ? ConfigEWN.NUM_PLAYERS:player;
     }
 
     public String debugBoardVector(int[] vector){
-        String s = "";
+        StringBuilder s = new StringBuilder();
         DecimalFormat frmAct = new DecimalFormat("00");
         for (int z = 0; z < vector.length; z++) {
-            s += frmAct.format(vector[z]);
+            s.append(frmAct.format(vector[z]));
             if((z+1) % ConfigEWN.BOARD_SIZE == 0){
-                s+= "\n";
+                s.append("\n");
             }else{
-                s+= " ";
+                s.append(" ");
             }
         }
-        return s;
+        return s.toString();
     }
 
 
+    /**
+     * Given a board vector from {@link #getBoardVector(StateObservation)} and given that the
+     * game has s symmetries, return an array which holds at most s symmetric board vectors: <ul>
+     * <li> the first element {@code vecOfBvecs[0]} is the board vector itself
+     * <li> the other elements are the board vectors when transforming {@code boardVector}
+     * 		according to the s-1 other symmetries (e. g. rotation, reflection, if applicable).
+     * </ul>
+     * In the case of EWN we have s=2 symmetries (the state itself and the mirror reflection along the main diagonal)
+     *
+     * @param boardVector a certain board in vector representation
+     * @param n number of symmetry vectors to return (n=0 meaning 'all')
+     * @return vecOfBvecs
+     */
     @Override
     public BoardVector[] symmetryVectors(BoardVector boardVector, int n) {
-        if(n > 2 || n < 1) throw new RuntimeException("There are maximal 2 symmetry vectors");
+        if (n==0) n=2;
+        assert (n==1 || n==2) : "Only n=1 or n=2 symmetry vectors allowed!";
+        //if(n > 2 || n < 1) throw new RuntimeException("There are maximal 2 symmetry vectors");
         BoardVector[] bvArray = new BoardVector[n];
         bvArray[0] = boardVector;
         if(n == 2) bvArray[1] = getDiagonalSymmetryVector(boardVector);
@@ -174,28 +188,55 @@ public class XNTupleFuncsEWN extends XNTupleBase implements XNTupleFuncs, Serial
     }
 
     /**
-     * Sarsa  and Q-Learning only.
+     * Given a certain board array of symmetric (equivalent) states for state <b>{@code so}</b>
+     * and a certain action to be taken in <b>{@code so}</b>, generate the array of equivalent
+     * action keys {@code equivAction} for the symmetric states.
+     * <p>
+     * This method is needed for Q-learning and Sarsa only.
+     *
      * @param actionKey
      * 				the key of the action to be taken in <b>{@code so}</b>
-     * @return
+     * @return <b>equivAction</b>
+     * 				array of the equivalent actions' keys.
+     * <p>
+     * If actionKey is the key of a certain action in board equiv[0], then equivAction[i] is the key of the equivalent
+     * action in the i'th equivalent board vector equiv[i]. <br>
+     * Here, equiv[i] = {@link #symmetryVectors(BoardVector, int)}{@code [i]}.
+     * <p>
+     * Example: In EWN, symmetry transformation 1 (the only allowed one) is a mirror reflection along the main diagonal.
+     * If the action is "104" (meaning: move token from field 1 to field 4), then the mirror-reflected action is "304"
+     * (because field 1 is mirror-mapped to field 3 and field 4 to field 4).
      */
     @Override
     public int[] symmetryActions(int actionKey) {
-        return new int[0];
+        int size = ConfigEWN.BOARD_SIZE;
+        int[] equivAction = new int[2];
+        equivAction[0] = actionKey;
+
+        int[] from_to = Helper.getIntsFromAction(Types.ACTIONS.fromInt(actionKey)); // [from, to] int array
+        int to_x = from_to[1] % size;
+        int to_y = (from_to[1] - to_x) / size;
+        int from_x = from_to[0] % size;
+        int from_y = (from_to[0] - from_x) / size;
+        int new_to = to_x*size + to_y;
+        int new_from = from_x*size + from_y;
+        equivAction[1] = new_from*100 + new_to;
+
+        return equivAction;
+
     }
 
     @Override
     public int[][] fixedNTuples(int mode) {
         switch(mode) {
             case 0:
-                switch(ConfigEWN.BOARD_SIZE) {
-                    case 3:return getNTuple3x3();
-                    case 4: return getNTuple4x4();
-                    case 5: return getNTuple5x5();
-                    case 6: return getNTuple6x6();
-                    default:
-                        throw new RuntimeException("XNTupleFuncsEWN: The size of the board must be [3,4,5,6].");
-                }
+                return switch (ConfigEWN.BOARD_SIZE) {
+                    case 3 -> getNTuple3x3();
+                    case 4 -> getNTuple4x4();
+                    case 5 -> getNTuple5x5();
+                    case 6 -> getNTuple6x6();
+                    default -> throw new RuntimeException("XNTupleFuncsEWN: The size of the board must be [3,4,5,6].");
+                };
             default: throw new RuntimeException("mode = " +mode + " is not supported");
         }
 
@@ -363,18 +404,26 @@ public class XNTupleFuncsEWN extends XNTupleBase implements XNTupleFuncs, Serial
         int[] mirror = new int[bv.bvec.length];
         int[] indices = new int[bv.bvec.length];
         int size = ConfigEWN.BOARD_SIZE;
-        int i = 0;
-        for(int pos : bv.bvec){
-            // Convert to 2d
+        // WRONG version (before 05/2023):
+//        int i = 0;
+//        for(int pos : bv.bvec){
+//            int x = pos % size;
+//            int y = (pos-x) / size;
+//            mirror[i] = ((x*size)+y);
+//            i++;
+//        }
+        // CORRECT version:
+        for (int pos=0; pos<bv.bvec.length; pos++) {
+            // Convert pos to 2d (x,y):  pos = (y*size) + x
 
             // swap x and y so that
             // (0,0) => (0,0)
             // (0,1) => (1,0)
-            // (2,1) => (1,2)
+            // (2,1) => (1,2) and so on
             int x = pos % size;
             int y = (pos-x) / size;
-            mirror[i] = ((x*size)+y);
-            i++;
+            int newpos =  (x*size)+y;
+            mirror[newpos] = bv.bvec[pos];
         }
         return new BoardVector(mirror);
     }

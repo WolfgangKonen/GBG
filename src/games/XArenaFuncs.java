@@ -257,6 +257,29 @@ public class XArenaFuncs {
 		}
 
 		return pa;
+	} // constructAgent
+
+	/**
+	 * Fetch the vector of all {@link PlayAgent}s from {@link Arena}. See
+	 * {@link #fetchAgent(int, String, XArenaButtons)} for the rules how to
+	 * fetch.
+	 *
+	 * @param m_xab
+	 *            where to read the settings from
+	 * @return the vector {@code m_PlayAgents} of all agents in the arena
+	 * @throws RuntimeException if agents cannot be fetched
+	 *
+	 * @see #constructAgent(int, String, XArenaButtons)
+	 * @see #fetchAgent(int, String, XArenaButtons)
+	 */
+	public PlayAgent[] fetchAgents(XArenaButtons m_xab) throws RuntimeException {
+		if (m_PlayAgents == null)
+			m_PlayAgents = new PlayAgent[numPlayers];
+		for (int n = 0; n < numPlayers; n++) {
+			String sAgent = m_xab.getSelectedAgent(n);
+			m_PlayAgents[n] = fetchAgent(n, sAgent, m_xab);
+		}
+		return m_PlayAgents;
 	}
 
 	/**
@@ -293,106 +316,56 @@ public class XArenaFuncs {
 		// push the params from Param Tabs onto the relevant ParXX in m_xab & call gb.updateParams():
 		updateParams(n,m_xab);
 
-		if (sAgent.equals("Max-N")) {
-			pa = new MaxNAgent(sAgent, m_xab.maxnPar[n], m_xab.oPar[n]);
-		} else if (sAgent.equals("RHEA-SI")) {
-			pa = new RheaAgentSI(sAgent, null);
-		} else if (sAgent.equals("Expectimax-N")) {
-			pa = new ExpectimaxNAgent(sAgent, m_xab.maxnPar[n], m_xab.oPar[n]);
-		} else if (sAgent.equals("Random")) {
-			pa = new RandomAgent(sAgent, m_xab.oPar[n]);
-		} else if (sAgent.equals("MCTS")) {
-			pa = new MCTSAgentT(sAgent, null, m_xab.mctsPar[n], m_xab.oPar[n]);
-		} else if (sAgent.equals("MCTS Expectimax")) {
-			pa = new MCTSExpectimaxAgt(sAgent, m_xab.mctsePar[n], m_xab.oPar[n]);
-		} else if (sAgent.equals("Human")) {
-			pa = new HumanPlayer(sAgent);
-//		} else if (sAgent.equals("MC")) {
-//			pa = new MCAgent(sAgent, m_xab.mcPar[n], m_xab.oPar[n]);
-		} else if (sAgent.equals("MC-N")) {
-			pa = new MCAgentN(sAgent, m_xab.mcPar[n], m_xab.oPar[n]);
-		} else if (sAgent.equals("AlphaBeta")) {			// CFour only, see gui_agent_list in XArenaButtonsGui
-			AlphaBetaAgent alphaBetaStd = new AlphaBetaAgent(new BookSum()); 	  // no search for distant losses
-			alphaBetaStd.instantiateAfterLoading();
-			pa = alphaBetaStd;
-		} else if (sAgent.equals("AlphaBeta-DL")) {				// CFour only, see gui_agent_list in XArenaButtonsGui
-			AlphaBetaAgent alphaBetaStd = new AlphaBetaAgent(new BookSum(),1000); // search for distant losses
-			alphaBetaStd.instantiateAfterLoading();
-			pa = alphaBetaStd;
-		} else if (sAgent.equals("Bouton")) { 	// Nim only, see gui_agent_list in XArenaButtonsGui
-			pa = new BoutonAgent(sAgent);
-		} else if (sAgent.equals("HeurPlayer")) { 	// Othello only, see gui_agent_list in XArenaButtonsGui
-			pa = new BenchMarkPlayer("HeurPlayer", 0);
-		} else if (sAgent.equals("BenchPlayer")) { 	// Othello only, see gui_agent_list in XArenaButtonsGui
-			pa = new BenchMarkPlayer("BenchPlayer", 1);
-//		} else if (sAgent.equals("Edax")) { // Othello only, see gui_agent_list in XArenaButtons
-//			pa = new Edax();
-		} else if (sAgent.equals("Edax2")) { 	// Othello only, see gui_agent_list in XArenaButtons
-			pa = new Edax2(sAgent, m_xab.edPar[n]);
-		} else if(sAgent.equals("BSBJA")) { // Black Jack only, see gui_agent_list in XArenaButtonsGui
-			pa = new BasicStrategyBlackJackAgent();
-		} else if(sAgent.equals("KuhnOptimal")) { // KuhnPoker only, see gui_agent_list in XArenaButtonsGui
-			pa = new KuhnPokerAgent("KuhnOptimal");
-		} else { // all the trainable agents:
-			if (m_PlayAgents[n] == null) {
+		try {
+			switch (sAgent) {
+				case "Max-N" -> pa = new MaxNAgent(sAgent, m_xab.maxnPar[n], m_xab.oPar[n]);
+				case "RHEA-SI" -> pa = new RheaAgentSI(sAgent, null);
+				case "Expectimax-N" -> pa = new ExpectimaxNAgent(sAgent, m_xab.maxnPar[n], m_xab.oPar[n]);
+				case "Random" -> pa = new RandomAgent(sAgent, m_xab.oPar[n]);
+				case "MCTS" -> pa = new MCTSAgentT(sAgent, null, m_xab.mctsPar[n], m_xab.oPar[n]);
+				case "MCTS Expectimax" -> pa = new MCTSExpectimaxAgt(sAgent, m_xab.mctsePar[n], m_xab.oPar[n]);
+				case "Human" -> pa = new HumanPlayer(sAgent);
+				case "MC-N" -> pa = new MCAgentN(sAgent, m_xab.mcPar[n], m_xab.oPar[n]);
+				case "AlphaBeta" -> {            // CFour only, see gui_agent_list in XArenaButtonsGui
+					AlphaBetaAgent alphaBetaStd = new AlphaBetaAgent(new BookSum());      // no search for distant losses
 
-				pa = fetchTrainableAgent(n, sAgent, m_xab);
-
-			} else { // i.e. if m_PlayAgents[n]!=null
-				PlayAgent inner_pa = m_PlayAgents[n];
-				if (m_PlayAgents[n].isWrapper())
-					inner_pa = m_PlayAgents[n].getWrappedPlayAgent();
-				if (!sAgent.equals(inner_pa.getName()))
-					throw new RuntimeException("Current agent for player " + n + " is " + m_PlayAgents[n].getName()
-							+ " but selector for player " + n + " requires " + sAgent + ".");
-				pa = m_PlayAgents[n]; // take the n'th current agent, whose state is either INIT or TRAINED
-
-				switch (pa.getAgentState()) {
-					case INIT:
-						// When fetching an agent in state INIT (useful when saving a stub), we want to take over all
-						// settings from the param tabs (that the user might have just set) and save them with pa to disk
-						if (pa instanceof NTuple4Base) {
-							((NTuple4Base) pa).setParTD(m_xab.tdPar[n]);
-							((NTuple4Base) pa).setParNT(m_xab.ntPar[n]);
-						} else if (pa instanceof NTupleBase) {
-							((NTupleBase) pa).setParTD(m_xab.tdPar[n]);
-							((NTupleBase) pa).setParNT(m_xab.ntPar[n]);
-						}
-						//
-						// TODO: extend this for other agents and their param tabs
-						//
-
-						pa.setParWrapper(m_xab.wrPar[n]); // for all agents
-						pa.setWrapperParamsOfromWr(pa.getParWrapper());
-						pa.setParOther(m_xab.oPar[n]);   // for all agents
-						pa.setParReplay(m_xab.rbPar[n]); // for all agents
-						break;
-					case TRAINED:
-						// When fetching an agent in state TRAINED, we want to take it 'as-is' (it was perhaps trained
-						// for a longer time) and use it with all its current settings. The only exceptions are:
-						//
-						// Wrapper MaxN: { nPly}, Wrapper MCTS: {iterations, PUCT, depth}, and stopEval (EpiLength Eval) are the
-						// ONLY parameters from tab 'Other pars' which may be changed by the user for a TRAINED agent.
-						// (All the other opar parameters may be only
-						// set/changed BEFORE training a trainable agent.) The following line of code was missing before 2020-08-11
-						// and caused the bug that a Wrapper nPly set for a trained agent was not saved to disk.
-						// Now it will be saved:
-						pa.setParWrapper(m_xab.wrPar[n]);
-						pa.setWrapperParamsOfromWr(pa.getParWrapper());
-						//pa.setWrapperParamsO(m_xab.oPar[n]);		// obsolete
-
-						pa.setParReplay(m_xab.rbPar[n]);
-						break;
-					default:
-						throw new RuntimeException("Not supported AgentState");
+					alphaBetaStd.instantiateAfterLoading();
+					pa = alphaBetaStd;
 				}
+				case "AlphaBeta-DL" -> {                // CFour only, see gui_agent_list in XArenaButtonsGui
+					AlphaBetaAgent alphaBetaStd = new AlphaBetaAgent(new BookSum(), 1000); // search for distant losses
 
-				// --- this is now done by updateParams above
-//				if (pa instanceof NTuple4Base) {
-//					((NTuple4Base) pa).setRewardParsFromParTD();
-//				}
+					alphaBetaStd.instantiateAfterLoading();
+					pa = alphaBetaStd;
+				}
+				case "Bouton" ->    // Nim only, see gui_agent_list in XArenaButtonsGui
+						pa = new BoutonAgent(sAgent);
+				case "HeurPlayer" ->    // Othello only, see gui_agent_list in XArenaButtonsGui
+						pa = new BenchMarkPlayer("HeurPlayer", 0);
+				case "BenchPlayer" ->    // Othello only, see gui_agent_list in XArenaButtonsGui
+						pa = new BenchMarkPlayer("BenchPlayer", 1);
+				case "Edax2" ->    // Othello only, see gui_agent_list in XArenaButtons
+						pa = new Edax2(sAgent, m_xab.edPar[n]);
+				case "BSBJA" ->  // Black Jack only, see gui_agent_list in XArenaButtonsGui
+						pa = new BasicStrategyBlackJackAgent();
+				case "KuhnOptimal" ->  // KuhnPoker only, see gui_agent_list in XArenaButtonsGui
+						pa = new KuhnPokerAgent("KuhnOptimal");
+				default -> {        // all the trainable agents:
+					if (m_PlayAgents[n] == null) {
 
-			}
+						pa = constructTrainableAgent(n, sAgent, m_xab);
+
+					} else {
+
+						pa = fetchTrainableAgent(n, sAgent, m_xab);
+
+					}
+				}
+			}  // switch
+
+		} catch (Exception e) {
+			m_Arena.showMessage(e.getClass().getName() + ": " + e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
+			e.printStackTrace();
 		}
 		if (pa == null)
 			throw new RuntimeException("Could not construct/fetch agent = " + sAgent);
@@ -400,132 +373,145 @@ public class XArenaFuncs {
 		return pa;
 	} // fetchAgent
 
-	// helper function for fetchAgent: construct a new trainable agent if the current one is null
+	// helper function for fetchAgent: fetch a trainable agent from m_PlayAgents
 	private PlayAgent fetchTrainableAgent(int n, String sAgent, XArenaButtons m_xab) {
-		PlayAgent pa = null;
-		int maxGameNum = m_xab.getGameNumber();
+		PlayAgent pa;
+		PlayAgent inner_pa = m_PlayAgents[n];
+		if (m_PlayAgents[n].isWrapper())
+			inner_pa = m_PlayAgents[n].getWrappedPlayAgent();
+		if (!sAgent.equals(inner_pa.getName()))
+			throw new RuntimeException("Current agent for player " + n + " is " + m_PlayAgents[n].getName()
+					+ " but selector for player " + n + " requires " + sAgent + ".");
+		pa = m_PlayAgents[n]; // take the n'th current agent, whose state is either INIT or TRAINED
 
-		if (sAgent.equals("TDS")) {
-			Feature feat = m_xab.m_arena.makeFeatureClass(m_xab.tdPar[n].getFeatmode());
-			pa = new TDAgent(sAgent, m_xab.tdPar[n], m_xab.oPar[n], feat, maxGameNum);
-		} else if (sAgent.equals("TD-Ntuple-3")) {
-			try {
-				XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
-				NTupleFactory ntupfac = new NTupleFactory();
-				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
-				pa = new TDNTuple3Agt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
-						m_xab.oPar[n], nTuples, xnf, maxGameNum);
-			} catch (Exception e) {
-				m_Arena.showMessage(e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
-				// e.printStackTrace();
+		switch (pa.getAgentState()) {
+			case INIT -> {
+				// When fetching an agent in state INIT (useful when saving a stub), we want to take over all
+				// settings from the param tabs (that the user might have just set) and save them with pa to disk
+				if (pa instanceof NTuple4Base) {
+					((NTuple4Base) pa).setParTD(m_xab.tdPar[n]);
+					((NTuple4Base) pa).setParNT(m_xab.ntPar[n]);
+				} else if (pa instanceof NTupleBase) {
+					((NTupleBase) pa).setParTD(m_xab.tdPar[n]);
+					((NTupleBase) pa).setParNT(m_xab.ntPar[n]);
+				}
+				//
+				// TODO: extend this for other agents and their param tabs
+				//
+
+				pa.setParWrapper(m_xab.wrPar[n]); // for all agents
+				pa.setWrapperParamsOfromWr(pa.getParWrapper());
+				pa.setParOther(m_xab.oPar[n]);   // for all agents
+				pa.setParReplay(m_xab.rbPar[n]); // for all agents
 			}
-		} else if (sAgent.equals("TD-Ntuple-4")) {
-			try {
-				XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
-				NTuple4Factory ntupfac = new NTuple4Factory();
-				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
-				pa = new TDNTuple4Agt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
-						m_xab.oPar[n],m_xab.rbPar[n], m_xab.wrPar[n], nTuples, xnf, maxGameNum);
-				//((TDNTuple4Agt) pa).setRewardParsFromParTD();
-				m_xab.m_arena.gb.updateParams();
-			} catch (Exception e) {
-				m_Arena.showMessage(e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
-				// e.printStackTrace();
+			case TRAINED -> {
+				// When fetching an agent in state TRAINED, we want to take it 'as-is' (it was perhaps trained
+				// for a longer time) and use it with all its current settings. The only exceptions are:
+				//
+				// Wrapper MaxN: { nPly}, Wrapper MCTS: {iterations, PUCT, depth}, and stopEval (EpiLength Eval) are the
+				// ONLY parameters from tab 'Other pars' which may be changed by the user for a TRAINED agent.
+				// (All the other opar parameters may be only
+				// set/changed BEFORE training a trainable agent.) The following line of code was missing before 2020-08-11
+				// and caused the bug that a Wrapper nPly set for a trained agent was not saved to disk.
+				// Now it will be saved:
+				pa.setParWrapper(m_xab.wrPar[n]);
+				pa.setWrapperParamsOfromWr(pa.getParWrapper());
+				//pa.setWrapperParamsO(m_xab.oPar[n]);		// obsolete
+
+				pa.setParReplay(m_xab.rbPar[n]);
 			}
-		} else if (sAgent.equals("Sarsa")) {
-			try {
-				XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
-				NTupleFactory ntupfac = new NTupleFactory();
-				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
-				// int numOutputs =
-				// m_xab.m_game.gb.getDefaultStartState().getAllAvailableActions().size();
-				ArrayList<ACTIONS> allAvailActions = m_xab.m_arena.gb.getDefaultStartState()
-						.getAllAvailableActions();
-				pa = new SarsaAgt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
-						m_xab.oPar[n], nTuples, xnf, allAvailActions, maxGameNum);
-			} catch (Exception e) {
-				m_Arena.showMessage(e.getMessage(), "Warning Sarsa", JOptionPane.WARNING_MESSAGE);
-				// e.printStackTrace();
-			}
-		} else if (sAgent.equals("Sarsa-4")) {
-			try {
-				XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
-				NTuple4Factory ntupfac = new NTuple4Factory();
-				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
-				ArrayList<ACTIONS> allAvailActions = m_xab.m_arena.gb.getDefaultStartState()
-						.getAllAvailableActions();
-				pa = new Sarsa4Agt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
-						m_xab.oPar[n], nTuples, xnf, allAvailActions, maxGameNum);
-			} catch (Exception e) {
-				m_Arena.showMessage(e.getMessage(), "Warning Sarsa-4", JOptionPane.WARNING_MESSAGE);
-				// e.printStackTrace();
-			}
-		} else if (sAgent.equals("Qlearn-4")) {
-			try {
-				XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
-				NTuple4Factory ntupfac = new NTuple4Factory();
-				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
-				ArrayList<ACTIONS> allAvailActions = m_xab.m_arena.gb.getDefaultStartState()
-						.getAllAvailableActions();
-				pa = new QLearn4Agt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
-						m_xab.oPar[n], nTuples, xnf, allAvailActions, maxGameNum);
-			} catch (Exception e) {
-				m_Arena.showMessage(e.getMessage(), "Warning Qlearn-4", JOptionPane.WARNING_MESSAGE);
-				// e.printStackTrace();
-			}
-		} else if (sAgent.equals("DaviNim")) { 	// Nim3P only, see gui_agent_list in XArenaButtonsGui
-			pa = new DaviNimAgent(sAgent, m_xab.oPar[n]);
-		} else if (sAgent.equals("DAVI2")) { // RubiksCube only, see gui_agent_list in XArenaButtonsGui
-			pa = new DAVI2Agent(sAgent, m_xab.oPar[n]);
-		} else if (sAgent.equals("DAVI3")) { // RubiksCube only, see gui_agent_list in XArenaButtonsGui
-			try {
-				XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
-				NTupleFactory ntupfac = new NTupleFactory();
-				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
-				pa = new DAVI3Agent(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
-						m_xab.oPar[n], nTuples, xnf, maxGameNum);
-			} catch (Exception e) {
-				m_Arena.showMessage(e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
-				// e.printStackTrace();
-			}
-		} else if (sAgent.equals("DAVI4")) { // RubiksCube only, see gui_agent_list in XArenaButtonsGui
-			try {
-				XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
-				NTuple4Factory ntupfac = new NTuple4Factory();
-				int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
-				pa = new DAVI4Agent(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
-						m_xab.oPar[n], nTuples, xnf, maxGameNum, m_Arena);
-			} catch (Exception e) {
-				m_Arena.showMessage(e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
-				// e.printStackTrace();
-			}
+			default -> throw new RuntimeException("Not supported case for AgentState");
 		}
-
 		return pa;
 	} // fetchTrainableAgent
 
-	/**
-	 * Fetch the vector of all {@link PlayAgent}s from {@link Arena}. See
-	 * {@link #fetchAgent(int, String, XArenaButtons)} for the rules how to
-	 * fetch.
-	 * 
-	 * @param m_xab
-	 *            where to read the settings from
-	 * @return the vector {@code m_PlayAgents} of all agents in the arena
-	 * @throws RuntimeException if agents cannot be fetched
-	 * 
-	 * @see #constructAgent(int, String, XArenaButtons)
-	 * @see #fetchAgent(int, String, XArenaButtons)
-	 */
-	public PlayAgent[] fetchAgents(XArenaButtons m_xab) throws RuntimeException {
-		if (m_PlayAgents == null)
-			m_PlayAgents = new PlayAgent[numPlayers];
-		for (int n = 0; n < numPlayers; n++) {
-			String sAgent = m_xab.getSelectedAgent(n);
-			m_PlayAgents[n] = fetchAgent(n, sAgent, m_xab);
+	// helper function for fetchAgent: construct a new trainable agent if the current one is null
+	private PlayAgent constructTrainableAgent(int n, String sAgent, XArenaButtons m_xab) {
+		PlayAgent pa = null;
+		int maxGameNum = m_xab.getGameNumber();
+
+		try {
+			switch (sAgent) {
+				case "TDS" -> {
+					Feature feat = m_xab.m_arena.makeFeatureClass(m_xab.tdPar[n].getFeatmode());
+					pa = new TDAgent(sAgent, m_xab.tdPar[n], m_xab.oPar[n], feat, maxGameNum);
+				}
+				case "TD-Ntuple-3" -> {
+					XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
+					NTupleFactory ntupfac = new NTupleFactory();
+					int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
+					pa = new TDNTuple3Agt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
+							m_xab.oPar[n], nTuples, xnf, maxGameNum);
+				}
+				case "TD-Ntuple-4" -> {
+					XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
+					NTuple4Factory ntupfac = new NTuple4Factory();
+					int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
+					pa = new TDNTuple4Agt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
+							m_xab.oPar[n], m_xab.rbPar[n], m_xab.wrPar[n], nTuples, xnf, maxGameNum);
+					//((TDNTuple4Agt) pa).setRewardParsFromParTD();
+					m_xab.m_arena.gb.updateParams();
+				}
+				case "Sarsa" -> {
+					XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
+					NTupleFactory ntupfac = new NTupleFactory();
+					int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
+					// int numOutputs =
+					// m_xab.m_game.gb.getDefaultStartState().getAllAvailableActions().size();
+					ArrayList<ACTIONS> allAvailActions = m_xab.m_arena.gb.getDefaultStartState()
+							.getAllAvailableActions();
+					pa = new SarsaAgt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
+							m_xab.oPar[n], nTuples, xnf, allAvailActions, maxGameNum);
+				}
+				case "Sarsa-4" -> {
+					XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
+					NTuple4Factory ntupfac = new NTuple4Factory();
+					int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
+					ArrayList<ACTIONS> allAvailActions = m_xab.m_arena.gb.getDefaultStartState()
+							.getAllAvailableActions();
+					pa = new Sarsa4Agt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
+							m_xab.oPar[n], nTuples, xnf, allAvailActions, maxGameNum);
+				}
+				case "Qlearn-4" -> {
+					XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
+					NTuple4Factory ntupfac = new NTuple4Factory();
+					int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
+					ArrayList<ACTIONS> allAvailActions = m_xab.m_arena.gb.getDefaultStartState()
+							.getAllAvailableActions();
+					pa = new QLearn4Agt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
+							m_xab.oPar[n], nTuples, xnf, allAvailActions, maxGameNum);
+				}
+				case "DaviNim" ->    // Nim3P only, see gui_agent_list in XArenaButtonsGui
+						pa = new DaviNimAgent(sAgent, m_xab.oPar[n]);
+				case "DAVI2" ->  // RubiksCube only, see gui_agent_list in XArenaButtonsGui
+						pa = new DAVI2Agent(sAgent, m_xab.oPar[n]);
+				case "DAVI3" -> { // RubiksCube only, see gui_agent_list in XArenaButtonsGui
+
+					XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
+					NTupleFactory ntupfac = new NTupleFactory();
+					int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
+					pa = new DAVI3Agent(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
+							m_xab.oPar[n], nTuples, xnf, maxGameNum);
+				}
+				case "DAVI4" -> { // RubiksCube only, see gui_agent_list in XArenaButtonsGui
+
+					XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
+					NTuple4Factory ntupfac = new NTuple4Factory();
+					int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
+					pa = new DAVI4Agent(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
+							m_xab.oPar[n], nTuples, xnf, maxGameNum, m_Arena);
+				}
+				default ->
+						throw new RuntimeException("Could not construct trainable agent: Unknown agent name " + sAgent);
+			}
+
+		} catch (Exception e) {
+			m_Arena.showMessage(e.getClass().getName() + ": " + e.getMessage(), "Warning", JOptionPane.WARNING_MESSAGE);
+			e.printStackTrace();
 		}
-		return m_PlayAgents;
-	}
+
+		return pa;
+	} // constructTrainableAgent
 
 	/**
 	 * Given the selected agents in {@code paVector}, call
@@ -1169,22 +1155,22 @@ public class XArenaFuncs {
 		boolean nextMoveSilent = (verbose < 2);
 		StateObservation so;
 		Types.ACTIONS_VT actBest;
-		String sMsg;
+		StringBuilder sMsg;
 
 		String[] pa_string = new String[numPlayers];
 		for (int i = 0; i < numPlayers; i++)
 			pa_string[i] = paVector.pavec[i].stringDescr();
 
 		switch (numPlayers) {
-			case (1) -> sMsg = "Competition, " + competeNum + " episodes: \n" + pa_string[0];
-			case (2) -> sMsg = "Competition, " + competeNum + " episodes: \n" +
-					"      X: " + pa_string[0] + " \n" + "   vs O: " + pa_string[1];
+			case (1) -> sMsg = new StringBuilder("Competition, " + competeNum + " episodes: \n" + pa_string[0]);
+			case (2) -> sMsg = new StringBuilder("Competition, " + competeNum + " episodes: \n" +
+					"      X: " + pa_string[0] + " \n" + "   vs O: " + pa_string[1]);
 			default -> {
-				sMsg = "Competition, " + competeNum + " episodes: \n";
+				sMsg = new StringBuilder("Competition, " + competeNum + " episodes: \n");
 				for (int n = 0; n < numPlayers; n++) {
-					sMsg = sMsg + "    P" + n + ": " + pa_string[n];
+					sMsg.append("    P").append(n).append(": ").append(pa_string[n]);
 					if (n < numPlayers - 1)
-						sMsg = sMsg + ", \n";
+						sMsg.append(", \n");
 				}
 			}
 		}

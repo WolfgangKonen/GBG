@@ -217,7 +217,7 @@ public class GameBoardEWN implements GameBoard {
     @Override
     public String getSubDir() {
         int boardSize = ConfigEWN.BOARD_SIZE;
-        int cellCoding = ConfigEWN.CEll_CODING;
+        int cellCoding = ConfigEWN.CELL_CODING;
         boolean random = ConfigEWN.RANDOM_POSITION;
         String board = boardSize+"x"+boardSize+" ";
         String players = ConfigEWN.NUM_PLAYERS + " Players";

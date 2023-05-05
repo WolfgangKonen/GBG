@@ -12,15 +12,26 @@ import tools.Types;
 import tools.Types.ACTIONS;
 import controllers.ExpectimaxNAgent;
 
+import java.io.Serial;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static tools.Types.WINNER.*;
 
+/**
+ * Class StateObserverEWN observes the current state of the game.<p>
+ * It has utility functions for
+ * <ul>
+ * <li> returning the available actions ({@link #getAvailableActions()}),
+ * <li> advancing the state of the game with a specific action ({@link #advance(Types.ACTIONS)}),
+ * <li> copying the current state
+ * <li> signaling end, score and winner of the game
+ * </ul>
+ *
+ */
 public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeterministic {
 
-    public static final long serialVersionUID = 12L;
     private static final double REWARD_NEGATIVE = -1, REWARD_POSITIVE = 1;
     private final int numPlayers; // /WK/ really needed? will be always =ConfigEWN.NUM_PLAYERS
     //private int count;                            // /WK/ seems never used
@@ -35,9 +46,11 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
     private ArrayList<ACTIONS> availableActions;
     private final ArrayList<ACTIONS> availableRandomActions;
     private int playerWin;      // Representing the winning player for faster evaluation
-    private int playerLooses;   // Representing the loosing player for faster evaluation
+    private int playerLoses;    // Representing the loosing player for faster evaluation
     private final ScoreTuple m_scoreTuple;
 
+    @Serial
+    private static final long  serialVersionUID = 13L;
 
     public StateObserverEWN(){
         super();
@@ -46,9 +59,9 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
         this.numPlayers = ConfigEWN.NUM_PLAYERS;
         this.size = ConfigEWN.BOARD_SIZE;
         m_scoreTuple = new ScoreTuple(numPlayers);
-        playerWin = -1;
+        playerWin = -1;             // -1 signals: not yet determined
+        playerLoses = -1;           //
         //count = 0;
-        playerLooses = -1;
         this.nextNondeterministicAction=null;
         this.isNextActionDeterministic=false;
         this.gameState = new Token[size][size];
@@ -81,7 +94,7 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
         this.players = new ArrayList<>();
         this.nextNondeterministicAction = other.getNextNondeterministicAction();
         this.isNextActionDeterministic = other.isNextActionDeterministic();
-        this.playerLooses = other.getPlayerLooses();
+        this.playerLoses = other.getPlayerLoses();
         this.playerWin = other.getPlayerWin();
         this.m_scoreTuple = new ScoreTuple(other.m_scoreTuple);
         this.availableActions = new ArrayList<>();
@@ -228,11 +241,11 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
      * <p>
      * For example, if we get action 706:
      * <ol>
-     *     <li>Convert the action 706 to indices [from,to] =&gt; [7,6] {@link Helper}</li>
-     *     <li>Split the indices of the array to their from and to coordinates</li>
-     *     <li>if to_token is a players token remove it</li>
-     *     <li>Changing the gameState</li>
-     *     <li>Update Players token</li>
+     *     <li>Convert the action to fields (e.g. 706 to fields [from,to] &rArr; [7,6], see {@link Helper#getIntsFromAction(ACTIONS)})
+     *     <li>Split the indices of the array to their from and to coordinates
+     *     <li>If to_token is a players token remove it
+     *     <li>Change the {@code gameState}
+     *     <li>Update {@code player}'s tokens
      * </ol>
 
      * @param action    the action
@@ -317,7 +330,7 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
     }
 
 
-
+    // TODO: These are too many!! Only adjacent pairs (i,k) are allowed !
     @Override
     public ArrayList<ACTIONS> getAllAvailableActions() {
         ArrayList<ACTIONS> ar = new ArrayList<>();
@@ -359,7 +372,8 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
     public void setAvailableActions() {
         Player p = players.get(player);
         p.setAvailableActions(nextNondeterministicAction.toInt());
-        this.availableActions = p.getAvailableActions();
+        this.availableActions = (ArrayList<ACTIONS>) p.getAvailableActions().clone();
+        // /WK/05/2023/: added .clone() for safety (this.availableActions should not point to another object)
     }
 
 
@@ -383,7 +397,7 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
 
     private Types.WINNER getWinner2(int player) {
         if(playerWin >= 0) return playerWin == player ? PLAYER_WINS : PLAYER_LOSES;
-        return playerLooses == player ? PLAYER_LOSES : PLAYER_WINS;
+        return playerLoses == player ? PLAYER_LOSES : PLAYER_WINS;
 
     }
 
@@ -392,9 +406,9 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
             if(playerWin >= 0) {
                 return player == 2 ? PLAYER_WINS : PLAYER_LOSES;
             }
-            if(playerLooses >= 0){
+            if(playerLoses >= 0){
                 // if playerLooses == 2
-                if(playerLooses == 2){
+                if(playerLoses == 2){
                     return player == 2 ? PLAYER_LOSES : PLAYER_WINS;
                 }
                 return player == 2 ? PLAYER_WINS : PLAYER_LOSES;
@@ -415,12 +429,12 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
             }
             return PLAYER_LOSES;
         }
-        else if(playerLooses >= 0){
+        else if(playerLoses >= 0){
 
-            if((playerLooses == 0 || playerLooses == 2) && (player == 0 || player == 2)){
+            if((playerLoses == 0 || playerLoses == 2) && (player == 0 || player == 2)){
                 return PLAYER_LOSES;
             }
-            if((playerLooses == 1 || playerLooses == 3) && (player == 1 || player == 3))
+            if((playerLoses == 1 || playerLoses == 3) && (player == 1 || player == 3))
             {
                 return PLAYER_LOSES;
             }
@@ -429,6 +443,10 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
         throw new RuntimeException("There must be a winner");
     }
 
+    /**
+     * Returns the winning condition of {@code player}, either PLAYER_WINS (+1) or PLAYER_LOSES (-1).
+     * Should be only called, if game is over.
+     */
     private Types.WINNER getWinner(int player){
         switch (ConfigEWN.NUM_PLAYERS){
             case 2: return getWinner2(player);
@@ -449,15 +467,16 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
 
     @Override
     public double getGameScore(int player) {
-        if(!isGameOver()) return 0.0;
-        Types.WINNER winState = getWinner(player);
-        switch (winState){
-            case PLAYER_LOSES:
-                return REWARD_NEGATIVE;
-            case PLAYER_WINS:
-                return REWARD_POSITIVE;
-            case TIE:  throw new RuntimeException("invalid outcome of the game [wrong getGameScore]");
+        if(isGameOver()) {
+            Types.WINNER winState = getWinner(player);
+            switch (winState){
+                case PLAYER_LOSES:
+                    return REWARD_NEGATIVE;
+                case PLAYER_WINS:
+                    return REWARD_POSITIVE;
+                case TIE:  throw new RuntimeException("invalid outcome of the game [EWN cannot end in a tie]");
             }
+        }
         return 0.0;
     }
 
@@ -597,7 +616,7 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
     @Override
     public boolean isGameOver() {
        switch(numPlayers){
-           case 2:  return gameOverTwoPlayer();
+           case 2: return gameOverTwoPlayer();
            case 3: return gameOverThreePlayer();
            case 4: return gameOverFourPlayer();
            default: throw new RuntimeException("numPlayer "+ numPlayers+ " is not not implemented yet");
@@ -619,7 +638,7 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
                 }
                 if(p.getTokens().size() == 0)
                 {
-                    playerLooses = p.getPlayer();
+                    playerLoses = p.getPlayer();
                     return true;
                 }
             }
@@ -637,7 +656,7 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
         }
         for(Player p : players) {
             if (p.getTokens().size() == 0) {
-                playerLooses = p.getPlayer();
+                playerLoses = p.getPlayer();
                 return true;
             }
         }
@@ -647,18 +666,21 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
     private boolean gameOverTwoPlayer(){
         int[] winningPositions = {size*size-1,0};
         for (Player p : players) {
+                            // game is over, if any token of player p reaches p's winning position (p has won):
             for (Token t : p.getTokens()) {
                 if (t.getIndex() == winningPositions[t.getPlayer()]) {
                     playerWin = p.getPlayer();
                     return true;
                 }
             }
+                                // game is over, if player p has no more tokens (p has lost):
             if (p.getTokens().size() == 0) {
-                playerLooses = p.getPlayer(); // setting player for getWinner()
+                playerLoses = p.getPlayer(); // setting player for getWinner()
                 return true;
             }
 
         }
+                                // game is not yet over:
         return false;
     }
 
@@ -696,8 +718,8 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
         return playerWin;
     }
 
-    public int getPlayerLooses(){
-        return playerLooses;
+    public int getPlayerLoses(){
+        return playerLoses;
     }
 
     public ScoreTuple getM_scoreTuple(){

@@ -55,6 +55,11 @@ public class Player implements Serializable {
 
     }
 
+    /**
+     * Return the list of tokens that are allowed to move, given {@code diceValue}
+     * @param diceValue     the value of the dice
+     * @return              the list of tokens (pieces of the current player)
+     */
     private Token[] selectToken(int diceValue){
         Token t = getTokenByValue(diceValue);
         if(t != null) return new Token[]{t};

@@ -8,8 +8,8 @@ import java.util.ArrayList;
 
 public class Token implements Serializable {
     private ArrayList<Types.ACTIONS> availableActions;
-    private int index;
-    private int value;
+    private int index;      // index of the token's position on the board
+    private int value;      // the value on the token minus 1
     private int player;
 
 
@@ -27,17 +27,20 @@ public class Token implements Serializable {
         this.availableActions = other.getAvailAbleActions();
     }
 
+    /**
+     * Given the specific {@code (index,player)} of {@code this} token, calculate the available actions for it
+     */
     public void setAvailableActions(){
         availableActions.clear();
         int[] directions = Helper.getMoveDirection(player);
+        int sz = ConfigEWN.BOARD_SIZE;
         for(int dir: directions){
             int newPos = index + dir;
-            if(newPos < 0  || newPos > ConfigEWN.BOARD_SIZE*ConfigEWN.BOARD_SIZE-1) continue; // Bounds check for [0,...,size²-1]
-            if(newPos % ConfigEWN.BOARD_SIZE == 0 && index % ConfigEWN.BOARD_SIZE == ConfigEWN.BOARD_SIZE-1) continue;
-            if(newPos % ConfigEWN.BOARD_SIZE == ConfigEWN.BOARD_SIZE-1 && index % ConfigEWN.BOARD_SIZE == 0) continue;
+            if(newPos < 0  || newPos > sz*sz-1) continue; // Bounds check for [0,...,size²-1]
+            if(newPos % sz == 0 && index % sz == sz-1) continue;
+            if(newPos % sz == sz-1 && index % sz == 0) continue;
             Types.ACTIONS a = Helper.parseAction(index,newPos);
-            if(a != null) availableActions.add(a);
-            else throw new RuntimeException("setAvailableActions in token for index: " + index + " value " + value + " Player: " + player);
+            availableActions.add(a);
         }
     }
 
