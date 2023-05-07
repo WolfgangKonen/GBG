@@ -67,6 +67,7 @@ agents/Othello/TCL3-*noFA*.agt.zip
 agents/Othello/TCL3-fixed6_250k-lam05_P4_H001-diff1-FAm.agt.zip
 agents/Othello/TCL4-100_7_100k-RB*.agt.zip
 agents/Othello/TCL4-100_7_250k-lam05_P4_nPly2-FAm_C.agt.zip
+agents/Othello/TCL4-100_7_250k-lam05_P4_nPly2-FAm_A-new.agt.zip
 # (the only Othello agent we have in repos is TCL3-fixed6_250k-lam05_P4_H001-FAm.agt.zip)
 agents/Othello/WrappeMCTS-100-OLD.agt.zip
 agents/Othello/WrappeMCTS-100-tst.agt.zip

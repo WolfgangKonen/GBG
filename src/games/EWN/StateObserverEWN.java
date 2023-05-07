@@ -15,6 +15,7 @@ import controllers.ExpectimaxNAgent;
 import java.io.Serial;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static tools.Types.WINNER.*;
@@ -34,14 +35,14 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
 
     private static final double REWARD_NEGATIVE = -1, REWARD_POSITIVE = 1;
     private final int numPlayers; // /WK/ really needed? will be always =ConfigEWN.NUM_PLAYERS
-    //private int count;                            // /WK/ seems never used
     private int player;
-    private final int size;
-    //private int turn = 0 ;                        // /WK/ seems never used
+    private final int size;                         // gets ConfigEWN.BOARD_SIZE
     private boolean isNextActionDeterministic;
     private ACTIONS nextNondeterministicAction;     // the dice value minus 1
     private final Token[][] gameState;
     //private ACTIONS rolledDice;                   // /WK/ seems never used
+    //private int turn = 0 ;                        // /WK/ seems never used
+    //private int count;                            // /WK/ seems never used
     private final ArrayList<Player> players;
     private ArrayList<ACTIONS> availableActions;
     private final ArrayList<ACTIONS> availableRandomActions;
@@ -124,7 +125,7 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
     }
 
     private void getFixedStartingPosition(){
-        int[][][] startingPosition = getStartingsPosition();
+        int[][][] startingPosition = getStartingPositions();
         for(int i = 0;i < startingPosition.length; i++){
             for(int k = 0; k < startingPosition[i].length; k++){
                 int[] startPosEntry = startingPosition[i][k];
@@ -310,13 +311,26 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
         return size == 6 ? 6:3;
     }
 
-    private int[][][] getStartingsPosition(){
+    private int[][][] getStartingPositions(){
         if(numPlayers == 2) {
-            return ConfigEWN.BOARD_SIZE == 3 ? StartingPositions.S3P2 : ConfigEWN.BOARD_SIZE == 4 ? StartingPositions.S4P2 : StartingPositions.S5P2;
+            return switch(ConfigEWN.BOARD_SIZE) {
+                case 3 -> StartingPositions.S3P2;
+                case 4 -> StartingPositions.S4P2;
+                case 5 -> StartingPositions.S5P2;
+                default -> throw new RuntimeException("ConfigEWN.BOARD_SIZE="+ConfigEWN.BOARD_SIZE+
+                        " not allowed for numPlayers="+numPlayers);
+            };
+            //return ConfigEWN.BOARD_SIZE == 3 ? StartingPositions.S3P2 : ConfigEWN.BOARD_SIZE == 4 ? StartingPositions.S4P2 : StartingPositions.S5P2;
         }
         else if(numPlayers == 3) return StartingPositions.S6P3;
-        else{
-             return ConfigEWN.BOARD_SIZE == 6 ? StartingPositions.S6P4 : StartingPositions.S4P4;
+        else{   // numPlayers == 4
+            return switch(ConfigEWN.BOARD_SIZE) {
+                case 4 -> StartingPositions.S4P4;
+                case 6 -> StartingPositions.S6P4;
+                default -> throw new RuntimeException("ConfigEWN.BOARD_SIZE="+ConfigEWN.BOARD_SIZE+
+                        " not allowed for numPlayers="+numPlayers);
+            };
+            // return ConfigEWN.BOARD_SIZE == 6 ? StartingPositions.S6P4 : StartingPositions.S4P4;
         }
     }
 
@@ -330,17 +344,33 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
     }
 
 
-    // TODO: These are too many!! Only adjacent pairs (i,k) are allowed !
+    /**
+     * Returns all available actions, in sorted order. Actions are coded as {@code from*100 + to} integers, where
+     * {@code from} and {@code to} are two fields on the board that are <ul>
+     *     <li>not equal and</li>
+     *     <li>adjacent</li>
+     * </ul>
+     * @return the {@link ArrayList} of all actions
+     */
     @Override
     public ArrayList<ACTIONS> getAllAvailableActions() {
         ArrayList<ACTIONS> ar = new ArrayList<>();
-        for(int i = 0; i <size; i++){
-            for(int k = 0; k < size; k++){
-                ar.add(Helper.parseAction(i,k));
-                ar.add(Helper.parseAction(k,i));
+        int fx,fy,tx,ty;
+        //for(int from = 0; from <size*size; from++){
+        for(int from = size*size-1; from >= 0; from--){
+            for(int to = 0; to < size*size; to++){
+                if (from != to) {
+                    tx = to % size;
+                    ty = (to - tx) / size;
+                    fx = from % size;
+                    fy = (from - fx) / size;
+                    if (Math.abs(tx-fx)<=1 && Math.abs(ty-fy)<=1) {
+                        ar.add(Helper.parseAction(from,to));
+                    }
+                }
             }
-            ar.add(new ACTIONS(i));
         }
+        Collections.sort(ar);
         return ar;
     }
 

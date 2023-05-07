@@ -3,10 +3,7 @@ package controllers.TD.ntuple4;
 import java.io.*;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.ListIterator;
-import java.util.Locale;
+import java.util.*;
 
 import org.apache.commons.math3.stat.descriptive.rank.Min;
 import org.apache.commons.math3.stat.descriptive.rank.Percentile;
@@ -16,7 +13,7 @@ import games.StateObsWithBoardVector;
 import games.StateObservation;
 import games.XNTupleFuncs;
 import params.ParNT;
-import tools.Types;
+import tools.Types.ACTIONS;
 
 /**
  *         Implementation of a trainable value-function using n-tuple systems.
@@ -25,7 +22,7 @@ import tools.Types;
  *         board. The value-function uses symmetries of the board to allow a
  *         faster training. The output of the value-function is put
  *         through a sigmoid function (tanh) or not depending on the value returned
- *         from {@link #hasSigmoid()}. The learning rate alpha decreases exponentially 
+ *         from {@link #hasSigmoid()}. The learning rate {@link #ALPHA} decreases exponentially
  *         from a start value at the beginning of the training to an end value after a 
  *         certain amount of games.
  * 
@@ -68,10 +65,18 @@ public class NTuple4ValueFunc implements Serializable {
 
 	NTuple4Agt tdAgt;		// the 'parent' - used to access the parameters in m_tdPar, m_ntPar
 	
-	// The generated n-tuples [numOutputs][numPlayers][numTuples]
+	/**
+	 * Array with n-tuple weights. Dimensions: {@code [numOutputs][numPlayers][numTuples]}.
+	 */
 	private NTuple4[][][] nTuples;
 	
 	public XNTupleFuncs xnf;
+
+	private boolean bUseActionMap = false;
+	/**
+	 * a {@link HashMap} that maps all available actions to consecutive {@link Integer}s.
+	 */
+	private HashMap<ACTIONS,Integer> actionMap;
 	
 	// elements needed for TD(lambda)-update with finite horizon, 
 	// see update(int[],int,double,double):
@@ -93,31 +98,35 @@ public class NTuple4ValueFunc implements Serializable {
 	private static final long  serialVersionUID = 12L;
 
 	/**
-	 * Constructor using a set of n-tuples that are predefined.
+	 * Constructor using a set of predefined n-tuples.
 	 * 
 	 * @param parent
 	 * 			  The agent object where {@code this} is part of. Used to access
 	 * 			  m_tdPar, m_ntPar and their parameters like withSigmoid, USESYMMETRY and so on.
 	 * @param nTuplesI
-	 *            The set of n-tuples as an {@code int} array. For each {@code nTuplesI[i]}
-	 *            the constructor will construct k {@link NTuple4} objects of the same form,
-	 *            one for each player ({@code k=xnf.getNumPlayers()}). Allowed values 
-	 *            for the sampling points of an n-tuple: 0,...,numCells.
+	 *            The set of predefined n-tuples as an {@code int} array. For each {@code nTuplesI[i]}
+	 *            the constructor will construct o*k {@link NTuple4} objects of the same form,
+	 *            one for each output (action in case of QLearn and Sarsa) times one for each player
+	 *            ({@code k=xnf.getNumPlayers()}).
+	 *            Allowed values for the sampling points of an n-tuple: 0,...,numCells.
 	 * @param xnf needed as reference to a proper {@link XNTupleFuncs} object
 	 * @param posVals
 	 *            number of possible values per board cell (TicTacToe: 3)
 	 * @param randInitWeights
 	 *            true, if all weights of all n-Tuples shall be initialized
 	 *            randomly. Otherwise, they are initialized with 0 (which allows to count the active weigths)
-	 * @param tcPar	temporal coherence and n-tuple parameters
+	 * @param tcPar    temporal coherence and n-tuple parameters
 	 * @param numCells
 	 * 			  the number of cells on the board (used to check validity of {@code nTuplesI})
 	 * @param numOutputs
 	 * 			  the number of outputs for the network (1 in TD-learning, numActions in SARSA)
-	 * @throws RuntimeException
+	 * @param allAvailActions the list of all available actions, used for action-to-output mapping. If {@code null},
+	 *                        no action-to-output mapping will occur.
+	 * @throws RuntimeException if {@code nTuplesI==null}
 	 */
 	public NTuple4ValueFunc(NTuple4Agt parent, int[][] nTuplesI, XNTupleFuncs xnf, int[] posVals,
-							boolean randInitWeights, ParNT tcPar, int numCells, int numOutputs)
+							boolean randInitWeights, ParNT tcPar, int numCells, int numOutputs,
+							ArrayList<ACTIONS> allAvailActions)
 					throws RuntimeException {
 //		this.useSymmetry = useSymmetry;
 		this.xnf = xnf;
@@ -126,7 +135,12 @@ public class NTuple4ValueFunc implements Serializable {
 		this.eList = new LinkedList[this.numPlayers];
 		for (int ie=0; ie<eList.length; ie++) eList[ie] = new LinkedList<>();
 		this.tdAgt = parent;
-		
+		if (xnf.useActionMap() && allAvailActions != null) {
+			bUseActionMap=true;
+			assert (numOutputs==allAvailActions.size()) : "Error: numOutputs != allAvailActions.size()";
+			buildActionMap(allAvailActions);
+		}
+
 		if (nTuplesI!=null) {
 			this.numTuples = nTuplesI.length;
 			initNTuples(nTuplesI, posVals, randInitWeights, tcPar, numCells);
@@ -137,14 +151,12 @@ public class NTuple4ValueFunc implements Serializable {
 
 	void initNTuples(int[][] nTuplesI, int[] posVals, boolean randInitWeights,
 			ParNT ntPar, int numCells) {
-		if (numOutputs==0) 
-			throw new RuntimeException("initNTuples: numOutputs is 0!");
+		assert (numOutputs!=0) : "initNTuples: numOutputs is 0!";
 		this.nTuples = new NTuple4[numOutputs][numPlayers][numTuples];
 		for (int i = 0; i < numTuples; i++) {
 			for (int j=0; j<nTuplesI[i].length; j++) {
 				int v = nTuplesI[i][j];
-				if (v<0 || v>=numCells) 
-					throw new RuntimeException("Invalid cell number "+v+" in n-tuple no. "+i);
+				assert (v>=0 && v<numCells) : "Invalid cell number "+v+" in n-tuple no. "+i;
 			}
 			for (int o=0; o<numOutputs; o++) {
 				for (int k=0; k<numPlayers; k++) {
@@ -155,6 +167,21 @@ public class NTuple4ValueFunc implements Serializable {
 				}				
 			}
 		}
+	}
+
+	/**
+	 * Build a {@link HashMap} {@code actionMap} that maps all available actions on consecutive {@link Integer}s. These
+	 * {@link Integer}s are used to index the 1st dimension of array {@link #nTuples}
+	 * (only if {@link #bUseActionMap}{@code ==true}).
+	 *
+	 * @param allAvailActions	the list of all available actions
+	 */
+	private void buildActionMap(ArrayList<ACTIONS> allAvailActions) {
+		actionMap = new HashMap<>();
+		for (int i=0; i<allAvailActions.size(); i++) {
+			actionMap.put(allAvailActions.get(i), i);
+		}
+
 	}
 
 	public boolean instantiateAfterLoading() {
@@ -199,7 +226,7 @@ public class NTuple4ValueFunc implements Serializable {
 	 *            the action to perform on {@code board}
 	 * @return	Q
 	 */
-	public double getQFunc(StateObsWithBoardVector curSOWB, int player, Types.ACTIONS act) {
+	public double getQFunc(StateObsWithBoardVector curSOWB, int player, ACTIONS act) {
 		int i, j;
 		double score = 0.0;
 		BoardVector[] equiv;
@@ -210,16 +237,31 @@ public class NTuple4ValueFunc implements Serializable {
 		equivAction = xnf.symmetryActions(act.toInt());
 
 		if (equivAction.length==0) throw new RuntimeException( "[getQFunc] Error: equivAction has length 0");
-		for (i=0; i<equivAction.length; i++) {
-			if (equivAction[i]>=nTuples.length) throw new RuntimeException(
-				"[getQFunc] equivAction["+i+"]="+equivAction[i]+" is not smaller than nTuples.length="+nTuples.length+" !!!");
-				// this should normally not happen. If it happens, we are out for an OutOfBoundException in the 
+		if (bUseActionMap) {
+			for (i=0; i<equivAction.length; i++) {
+				if (actionMap.get(new ACTIONS(equivAction[i]))==null) throw new RuntimeException(
+						"[getQFunc] equivAction["+i+"]="+equivAction[i]+" is not in actionMap !!!");
+				// this should normally not happen. If it happens, we are out for an OutOfBoundException in the
 				// following lines ...
-		}
-		
-		for (i = 0; i < numTuples; i++) {
-			for (j = 0; j < equiv.length; j++) {
-				score += nTuples[equivAction[j]][player][i].getScore(equiv[j].bvec);
+			}
+
+			for (i = 0; i < numTuples; i++) {
+				for (j = 0; j < equiv.length; j++) {
+					score += nTuples[actionMap.get(new ACTIONS(equivAction[j])) ][player][i].getScore(equiv[j].bvec);
+				}
+			}
+		} else {  // i.e. if !bUseActionMap:
+			for (i=0; i<equivAction.length; i++) {
+				if (equivAction[i]>=nTuples.length) throw new RuntimeException(
+						"[getQFunc] equivAction["+i+"]="+equivAction[i]+" is not smaller than nTuples.length="+nTuples.length+" !!!");
+				// this should normally not happen. If it happens, we are out for an OutOfBoundException in the
+				// following lines ...
+			}
+
+			for (i = 0; i < numTuples; i++) {
+				for (j = 0; j < equiv.length; j++) {
+					score += nTuples[equivAction[j]][player][i].getScore(equiv[j].bvec);
+				}
 			}
 		}
 
@@ -490,7 +532,7 @@ public class NTuple4ValueFunc implements Serializable {
 	 * @param thisSO
 	 * 		  	  only for debug info: access to the current state's stringDescr()
 	 */
-	public void updateWeightsQ(StateObsWithBoardVector lastSOWB, int lastPlayer, Types.ACTIONS lastAction,
+	public void updateWeightsQ(StateObsWithBoardVector lastSOWB, int lastPlayer, ACTIONS lastAction,
 							   double qLast, double target, double reward, StateObservation thisSO) {
 		// delta is the error signal:
 		double delta = (target - qLast);
@@ -606,13 +648,22 @@ public class NTuple4ValueFunc implements Serializable {
 					: "Error: lamFactor < ParTD.getHorizonCut";
 			e = lamFactor*elem.sigDeriv;
 			for (i = 0; i < numTuples; i++) {
-				nTuples[output][player][i].clearIndices();
+				if (bUseActionMap) {
+					nTuples[ actionMap.get(new ACTIONS(output)) ][player][i].clearIndices();
+				} else {
+					nTuples[output][player][i].clearIndices();
+				}
 				for (j = 0; j < equiv.length; j++) {
 					// this assertion is only valid for TicTacToe, where each action should be 
 					// on an empty field which is coded as '1' here:
 					//assert (equiv[j][equivAction[j]]==1) : "Oops, action TicTacToe not viable";
 					
 					out = (QMODE ? equivAction[j] : output);
+					if (bUseActionMap) {
+						if (actionMap.get(new ACTIONS(out))==null) throw new RuntimeException(
+								"[update] action with index "+out+" is not in actionMap !!!");
+						out = actionMap.get(new ACTIONS(out));
+					}
 //					System.out.print("(i,j)=("+i+","+j+"):  ");		//debug
 					nTuples[out][player][i].updateNew(equiv[j].bvec, alphaM, delta, e);
 				}
@@ -822,7 +873,7 @@ public class NTuple4ValueFunc implements Serializable {
 	 * <pre>   {0,4,15,22, ...} </pre>
 	 * i.e. the list of cells covered by this n-tuple.
 	 * 
-	 * @throws IOException
+	 * @throws IOException  if {@link FileWriter} constructor does not succeed
 	 */
 	public void printNTuples() throws IOException {
 		String str;

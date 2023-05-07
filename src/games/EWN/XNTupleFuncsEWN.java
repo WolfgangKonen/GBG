@@ -1,5 +1,8 @@
 package games.EWN;
 
+import controllers.TD.ntuple4.NTuple4ValueFunc;
+import controllers.TD.ntuple4.QLearn4Agt;
+import controllers.TD.ntuple4.Sarsa4Agt;
 import games.*;
 import games.EWN.StateObserverHelper.Helper;
 import games.EWN.StateObserverHelper.Token;
@@ -223,7 +226,60 @@ public class XNTupleFuncsEWN extends XNTupleBase implements XNTupleFuncs, Serial
         equivAction[1] = new_from*100 + new_to;
 
         return equivAction;
+    }
 
+    /**
+     *
+     * @return {@code true}, if {@code actionMap} in {@link NTuple4ValueFunc} shall be used. Otherwise, if {@code false},
+     * no action mapping occurs and the int values of {@link Types.ACTIONS} are used for indexing.
+     * Only relevant for {@link QLearn4Agt} and {@link Sarsa4Agt}.
+     *
+     * @see NTuple4ValueFunc
+     */
+    @Override
+    public boolean useActionMap() { return true; }
+
+    /**
+     * Helper for {@link #symmetryVectors(BoardVector, int)}. Given {@link BoardVector} bv, return the symmetric
+     * {@link BoardVector} when mirror-reflecting along the main diagonal. Example for 3x3 EWN:<pre>
+     *           0 2 0
+     *     bv =  0 1 1
+     *           2 2 1
+     * </pre>
+     * with 0 = player 0, 1 = player 1, 2 = empty, is transformed into <pre>
+     *           0 0 2
+     *           2 1 2
+     *           0 1 1
+     * </pre>
+     * @param bv the {@link BoardVector} to be transformed
+     * @return   the mirror-reflected {@link BoardVector}
+     */
+    private BoardVector getDiagonalSymmetryVector(BoardVector bv){
+        int[] mirror = new int[bv.bvec.length];
+        int size = ConfigEWN.BOARD_SIZE;
+        // WRONG version (before 05/2023):
+//        int[] indices = new int[bv.bvec.length];
+//        int i = 0;
+//        for(int pos : bv.bvec){
+//            int x = pos % size;
+//            int y = (pos-x) / size;
+//            mirror[i] = ((x*size)+y);
+//            i++;
+//        }
+        // CORRECT version:
+        for (int pos=0; pos<bv.bvec.length; pos++) {
+            // Convert pos to 2d (x,y) where  pos = (y*size) + x
+            int x = pos % size;
+            int y = (pos-x) / size;
+
+            // swap x and y so that
+            // (0,0) => (0,0)
+            // (0,1) => (1,0)
+            // (2,1) => (1,2) and so on
+            int newpos =  (x*size)+y;
+            mirror[newpos] = bv.bvec[pos];
+        }
+        return new BoardVector(mirror);
     }
 
     @Override
@@ -241,6 +297,7 @@ public class XNTupleFuncsEWN extends XNTupleBase implements XNTupleFuncs, Serial
         }
 
     }
+
     /**
      *      4 x 4 tuple
      *     Return the NTuples for a board size of 3x3
@@ -376,58 +433,6 @@ public class XNTupleFuncsEWN extends XNTupleBase implements XNTupleFuncs, Serial
         };
     }
 
-    /**
-     *
-     * @param bv Boardvector
-     *          [0,1,2,
-     *           3,4,5,
-     *           6,7,8]
-     *
-     *           returns a new Boardvector
-     *           [
-     *           0, 3, 6,
-     *           1, 4, 7,
-     *           2, 5, 8
-     *          ]
-     *
-     *          Converting the bv to 2d and swap x and y since the board has fixed n*n size
-     *          [(0,0) , (0,1), (0,2)
-     *           (1,0) , (1,1), (1,2)
-     *           (2,0) , (2,1), (2,2)]
-     *
-     * @return new Boardvector swapped
-     *          [(0,0), (1,0), (2,0)
-     *           (0,1), (1,1), (2,1)
-     *           (0,2), (1,2), (2,2)]*
-     */
-    private BoardVector getDiagonalSymmetryVector(BoardVector bv){
-        int[] mirror = new int[bv.bvec.length];
-        int[] indices = new int[bv.bvec.length];
-        int size = ConfigEWN.BOARD_SIZE;
-        // WRONG version (before 05/2023):
-//        int i = 0;
-//        for(int pos : bv.bvec){
-//            int x = pos % size;
-//            int y = (pos-x) / size;
-//            mirror[i] = ((x*size)+y);
-//            i++;
-//        }
-        // CORRECT version:
-        for (int pos=0; pos<bv.bvec.length; pos++) {
-            // Convert pos to 2d (x,y):  pos = (y*size) + x
-
-            // swap x and y so that
-            // (0,0) => (0,0)
-            // (0,1) => (1,0)
-            // (2,1) => (1,2) and so on
-            int x = pos % size;
-            int y = (pos-x) / size;
-            int newpos =  (x*size)+y;
-            mirror[newpos] = bv.bvec[pos];
-        }
-        return new BoardVector(mirror);
-    }
-
     @Override
     public String fixedTooltipString() {
         return "<html>"
@@ -442,7 +447,7 @@ public class XNTupleFuncsEWN extends XNTupleBase implements XNTupleFuncs, Serial
     }
 
     @Override
-    public HashSet adjacencySet(int iCell) {
+    public HashSet<Integer> adjacencySet(int iCell) {
         HashSet<Integer> neighbours = new HashSet<>();
         int size = ConfigEWN.BOARD_SIZE; // board size
 

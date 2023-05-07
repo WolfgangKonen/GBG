@@ -239,6 +239,8 @@ public class XNTupleFuncsCube extends XNTupleBase implements XNTupleFuncs, Seria
 	 * <p>
 	 * equivAction[i] is the key of the action equivalent to actionKey in the
 	 * i'th equivalent board vector equiv[i] = {@link #symmetryVectors(StateObsWithBoardVector, int)}[i]
+	 * 
+	 * @see #symmetryVectors(StateObsWithBoardVector, int) 
 	 */
 	public int[] symmetryActions(int actionKey) {
 		/* TODO */
