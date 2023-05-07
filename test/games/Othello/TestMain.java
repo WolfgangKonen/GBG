@@ -78,7 +78,24 @@ public class TestMain extends GBGBatch {
 		long startTime = System.currentTimeMillis();
 		String[] agtFileA = {"TCL4-100_7_250k-lam05_P4_nPly2-FAm_A.agt.zip"};
 
-		quickOthelloEval(agtFileA);
+		int iter=1000;
+		int edaxDepth = 5;
+		quickOthelloEval(agtFileA, iter, edaxDepth, null);
+
+		double elapsedTime = (double)(System.currentTimeMillis() - startTime)/1000.0;
+		System.out.println("quickEvalTest finished in "+elapsedTime+" sec.");
+	}
+
+	@Test
+	public void sweepOthelloEvalTest() {
+		long startTime = System.currentTimeMillis();
+		String[] agtFileA = {"TCL4-100_7_250k-lam05_P4_nPly2-FAm_A.agt.zip"};
+		String csvFile = "test_EWN_branch.csv";
+
+		int iter=1000;
+		for (int edaxDepth = 0; edaxDepth<9; edaxDepth++) {
+			quickOthelloEval(agtFileA, iter, edaxDepth, csvFile);
+		}
 
 		double elapsedTime = (double)(System.currentTimeMillis() - startTime)/1000.0;
 		System.out.println("quickEvalTest finished in "+elapsedTime+" sec.");
@@ -88,16 +105,19 @@ public class TestMain extends GBGBatch {
 	 * Make a quick Othello evaluation of a vector af agents stored in {@code agtFile} against Edax. Both
 	 * agents play one episode in each role.
 	 * <p>
-	 * The agents are wrapped by {@link MCTSWrapperAgent} with {@code iter} iterations and {@code c_puct} as
-	 * specified in source code. <br>
-	 * Edax parametrised as specified in source code.
+	 * The agents are wrapped by {@link MCTSWrapperAgent} with {@code iter} iterations (and {@code c_puct} as
+	 * specified in source code). <br>
+	 * Edax is parametrised with {@code edaxDepth}.
 	 *
 	 * @param agtFile       vector of agent files
+	 * @param iter			iterations of {@link MCTSWrapperAgent}
+	 * @param edaxDepth		depth for Edax
 	 */
-	public void quickOthelloEval(String[] agtFile) {
+	public void quickOthelloEval(String[] agtFile, int iter, int edaxDepth, String csvFile) {
 		String selectedGame = "Othello";
 		PlayAgent pa,qa,edaxAgent;
 		ArrayList<MCompeteMWrap> mcList= new ArrayList<>();
+		String userTitle1 = "time", userTitle2 = "";
 
 		String[] scaPar = SetupGBG.setDefaultScaPars(selectedGame);
 		arenaTrain = SetupGBG.setupSelectedGame(selectedGame,scaPar,"",false,true);
@@ -116,11 +136,9 @@ public class TestMain extends GBGBatch {
 
 			String sAgent = arenaTrain.m_xab.getSelectedAgent(0);
 			pa = arenaTrain.m_xfun.fetchAgent(0,sAgent, arenaTrain.m_xab);
-			int edaxDepth = 5;
 			ParEdax edaxPar = new ParEdax();
 			edaxPar.setDepth(edaxDepth);
 			edaxAgent = new Edax2("Edax",edaxPar);
-			int iter=1000;
 			double c_puct=1.0;
 			if (iter == 0) qa = pa;
 			else qa = new MCTSWrapperAgent(iter, c_puct,
@@ -134,7 +152,7 @@ public class TestMain extends GBGBatch {
 				startTime = System.currentTimeMillis();
 				StateObservation so = gb.getDefaultStartState();
 				ScoreTuple sc;
-				sc = XArenaFuncs.competeNPlayer(paVector.shift(p_MWrap), so, 1, 0, null);
+				sc = XArenaFuncs.competeNPlayer(paVector.shift(p_MWrap), so, 1, 2, null);
 				winrate = (sc.scTup[p_MWrap] + 1) / 2;
 				deltaTime = (double) (System.currentTimeMillis() - startTime) / 1000.0;
 				mCompete = new MCompeteMWrap(0, agtFile[k], 1, edaxDepth, iter,
@@ -145,6 +163,10 @@ public class TestMain extends GBGBatch {
 				elapsedTime += deltaTime;
 			} // for (p_MWrap)
 
+			if (csvFile != null) {
+				MCompeteMWrap.printMultiCompeteList(csvFile, mcList, pa, arenaTrain, userTitle1, userTitle2);
+				System.out.println("Results written to "+csvFile);
+			}
 
 			System.out.println("[quickOthelloEval,"+agtFile[k]+"] all done.");
 		} // for (k)

@@ -25,6 +25,7 @@ import games.Nim.BoutonAgent;
 import games.Nim.DaviNimAgent;
 import games.Othello.BenchmarkPlayer.BenchMarkPlayer;
 import games.Othello.Edax.Edax2;
+import games.Othello.StateObserverOthello;
 import games.RubiksCube.*;
 import tools.TStats.TAggreg;
 import gui.DeviationWeightsChart;
@@ -1217,6 +1218,11 @@ public class XArenaFuncs {
 					moveCount += so.getMoveCounter();
 					if (verbose > 0)
 						System.out.println(sc.printEpisodeWinner(k));
+					if (verbose > 1 && so instanceof StateObserverOthello) {
+						// this is for test/Othello/TestMain only:
+						StateObserverOthello soO = (StateObserverOthello) so;
+						System.out.println("# Black = "+ soO.getCountBlack()+", # White = "+ soO.getCountWhite());
+					}
 
 					break; // out of while
 
