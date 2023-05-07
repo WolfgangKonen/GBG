@@ -1,11 +1,11 @@
 Competition, 1 episodes: 
       X: TD-Ntuple-4[iter=1000] 
    vs O: Edax2: depth:0, moveTime:10.0
-# Black = 53, # White = 11
+# Black = 52, # White = 12
 Competition, 1 episodes: 
       X: Edax2: depth:0, moveTime:10.0 
    vs O: TD-Ntuple-4[iter=1000]
-# Black = 5, # White = 59
+# Black = 13, # White = 51
 Competition, 1 episodes: 
       X: TD-Ntuple-4[iter=1000] 
    vs O: Edax2: depth:1, moveTime:10.0

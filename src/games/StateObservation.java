@@ -26,12 +26,13 @@ import controllers.MaxNAgent;
  * <li> and others.
  * </ul><p>
  * 
- * StateObservation is for deterministic games.
+ * StateObservation is for deterministic games. See {@link StateObsNondeterministic} for extension to nondeterministic
+ * games.
  *
  * @see PartialState
  * @see StateObsNondeterministic
  *
- * @author Wolfgang Konen, TH Koeln, 2017-2021
+ * @author Wolfgang Konen, TH Koeln, 2017-2023
  */
 public interface StateObservation extends PartialState, Serializable{
 
@@ -85,8 +86,8 @@ public interface StateObservation extends PartialState, Serializable{
 	 *
 	 * @return a string representation of the current state
 	 */
-	@Deprecated
-	String toString();
+//	@Deprecated
+//	String toString();
 
 	/**
 	 * @return a string representation of the current state
@@ -171,7 +172,7 @@ public interface StateObservation extends PartialState, Serializable{
 	 * @param rewardIsGameScore if true, use game score as reward; if false, use a different, 
 	 * 		  game-specific reward
 	 * @return	a score tuple which has as {@code i}th value  
-	 * 			{@link #getReward(int, boolean)} with {@code i} as first argument
+	 * 			{@link #getReward(int, boolean) getReward(i, rewardIsGameScore)}
 	 */
 	ScoreTuple getRewardTuple(boolean rewardIsGameScore);
 
@@ -180,7 +181,7 @@ public interface StateObservation extends PartialState, Serializable{
 	 * The step reward is for transition into state {@code this} from a previous state.
 	 * <p>
 	 * NOTE: Currently the step reward does NOT include the final reward, which is given by
-	 * {@link #getRewardTuple(boolean)}. It is non-null only for StateObserverCube. It is a separate
+	 * {@link #getRewardTuple(boolean)}. It is non-zero only for StateObserverCube. It is a separate
 	 * method, because MaxN2Wrapper needs the separate step reward when returning from recursion
 	 *
 	 * @return	a score tuple
@@ -199,13 +200,6 @@ public interface StateObservation extends PartialState, Serializable{
 
 	void resetMoveCounter();
 	
-	// --- obsolete, use Arena().getGameName() instead
-//	/**
-//	 *
-//	 * @return the name of the Game (should be a valid directory name)
-//	 */
-//	String getName();
-
 	/**
 	 * Advance the current state with {@code action} to a new state
 	 * 
@@ -269,7 +263,8 @@ public interface StateObservation extends PartialState, Serializable{
 	void initRound();
 
     /**
-     * Return all available actions (all actions that can ever become possible in this game)
+     * Return all available actions (all actions that can ever become possible in this game), sorted by
+	 * increasing action key
      * @return {@code ArrayList<ACTIONS>}
      */
 	ArrayList<ACTIONS> getAllAvailableActions();
@@ -283,7 +278,7 @@ public interface StateObservation extends PartialState, Serializable{
 	int getNumAvailableActions();
 
 	/**
-	 * Given the current state, what are the available actions? 
+	 * Given the current state {@code this}, what are the available actions?
 	 * Set them in member ACTIONS[] actions.
 	 */
 	void setAvailableActions();
@@ -297,7 +292,7 @@ public interface StateObservation extends PartialState, Serializable{
 	void passToNextPlayer();
 
 	/**
-	 * Given the current state, store some info useful for inspecting the  
+	 * Given the current state {@code this}, store some info useful for inspecting the
 	 * action actBest and double[] vtable returned by a call to <br>
 	 * {@code ACTION_VT} {@link PlayAgent#getNextAction2(StateObservation, boolean, boolean)}. 
 	 *  

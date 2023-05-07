@@ -29,7 +29,6 @@ import static tools.Types.WINNER.*;
  * <li> copying the current state
  * <li> signaling end, score and winner of the game
  * </ul>
- *
  */
 public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeterministic {
 
@@ -305,33 +304,34 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
 
 
 
-    private int getRandomActionSize(int size, int player){
-        if(player == 2) return size == 5 ? 6 : 3;
-        else if(player == 3) return 6;
-        return size == 6 ? 6:3;
+    private int getRandomActionSize(int size, int numPlayers){
+        return switch (numPlayers) {
+            case 2 -> size == 5 ? 6 : 3;
+            case 3 -> 6;
+            default -> size == 6 ? 6 : 3;
+        };
     }
 
     private int[][][] getStartingPositions(){
-        if(numPlayers == 2) {
-            return switch(ConfigEWN.BOARD_SIZE) {
+        return switch (numPlayers) {
+            case 2 -> switch (ConfigEWN.BOARD_SIZE) {
                 case 3 -> StartingPositions.S3P2;
                 case 4 -> StartingPositions.S4P2;
                 case 5 -> StartingPositions.S5P2;
-                default -> throw new RuntimeException("ConfigEWN.BOARD_SIZE="+ConfigEWN.BOARD_SIZE+
-                        " not allowed for numPlayers="+numPlayers);
+                default -> throw new RuntimeException("ConfigEWN.BOARD_SIZE=" + ConfigEWN.BOARD_SIZE +
+                        " not allowed for numPlayers=" + numPlayers);
             };
             //return ConfigEWN.BOARD_SIZE == 3 ? StartingPositions.S3P2 : ConfigEWN.BOARD_SIZE == 4 ? StartingPositions.S4P2 : StartingPositions.S5P2;
-        }
-        else if(numPlayers == 3) return StartingPositions.S6P3;
-        else{   // numPlayers == 4
-            return switch(ConfigEWN.BOARD_SIZE) {
-                case 4 -> StartingPositions.S4P4;
-                case 6 -> StartingPositions.S6P4;
-                default -> throw new RuntimeException("ConfigEWN.BOARD_SIZE="+ConfigEWN.BOARD_SIZE+
-                        " not allowed for numPlayers="+numPlayers);
-            };
+            case 3 -> StartingPositions.S6P3;
+            default ->    // numPlayers == 4
+                    switch (ConfigEWN.BOARD_SIZE) {
+                        case 4 -> StartingPositions.S4P4;
+                        case 6 -> StartingPositions.S6P4;
+                        default -> throw new RuntimeException("ConfigEWN.BOARD_SIZE=" + ConfigEWN.BOARD_SIZE +
+                                " not allowed for numPlayers=" + numPlayers);
+                    };
             // return ConfigEWN.BOARD_SIZE == 6 ? StartingPositions.S6P4 : StartingPositions.S4P4;
-        }
+        };
     }
 
 
@@ -727,6 +727,7 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
     public boolean isLegalAction(ACTIONS act){
         return availableActions.contains(act);
     }
+
     @Override
     public boolean isLegalState() {
         return true;
