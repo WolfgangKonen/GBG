@@ -101,7 +101,7 @@ public class DAVI3Agent extends NTuple4Base implements PlayAgent {
 		int numCells = xnf.getNumCells();
 		
 		m_Net = new NTuple4ValueFunc(this,nTuples, xnf, posVals,
-				RANDINITWEIGHTS,ntPar,numCells,1);
+				RANDINITWEIGHTS,ntPar,numCells,1, null);
 		
 		setNTParams(ntPar);
 		setTDParams(tdPar, maxGameNum);

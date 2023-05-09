@@ -195,7 +195,7 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 	 * Advance the current state with action {@code action} to a new state
 	 * @param action the action having key  
 	 * <pre>
-	 * 		iAction = i*NimConfig.MAX_MINUS+j
+	 *   iAction = i*NimConfig.MAX_MINUS+j
 	 * </pre> 
 	 * with j = 0,...,{@link NimConfig#MAX_MINUS} means: 
 	 * Subtract {@code j+1} items from heap no {@code i}. 

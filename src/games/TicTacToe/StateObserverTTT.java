@@ -2,6 +2,7 @@ package games.TicTacToe;
 
 import java.io.Serial;
 import java.util.ArrayList;
+import java.util.Collections;
 
 import games.ObserverBase;
 import games.StateObservation;
@@ -194,10 +195,10 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
     @Override
     public ArrayList<Types.ACTIONS> getAllAvailableActions() {
         ArrayList<Types.ACTIONS> allActions = new ArrayList<>();
-        for (int i = 0; i < 3; i++) 
-            for (int j = 0; j < 3; j++) 
+		for (int j = 0; j < 3; j++)
+			for (int i = 0; i < 3; i++)
             	allActions.add(Types.ACTIONS.fromInt(i * 3 + j));
-        
+		Collections.sort(allActions);
         return allActions;
     }
     

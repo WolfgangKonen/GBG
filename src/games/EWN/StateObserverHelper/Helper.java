@@ -6,11 +6,11 @@ import tools.Types;
 public class Helper {
 
     /**
-     * Concatenate from with to, e.g.  from=1, to=4 &rArr; 104
-     * where [1][04] is the string;
+     * Given a move 'from &rArr; to', concatenate from with to, e.g.  from=1, to=4 &rArr; 104
+     *
      * @param from  index of board
      * @param to index of board
-     * @return  ACTiON
+     * @return  ACTION
      */
     public static Types.ACTIONS parseAction(int from, int to){
         from *= 100; // 0 => 0   [1,...9] => x00  [10,...25] => xx00

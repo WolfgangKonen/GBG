@@ -126,14 +126,17 @@ public class XNTupleFuncsTTT extends XNTupleBase implements XNTupleFuncs, Serial
 		if (n==0) n=8;
 		BoardVector[] equiv = new BoardVector[n];
 		equiv[0] = boardVector;
-		for (i = 1; i < 4; i++)
-			if (i>=n) break;
+		for (i = 1; i < 4; i++) {
+			if (i >= n)
+				break;
 			equiv[i] = rotate(equiv[i - 1]);
+		}
 		equiv[i] = flip(boardVector);
-		for (i=5; i < 8; i++)
-			if (i>=n) break;
+		for (i=5; i < 8; i++) {
+			if (i >= n)
+				break;
 			equiv[i] = rotate(equiv[i - 1]);
-
+		}
 		return equiv;
 	}
 	

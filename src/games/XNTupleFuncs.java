@@ -5,11 +5,15 @@ import controllers.TD.ntuple2.NTupleFactory;
 import controllers.TD.ntuple2.SarsaAgt;
 
 import java.util.HashSet;
+import tools.Types.ACTIONS;
 
 import agentIO.LoadSaveGBG;
 import controllers.TD.ntuple2.TDNTuple3Agt;
 import controllers.TD.ntuple4.Sarsa4Agt;
 import controllers.TD.ntuple4.TDNTuple4Agt;
+import controllers.TD.ntuple4.NTuple4ValueFunc;
+import controllers.TD.ntuple4.QLearn4Agt;
+import controllers.TD.ntuple4.Sarsa4Agt;
 
 
 /**
@@ -126,7 +130,17 @@ public interface XNTupleFuncs {
 	 * Here, equiv[i] = {@link #symmetryVectors(BoardVector, int)}{@code [i]}.
 	 */
 	int[] symmetryActions(int actionKey);
-	
+
+	/**
+	 *
+	 * @return Return true, if actionMap in {@link NTuple4ValueFunc} shall be used. Otherwise, no action mapping
+	 * is used, the int values of {@link ACTIONS} are used for indexing. Only relevant for {@link QLearn4Agt} and
+	 * {@link Sarsa4Agt}
+	 *
+	 * @see NTuple4ValueFunc
+	 */
+	boolean useActionMap();
+
 	/** 
 	 * Return a fixed set of {@code numTuples} n-tuples suitable for that game. 
 	 * Different n-tuples may have different lengths. An n-tuple {0,1,4} means a 3-tuple 

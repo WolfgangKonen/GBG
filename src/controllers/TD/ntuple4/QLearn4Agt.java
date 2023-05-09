@@ -114,7 +114,7 @@ public class QLearn4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Ser
 		ParTD tdPar = new ParTD();
 		ParNT ntPar = new ParNT();
 		ParOther oPar = new ParOther();
-		initNet(ntPar, tdPar, oPar, null, null, 1, 1000);
+		initNet(ntPar, tdPar, oPar, null, null, 1, 1000, null);
 	}
 
 	/**
@@ -137,7 +137,11 @@ public class QLearn4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Ser
 		this.randLast = new boolean[numPlayers];
 		this.setMaxGameNum(maxGameNum);
 		processAvailActions(allAvailActions);		// calc members actionIndexMin, actionIndexMax, numOutputs
-		initNet(ntPar,tdPar,oPar, nTuples, xnf, numOutputs, maxGameNum);			
+		if (xnf.useActionMap()) {
+			assert allAvailActions != null : "Error: allAvailActions is null!";
+			numOutputs = allAvailActions.size();
+		}
+		initNet(ntPar,tdPar,oPar, nTuples, xnf, numOutputs, maxGameNum, allAvailActions);
 	}
 
 	/** 
@@ -163,17 +167,17 @@ public class QLearn4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Ser
 	}
 	
 	/**
-	 * 
-	 * @param tdPar			temporal difference parameters
-	 * @param ntPar			n-tuples and temporal coherence parameter
-	 * @param nTuples		the set of n-tuples
-	 * @param xnf			contains game-specific n-tuple functions
-	 * @param numOutputs	the number of outputs of the n-tuple network (=number of all
-	 * 						available actions)
-	 * @param maxGameNum	maximum number of training games
+	 *  @param ntPar            n-tuples and temporal coherence parameter
+	 * @param tdPar            temporal difference parameters
+	 * @param nTuples        the set of n-tuples
+	 * @param xnf            contains game-specific n-tuple functions
+	 * @param numOutputs    the number of outputs of the n-tuple network (=number of all
+* 						available actions)
+	 * @param maxGameNum    maximum number of training games
+	 * @param allAvailActions
 	 */
-	private void initNet(ParNT ntPar, ParTD tdPar, ParOther oPar,  
-			int[][] nTuples, XNTupleFuncs xnf, int numOutputs, int maxGameNum) {
+	private void initNet(ParNT ntPar, ParTD tdPar, ParOther oPar,
+						 int[][] nTuples, XNTupleFuncs xnf, int numOutputs, int maxGameNum, ArrayList<ACTIONS> allAvailActions) {
 		m_tdPar = new ParTD(tdPar);
 		m_ntPar = new ParNT(ntPar);
 		m_oPar = new ParOther(oPar);		// m_oPar is in AgentBase
@@ -184,7 +188,7 @@ public class QLearn4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Ser
 		int numCells = xnf.getNumCells();
 		
 		m_Net = new NTuple4ValueFunc(this,nTuples, xnf, posVals,
-				RANDINITWEIGHTS,ntPar,numCells,numOutputs);
+				RANDINITWEIGHTS,ntPar,numCells,numOutputs, allAvailActions);
 		
 		setNTParams(ntPar);
 		setTDParams(tdPar, maxGameNum);

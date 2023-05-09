@@ -1,5 +1,6 @@
 package games.Sim;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -51,6 +52,10 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	private int numNodes;
 	private int numPlayers;
 	private int player;			// 0,1 in 2-player variant;   0,1,2 in 3-player variant
+	/**
+	 * A vector of {@link Link2} objects. {@code lFrom[i]} holds all links emanating from node {@code i} to a node
+	 * with a higher number.
+	 */
 	private Link2[] lFrom;
 	/**
 	 * The list of available actions
@@ -66,18 +71,19 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	 * returns {@code true}: It is the node number completing the losing triangle 
 	 * (needed in {@link BoardPanel} to color this triangle).
 	 */
-	private int[] lastNodes = {-1,-1,-1};
-	
+	private final int[] lastNodes = {-1,-1,-1};
+
+	@Serial
 	private static final long serialVersionUID = 12L;	//Serial number
 	private FinalSim finalSim;
 
-	StateObserverSim() 
+	public StateObserverSim()
 	{
 		super();
 		config(ConfigSim.NUM_PLAYERS, ConfigSim.NUM_NODES);
 	}
 		
-	StateObserverSim(StateObserverSim other)
+	public StateObserverSim(StateObserverSim other)
 	{
 		super(other);		// copy members m_counter, lastMoves and stored*
 		this.numNodes = other.numNodes;
@@ -246,27 +252,25 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	
 	private boolean checkIfLegal2Variable(int [] players, int [] counts)
 	{
-		if (Math.abs(counts[0]-counts[1])<=1) return true;
-		return false;
+		return Math.abs(counts[0] - counts[1]) <= 1;
 	}
 	
 	private int[] getRemainingPlayers()
 	{
 		int [] players = new int[2];
-		switch(finalSim.getLoser())
-		{
-		case 0:
-			players[0] = 1;
-			players[1] = 2;
-			break;
-		case 1:
-			players[0] = 0;
-			players[1] = 2;
-			break;
-		case 2:
-			players[0] = 0;
-			players[1] = 1;
-			break;
+		switch (finalSim.getLoser()) {
+			case 0 -> {
+				players[0] = 1;
+				players[1] = 2;
+			}
+			case 1 -> {
+				players[0] = 0;
+				players[1] = 2;
+			}
+			case 2 -> {
+				players[0] = 0;
+				players[1] = 1;
+			}
 		}
 		return players;
 	}
@@ -274,20 +278,19 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	private int[] getRemainingCount(int count0, int count1, int count2)
 	{
 		int [] counts = new int[2];
-		switch(finalSim.getLoser())
-		{
-		case 0:
-			counts[0] = count1;			// /WK/ bug fix (was count0 before)
-			counts[1] = count2;
-			break;
-		case 1:
-			counts[0] = count0;
-			counts[1] = count2;
-			break;
-		case 2:
-			counts[0] = count0;
-			counts[1] = count1;
-			break;		
+		switch (finalSim.getLoser()) {
+			case 0 -> {
+				counts[0] = count1;            // /WK/ bug fix (was count0 before)
+				counts[1] = count2;
+			}
+			case 1 -> {
+				counts[0] = count0;
+				counts[1] = count2;
+			}
+			case 2 -> {
+				counts[0] = count0;
+				counts[1] = count1;
+			}
 		}
 		return counts;
 	}
@@ -330,11 +333,17 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		return availableActions.get(i);
 	}
 
+	/**
+	 * See class description {@link StateObserverSim} for action numbering.
+	 *
+	 * @return the list of all possible actions
+	 */
     @Override
 	public ArrayList<ACTIONS> getAllAvailableActions() {
 		int action = 0;
         ArrayList<ACTIONS> allActions = new ArrayList<>();
 		for(int i = 0; i < lFrom.length -1 ; i++) {
+			// lFrom is a vector of Link2 objects (all links emanating from a certain node)
 			for(int j = lFrom[i].getNode()+1; j < lFrom.length; j++) {
 				allActions.add(Types.ACTIONS.fromInt(action));
 				action++;
@@ -378,11 +387,6 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		return finalSim.getAllRewards();
 	}
 
-//	@Override
-//	public double getGameScore(StateObservation referringState) {
-//		return getGameScore(referringState.getPlayer());
-//	}
-	
 	@Override
 	public double getGameScore(int player) {
         if(isGameOver()) {
@@ -535,7 +539,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 			{
 				winner = getNextPlayer();
 				allRewards[player] = -1;
-				allRewards[winner] = +1;
+				allRewards[winner] =  1;
 			}
 			else if(isFull())
 				winner = -1;	// it's a draw	--> allRewards = {0,0}
@@ -544,14 +548,9 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		private void checkIfPlayerLost3Player()
 		{
 			switch (ConfigSim.COALITION) {
-			case "None":
-				checkIfPlayerLost3PlayerNoCoalition();
-				break;
-			case "1-2":
-				checkIfPlayerLost3PlayerCoalition12();
-				break;
-			default:
-				throw new RuntimeException("Unknown case in ConfigSim.COAlITION");
+				case "None" -> checkIfPlayerLost3PlayerNoCoalition();
+				case "1-2" -> checkIfPlayerLost3PlayerCoalition12();
+				default -> throw new RuntimeException("Unknown case in ConfigSim.COAlITION");
 			}
 		}
 		private void checkIfPlayerLost3PlayerNoCoalition() 
@@ -574,7 +573,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 				else	// if there is already a loser AND the current player has lost, then the next player is the winner
 				{
 					winner = getNextPlayer();
-					allRewards[winner] = +1;
+					allRewards[winner] = 1;
 					
 				}
 			}
@@ -589,17 +588,15 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 				int[] winAlone     = {+1,-1,-1};
 				int[] winCoalition = {-1,+1,+1};
 				switch (player) {
-				case 0:
-					allRewards = winCoalition;
-					winner = 0;			// signal that game is over
-					break;
-				case 1:
-				case 2:
-					allRewards = winAlone;
-					winner = 1; 		// signal that game is over
-					break;
-				default:
-					throw new RuntimeException("Unknown case in checkIfPlayerLost3PlayerCoalition12");
+					case 0 -> {
+						allRewards = winCoalition;
+						winner = 0;            // signal that game is over
+					}
+					case 1, 2 -> {
+						allRewards = winAlone;
+						winner = 1;        // signal that game is over
+					}
+					default -> throw new RuntimeException("Unknown case in checkIfPlayerLost3PlayerCoalition12");
 				}
 			}
 			else if(isFull())

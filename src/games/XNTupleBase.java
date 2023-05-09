@@ -1,17 +1,25 @@
 package games;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.HashSet;
 
 import agentIO.LoadSaveGBG;
+import controllers.TD.ntuple4.NTuple4ValueFunc;
 import controllers.TD.ntuple4.QLearn4Agt;
 import controllers.TD.ntuple4.Sarsa4Agt;
 import controllers.TD.ntuple4.TDNTuple4Agt;
+import tools.Types;
 
 /**
- *  This class just provides a default implementation for methods {@link #getPositionValuesVector()},
- *  {@link #instantiateAfterLoading()} and {@link #makeBoardVectorEachCellDifferent()} from the
- *  interface {@link XNTupleFuncs}. All other methods are left as abstract methods.
+ *  This class just provides a default implementation for some methods: <ul>
+ *      <li> {@link #getPositionValuesVector()},
+ *      <li> {@link #instantiateAfterLoading()},
+ *      <li> {@link #makeBoardVectorEachCellDifferent()},
+ *      <li> {@link #symmetryVectors(StateObsWithBoardVector, int)} and
+ *      <li> {@link #useActionMap()}
+ *  </ul>
+ *  from the interface {@link XNTupleFuncs}. All other methods are left as abstract methods.
  */
 abstract public class XNTupleBase implements Serializable, XNTupleFuncs {
 
@@ -20,6 +28,7 @@ abstract public class XNTupleBase implements Serializable, XNTupleFuncs {
      * longer compatible with an older one (older .gamelog or .agt.zip containing this object will
      * become unreadable)  
      */
+    @Serial
     private static final long serialVersionUID = 42L;
 
     public XNTupleBase() {	}
@@ -93,6 +102,17 @@ abstract public class XNTupleBase implements Serializable, XNTupleFuncs {
 
 	@Override
 	abstract public int[] symmetryActions(int actionKey);
+
+	/**
+	 *
+	 * @return Return true, if actionMap in {@link NTuple4ValueFunc} shall be used. Otherwise, no action mapping
+	 * is used, the int values of {@link Types.ACTIONS} are used for indexing. Only relevant for {@link QLearn4Agt} and
+	 * {@link Sarsa4Agt}
+	 *
+	 * @see NTuple4ValueFunc
+	 */
+	@Override
+	public boolean useActionMap() { return false; }
 
 	@Override
 	abstract public int[][] fixedNTuples(int mode);
