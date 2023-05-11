@@ -119,7 +119,8 @@ public class GBGBatch extends SetupGBG {
 	 * par1 = 1.5 <br>
 	 * parVec = 4 8 16
 	 *  </pre>
-	 * (whitespace as separator between vector elements).
+	 * (whitespace as separator between vector elements). See {{@link #readProperties(String, String)} and {@code
+	 * get**FromProps(..)} for further info on properties.}
 	 *
 	 * @throws IOException if s.th. goes wrong when loading the agent or the properties file or when saving the csv file.
 	 */
@@ -540,11 +541,13 @@ public class GBGBatch extends SetupGBG {
 	 * @param csvName		filename for CSV results
 	 */
 	public void batch06(int iterMCTS, Properties prop, String agtDir, String csvName) {
-		int[] depthArr = getIntegerArrOrNullFromProps(prop, "depthArr");
+		int[] depthArr = getIntegerArrOrNullFromProps(prop, "depthArr_06");
+		int[] iterMWrapArr = getIntegerArrOrNullFromProps(prop, "iterMWrapArr_06");
+		if (iterMWrapArr==null) iterMWrapArr = new int[] {0, iterMCTS};
 		long startTime = System.currentTimeMillis();
 
 		MCompeteSweep mcmw = new MCompeteSweep();
-		mcmw.multiCompeteSweepOthello(iterMCTS,depthArr,agtDir,arenaTrain,csvName);
+		mcmw.multiCompeteSweepOthello(iterMWrapArr,depthArr,agtDir,arenaTrain,csvName);
 
 		double elapsedTime = (System.currentTimeMillis() - startTime)/1000.0;
 		System.out.println("[GBGBatch.batch06] multiCompeteSweep finished in "+elapsedTime+" sec: Results written to "+csvName);
@@ -568,7 +571,9 @@ public class GBGBatch extends SetupGBG {
 	 */
 	public void batch07(int nruns, int iterMCTS, Properties prop, String agtFile,
 					    GameBoard gb, String csvName) {
-		int[] depthArr = getIntegerArrOrNullFromProps(prop, "depthArr");
+		int[] depthArr = getIntegerArrOrNullFromProps(prop, "depthArr_07");
+		int[] iterMWrapArr = getIntegerArrOrNullFromProps(prop, "iterMWrapArr_07");
+		if (iterMWrapArr==null) iterMWrapArr = new int[] {0, iterMCTS};
 
 		PlayAgent pa = arenaTrain.loadAgent(agtFile);	// load agent
 		if (pa.getAgentFile()==null) pa.setAgentFile(agtFile);
@@ -576,7 +581,7 @@ public class GBGBatch extends SetupGBG {
 		long startTime = System.currentTimeMillis();
 
 		MCompeteSweep mcmw = new MCompeteSweep();
-		mcmw.multiCompeteOthello(pa,iterMCTS,depthArr,nruns,arenaTrain,gb,csvName);
+		mcmw.multiCompeteOthello(pa,iterMWrapArr,depthArr,nruns,arenaTrain,gb,csvName);
 
 		double elapsedTime = (System.currentTimeMillis() - startTime)/1000.0;
 		System.out.println("[GBGBatch.batch07] multiCompete finished in "+elapsedTime+" sec: Results written to "+csvName);
@@ -595,7 +600,7 @@ public class GBGBatch extends SetupGBG {
 	public void batch08(String agtDir, String csvName, int pMode, Properties prop) {
 
 		//int[] iterMWrapArr = {0,100,800}; //{0, 50, 100, 200, 400, 800};			// now read from prop
-		int[] iterMWrapArr = getIntegerArrFromProps(prop, "iterMWrapArr");
+		int[] iterMWrapArr = getIntegerArrFromProps(prop, "iterMWrapArr_08");
 		double c_puct = getDoubleFromProps(prop, "c_puct");
 
 		long startTime = System.currentTimeMillis();

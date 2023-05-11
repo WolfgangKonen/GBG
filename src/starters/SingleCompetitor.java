@@ -29,16 +29,16 @@ class SingleCompetitor {
         return elapsedTime;
     }
 
-    public PlayAgent doSingleCompetition(int i, PlayAgent pa, String agtFile, int iterMWrap, int[] depthArr,
+    public PlayAgent doSingleCompetition(int i, PlayAgent pa, String agtFile, int[] iterMWrapArr, int[] depthArr,
                                          Arena arenaTrain, GameBoard gb, double userValue2, String csvName) {
         String userTitle1 = "time", userTitle2 = "user2";
         int numEpisodes;    // parameter for competeNPlayer
-        int[] iterMWrapArr = (iterMWrap == 0) ? new int[]{0} : new int[]{0, iterMWrap};
         double[] epsArr = {1e-8}; //  {1e-8, 0.0};  //  {1e-8, 0.0, -1e-8}; //
         double[] cpuctArr = {1.0}; //{0.2, 0.4, 0.6, 0.8, 1.0, 1.4, 2.0, 4.0, 10.0}; // {1.0};
         double winrate;
         long startTime;
         double deltaTime;
+        if (iterMWrapArr==null) iterMWrapArr =  new int[]{0, 10000};
         // Edax depth:
         if (depthArr==null) depthArr = new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9};
 

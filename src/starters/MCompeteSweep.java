@@ -13,7 +13,7 @@ import java.util.Objects;
  *  This class contains several Othello sweep routines (multi-training and multi-competition) that are called from
  *  {@link GBGBatch}.
  *  <p>
- *  When starting {@link SingleCompetitor#doSingleCompetition(int, PlayAgent, String, int, int[], Arena, GameBoard, double, String)
+ *  When starting {@link SingleCompetitor#doSingleCompetition(int, PlayAgent, String, int[], int[], Arena, GameBoard, double, String)
  *  SingleCompetitor.doSingleCompetition}, an object {@code ArrayList<MCompete> mcList} is created and
  *  finally written with {@link MCompeteMWrap#printMultiCompeteList(String, ArrayList, PlayAgent, Arena, String, String)
  *  MCompeteMWrap.printMultiCompeteList} to file <b>{@code agents/<gameDir>/csv/<csvName>}</b> (usually {@code multiCompete.csv}).
@@ -39,23 +39,23 @@ public class MCompeteSweep {
      * <p>
      * NOTE: This method can only be run under Windows, since edax.exe is a Windows executable.
      *
-     * @param pa		    agent to wrap
-     * @param iterMWrap	    number of MCTS wrapper iterations
-     * @param depthArr	    Edax levels, maybe {@code null}.
-     * @param nruns	        number of runs, each run prints a line to csv. Should be 1 for deterministic agent {@code pa}
+     * @param pa            agent to wrap
+     * @param iterMWrapArr        number of MCTS wrapper iterations
+     * @param depthArr        Edax levels, maybe {@code null}.
+     * @param nruns            number of runs, each run prints a line to csv. Should be 1 for deterministic agent {@code pa}
      * @param arenaTrain    Arena object with train rights
-     * @param gb		    the game board, needed for start state selection
-     * @param csvName	    results are written to this filename
+     * @param gb            the game board, needed for start state selection
+     * @param csvName        results are written to this filename
      * @return the wrapped agent
      */
-    public PlayAgent multiCompeteOthello(PlayAgent pa, int iterMWrap, int[] depthArr, int nruns, Arena arenaTrain,
+    public PlayAgent multiCompeteOthello(PlayAgent pa, int[] iterMWrapArr, int[] depthArr, int nruns, Arena arenaTrain,
                                          GameBoard gb, String csvName) {
         SingleCompetitor sCompetitor = new SingleCompetitor();
         PlayAgent qa=null;
 
         for (int i=0; i<nruns; i++) {
             // competition of trained (and possibly wrapped) agent against Edax
-            qa = sCompetitor.doSingleCompetition(i, pa, pa.getAgentFile(), iterMWrap, depthArr, arenaTrain, gb, 0.0, csvName);
+            qa = sCompetitor.doSingleCompetition(i, pa, pa.getAgentFile(), iterMWrapArr, depthArr, arenaTrain, gb, 0.0, csvName);
         } // for (i)
 
         System.out.println("[multiCompeteSweepOthello] "+sCompetitor.getElapsedTime()+" sec.");
@@ -63,7 +63,7 @@ public class MCompeteSweep {
     } // multiCompeteOthello
 
     /**
-     * Same as {@link #multiCompeteOthello(PlayAgent, int, int[], int, Arena, GameBoard, String) multiCompeteOthello}, but
+     * Same as {@link #multiCompeteOthello(PlayAgent, int[], int[], int, Arena, GameBoard, String) multiCompeteOthello}, but
      * instead of a single agent {@code pa} we sweep over all agents that we find in directory
      * <b>{@code agents/Othello/<agtDir>}</b>.
      * <p>
@@ -80,14 +80,14 @@ public class MCompeteSweep {
      * <p>
      * NOTE: This method can only be run under Windows, since edax.exe is a Windows executable.
      *
-     * @param iterMWrap	    number of MCTS wrapper iterations
-     * @param depthArr	    Edax levels, maybe {@code null}.
+     * @param iterMWrapArr        number of MCTS wrapper iterations
+     * @param depthArr        Edax levels, maybe {@code null}.
      * @param agtDir        the directory where to search for agent files
      * @param arenaTrain    Arena object with train rights
-     * @param csvName	    results are written to this filename
+     * @param csvName        results are written to this filename
      * @return the last wrapped agent
      */
-    public PlayAgent multiCompeteSweepOthello(int iterMWrap, int[] depthArr, String agtDir, Arena arenaTrain,
+    public PlayAgent multiCompeteSweepOthello(int[] iterMWrapArr, int[] depthArr, String agtDir, Arena arenaTrain,
                                               String csvName) {
         SingleCompetitor sCompetitor = new SingleCompetitor();
         PlayAgent pa,qa=null;
@@ -104,7 +104,7 @@ public class MCompeteSweep {
             if (!contents[i].split("\\.")[1].equals("csv")) {
                 pa = arenaTrain.loadAgent(agtDir+"/" + contents[i]);
                 // competition of trained (and possibly wrapped) agent against Edax
-                qa = sCompetitor.doSingleCompetition(i2, pa, contents[i], iterMWrap, depthArr, arenaTrain, gb, 0.0, csvName);
+                qa = sCompetitor.doSingleCompetition(i2, pa, contents[i], iterMWrapArr, depthArr, arenaTrain, gb, 0.0, csvName);
                 i2++;   // increment only if it was not a .csv file
             }
         } // for (i)

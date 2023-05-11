@@ -10,15 +10,24 @@ trainOutDir = multiTrain2
 # batchSizeArr: optional, test replay buffers with different sizes. If not given or commented out, do not use replay buffer
 #batchSizeArr = 0 100 200 400
 
-### batch06,batch07 parameters (Othello Edax competition)
+### batch06 parameters (Othello Edax competition, agtDir)
 ###
-# depthArr: optional, specify Edax depth levels. If not given or commented out, use 1,2,3,4,5,6,7,8,9
-#depthArr = 6 7 8 9
+# depthArr_06: optional, specify Edax depth levels. If not given or commented out, use 1,2,3,4,5,6,7,8,9
+#depthArr_06 = 6 7 8 9
+# number of iterations in MCTS Wrapper. If not given or commented out, use {0, iterMCTS} where iterMCTS is command line arg
+#iterMWrapArr_06 = 0 100 800
 
-### batch08 parameters (Rubiks multi-eval, agtDir)
+### batch07 parameters (Othello Edax competition, agtFile)
+###
+# depthArr_07: optional, specify Edax depth levels. If not given or commented out, use 1,2,3,4,5,6,7,8,9
+#depthArr_07 = 6 7 8 9
+# number of iterations in MCTS Wrapper. If not given or commented out, use {0, iterMCTS} where iterMCTS is command line arg
+#iterMWrapArr_07 = 0 100 800
+
+#### batch08 parameters (Rubiks multi-eval, agtDir)
 ###
 # number of iterations in MCTS Wrapper
-iterMWrapArr = 0 100 800		
+iterMWrapArr_08 = 0 100 800
 c_puct = 1.0
 pMinEval_single = 1
 pMaxEval_single = 18

@@ -70,7 +70,7 @@ public class MCompeteMWrap {
 
     /**
      * Print the results from
-     * {@link MCompeteSweep#multiCompeteOthello(PlayAgent, int, int[], int, Arena, GameBoard, String)
+     * {@link MCompeteSweep#multiCompeteOthello(PlayAgent, int[], int[], int, Arena, GameBoard, String)
      * MCompeteSweep.multiCompeteOthello} (and others) to file
      * <pre>
      * {@link Types#GUI_DEFAULT_DIR_AGENT}{@code /<gameName>[/subDir]/csv/<csvName>}
