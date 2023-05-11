@@ -417,7 +417,7 @@ abstract public class ObserverBase extends PartialPerfect implements StateObserv
     public boolean isRoundBasedGame(){return false;}
 
 	/**
-	 * Signals for {@link XArenaFuncs#competeNPlayer(PlayAgtVector, StateObservation, int, int, TSTimeStorage[]) XArenaFuncs.competeNPlayer}
+	 * Signals for {@link XArenaFuncs#competeNPlayer(PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], ArrayList) XArenaFuncs.competeNPlayer}
 	 * whether the start state needs randomization when doing such a competition.
 	 *
 	 * @return true or false
@@ -425,7 +425,7 @@ abstract public class ObserverBase extends PartialPerfect implements StateObserv
 	public boolean needsRandomization(){return false;}
 
 	/**
-	 *  Randomize the start state in {@link XArenaFuncs#competeNPlayer(PlayAgtVector, StateObservation, int, int, TSTimeStorage[]) XArenaFuncs.competeNPlayer}
+	 *  Randomize the start state in {@link XArenaFuncs#competeNPlayer(PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], ArrayList) XArenaFuncs.competeNPlayer}
 	 *  if {@link #needsRandomization()} returns true
 	 */
 	public void randomizeStartState() { }

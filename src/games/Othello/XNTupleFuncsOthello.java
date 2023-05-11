@@ -6,9 +6,13 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+import controllers.TD.ntuple4.NTuple4ValueFunc;
+import controllers.TD.ntuple4.QLearn4Agt;
+import controllers.TD.ntuple4.Sarsa4Agt;
 import games.*;
 
 import controllers.TD.ntuple2.NTupleFactory;
+import tools.Types;
 import tools.Types.ACTIONS;
 
 
@@ -267,7 +271,18 @@ public class XNTupleFuncsOthello extends XNTupleBase implements XNTupleFuncs, Se
 		return actionPositions[actionKey];
 	}
 
-	/** 
+	/**
+	 *
+	 * @return {@code true}, if {@code actionMap} in {@link NTuple4ValueFunc} shall be used. Otherwise, if {@code false},
+	 * no action mapping occurs and the int values of {@link Types.ACTIONS} are used for indexing.
+	 * Only relevant for {@link QLearn4Agt} and {@link Sarsa4Agt}.
+	 *
+	 * @see NTuple4ValueFunc
+	 */
+	@Override
+	public boolean useActionMap() { return true; }
+
+	/**
 	 * Return a fixed set of {@code numTuples} n-tuples suitable for that game. 
 	 * Different n-tuples may have different lengths. An n-tuple {0,1,4} means a 3-tuple 
 	 * containing the cells 0, 1, and 4.<p>

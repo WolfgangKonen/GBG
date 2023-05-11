@@ -124,7 +124,7 @@ public class EvaluatorNim3P extends Evaluator {
  	private EvalResult evaluateAgent0(PlayAgent pa, GameBoard gb, int competeNum, double thresh) {
  		StateObservation so = gb.getDefaultStartState();
 //		lastResult = XArenaFuncs.competeBoth(pa, random_agent, so, 100, 0, gb);
-		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pa,randomAgent,randomAgent2), so, competeNum, 0);
+		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pa,randomAgent,randomAgent2), so, competeNum, 0, null);
 		lastResult = sc.scTup[0];
 		m_msg = pa.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>0) System.out.println(m_msg);
@@ -139,7 +139,7 @@ public class EvaluatorNim3P extends Evaluator {
 	 */
  	private EvalResult evaluateAgent1(PlayAgtVector paVector, GameBoard gb, int competeNum, double thresh) {
  		StateObservation so = gb.getDefaultStartState();
-		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(paVector, so, competeNum, 0);
+		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(paVector, so, competeNum, 0, null);
 		lastResult = sc.scTup[0];
 		m_msg = paVector.pavec[0].getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>0) System.out.println(m_msg);
@@ -165,7 +165,7 @@ public class EvaluatorNim3P extends Evaluator {
 			// Choose randomly one of the possible 0-1-ply start states. Repeat 
 			// this numK times to sample a representative subset of possible configurations.
 			StateObservation startSO = gb.chooseStartState();
-			ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(paVector, startSO, competeNum, 0);
+			ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(paVector, startSO, competeNum, 0, null);
     		success = sc.scTup[0];
     		averageSuccess += success;
 		}

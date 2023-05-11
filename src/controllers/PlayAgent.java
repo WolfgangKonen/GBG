@@ -270,7 +270,7 @@ public interface PlayAgent {
 	/**
 	 * reset agent when starting a new episode
 	 * (needed when re-using an agent, e.g. in competeNum episodes during a competition
-	 * {@link games.XArenaFuncs#competeNPlayer(PlayAgtVector, StateObservation, int, int, TSTimeStorage[])})
+	 * {@link games.XArenaFuncs#competeNPlayer(PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], java.util.ArrayList)})
 	 */
 	void resetAgent();
 

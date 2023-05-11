@@ -94,12 +94,12 @@ public class EvaluatorYavalath extends Evaluator {
             ScoreTuple sc;
             double scWeight = 1 / (double) diffStartList.size();
             for(StateObserverYavalath soYav : diffStartList){
-                sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent,opponent), soYav, numEpisodes,0);
+                sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent,opponent), soYav, numEpisodes,0, null);
                 scMean.combine(sc, ScoreTuple.CombineOP.AVG,1,scWeight);
             }
 
         }else {
-            scMean = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent), so, numEpisodes, 0);
+            scMean = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent), so, numEpisodes, 0, null);
         }
         lastResult = scMean.scTup[0];
         m_msg = playAgent.getName()+": " +getPrintString() + lastResult;

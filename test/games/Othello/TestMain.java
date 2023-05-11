@@ -5,9 +5,11 @@ import controllers.MCTSWrapper.stateApproximation.PlayAgentApproximator;
 import controllers.PlayAgent;
 import controllers.PlayAgtVector;
 import games.GameBoard;
+import games.Othello.Edax.CommandLineInteractor;
 import games.Othello.Edax.Edax2;
 import games.StateObservation;
 import games.XArenaFuncs;
+import games.XStateObs;
 import org.junit.Test;
 import params.ParEdax;
 import params.ParOther;
@@ -30,47 +32,9 @@ public class TestMain extends GBGBatch {
 			
 		}
 		System.out.println(z);
-//		
-//		System.out.flush();
-//		int move = 26;
-//		
-//		/**
-//		 * The First test with my test.exe to test timing behaviours and timeouts
-//		 */
-////		CommandLineInteractor cli = new CommandLineInteractor("agents\\Othello\\Edax", "Test.exe");
-////		System.out.println(cli.sendAndAwait("mode 1"));
-////		System.out.println(cli.sendAndAwait("10000"));
-////		System.out.println(cli.sendAndAwait("f"));
-////		cli.stop();
-//
-//		/**
-//		 * The second test with edax.exe, to test the first three moves
-//		 */
-////		CommandLineInteractor cli = new CommandLineInteractor("agents\\Othello\\Edax", "edax.exe", ".*[eE]dax plays ([A-z][0-8]).*", 1);
-//////		CommandLineInteractor cli = new CommandLineInteractor("agents\\Othello\\Edax", "edax.exe");
-////		System.out.println(cli.sendAndAwait("mode 1"));
-////		System.err.println("-----");
-////		System.out.println(cli.sendAndAwait("f6"));
-////		System.err.println("-----");
-////		System.out.println(cli.sendAndAwait("f4"));
-////		System.err.println("-----");
-////		System.out.println(cli.sendAndAwait("c5"));
-////		System.err.println("-----");
-////		System.out.println(cli.sendAndAwait("d7"));
-////		System.err.println("-----");
-////		System.out.println(cli.sendAndAwait("b3"));
-//////		System.out.println(cli.sendAndAwait("d6"));
-//////		System.out.println(cli.sendAndAwait("d6"));
-////		cli.stop();
-//		
-//		CommandLineInteractor cli = new CommandLineInteractor("", "");
-//		System.out.println(cli.sendAndAwait("ipconfig"));
-//		System.out.println("...........");
-//		System.out.println(cli.sendAndAwait("help"));
-//		System.out.println("...........");
-//		System.out.println(cli.sendAndAwait("dir"));
-//		System.out.println("...........");
-//		System.out.println(cli.sendAndAwait("ipconfig"));
+
+		check_edax_interface();
+
 	}
 
 	@Test
@@ -90,10 +54,10 @@ public class TestMain extends GBGBatch {
 	@Test
 	public void sweepOthelloEvalTest() {
 		long startTime = System.currentTimeMillis();
-		int iter=10000;
+		int iter=1000;
 		String[] agtFileA = {"TCL4-100_7_250k-lam05_P4_nPly2-FAm_A.agt.zip"};
 		String mCsvFile = "test_EWN_branch_i"+iter+".csv";
-		String userTitle1 = "time", userTitle2 = "";
+		String userTitle1 = "nMWrap", userTitle2 = "nEdax2";	// number of pieces MWrap and Edax in final state
 		ArrayList<MCompeteMWrap> mcList= new ArrayList<>();
 
 		for (int edaxDepth = 0; edaxDepth<9; edaxDepth++) {
@@ -105,6 +69,7 @@ public class TestMain extends GBGBatch {
 		MCompeteMWrap.printMultiCompeteList(mCsvFile, mcList, pa, arenaTrain, userTitle1, userTitle2);
 		System.out.println("Results written to "+mCsvFile);
 
+		MCompeteMWrap.printMultiCompeteList(mCsvFile, mcList, pa, arenaTrain, userTitle1, userTitle2);
 
 		double elapsedTime = (double)(System.currentTimeMillis() - startTime)/1000.0;
 		System.out.println("sweepEvalTest finished in "+elapsedTime+" sec.");
@@ -157,23 +122,72 @@ public class TestMain extends GBGBatch {
 			PlayAgtVector paVector = new PlayAgtVector(qa, edaxAgent);
 			MCompeteMWrap mCompete;
 			for (int p_MWrap : new int[]{0, 1}) {     // p_MWrap: whether agent qa is player 0 or player 1
+				ArrayList<XStateObs> finalSobList = new ArrayList<>();
 				startTime = System.currentTimeMillis();
 				StateObservation so = gb.getDefaultStartState();
 				ScoreTuple sc;
-				sc = XArenaFuncs.competeNPlayer(paVector.shift(p_MWrap), so, 1, 2, null);
+				sc = XArenaFuncs.competeNPlayer(paVector, p_MWrap, so, 1, 0, null, finalSobList);
 				winrate = (sc.scTup[p_MWrap] + 1) / 2;
 				deltaTime = (double) (System.currentTimeMillis() - startTime) / 1000.0;
+				StateObserverOthello soO = (StateObserverOthello) finalSobList.get(0).getFinalState();
 				mCompete = new MCompeteMWrap(0, filename, 1, edaxDepth, iter,
 						1e-8, p_MWrap, c_puct, winrate,
-						deltaTime, 0.0);
+						(p_MWrap==0) ? soO.getCountBlack() :soO.getCountWhite(),
+						(p_MWrap==0) ? soO.getCountWhite() :soO.getCountBlack());
 				System.out.println("EPS=" + 1e-8 + ", iter=" + iter + ", dEdax=" + edaxDepth + ", p=" + p_MWrap + ", winrate=" + winrate);
+				System.out.println("# Black = "+ soO.getCountBlack()+", # White = "+ soO.getCountWhite());
+
 				mcList.add(mCompete);
 				elapsedTime += deltaTime;
 			} // for (p_MWrap)
 
-			System.out.println("[quickOthelloEval," + filename + "] all done.");
+			System.out.println("[quickOthelloEval," + filename + "] all done (elapsed time = "+elapsedTime+" sec).");
 		} // for (filename)
 	}
 
+	private static void check_edax_interface() {
 
+		System.out.flush();
+
+		/*
+		 * The first test with edax.exe to test timing behaviours and timeouts
+		 */
+		CommandLineInteractor cli = new CommandLineInteractor("agents\\Othello\\Edax", "Test.exe");
+		System.out.println(cli.sendAndAwait("mode 1"));
+		System.out.println(cli.sendAndAwait("10000"));
+		System.out.println(cli.sendAndAwait("f"));
+		cli.stop();
+
+		/*
+		 * The second test with edax.exe, to test the first three moves
+		 */
+		cli = new CommandLineInteractor("agents\\Othello\\Edax", "edax.exe", ".*[eE]dax plays ([A-z][0-8]).*", 1);
+//		CommandLineInteractor cli = new CommandLineInteractor("agents\\Othello\\Edax", "edax.exe");
+		System.out.println(cli.sendAndAwait("mode 1"));
+		System.err.println("-----");
+		System.out.println(cli.sendAndAwait("f6"));
+		System.err.println("-----");
+		System.out.println(cli.sendAndAwait("f4"));
+		System.err.println("-----");
+		System.out.println(cli.sendAndAwait("c5"));
+		System.err.println("-----");
+		System.out.println(cli.sendAndAwait("d7"));
+		System.err.println("-----");
+		System.out.println(cli.sendAndAwait("b3"));
+//		System.out.println(cli.sendAndAwait("d6"));
+//		System.out.println(cli.sendAndAwait("d6"));
+		cli.stop();
+
+		/*
+		 * The third test with edax.exe, to test certain commands
+		 */
+		cli = new CommandLineInteractor("", "");
+		System.out.println(cli.sendAndAwait("ipconfig"));
+		System.out.println("...........");
+		System.out.println(cli.sendAndAwait("help"));
+		System.out.println("...........");
+		System.out.println(cli.sendAndAwait("dir"));
+		System.out.println("...........");
+		System.out.println(cli.sendAndAwait("ipconfig"));
+	}
 }

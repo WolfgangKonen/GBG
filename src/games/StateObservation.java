@@ -325,7 +325,7 @@ public interface StateObservation extends PartialState, Serializable{
 	int getNumPlayers();
 
 	/**
-	 * Signals for {@link XArenaFuncs#competeNPlayer(PlayAgtVector, StateObservation, int, int, TSTimeStorage[]) XArenaFuncs.competeNPlayer}
+	 * Signals for {@link XArenaFuncs#competeNPlayer(PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], ArrayList) XArenaFuncs.competeNPlayer}
 	 * whether the start state needs randomization when doing such a competition.
 	 * <p>
 	 * Currently only used by {@link games.Poker.StateObserverPoker}
@@ -335,7 +335,7 @@ public interface StateObservation extends PartialState, Serializable{
 	boolean needsRandomization();
 
 	/**
-	 *  Randomize the start state in {@link XArenaFuncs#competeNPlayer(PlayAgtVector, StateObservation, int, int, TSTimeStorage[]) XArenaFuncs.competeNPlayer}
+	 *  Randomize the start state in {@link XArenaFuncs#competeNPlayer(PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], ArrayList) XArenaFuncs.competeNPlayer}
 	 *  if {@link #needsRandomization()} returns true
 	 * <p>
 	 * Currently, only used by {@link games.Poker.StateObserverPoker}

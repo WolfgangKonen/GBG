@@ -63,7 +63,7 @@ public final class MctseWrapperAgent extends AgentBase implements PlayAgent, Ser
      * reset agent: when starting a new episode, a new tree should be built. Therefore, set
      * {@code lastSelectedNode=null}
      * (needed when re-using an existing agent, e.g. in competeNum episodes during a competition, see
-     * {@link games.XArenaFuncs#competeNPlayer(PlayAgtVector, StateObservation, int, int, TSTimeStorage[])
+     * {@link games.XArenaFuncs#competeNPlayer(PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], java.util.ArrayList)
      * XArenaFuncs.competeNPlayer})
      *
      */

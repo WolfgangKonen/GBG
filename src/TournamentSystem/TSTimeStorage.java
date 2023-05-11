@@ -1,6 +1,5 @@
 package TournamentSystem;
 
-import controllers.PlayAgent;
 import games.StateObservation;
 
 import java.io.Serializable;
@@ -11,7 +10,7 @@ import java.util.Collections;
 /**
  * This class stores time measurements for every round in a tournament and gets instantiated every game.
  * Time is measured in nanoseconds via {@link System#nanoTime()}, see 
- * {@link games.XArenaFuncs#competeNPlayer(controllers.PlayAgtVector, StateObservation, int, int, TSTimeStorage[]) XArenaFuncs.competeNPlayer()}.
+ * {@link games.XArenaFuncs#competeNPlayer(controllers.PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], ArrayList) XArenaFuncs.competeNPlayer()}.
  * <p>
  * The times are saved in dynamic ArrayLists. There are also methods to convert nanoseconds to 
  * milliseconds or seconds for improved readability.

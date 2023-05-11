@@ -103,14 +103,14 @@ public class EvaluatorEWN extends Evaluator {
             ScoreTuple sc;
             for (int c=0; c<numEpisodes; c++) {
                 for (StateObservation sd : diffStartList) {
-                    sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent), sd, 100, 0);
+                    sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent), sd, 100, 0, null);
                     scMean.combine(sc, ScoreTuple.CombineOP.AVG, 0, sWeight);
                     count++;
                 }
             }
             System.out.println("count = "+ count);
         }else {
-            scMean= XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent,opponent), so, numEpisodes,0);
+            scMean= XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent,opponent), so, numEpisodes,0, null);
         }
         lastResult = scMean.scTup[0];
         m_msg = playAgent.getName() + ": " + getPrintString() + lastResult;
@@ -138,13 +138,13 @@ public class EvaluatorEWN extends Evaluator {
             ScoreTuple sc;
             for (int c=0; c<numEpisodes; c++) {
                 for (StateObservation sd : diffStartList) {
-                    sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent, opponent2), sd, 100, 0);
+                    sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent, opponent2), sd, 100, 0, null);
                     scMean.combine(sc, ScoreTuple.CombineOP.AVG, 0, sWeight);
                     //count++;
                 }
             }
         }else {
-            scMean= XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent,opponent, opponent2), so, numEpisodes,0);
+            scMean= XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent,opponent, opponent2), so, numEpisodes,0, null);
         }
         lastResult = scMean.scTup[0];
         m_msg = playAgent.getName() + ": " + getPrintString() + lastResult;
@@ -165,13 +165,13 @@ public class EvaluatorEWN extends Evaluator {
             ScoreTuple sc;
             for (int c=0; c<numEpisodes; c++) {
                 for (StateObservation sd : diffStartList) {
-                    sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(new PlayAgent[]{playAgent,opponent, opponent2, opponent3}), sd, 100, 0);
+                    sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(new PlayAgent[]{playAgent,opponent, opponent2, opponent3}), sd, 100, 0, null);
                     scMean.combine(sc, ScoreTuple.CombineOP.AVG, 0, sWeight);
                     //count++;
                 }
             }
         }else {
-            scMean= XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(new PlayAgent[]{playAgent,opponent, opponent2, opponent3}), so, numEpisodes,0);
+            scMean= XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(new PlayAgent[]{playAgent,opponent, opponent2, opponent3}), so, numEpisodes,0, null);
         }
         lastResult = scMean.scTup[0];
         m_msg = playAgent.getName() + ": " + getPrintString() + lastResult;
@@ -244,14 +244,14 @@ public class EvaluatorEWN extends Evaluator {
             ScoreTuple sc;
             for (int c=0; c<numEpisodes; c++) {
                 for (StateObservation sd : diffStartList) {
-                    sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent), sd, 100, 0);
+                    sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent), sd, 100, 0, null);
                     scMean.combine(sc, ScoreTuple.CombineOP.AVG, 0, sWeight);
                     count++;
                 }
             }
             System.out.println("count = "+ count);
         }else {
-            scMean= XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent,opponent), so, numEpisodes,0);
+            scMean= XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent,opponent), so, numEpisodes,0, null);
         }
         lastResult = scMean.scTup[0];
         m_msg = playAgent.getName() + ": " + getPrintString() + lastResult;

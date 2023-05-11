@@ -301,9 +301,6 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
 
     }
 
-
-
-
     private int getRandomActionSize(int size, int numPlayers){
         return switch (numPlayers) {
             case 2 -> size == 5 ? 6 : 3;

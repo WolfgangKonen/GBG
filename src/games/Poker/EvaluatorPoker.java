@@ -65,7 +65,7 @@ public class EvaluatorPoker extends Evaluator {
 		for (PlayAgent opponent: opponents) {
 			pavec[i++] = opponent;
 		}
-		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pavec), so, 1000, 2);
+		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pavec), so, 1000, 2, null);
 		lastResult = sc.scTup[0];
 		m_msg = playAgent.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>0) System.out.println(m_msg);
@@ -128,7 +128,7 @@ public class EvaluatorPoker extends Evaluator {
 		PlayAgtVector qaVector;
 		for (int k = 0; k < N; k++) {
 			qaVector = paVector.shift(k);
-			sc = XArenaFuncs.competeNPlayer(qaVector, startSO, competeNum, verbose, null);
+			sc = XArenaFuncs.competeNPlayer(qaVector, 0, startSO, competeNum, verbose, null, null);
 			shiftedTuple = sc.shift(N - k);
 			scMean.combine(shiftedTuple, ScoreTuple.CombineOP.AVG, 0, sWeight);
 		}
