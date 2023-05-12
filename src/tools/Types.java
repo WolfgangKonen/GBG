@@ -309,7 +309,7 @@ public class Types {
      * width and height of 'Competition Options'  window
      */
 	public static int GUI_WINCOMP_WIDTH = (int)(200*GUI_SCALING_FACTOR_X);	
-	public static int GUI_WINCOMP_HEIGHT = (int)(250*GUI_SCALING_FACTOR_Y);
+	public static int GUI_WINCOMP_HEIGHT = (int)(500*GUI_SCALING_FACTOR_Y);
     /**
      * width and height of Param Tabs window, wide enough to hold 6 tabs
      */
@@ -360,7 +360,7 @@ public class Types {
 		GUI_ARENATRAIN_WIDTH = (int)(465*GUI_SCALING_FACTOR_X);	 
 		GUI_ARENATRAIN_HEIGHT = (int)(380*GUI_SCALING_FACTOR_Y);
 		GUI_WINCOMP_WIDTH = (int)(200*GUI_SCALING_FACTOR_X);	
-		GUI_WINCOMP_HEIGHT = (int)(210*GUI_SCALING_FACTOR_Y);
+		GUI_WINCOMP_HEIGHT = (int)(320*GUI_SCALING_FACTOR_Y);
 		GUI_PARAMTABS_WIDTH = (int)(464*GUI_SCALING_FACTOR_X); 
 		GUI_PARAMTABS_HEIGHT = (int)(330*GUI_SCALING_FACTOR_Y);
 

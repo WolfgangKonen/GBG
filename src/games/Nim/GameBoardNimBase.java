@@ -1,12 +1,11 @@
 package games.Nim;
 
-import java.util.ArrayList;
+import java.util.Random;
 
 import controllers.PlayAgent;
 import games.Arena;
 import games.GameBoard;
 import games.StateObservation;
-import tools.Types.ACTIONS;
 
 
 /**
@@ -30,7 +29,7 @@ public abstract class GameBoardNimBase implements GameBoard {
 	public void updateParams() {}
 
 	@Override
-	abstract public void clearBoard(boolean boardClear, boolean vClear);
+	abstract public void clearBoard(boolean boardClear, boolean vClear, Random cmpRand);
 
 	@Override
 	abstract public void destroy();
@@ -63,7 +62,7 @@ public abstract class GameBoardNimBase implements GameBoard {
 	abstract public Arena getArena();
 
 	@Override
-	abstract public StateObservation getDefaultStartState();
+	abstract public StateObservation getDefaultStartState(Random cmpRand);
 
 	@Override
 	abstract public StateObservation chooseStartState(PlayAgent pa);

@@ -99,7 +99,7 @@ public class RandomAgent extends AgentBase implements PlayAgent {
 
         assert actBest != null : "Oops, no best action actBest";
 		StateObservation NewSO = so.copy();
-		NewSO.advance(actBest);
+		NewSO.advance(actBest, null);
         if (!silent) {
 			// optional: show the best action
         	System.out.println("---Best Move: "+NewSO.stringDescr()+"   "+maxScore);

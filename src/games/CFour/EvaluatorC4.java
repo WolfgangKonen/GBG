@@ -211,7 +211,7 @@ public class EvaluatorC4 extends Evaluator {
      * @return Percentage of games won on a scale of [0, 1] as double
      */
     private double competeAgainstMaxN(PlayAgent playAgent, int numEpisodes) {
-		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(playAgent, maxnAgent), 0, new StateObserverC4(), numEpisodes, verbose, null, null);
+		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(playAgent, maxnAgent), 0, new StateObserverC4(), numEpisodes, verbose, null, null, null);
 		lastResult = sc.scTup[0];
         m_msg = playAgent.getName() + ": " + this.getPrintString() + lastResult;
         if (this.verbose > 0) System.out.println(m_msg);
@@ -232,7 +232,7 @@ public class EvaluatorC4 extends Evaluator {
      */
     private double competeAgainstAlphaBeta(PlayAgent playAgent, int numEpisodes) {
 //    	verbose=1;
-		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(playAgent, alphaBetaStd), 0, new StateObserverC4(), 2*numEpisodes, verbose, null, null);
+		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(playAgent, alphaBetaStd), 0, new StateObserverC4(), 2*numEpisodes, verbose, null, null, null);
 		lastResult = sc.scTup[0];
         m_msg = playAgent.getName() + ": " + this.getPrintString() + lastResult;
        	System.out.println(m_msg);
@@ -256,7 +256,7 @@ public class EvaluatorC4 extends Evaluator {
      * 		best moves if there is more than one.
      */
     private double competeAgainstAlphaBetaDistantLoss(PlayAgent playAgent, int numEpisodes) {
-		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(playAgent, alphaBeta_DL), 0, new StateObserverC4(), 2*numEpisodes, verbose, null, null);
+		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(playAgent, alphaBeta_DL), 0, new StateObserverC4(), 2*numEpisodes, verbose, null, null, null);
 //        ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, alphaBeta_DL), new StateObserverC4(), 2*numEpisodes, verbose);
 		lastResult = sc.scTup[0];
         m_msg = playAgent.getName() + ": " + this.getPrintString() + lastResult;
@@ -280,7 +280,7 @@ public class EvaluatorC4 extends Evaluator {
         mctsAgent = new MCTSAgentT("MCTS", new StateObserverC4(), params);
 
         // this version plays only games that playAgent can win (same as against AlphaBetaAgent):
-		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(playAgent, mctsAgent), 0, new StateObserverC4(), 2*numEpisodes, verbose, null, null);
+		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(playAgent, mctsAgent), 0, new StateObserverC4(), 2*numEpisodes, verbose, null, null, null);
         // this version, if you want to test both directions:
 //		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, mctsAgent), new StateObserverC4(), 2*numEpisodes, verbose);
 
@@ -336,12 +336,12 @@ public class EvaluatorC4 extends Evaluator {
         for (int i=0; i<startAction.length; i++) {
         	StateObserverC4 so = new StateObserverC4();
         	if (startAction[i] == -1) {
-        		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(playAgent, opponent), 0, so, numEpisodes, 0, null, null);
+        		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(playAgent, opponent), 0, so, numEpisodes, 0, null, null, null);
 //                ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent), so, numEpisodes, 0);
         		singleResult = sc.scTup[0];
        	    } else {
-        		so.advance(new ACTIONS(startAction[i]));
-        		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(opponent, playAgent), 0, so, numEpisodes, 0, null, null);
+        		so.advance(new ACTIONS(startAction[i]), null);
+        		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(opponent, playAgent), 0, so, numEpisodes, 0, null, null, null);
 //                ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(opponent, playAgent), so, numEpisodes, 0);
         		singleResult = sc.scTup[1];
         	}
@@ -408,11 +408,11 @@ public class EvaluatorC4 extends Evaluator {
                 MCTSAgentT mctsAgent2 = new MCTSAgentT("MCTS", new StateObserverC4(), params);
 
             	if (startAction2[i2] == -1) {
-            		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(playAgent, mctsAgent2), 0, so, numEpisodes, 0, null, null);
+            		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(playAgent, mctsAgent2), 0, so, numEpisodes, 0, null, null, null);
             		success = sc.scTup[0];
             	} else {
-            		so.advance(new ACTIONS(startAction2[i2]));
-            		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(mctsAgent2, playAgent), 0, so, numEpisodes, 0, null, null);
+            		so.advance(new ACTIONS(startAction2[i2]), null);
+            		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(mctsAgent2, playAgent), 0, so, numEpisodes, 0, null, null, null);
             		success = sc.scTup[1];
             	}
                 if(verbose == 0) {
@@ -460,7 +460,7 @@ public class EvaluatorC4 extends Evaluator {
      */
     private double competeAgainstRandom(PlayAgent playAgent) {
     	StateObservation so = new StateObserverC4();
-		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent,randomAgent), so, 50, 0, null);
+		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent,randomAgent), so, 50, 0, null, null);
 		double success = sc.scTup[0];
         m_msg = playAgent.getName() + ": " + this.getPrintString() + success;
         if (this.verbose > 0) System.out.println(m_msg);

@@ -1,7 +1,6 @@
 package games.Othello.BenchmarkPlayer;
 
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.Random;
 
 import controllers.AgentBase;
@@ -140,7 +139,7 @@ public class BenchMarkPlayer extends AgentBase implements PlayAgent, Serializabl
 		double currentScore, scoreNormalized;
 		StateObserverOthello newSO = (StateObserverOthello) so.copy();
 		int player = newSO.getPlayer();
-		newSO.advance(action);
+		newSO.advance(action, null);
 		currentScore = evaluate(newSO);
 		scoreNormalized = normalize(currentScore);
 //		System.out.println(scoreNormalized + " " + currentScore);

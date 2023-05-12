@@ -224,7 +224,7 @@ public class ExpectimaxN2Wrapper extends AgentBase implements PlayAgent, Seriali
             {
             	actions[i] = rans.get(i);
             	NewSO = soND.copy();
-            	NewSO.advanceNondeterministic(actions[i]);
+            	NewSO.advanceNondeterministic(actions[i], null);
             	
 				// here is the recursion: getAllScores may call getBestAction back:
 				currScoreTuple = getAllScores(NewSO,refer,silent,depth+1);		

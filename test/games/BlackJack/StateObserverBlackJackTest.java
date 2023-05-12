@@ -17,7 +17,7 @@ public class StateObserverBlackJackTest {
         for(int i = 0; i < 100000; i++){
             while(!so.isRoundOver()){
                 int action = m_rnd.nextInt(so.getNumAvailableActions());
-                so.advance(so.getAction(action));
+                so.advance(so.getAction(action), null);
                 if(so.getCurrentPhase() == StateObserverBlackJack.gamePhase.ASKFORINSURANCE)
                     askForInsuranceCounter++;
             }
@@ -40,7 +40,7 @@ public class StateObserverBlackJackTest {
         for(int i = 0; i < 1000; i++){
             while(!so.isRoundOver()){
                 int randomAction = m_rnd.nextInt(so.getNumAvailableActions());
-                so.advance(so.getAction(randomAction));
+                so.advance(so.getAction(randomAction), null);
             }
             assert so.getGameScoreTuple().scTup.length == 1: "scoretuple should have length 1";
             double scoreOnRoundOver = so.getGameScoreTuple().scTup[0];

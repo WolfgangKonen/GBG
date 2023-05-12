@@ -280,12 +280,12 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
     	        	NewSO.advanceDeterministic(thisAct); 	// generate the afterstate
     	        	value = this.getScore(NewSO,so); // this is V(s') from so-perspective
 					while (!NewSO.isNextActionDeterministic() && !NewSO.isRoundOver()) {	// /WK/ NEW/03/2021
-						NewSO.advanceNondeterministic();
+						NewSO.advanceNondeterministic(null);
 					}
     	        } else {
     	        	// the non-afterstate logic for the case of single moves:
     	        	//System.out.println("NewSO: "+NewSO.stringDescr()+", act: "+act.toInt()); // DEBUG
-    	            NewSO.advance(acts.get(i));
+    	            NewSO.advance(acts.get(i), null);
     	            value = this.getScore(NewSO,so); // this is V(s'') from the perspective of so
     	        }
     	        // both ways of calculating the agent score are the same for deterministic games (s'=s''),
@@ -326,7 +326,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 
         assert actBest != null : "Oops, no best action actBest";
 		NewSO = so.copy();
-		NewSO.advance(actBest);
+		NewSO.advance(actBest, null);
 		if (!silent) {
 			printDebugInfo(so,NewSO,bestValue,VTable);
 		}

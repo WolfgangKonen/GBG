@@ -201,7 +201,7 @@ public class MCAgentN extends AgentBase implements PlayAgent {
                     StateObservation newSob = sob.copy();
                     
                 	//fetch the first action (of rollout) and execute it on the game state:
-                    newSob.advance(actions.get(firstActionIdentifier));
+                    newSob.advance(actions.get(firstActionIdentifier), null);
 
                     //construct Random Agent and let it simulate a (random) rollout until game over:
                     agent.startAgent(newSob, depth, stopOnRoundOver);			// contains BUG1 fix
@@ -361,7 +361,7 @@ public class MCAgentN extends AgentBase implements PlayAgent {
 
                 	//fetch the first action and execute it on the game state:
                     Types.ACTIONS firstAction = actions.get(firstActionIdentifier);
-                    newSob.advance(firstAction);
+                    newSob.advance(firstAction, null);
 
                     //construct Random Agent and let it simulate a (random) rollout:
                     RandomSearch agent = new RandomSearch();
@@ -493,7 +493,7 @@ public class MCAgentN extends AgentBase implements PlayAgent {
                 for (int k = 0; k < iterations; k++) {
                     StateObservation newSob = sob.copy();
 
-                    newSob.advance(actions.get(j));
+                    newSob.advance(actions.get(j), null);
 
                     RandomSearch agent = new RandomSearch();
                     agent.startAgent(newSob, depth, stopOnRoundOver);			// contains BUG1 fix
@@ -613,9 +613,9 @@ public class MCAgentN extends AgentBase implements PlayAgent {
         for(int i = 0; i < rans.size(); ++i)
         {
             NewSO = soND.copy();
-            NewSO.advanceNondeterministic(rans.get(i));
+            NewSO.advanceNondeterministic(rans.get(i), null);
             while(!NewSO.isNextActionDeterministic() && !NewSO.isRoundOver()){		// /WK/03/2021 NEW
-                NewSO.advanceNondeterministic();
+                NewSO.advanceNondeterministic(null);
             }
 
             currScoreTuple = getNextAction2(NewSO.partialState(), false, true).getScoreTuple();

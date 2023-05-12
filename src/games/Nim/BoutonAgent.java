@@ -52,7 +52,7 @@ public class BoutonAgent extends AgentBase implements PlayAgent {
         for(i = 0; i < acts.size(); ++i)
         {
         	NewSO = ((StateObserverNim) so).copy();
-        	NewSO.advance(acts.get(i));
+        	NewSO.advance(acts.get(i), null);
         	
         	value = VTable[i] = NewSO.boutonValue(NewSO.getHeaps());
         	// 'value' will be either +1.0 or -1.0 in game Nim.
@@ -70,7 +70,7 @@ public class BoutonAgent extends AgentBase implements PlayAgent {
         // optional: print the best action
         if (!silent) {
         	NewSO = ((StateObserverNim) so).copy();
-        	NewSO.advance(actBest);
+        	NewSO.advance(actBest, null);
         	System.out.println("---Best Move: "+NewSO.stringDescr()+"   "+maxValue);
         }			
 

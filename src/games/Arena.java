@@ -234,7 +234,7 @@ abstract public class Arena implements Runnable {
 				enableButtons(false,true,false); 
 				if (!singlePlayerTSRunning) {
 					gb.showGameBoard(this, false);
-					gb.clearBoard(false, true);
+					gb.clearBoard(false, true, null);
 					
 					PlayGame();
 					
@@ -245,7 +245,7 @@ abstract public class Arena implements Runnable {
 			case INSPECTV:
 				enableButtons(false,true,true); 
 				gb.showGameBoard(this, false);
-				gb.clearBoard(false, true);
+				gb.clearBoard(false, true, null);
 				gb.setActionReq(true);
 				
 				InspectGame();
@@ -325,7 +325,7 @@ abstract public class Arena implements Runnable {
 							"Warning", JOptionPane.WARNING_MESSAGE);
 		}
 
-		gb.clearBoard(true, true);
+		gb.clearBoard(true, true, null);
 		gb.updateBoard(null, true, true); // update with reset
 		gb.enableInteraction(true); // needed for CFour
 
@@ -390,7 +390,7 @@ abstract public class Arena implements Runnable {
 						// not a valid play position >> show the board settings,
 						// i.e.
 						// the game-over position, but clear the values:
-						gb.clearBoard(false, true);
+						gb.clearBoard(false, true, null);
 //						this.enableButtons(true);
 				
 						break; // out of while, i.e. finish INSPECTV
@@ -399,7 +399,7 @@ abstract public class Arena implements Runnable {
 						// in INSPECTV is usually the default (game-over, solved-cube)
 						// state: In this case we only clear the action values, but
 						// stay in INSPECTV
-						gb.clearBoard(false, true);
+						gb.clearBoard(false, true, null);
 					}
 				}
 				gb.enableInteraction(true);
@@ -552,7 +552,7 @@ abstract public class Arena implements Runnable {
 						}
 
 						so.storeBestActionInfo(actBest);
-						so.advance(actBest);
+						so.advance(actBest, null);
 						logManager.addLogEntry(actBest, so, logSessionid);
 						if (m_spDT==null) {		// the normal play (non-TS, i.e. no tournament)
 							try {
@@ -689,7 +689,7 @@ abstract public class Arena implements Runnable {
 			}
 
 			so.storeBestActionInfo(actBest);
-			so.advance(actBest);
+			so.advance(actBest, null);
 
 			if (so.isRoundOver()) {
 
@@ -807,7 +807,7 @@ abstract public class Arena implements Runnable {
 		} else {
 			// if taskBefore!=INSPECTV, select here the start state:
 			//gb.clearBoard(true, true); // reset game board to default start state
-			so = gb.getDefaultStartState();
+			so = gb.getDefaultStartState(null);
 			//if (m_xab.oPar[0].getChooseStart01()) {
 			// this is not recommended: an innocent start of Play where chooseStart01 in ParOther remains set
 			// from a previous training will let the first agent make (silently) an unfortunate 1st move in

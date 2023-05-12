@@ -214,7 +214,7 @@ public class LogManagerGUI {
                     }
                     currentLog = tempLog;
 
-                    gameBoard.clearBoard(true,true);
+                    gameBoard.clearBoard(true,true, null);
                     loadBoard(0);
 
                     fetch_paX();        // re-fetch agent X (in case it or its parameters have changed)

@@ -13,7 +13,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * Class StateObservation observes the current state of the game, it has utility functions for
  * <ul>
  * <li> returning the available actions ({@link #getAvailableActions()}), 
- * <li> advancing the state of the game with a specific action ({@link #advance(ACTIONS)}),
+ * <li> advancing the state of the game with a specific action ({@link StateObservation#advance(ACTIONS, Random)}),
  * <li> copying the current state
  * <li> signaling end, score and winner of the game
  * </ul>
@@ -649,13 +649,14 @@ public class StateObserverPoker extends ObsNondetBase implements StateObsNondete
 	 * - 4 -&gt; RAISE	: raise the last bet by the "Big Blind"
 	 * - 5 -&gt; ALL IN: bet all remaining chips
 	 * @param action to advance the state of the game
+	 * @param cmpRand
 	 */
-	public void advance(ACTIONS action){
+	public void advance(ACTIONS action, Random cmpRand){
 		if(isNextActionDeterministic()){
 			advanceDeterministic(action);
 		}
 		while(!isNextActionDeterministic() && !isRoundOver()){
-			advanceNondeterministic();
+			advanceNondeterministic(null);
 		}
 	}
 
@@ -721,8 +722,10 @@ public class StateObserverPoker extends ObsNondetBase implements StateObsNondete
 	 * - 53 -&gt; determine winner of the round
 	 * - 53 -&gt; determine winner of the round
 	 * @param randAction to advance the state of the game
-	 */
-	public ACTIONS advanceNondeterministic(ACTIONS randAction) {
+	 * @param cmpRand
+	 *
+     */
+	public ACTIONS advanceNondeterministic(ACTIONS randAction, Random cmpRand) {
 		if(isRoundOver())
 			return randAction;
 		if (isNextActionDeterministic) {
@@ -806,12 +809,12 @@ public class StateObserverPoker extends ObsNondetBase implements StateObsNondete
 			gamescores[i] = chips[i]-START_CHIPS;
 	}
 
-	public ACTIONS advanceNondeterministic() {
+	public ACTIONS advanceNondeterministic(Random cmpRand) {
 		ArrayList<ACTIONS> possibleRandoms = getAvailableRandoms();
 		//advanceNondeterministic(possibleRandoms.get(rand.nextInt(possibleRandoms.size())));
 		// above doesn't provide sufficiently random results
 		ACTIONS act = possibleRandoms.get(ThreadLocalRandom.current().nextInt(possibleRandoms.size()));
-		advanceNondeterministic(act);
+		advanceNondeterministic(act, null);
 
 		return act;
 	}
@@ -1320,7 +1323,8 @@ public class StateObserverPoker extends ObsNondetBase implements StateObsNondete
 		}
 	}
 
-	public void randomizeState(){
+	@Override
+	public void randomizeStartState(Random cmpRand){
 		resetCards();
 	}
 

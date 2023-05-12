@@ -56,7 +56,7 @@ public class GameBoardSG implements GameBoard {
 	public void updateParams() {}
 
 	@Override
-	public void clearBoard(boolean boardClear, boolean vClear) {
+	public void clearBoard(boolean boardClear, boolean vClear, Random cmpRand) {
 		if (boardClear) {
 			m_so = new StateObserverSG();		// random start state
 		}
@@ -110,7 +110,7 @@ public class GameBoardSG implements GameBoard {
 		int iAction = 3*x+y;
 		Types.ACTIONS act = Types.ACTIONS.fromInt(iAction);
 		assert m_so.isLegalAction(act) : "Desired action is not legal";
-		m_so.advance(act);			// perform action (optionally add random elements from game 
+		m_so.advance(act, null);			// perform action (optionally add random elements from game
 									// environment - not necessary in TicTacToe)
 		(m_Arena.getLogManager()).addLogEntry(act, m_so, m_Arena.getLogSessionID());
 		arenaActReq = true;			// ask Arena for next action
@@ -127,7 +127,7 @@ public class GameBoardSG implements GameBoard {
 		} else {
 			m_Arena.setStatusMessage("Inspecting the value function ...");
 		}
-		m_so.advance(act);			// perform action (optionally add random elements from game 
+		m_so.advance(act, null);			// perform action (optionally add random elements from game
 									// environment - not necessary in TicTacToe)
 		arenaActReq = true;
 	}
@@ -138,10 +138,11 @@ public class GameBoardSG implements GameBoard {
 
 	/**
 	 * @return the 'empty-board' start state
+     * @param cmpRand
 	 */
 	@Override
-	public StateObservation getDefaultStartState() {
-		clearBoard(true, true);
+	public StateObservation getDefaultStartState(Random cmpRand) {
+		clearBoard(true, true, null);
 		return m_so;
 	}
 
@@ -152,7 +153,7 @@ public class GameBoardSG implements GameBoard {
 	 */
 	@Override
 	public StateObservation chooseStartState() {
-		return getDefaultStartState();			// m_so is in default start state
+		return getDefaultStartState(null);			// m_so is in default start state
 	}
 
 	@Override

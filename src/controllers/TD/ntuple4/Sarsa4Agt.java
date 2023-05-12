@@ -309,7 +309,7 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 
         assert actBest != null : "Oops, no best action actBest";
 		NewSO = so.copy();
-		NewSO.advance(actBest);
+		NewSO.advance(actBest, null);
 
 		ScoreTuple scBest = so.getStoredBestScoreTuple();
 				// This is the previous tuple, only relevant in case N>=3. If so.getStoredBestScoreTuple() encounters

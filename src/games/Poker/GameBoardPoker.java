@@ -49,7 +49,7 @@ public class GameBoardPoker implements GameBoard {
 	public void updateParams() {}
 
 	@Override
-	public void clearBoard(boolean boardClear, boolean vClear) {
+	public void clearBoard(boolean boardClear, boolean vClear, Random cmpRand) {
 		if (boardClear) {
 			m_so = new StateObserverPoker();			// empty Table
 			if (m_Arena!=null&&m_Arena.hasGUI() && m_gameGui!=null) {
@@ -102,7 +102,7 @@ public class GameBoardPoker implements GameBoard {
 	{
 		Types.ACTIONS act = Types.ACTIONS.fromInt(x);
 		assert m_so.isLegalAction(act) : "Desired action is not legal";
-		m_so.advance(act);
+		m_so.advance(act, null);
 		if(m_Arena!=null)
 			(m_Arena.getLogManager()).addLogEntry(act, m_so, m_Arena.getLogSessionID());
 		arenaActReq = true;			// ask Arena for next action
@@ -114,10 +114,11 @@ public class GameBoardPoker implements GameBoard {
 
 	/**
 	 * @return the 'empty-board' start state
+     * @param cmpRand
 	 */
 	@Override
-	public StateObservation getDefaultStartState() {
-		clearBoard(true, true);
+	public StateObservation getDefaultStartState(Random cmpRand) {
+		clearBoard(true, true, null);
 		return m_so;
 	}
 
@@ -128,13 +129,13 @@ public class GameBoardPoker implements GameBoard {
 	 */
 	@Override
 	public StateObservation chooseStartState() {
-		getDefaultStartState();			// m_so is in default start state 
+		getDefaultStartState(null);			// m_so is in default start state
 		if (rand.nextDouble()>0.5) {
 			// choose randomly one of the possible actions in default 
 			// start state and advance m_so by one ply
 			ArrayList<Types.ACTIONS> acts = m_so.getAvailableActions();
 			int i = rand.nextInt(acts.size());
-			m_so.advance(acts.get(i));
+			m_so.advance(acts.get(i), null);
 		}
 		return m_so;
 	}

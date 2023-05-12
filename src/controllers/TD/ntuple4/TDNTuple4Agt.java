@@ -270,11 +270,11 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 							// .project() projects the state into its canonical form (e.g. sorted heaps in case Nim,
 							// for all other state observers, .project() currently returns just 'this')
 					while (!NewSO.isNextActionDeterministic() && !NewSO.isRoundOver()) {	// /WK/ NEW/03/2021
-						NewSO.advanceNondeterministic();
+						NewSO.advanceNondeterministic(null);
 					}
 				} else {
 					// the non-afterstate logic for the case of single moves:
-					NewSO.advance(acts.get(i));
+					NewSO.advance(acts.get(i), null);
 					value = this.getScore(NewSO.project(),so); // this is V(s'') from the perspective of so
 				}
 				// both ways of calculating the agent score are the same for deterministic games (s'=s''),
@@ -328,7 +328,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 
 		if (!silent) {
 			NewSO = so.copy();
-			NewSO.advance(actBest);
+			NewSO.advance(actBest, null);
 			printDebugInfo(so,NewSO,actBest,bestValue,VTable);
 		}
 

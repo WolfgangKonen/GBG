@@ -89,7 +89,7 @@ public final class GameStateIncludingPass {
     public Tuple<ApplicableAction,GameStateIncludingPass> advanceNondeterministic() {
         assert state instanceof StateObsNondeterministic : "[GameStateIncludingPass] state must be NON DET";
         final var stateCopy = state.copy();
-        final var r = stateCopy.advanceNondeterministic();
+        final var r = stateCopy.advanceNondeterministic(null);
         return new Tuple(new RegularAction(r), new GameStateIncludingPass(stateCopy));
     }
 

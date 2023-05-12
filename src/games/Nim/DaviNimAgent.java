@@ -2,12 +2,10 @@ package games.Nim;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Random;
 
 import controllers.AgentBase;
 import controllers.PlayAgent;
-import controllers.PlayAgent.AgentState;
 import games.StateObservation;
 import params.ParOther;
 import tools.ScoreTuple;
@@ -97,7 +95,7 @@ public class DaviNimAgent extends AgentBase implements PlayAgent {
         for(i = 0; i < acts.size(); ++i)
         {
         	newSO = ((StateObserverNim3P) so).copy();
-        	newSO.advance(acts.get(i));
+        	newSO.advance(acts.get(i), null);
         	
         	// value is the V(s) for for taking action i in state s='so'. Action i leads to state newSO.
         	ScoreTuple sc = daviValue(newSO);
@@ -126,7 +124,7 @@ public class DaviNimAgent extends AgentBase implements PlayAgent {
         // optional: print the best action
         if (!silent) {
         	newSO = ((StateObserverNim3P) so).copy();
-        	newSO.advance(actBest);
+        	newSO.advance(actBest, null);
         	System.out.println("---Best Move: "+newSO.stringDescr()+"   "+maxValue);
         }			
 
@@ -178,7 +176,7 @@ public class DaviNimAgent extends AgentBase implements PlayAgent {
 	        
 			//System.out.println(s_t.stringDescr()+", "+a_t.getVBest());
 	        
-			s_t.advance(a_t);		// advance the state 
+			s_t.advance(a_t, null);		// advance the state
 			s_t.storeBestActionInfo(a_t);	// /WK/ was missing before 2021-09-10. Now stored ScoreTuple is up-to-date.
 
 			if (s_t.isGameOver()) m_finished = true;

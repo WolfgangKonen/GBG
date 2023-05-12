@@ -1,5 +1,6 @@
 package games.ZweiTausendAchtundVierzig;
 
+import games.StateObservation;
 import tools.Types;
 
 /**
@@ -17,8 +18,8 @@ import tools.Types;
  * Likewise, static transposition tables {@code scoreLeft} and {@code scoreRight} are filled
  * which contain for each possible row value the resulting score. <p>
  *
- * This speeds up the calculation in {@link StateObserver2048#advance(Types.ACTIONS)} by a
- * factor of 10 as compared to {@link StateObserver2048Slow#advance(Types.ACTIONS)}.
+ * This speeds up the calculation in {@link StateObservation#advance(Types.ACTIONS, java.util.Random)} by a
+ * factor of 10 as compared to {@link StateObservation#advance(Types.ACTIONS, java.util.Random)}.
  *
  * @author Wolfgang Konen, THK
  */

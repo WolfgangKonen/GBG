@@ -67,7 +67,7 @@ public class GameBoardSim implements GameBoard {
 	public void updateParams() {}
 
 	@Override
-	public void clearBoard(boolean boardClear, boolean vClear) {
+	public void clearBoard(boolean boardClear, boolean vClear, Random cmpRand) {
 		if(boardClear) {
             m_so = new StateObserverSim();
 		}
@@ -142,10 +142,11 @@ public class GameBoardSim implements GameBoard {
 	/**
 	 * @return the 'empty-board' start state. <br>
 	 * If {@code m_DEBG==true}, another default start state is returned (see source code).
+     * @param cmpRand
 	 */
 	@Override
-	public StateObservation getDefaultStartState() {
-		clearBoard(true, true);
+	public StateObservation getDefaultStartState(Random cmpRand) {
+		clearBoard(true, true, null);
 		if (m_DEBG) {		// just simpler to learn and simpler to debug start states:
 			// 1) If all ACTIONS below are active: a very simple position with only 3 moves left.
 			//    X to move and ACTIONS(10) lets X win, the other 2 let O win.
@@ -164,7 +165,7 @@ public class GameBoardSim implements GameBoard {
 			// 	  (Makes the game tree smaller, but the game difficulty remains the same. The other 
 			//    1st-ply moves lead to equivalent episodes). 14 moves to go. Surprisingly, 
 			//    *every* 2nd-ply move of player O is a winning move (!)
-			m_so.advance(new ACTIONS( 0));	// P0: node 1 to 2
+			m_so.advance(new ACTIONS( 0), null);	// P0: node 1 to 2
 //			m_so.advance(new ACTIONS( 2));	// P1: node 1 to 4
 //			m_so.advance(new ACTIONS( 4));	// P0: node 1 to 6
 //			m_so.advance(new ACTIONS( 7));	// P1: node 2 to 5
@@ -192,14 +193,14 @@ public class GameBoardSim implements GameBoard {
 	 */
 	@Override
 	public StateObservation chooseStartState() {
-		getDefaultStartState();			// m_so is in default start state 
+		getDefaultStartState(null);			// m_so is in default start state
 		// /WK/ this part was missing before 2019-09-04:
 		if (rand.nextDouble()>0.5) {
 			// choose randomly one of the possible actions in default 
 			// start state and advance m_so by one ply
 			ArrayList<Types.ACTIONS> acts = m_so.getAvailableActions();
 			int i = rand.nextInt(acts.size());
-			m_so.advance(acts.get(i));
+			m_so.advance(acts.get(i), null);
 		}
 		return m_so;
 	}

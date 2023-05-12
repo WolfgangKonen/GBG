@@ -55,7 +55,7 @@ public class GameBoardHex implements GameBoard {
     public void updateParams() {}
 
     @Override
-    public void clearBoard(boolean boardClear, boolean vClear) {
+    public void clearBoard(boolean boardClear, boolean vClear, Random cmpRand) {
         if (boardClear) {
             m_so = new StateObserverHex();
         } else if (vClear) {
@@ -129,8 +129,8 @@ public class GameBoardHex implements GameBoard {
     }
 
     @Override
-    public StateObservation getDefaultStartState() {
-        clearBoard(true, true);
+    public StateObservation getDefaultStartState(Random cmpRand) {
+        clearBoard(true, true, null);
         return m_so;
     }
 
@@ -141,13 +141,13 @@ public class GameBoardHex implements GameBoard {
 	 */
     @Override
     public StateObservation chooseStartState() {
-        clearBoard(true, true);
+        clearBoard(true, true, null);
         if (rand.nextDouble() > 0.5) {
             // choose randomly one of the possible actions in default
             // start state and advance m_so by one ply
             ArrayList<Types.ACTIONS> acts = m_so.getAvailableActions();
             int i = rand.nextInt(acts.size());
-            m_so.advance(acts.get(i));
+            m_so.advance(acts.get(i), null);
         }
         return m_so;
     }

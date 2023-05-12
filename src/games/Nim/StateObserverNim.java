@@ -2,6 +2,7 @@ package games.Nim;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Random;
 
 import controllers.TD.ntuple4.TDNTuple4Agt;
 import games.ObserverBase;
@@ -14,7 +15,7 @@ import tools.Types.ACTIONS;
  * superclass for {@link StateObserverNim3P}. It has utility functions for
  * <ul>
  * <li> returning the available actions ({@link #getAvailableActions()}), 
- * <li> advancing the state of the game with a specific action ({@link #advance(Types.ACTIONS)}),
+ * <li> advancing the state of the game with a specific action ({@link StateObservation#advance(ACTIONS, Random)}),
  * <li> copying the current state
  * <li> signaling end, score and winner of the game
  * </ul>
@@ -193,14 +194,15 @@ public class StateObserverNim extends ObserverBase implements StateObservation {
 
 	/**
 	 * Advance the current state with action {@code action} to a new state
-	 * @param action the action having key  
-	 * <pre>
-	 *   iAction = i*NimConfig.MAX_MINUS+j
-	 * </pre> 
-	 * with j = 0,...,{@link NimConfig#MAX_MINUS} means: 
-	 * Subtract {@code j+1} items from heap no {@code i}. 
-	 */
-	public void advance(ACTIONS action) {
+     * @param action the action having key
+     * <pre>
+     *   iAction = i*NimConfig.MAX_MINUS+j
+     * </pre>
+     * with j = 0,...,{@link NimConfig#MAX_MINUS} means:
+     * Subtract {@code j+1} items from heap no {@code i}.
+     * @param cmpRand
+     */
+	public void advance(ACTIONS action, Random cmpRand) {
 		super.advanceBase(action);		//		includes addToLastMoves(action)
 		int iAction = action.toInt();
 		int j=iAction%NimConfig.MAX_MINUS;

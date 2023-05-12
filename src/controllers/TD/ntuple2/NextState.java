@@ -1,6 +1,5 @@
 package controllers.TD.ntuple2;
 
-import games.RubiksCube.StateObserverCube;
 import games.StateObservation;
 import tools.ScoreTuple;
 import tools.Types;
@@ -66,12 +65,12 @@ public class NextState {
 				nextSO = afterState.copy();
 				// /WK/ commented out since isNextActionDeterministic() is not yet part of the general interface
 				//while(!nextSO.isNextActionDeterministic() && !isRoundOver()) {
-					nextSO.advanceNondeterministic();
+					nextSO.advanceNondeterministic(null);
 				//}
 	        	
 	        } else {
                 nextSO = so.copy();
-                nextSO.advance(actBest);
+                nextSO.advance(actBest, null);
 				afterState = nextSO.copy();
 	        }
 			nextSO.storeBestActionInfo(actBest);	// /WK/ was missing before 2021-09-10. Now stored ScoreTuple is up-to-date.

@@ -20,7 +20,6 @@ import controllers.TD.ntuple4.*;
 import games.BlackJack.BasicStrategyBlackJackAgent;
 import games.CFour.AlphaBetaAgent;
 import games.CFour.openingBook.BookSum;
-import games.EWN.StateObserverEWN;
 import games.KuhnPoker.KuhnPokerAgent;
 import games.Nim.BoutonAgent;
 import games.Nim.DaviNimAgent;
@@ -40,6 +39,7 @@ import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * Class {@link XArenaFuncs} contains several methods to train, evaluate and
@@ -181,7 +181,7 @@ public class XArenaFuncs {
 					int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
 					// int numOutputs =
 					// m_xab.m_game.gb.getDefaultStartState().getAllAvailableActions().size();
-					ArrayList<ACTIONS> allAvailActions = m_xab.m_arena.gb.getDefaultStartState().getAllAvailableActions();
+					ArrayList<ACTIONS> allAvailActions = m_xab.m_arena.gb.getDefaultStartState(null).getAllAvailableActions();
 					pa = new SarsaAgt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
 							m_xab.oPar[n], nTuples, xnf, allAvailActions, maxGameNum);
 				}
@@ -189,7 +189,7 @@ public class XArenaFuncs {
 					XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
 					NTuple4Factory ntupfac = new NTuple4Factory();
 					int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
-					ArrayList<ACTIONS> allAvailActions = m_xab.m_arena.gb.getDefaultStartState().getAllAvailableActions();
+					ArrayList<ACTIONS> allAvailActions = m_xab.m_arena.gb.getDefaultStartState(null).getAllAvailableActions();
 					pa = new Sarsa4Agt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
 							m_xab.oPar[n], nTuples, xnf, allAvailActions, maxGameNum);
 				}
@@ -197,7 +197,7 @@ public class XArenaFuncs {
 					XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
 					NTuple4Factory ntupfac = new NTuple4Factory();
 					int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
-					ArrayList<ACTIONS> allAvailActions = m_xab.m_arena.gb.getDefaultStartState().getAllAvailableActions();
+					ArrayList<ACTIONS> allAvailActions = m_xab.m_arena.gb.getDefaultStartState(null).getAllAvailableActions();
 					pa = new QLearn4Agt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
 							m_xab.oPar[n], nTuples, xnf, allAvailActions, maxGameNum);
 				}
@@ -459,7 +459,7 @@ public class XArenaFuncs {
 					int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
 					// int numOutputs =
 					// m_xab.m_game.gb.getDefaultStartState().getAllAvailableActions().size();
-					ArrayList<ACTIONS> allAvailActions = m_xab.m_arena.gb.getDefaultStartState()
+					ArrayList<ACTIONS> allAvailActions = m_xab.m_arena.gb.getDefaultStartState(null)
 							.getAllAvailableActions();
 					pa = new SarsaAgt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
 							m_xab.oPar[n], nTuples, xnf, allAvailActions, maxGameNum);
@@ -468,7 +468,7 @@ public class XArenaFuncs {
 					XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
 					NTuple4Factory ntupfac = new NTuple4Factory();
 					int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
-					ArrayList<ACTIONS> allAvailActions = m_xab.m_arena.gb.getDefaultStartState()
+					ArrayList<ACTIONS> allAvailActions = m_xab.m_arena.gb.getDefaultStartState(null)
 							.getAllAvailableActions();
 					pa = new Sarsa4Agt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
 							m_xab.oPar[n], nTuples, xnf, allAvailActions, maxGameNum);
@@ -477,7 +477,7 @@ public class XArenaFuncs {
 					XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
 					NTuple4Factory ntupfac = new NTuple4Factory();
 					int[][] nTuples = ntupfac.makeNTupleSet(m_xab.ntPar[n], xnf);
-					ArrayList<ACTIONS> allAvailActions = m_xab.m_arena.gb.getDefaultStartState()
+					ArrayList<ACTIONS> allAvailActions = m_xab.m_arena.gb.getDefaultStartState(null)
 							.getAllAvailableActions();
 					pa = new QLearn4Agt(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
 							m_xab.oPar[n], nTuples, xnf, allAvailActions, maxGameNum);
@@ -674,7 +674,7 @@ public class XArenaFuncs {
 			pa = this.constructAgent(n, sAgent, xab);
 			if (pa == null)
 				throw new RuntimeException("Could not construct agent = " + sAgent);
-			qa = wrapAgentTrain(pa, xab.oPar[n], xab.wrPar[n], xab.maxnPar[n], gb.getDefaultStartState());
+			qa = wrapAgentTrain(pa, xab.oPar[n], xab.wrPar[n], xab.maxnPar[n], gb.getDefaultStartState(null));
 
 			if (qa == null)
 				throw new RuntimeException("Could not wrap agent = " + sAgent);
@@ -866,7 +866,7 @@ public class XArenaFuncs {
 		if (chooseStart01) {
 			so = gb.chooseStartState(pa);
 		} else {
-			so = gb.getDefaultStartState();
+			so = gb.getDefaultStartState(null);
 		}
 		return so;
 	}
@@ -970,7 +970,7 @@ public class XArenaFuncs {
 				pa = constructAgent(n, sAgent, xab);
 				if (pa == null)
 					throw new RuntimeException("Could not construct AgentX = " + sAgent);
-				qa = wrapAgentTrain(pa, xab.oPar[n], xab.wrPar[n], xab.maxnPar[n], gb.getDefaultStartState());
+				qa = wrapAgentTrain(pa, xab.oPar[n], xab.wrPar[n], xab.maxnPar[n], gb.getDefaultStartState(null));
 
 				if (qa == null)
 					throw new RuntimeException("Could not wrap agent = " + sAgent);
@@ -1136,7 +1136,9 @@ public class XArenaFuncs {
 	 * @param competeNum
 	 *            the number of episodes to play
 	 * @param verbose
-	 *            0: silent, 1,2: more print-out
+	 *            0: silent, 1: more print-out,
+	 *            2: print start state & one-liner (dice + actBest) for each move
+	 *            3: print additionally agent's best move & state (if agent permits, see nextMoveSilent)
 	 * @param nextTimes
 	 *            storage to save time measurements, null if not needed
 	 *            (currently only used by tournament system). If
@@ -1147,22 +1149,26 @@ public class XArenaFuncs {
 	 * 			the result of the competition. {@link XStateObs} holds in addition to the state: (i) the index
 	 * 			{@code k=0,1,...,competeNum-1} and (ii) the shift number {@code p0Role} (in which role 0,1,..,N-1 the
 	 * 			first player P0 has performed this competition episode). If {@code null} on input, it returns {@code null}.
-	 * @return 	a score tuple which holds in the kth position the average score
+	 * @param cmpRand
+	 * 			if non-null, use this (reproducible) RNG instead of StateObservation's RNG
+	 * @return
+	 * 			a score tuple which holds in the kth position the average score
 	 *         	of the kth agent from all {@code competeNum} episodes.
 	 *
-	 * @see #competeNPlayerAllRoles(PlayAgtVector, StateObservation, int, int, ArrayList)
+	 * @see #competeNPlayerAllRoles(PlayAgtVector, StateObservation, int, int, ArrayList, Random)
 	 */
 	public static ScoreTuple competeNPlayer(PlayAgtVector paVector, int p0Role, StateObservation startSO, int competeNum,
-											int verbose, TSTimeStorage[] nextTimes, ArrayList<XStateObs> finalSobList) {
+											int verbose, TSTimeStorage[] nextTimes, ArrayList<XStateObs> finalSobList, Random cmpRand) {
 		int numPlayers = paVector.getNumPlayers();
 		ScoreTuple sc, scMean = new ScoreTuple(numPlayers);
 		double sWeight = 1 / (double) competeNum;
 		double moveCount = 0.0;
 		DecimalFormat frm = new DecimalFormat("#0.000");
-		boolean nextMoveSilent = (verbose < 2);
+		boolean nextMoveSilent = (verbose < 3);
 		StateObservation so;
 		Types.ACTIONS_VT actBest;
 		StringBuilder sMsg;
+		//System.out.println(cmpRand.nextInt(6)+ "   "+cmpRand.nextInt(6)+ "   "+cmpRand.nextInt(6));
 
 		PlayAgtVector qaVector = paVector.shift(p0Role);
 
@@ -1206,20 +1212,24 @@ public class XArenaFuncs {
 			so = startSO.copy();
 
 			if(so.needsRandomization()) {
-				// Randomizing the start state in case a game already is initialized with a state to make sure there is a fair competition.
-				so.randomizeStartState();
+				// Randomizing the start state (e.g. roll the dice at a given start state) to make sure there
+				// is a fair competition.
+				so.randomizeStartState(cmpRand);
 			}
+			if (verbose > 1)
+				System.out.println("start state = "+so.stringDescr());
 
 			while (true) {
 				long startTNano = System.nanoTime();
-				// --- only debug ---
-				//if (so instanceof StateObserverEWN)
-				//	System.out.println("k="+k+",   dice="+((StateObserverEWN)so).getNextNondeterministicAction());
 				actBest = qaVector.pavec[player].getNextAction2(so.partialState(), false, nextMoveSilent);
 				long endTNano = System.nanoTime();
 				if (nextTimes != null)
 					nextTimes[player].addNewTimeNS(endTNano - startTNano);
-				so.advance(actBest);
+				so.advance(actBest, cmpRand);
+				// --- only debug ---
+				if (verbose > 1 && so instanceof StateObsNondeterministic)
+					System.out.println("k="+k+", dice="+(((StateObsNondeterministic)so).getNextNondeterministicAction().toInt()+1)
+					+ ", actBest="+actBest.toInt());
 				so.storeBestActionInfo(actBest);	// /WK/ added 2021-09-10, but probably never needed
 
 
@@ -1280,20 +1290,24 @@ public class XArenaFuncs {
 	 * 			characterize the result of the competition. {@link XStateObs} holds in addition to the state: (i) the index
 	 * 			{@code k=0,1,...,competeNum-1} and (ii) the shift number {@code p0Role} (in which role 0,1,..,N-1 the
 	 * 			first player P0 has performed this competition episode). If {@code null} on input, it returns {@code null}.
-	 * @return a score tuple which holds in the kth position the average score
-	 *         for the kth agent from all {@code competeNum}*{@code N} episodes.
+	 * @param cmpRand
+	 * 			if non-null, use this (reproducible) RNG instead of StateObservation's RNG
+	 * @return
+	 * 			a score tuple which holds in the kth position the average score
+	 *         	for the kth agent from all {@code competeNum}*{@code N} episodes.
 	 *
-	 * @see #competeNPlayer(PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], ArrayList)
+	 * @see #competeNPlayer(PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], ArrayList, Random)
 	 */
 	public static ScoreTuple competeNPlayerAllRoles(PlayAgtVector paVector, StateObservation startSO, int competeNum,
-													int verbose, ArrayList<XStateObs> finalSobList) {
+													int verbose, ArrayList<XStateObs> finalSobList, Random cmpRand) {
 		int N = startSO.getNumPlayers();
 		double sWeight = 1 / (double) N;
 		ScoreTuple sc, shiftedTuple, scMean = new ScoreTuple(N);
+
 		//PlayAgtVector qaVector;
 		for (int k = 0; k < N; k++) {
 			//qaVector = paVector.shift(k);
-			sc = competeNPlayer(paVector, k, startSO, competeNum, verbose, null, finalSobList);
+			sc = competeNPlayer(paVector, k, startSO, competeNum, verbose, null, finalSobList, cmpRand);
 			shiftedTuple = sc.shift(N - k);
 			scMean.combine(shiftedTuple, ScoreTuple.CombineOP.AVG, 0, sWeight);
 		}
@@ -1332,7 +1346,17 @@ public class XArenaFuncs {
 	 */
 	protected double competeDispatcher(boolean swap, boolean allRoles, XArenaButtons xab, GameBoard gb) {
 		int competeNum = xab.winCompOptions.getNumGames();
-		StateObservation startSO = gb.getDefaultStartState(); // empty board
+		int verbose = xab.winCompOptions.getVerbose();
+		long seed;
+		if (xab.winCompOptions.useSeed()) {
+			seed = xab.winCompOptions.getSeed();
+		} else {
+			seed = ThreadLocalRandom.current().nextLong();
+		}
+		System.out.println("[competeDispatcher] seed = "+seed);
+		Random cmpRand = new Random(seed);
+
+		StateObservation startSO = gb.getDefaultStartState(cmpRand); // initial board
 		int numPlayers = startSO.getNumPlayers();
 
 		try {
@@ -1350,20 +1374,20 @@ public class XArenaFuncs {
 			PlayAgent[] qaVector = wrapAgents(paVector, xab, startSO);
 			PlayAgtVector raVector = new PlayAgtVector(qaVector);
 
-			int verbose = 1;
 
 			if (allRoles) {
-				ScoreTuple sc = competeNPlayerAllRoles(raVector, startSO, competeNum, verbose, null);
+				ScoreTuple sc = competeNPlayerAllRoles(raVector, startSO, competeNum, verbose, null, cmpRand);
 				System.out.println("Avg score for all players: " + sc.toStringFrm());
 				return sc.scTup[0];
 			} else {
 				if (swap) {
 					ScoreTuple sc = competeNPlayer(raVector, 1, startSO, competeNum,
-							verbose, null, null);
+							verbose, null, null, cmpRand);
 					System.out.println("Avg score for all players: " + sc.toStringFrm());
 					return sc.scTup[1];
 				} else {
-					ScoreTuple sc = competeNPlayer(raVector, 0, startSO, competeNum, verbose, null, null);
+					ScoreTuple sc = competeNPlayer(raVector, 0, startSO, competeNum,
+							verbose, null, null, cmpRand);
 					System.out.println("Avg score for all players: " + sc.toStringFrm());
 					return sc.scTup[0];
 				}
@@ -1421,7 +1445,7 @@ public class XArenaFuncs {
 			if (AgentX.equals("Human") | AgentO.equals("Human")) {
 				throw new RuntimeException("No compete for agent Human, select different agent");
 			} else {
-				StateObservation startSO = gb.getDefaultStartState(); // empty
+				StateObservation startSO = gb.getDefaultStartState(null); // empty
 																		// board
 
 				// manipulation of selected standard agent in XArenaButtons!
@@ -1452,7 +1476,7 @@ public class XArenaFuncs {
 					qaVector = wrapAgents(paVector, xab, startSO);
 				}
 
-				sc = competeNPlayer(new PlayAgtVector(qaVector), 0, dataTS.startSO, competeNum, 0, dataTS.nextTimes, null);
+				sc = competeNPlayer(new PlayAgtVector(qaVector), 0, dataTS.startSO, competeNum, 0, dataTS.nextTimes, null, null);
 
 				xab.disableTournamentRemoteData();
 			}

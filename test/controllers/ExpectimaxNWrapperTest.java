@@ -48,12 +48,12 @@ public class ExpectimaxNWrapperTest extends GBGBatch {
             qaShallow = new ExpectimaxNWrapper(pa,nply);
 
             // select start state:
-            startSO = (StateObserverEWN) gb.getDefaultStartState();
+            startSO = (StateObserverEWN) gb.getDefaultStartState(null);
             ArrayList<Types.ACTIONS> startRandoms = startSO.getAvailableRandoms();
 
             for (Types.ACTIONS startR : startRandoms) {
                 so = (StateObserverEWN) startSO.copy();
-                so.advanceNondeterministic(startR);
+                so.advanceNondeterministic(startR, null);
 
                 //System.out.println("\n*** Episode with dice value "+startR.toInt()+ " starts ***");
                 //System.out.print(so);
@@ -103,11 +103,11 @@ public class ExpectimaxNWrapperTest extends GBGBatch {
             qaShallow = new ExpectimaxNWrapper(pa,nply);
 
             // select start state:
-            startSO = (StateObserverEWN) gb.getDefaultStartState();
+            startSO = (StateObserverEWN) gb.getDefaultStartState(null);
             ArrayList<Types.ACTIONS> startRandoms = startSO.getAvailableRandoms();
 
             for (Types.ACTIONS startR : startRandoms) {
-                startSO.advanceNondeterministic(startR);
+                startSO.advanceNondeterministic(startR, null);
                 ArrayList<Types.ACTIONS> nextActions = startSO.getAvailableActions();
 
                 //System.out.print(startSO);
@@ -116,7 +116,7 @@ public class ExpectimaxNWrapperTest extends GBGBatch {
                     //System.out.println("\n*** Episode with action " + frmAct.format(a.toInt()) + " starts ***");
 
                     so = (StateObserverEWN) startSO.copy();
-                    so.advance(a);
+                    so.advance(a, null);
 
                     innerEWrapTest(qaDeep,qaShallow,so,silent,"action=" + frmAct.format(a.toInt()));
                 }
@@ -130,14 +130,14 @@ public class ExpectimaxNWrapperTest extends GBGBatch {
         Types.ACTIONS_VT act_pa = qaDeep.getNextAction2(so.partialState(),false,silent);
         double vA = act_pa.getVBest();
         afterstate = (StateObserverEWN) so.copy();
-        afterstate.advance(act_pa);
+        afterstate.advance(act_pa, null);
 
         ArrayList<Types.ACTIONS> nextRandoms = afterstate.getAvailableRandoms();
         double vNew=0.0;
         double prob;
         for (Types.ACTIONS r : nextRandoms) {
             newSO = (StateObserverEWN) afterstate.copy();
-            newSO.advanceNondeterministic(r);
+            newSO.advanceNondeterministic(r, null);
             act_pa = qaShallow.getNextAction2(newSO.partialState(),false,silent);
             prob = afterstate.getProbability(r);
             vNew += act_pa.getVBest()*prob;

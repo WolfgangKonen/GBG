@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 /**
  * This class is used for better logging (see
- * {@link XArenaFuncs#competeNPlayer(PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], ArrayList)
+ * {@link XArenaFuncs#competeNPlayer(PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], ArrayList, java.util.Random)
  * XArenaFuncs.competeNPlayer} and its argument {@code finalSobList}
  */
 public class XStateObs {

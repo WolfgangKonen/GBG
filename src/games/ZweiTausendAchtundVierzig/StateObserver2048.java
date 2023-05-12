@@ -663,7 +663,7 @@ public class StateObserver2048 extends ObsNondetBase implements StateObsNondeter
         return actions[i];
     }
 
-    public void advance(ACTIONS action) {
+    public void advance(ACTIONS action, Random cmpRand) {
         super.advanceBase(action);		//		includes addToLastMoves(action)
         int iAction = action.toInt();
         assert (availableMoves.contains(iAction)) : "iAction is not viable.";
@@ -689,7 +689,7 @@ public class StateObserver2048 extends ObsNondetBase implements StateObsNondeter
         isNextActionDeterministic = false;
     }
 
-    public ACTIONS advanceNondeterministic(ACTIONS randAction) {
+    public ACTIONS advanceNondeterministic(ACTIONS randAction, Random cmpRand) {
         if(isNextActionDeterministic) {
             throw new RuntimeException("Next action is deterministic but called advanceNondeterministic()");
         }
@@ -714,10 +714,11 @@ public class StateObserver2048 extends ObsNondetBase implements StateObsNondeter
      * Advance the current afterstate to a new state (do the nondeterministic part of advance)
      *
      * Choose the nondeterministic action according to its probability of occurence (!)
+     * @param cmpRand
      */
-    public ACTIONS advanceNondeterministic() {
+    public ACTIONS advanceNondeterministic(Random cmpRand) {
         setNextNondeterministicAction();
-        return advanceNondeterministic(nextNondeterministicAction);
+        return advanceNondeterministic(nextNondeterministicAction, null);
     }
 
     /**

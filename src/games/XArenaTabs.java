@@ -20,7 +20,7 @@ public class XArenaTabs extends JFrame
 		super(arena.getGameName()+" Parameters");
 		//addWindowListener(new WindowClosingAdapter(true));
 
-		int numPlayer = arena.gb.getDefaultStartState().getNumPlayers();
+		int numPlayer = arena.gb.getDefaultStartState(null).getNumPlayers();
 		tp = new JTabbedPane[numPlayer];
 		outer = new JTabbedPane();
 		

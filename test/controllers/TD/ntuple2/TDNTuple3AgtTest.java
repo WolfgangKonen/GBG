@@ -177,7 +177,7 @@ public class TDNTuple3AgtTest extends GBGBatch {
         double evalQ;
         int nRuns=2;
         int stopEval=50;
-        StateObservation so = gb.getDefaultStartState();
+        StateObservation so = gb.getDefaultStartState(null);
 
         for (int nply=0; nply<=nplyMax; nply++) {
             if (nply==0) qa = pa; // this was necessary before bug fix in MaxN2Wrapper.getNextAction2 (.clearedCopy()

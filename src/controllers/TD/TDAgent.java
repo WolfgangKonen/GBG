@@ -262,7 +262,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 		if (!silent) {
 			System.out.print("---Best Move: ");
             NewSO = so.copy();
-            NewSO.advance(actBest);
+            NewSO.advance(actBest, null);
 			System.out.println(NewSO.stringDescr()+", "+(2*BestScore*player-1));
 		}			
 		
@@ -342,7 +342,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 		if (!silent) {
 			System.out.print("---Best Move: ");
             NewSO = so.copy();
-            NewSO.advance(actBest);
+            NewSO.advance(actBest, null);
 			System.out.println(NewSO.stringDescr()+", "+(2*BestScore*player-1));
 		}			
 		
@@ -367,7 +367,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 
 		// the normal part for the case of single moves:
 		NewSO = so.copy();
-		NewSO.advance(act);
+		NewSO.advance(act, null);
 
 		// the recursive part (only for deterministic games) is for the case of 
 		// multi-moves: the player who just moved gets from StateObservation 
@@ -379,7 +379,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 			if (newPlayer==player) 
 			{
 				actBestVT = getNextAction3(NewSO, refer, false, silent);
-				NewSO.advance(actBestVT);
+				NewSO.advance(actBestVT, null);
 				CurrentScore = actBestVT.getVBest();
 				return CurrentScore;
 			}
@@ -418,7 +418,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
         
     	// the normal part for the case of single moves:
         NewSO = so.copy();
-        NewSO.advance(act);
+        NewSO.advance(act, null);
         
         //
         // the recursive part (only for deterministic games) is for the case of 
@@ -525,7 +525,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 			actBest = acting_pa.getNextAction2(so.partialState(), true, true);
 			randomMove = actBest.isRandomAction();
 			oldSO = so.copy();
-			so.advance(actBest);
+			so.advance(actBest, null);
 			so.storeBestActionInfo(actBest);	// /WK/ was missing before 2021-09-10. Now stored ScoreTuple is up-to-date.
 
 			//couldn't we just train till round over?
@@ -662,7 +662,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 			
 			actBest = acting_pa.getNextAction2(so.partialState(), true, true);
 			randomMove = actBest.isRandomAction();
-			so.advance(actBest);
+			so.advance(actBest, null);
 			so.storeBestActionInfo(actBest);	// /WK/ was missing before 2021-09-10. Now stored ScoreTuple is up-to-date.
 
 			counter++;

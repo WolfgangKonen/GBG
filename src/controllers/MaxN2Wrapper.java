@@ -136,7 +136,7 @@ public class MaxN2Wrapper extends AgentBase implements PlayAgent, Serializable {
         for(i = 0; i < acts.size(); ++i)
         {
         	NewSO = so.copy();
-        	NewSO.advance(acts.get(i));
+        	NewSO.advance(acts.get(i), null);
         	
     		if (NewSO.isGameOver())
     		{
@@ -187,7 +187,7 @@ public class MaxN2Wrapper extends AgentBase implements PlayAgent, Serializable {
         // optional: print the best action
         if (!silent) {
         	NewSO = so.copy();
-        	NewSO.advance(actBest);
+        	NewSO.advance(actBest, null);
         	if (depth<=0)
         		System.out.println("--- "+depth+": Best Move: "+NewSO.stringDescr()+"   "+maxValue);
         }			

@@ -172,7 +172,7 @@ public class XArenaButtonsGui extends JPanel {
 			choiceAgent[n].setSelectedItem(Types.GUI_AGENT_INITIAL[n]);
 			
 			// only applicable agents:
-			if (m_arena.getGameBoard().getDefaultStartState().isDeterministicGame()) { // if changes are applied to this if
+			if (m_arena.getGameBoard().getDefaultStartState(null).isDeterministicGame()) { // if changes are applied to this if
 				choiceAgent[n].removeItem("Expectimax-N");						// repeat them in TSSettingsGUI2 constructor too
 				choiceAgent[n].removeItem("MCTS Expectimax");					// the same if is used there for GUI init
 			} else {

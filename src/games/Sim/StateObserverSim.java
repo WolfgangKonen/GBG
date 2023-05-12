@@ -3,6 +3,7 @@ package games.Sim;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Random;
 
 import controllers.PlayAgent;
 import controllers.RandomAgent;
@@ -358,7 +359,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 	}
 
 	@Override
-	public void advance(ACTIONS action) {
+	public void advance(ACTIONS action, Random cmpRand) {
 		super.advanceBase(action);		//		includes addToLastMoves(action)
 		int iAction = action.toInt();
 		
@@ -630,9 +631,9 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		PlayAgent p = new RandomAgent("");
 		
 		for (int i=0; i<R; i++) {
-			StateObserverSim sob = (StateObserverSim) ar.getGameBoard().getDefaultStartState();
+			StateObserverSim sob = (StateObserverSim) ar.getGameBoard().getDefaultStartState(null);
 			while (!sob.isGameOver()) 
-				sob.advance(p.getNextAction2(sob.partialState(), true, true));
+				sob.advance(p.getNextAction2(sob.partialState(), true, true), null);
 			
 			for (int k=0; k<sob.getNumPlayers(); k++) {
 //				System.out.println("i="+i+",k="+k+":"+(int)sob.getGameScore(k)+"/"+sob.getAllRewards()[k]);

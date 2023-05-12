@@ -106,7 +106,7 @@ public interface PartialState {
      * For perfect-information games: an exception is thrown.
      *
      * @return a list with all possible completing actions (that can be sent to
-     *         {@link StateObsNondeterministic#advanceNondeterministic() advanceNondeterministic()})
+     *         {@link StateObservation#advanceNondeterministic(java.util.Random) advanceNondeterministic()})
      */
     ArrayList<Types.ACTIONS> getAvailableCompletions();
     /**

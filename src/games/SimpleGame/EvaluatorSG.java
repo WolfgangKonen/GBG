@@ -62,9 +62,9 @@ public class EvaluatorSG extends Evaluator {
  	private EvalResult evaluateAgent0(PlayAgent pa, GameBoard gb, double thresh) {
  		double avgReward=0.0;
  		for (int i=0; i<NUMEPISODES; i++) {
-			StateObservation so = gb.getDefaultStartState();
+			StateObservation so = gb.getDefaultStartState(null);
 			Types.ACTIONS_VT actBest = pa.getNextAction2(so.partialState(), false, true);
-			so.advance(actBest);
+			so.advance(actBest, null);
 			avgReward += so.getGameScore(so.getPlayer());
 		}
 		lastResult = avgReward/NUMEPISODES;
@@ -82,7 +82,7 @@ public class EvaluatorSG extends Evaluator {
 	private EvalResult evaluateAgent1(PlayAgent pa, GameBoard gb, double thresh) {
 		double percCorrect=0.0;
 		for (int i=0; i<NUMEPISODES; i++) {
-			StateObserverSG so = (StateObserverSG) gb.getDefaultStartState();
+			StateObserverSG so = (StateObserverSG) gb.getDefaultStartState(null);
 			Types.ACTIONS_VT actBest = pa.getNextAction2(so.partialState(), false, true);
 			if (so.get_sum() < 4)
 				if (actBest.toInt() == 0) {

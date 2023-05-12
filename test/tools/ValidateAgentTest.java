@@ -22,7 +22,7 @@ public class ValidateAgentTest {
         // numbers. Check this with different StateObservation objects so that there is at least one
         // state for every player. (Of course this test is not exhaustive.)
         //
-        StateObservation sob = ar.getGameBoard().getDefaultStartState();
+        StateObservation sob = ar.getGameBoard().getDefaultStartState(null);
         boolean verbose = true;
         ScoreTuple sc;
         sc = pa.getScoreTuple(sob, null);
@@ -31,7 +31,7 @@ public class ValidateAgentTest {
         checkScoreTuple(sc, sob, verbose);
         for (int i = 1; i < sob.getNumPlayers(); i++) {
             Types.ACTIONS a = sob.getAvailableActions().get(0);
-            sob.advance(a);
+            sob.advance(a, null);
             sc = pa.getScoreTuple(sob, null);
             checkScoreTuple(sc, sob, verbose);
             sc = pa.estimateGameValueTuple(sob, null);
@@ -73,7 +73,7 @@ public class ValidateAgentTest {
     }
 
     public boolean runTestFinalScoreTuple(PlayAgent pa, Arena ar) {
-        StateObservation sob = ar.getGameBoard().getDefaultStartState();
+        StateObservation sob = ar.getGameBoard().getDefaultStartState(null);
         boolean verbose = true;
         ScoreTuple sc;
         //
@@ -83,7 +83,7 @@ public class ValidateAgentTest {
         while (!sob.isGameOver()) {
             ArrayList<Types.ACTIONS> arr = sob.getAvailableActions();
             Types.ACTIONS a = pa.getNextAction2(sob.partialState(), false, true);
-            sob.advance(a);
+            sob.advance(a, null);
         }
         sc = pa.getScoreTuple(sob, null);
         checkScoreTuple(sc,sob,verbose);
@@ -99,7 +99,7 @@ public class ValidateAgentTest {
         //
         System.out.print("train pa for one episode ... ");
         int num = pa.getGameNum();
-        StateObservation sob = ar.getGameBoard().getDefaultStartState();
+        StateObservation sob = ar.getGameBoard().getDefaultStartState(null);
         pa.trainAgent(sob);
         assert (pa.getGameNum()-num == 1) : "Game counter not correctly incremented!";
         System.out.println("OK");
@@ -112,7 +112,7 @@ public class ValidateAgentTest {
         //    a) a permutation of bv and
         //    b) different from all the others.
         //
-        StateObservation sob = ar.getGameBoard().getDefaultStartState();
+        StateObservation sob = ar.getGameBoard().getDefaultStartState(null);
         XNTupleFuncs xnf = ar.makeXNTupleFuncs();
         BoardVector bv = xnf.makeBoardVectorEachCellDifferent();
         StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(sob,bv);

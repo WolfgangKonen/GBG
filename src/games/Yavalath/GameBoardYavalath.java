@@ -41,7 +41,7 @@ public class GameBoardYavalath implements GameBoard {
     public void updateParams() {}
 
     @Override
-    public void clearBoard(boolean boardClear, boolean vClear) {
+    public void clearBoard(boolean boardClear, boolean vClear, Random cmpRand) {
         if(boardClear){
             m_so = new StateObserverYavalath();
         }
@@ -115,8 +115,8 @@ public class GameBoardYavalath implements GameBoard {
     }
 
     @Override
-    public StateObservation getDefaultStartState() {
-        clearBoard(true,true);
+    public StateObservation getDefaultStartState(Random cmpRand) {
+        clearBoard(true,true, null);
         return m_so;
     }
 
@@ -128,18 +128,18 @@ public class GameBoardYavalath implements GameBoard {
     @Override
     public StateObservation chooseStartState() {
 
-        getDefaultStartState();
+        getDefaultStartState(null);
         if(rand.nextDouble()>0.5){
             ArrayList<Types.ACTIONS> actions = m_so.getAvailableActions();
             int actInt = rand.nextInt(actions.size());
-            m_so.advance(actions.get(actInt));
+            m_so.advance(actions.get(actInt), null);
         }
         return m_so;
     }
 
     public void HGameMove(Types.ACTIONS action){
         if(m_so.isLegalAction(action)){
-            m_so.advance(action);
+            m_so.advance(action, null);
             if(m_arena.taskState == Arena.Task.PLAY){
                 m_arena.getLogManager().addLogEntry(action,m_so,m_arena.getLogSessionID());
             }

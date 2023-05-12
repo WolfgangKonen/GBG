@@ -247,7 +247,7 @@ public class CFourMatches extends GBGBatch {
         for(Move ludiiMove : moveList){
             if(moveList.get(moveList.size()-1).to() == -1) continue;
             Types.ACTIONS action = Types.ACTIONS.fromInt(systemConversionC4.getGBGIndexFromLudii(ludiiMove.to()));
-            stateObserverC4.advance(action);
+            stateObserverC4.advance(action, null);
             logManager.addLogEntry(action,stateObserverC4,sessionID);
         }
 

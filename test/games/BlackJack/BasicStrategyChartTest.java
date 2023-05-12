@@ -581,15 +581,15 @@ public class BasicStrategyChartTest {
         double avgPayOffSplit = 0;
         for(int i = 0; i < NUM_ITERATIONS; i++){
             StateObserverBlackJack newSo = (StateObserverBlackJack) so.copy();
-            newSo.advance(Types.ACTIONS.fromInt(StateObserverBlackJack.BlackJackActionDet.SPLIT.getAction()));
+            newSo.advance(Types.ACTIONS.fromInt(StateObserverBlackJack.BlackJackActionDet.SPLIT.getAction()), null);
             BasicStrategyBlackJackAgent ba = new BasicStrategyBlackJackAgent();
             while(!newSo.isRoundOver()){
                 if(newSo.getCurrentPlayer().getActiveHand().isPair())
-                    newSo.advance(Types.ACTIONS.fromInt(ba.lookUpBestMovePair(newSo)));
+                    newSo.advance(Types.ACTIONS.fromInt(ba.lookUpBestMovePair(newSo)), null);
                 else if(newSo.getCurrentPlayer().getActiveHand().isSoft())
-                    newSo.advance(Types.ACTIONS.fromInt(ba.lookUpBestMoveSoft(newSo)));
+                    newSo.advance(Types.ACTIONS.fromInt(ba.lookUpBestMoveSoft(newSo)), null);
                 else
-                    newSo.advance(Types.ACTIONS.fromInt(ba.lookUpBestMoveHard(newSo)));
+                    newSo.advance(Types.ACTIONS.fromInt(ba.lookUpBestMoveHard(newSo)), null);
             }
             avgPayOffSplit += newSo.getCurrentPlayer().getRoundPayoff();
         }
@@ -606,10 +606,10 @@ public class BasicStrategyChartTest {
         double avgPayOffHit = 0;
         for(int i = 0; i < NUM_ITERATIONS; i++){
             StateObserverBlackJack newSo = (StateObserverBlackJack) so.copy();
-            newSo.advance(Types.ACTIONS.fromInt(StateObserverBlackJack.BlackJackActionDet.HIT.getAction()));
+            newSo.advance(Types.ACTIONS.fromInt(StateObserverBlackJack.BlackJackActionDet.HIT.getAction()), null);
             while(!newSo.isRoundOver()){
                 int action = r.nextInt(newSo.getNumAvailableActions());
-                newSo.advance(newSo.getAction(action));
+                newSo.advance(newSo.getAction(action), null);
             }
             avgPayOffHit += newSo.getCurrentPlayer().getRoundPayoff();
         }
@@ -623,11 +623,11 @@ public class BasicStrategyChartTest {
         double avgFinalReward = 0;
         for(int i = 0; i < NUM_ITERATIONS; i++){
             StateObserverBlackJack newSo = (StateObserverBlackJack) so.copy();
-            newSo.advance(a);
+            newSo.advance(a, null);
             if(newSo.isRoundOver())
                 newSo.initRound();
             for(int f = 0; f < 5; f++){
-                newSo.advance(newSo.getAction(r.nextInt(newSo.getNumAvailableActions())));
+                newSo.advance(newSo.getAction(r.nextInt(newSo.getNumAvailableActions())), null);
                 if(newSo.isRoundOver())
                     newSo.initRound();
             }
@@ -643,7 +643,7 @@ public class BasicStrategyChartTest {
         double avgPayOffStand = 0;
         for(int i = 0; i < NUM_ITERATIONS; i++){
             StateObserverBlackJack newSo = (StateObserverBlackJack) so.copy();
-            newSo.advance(Types.ACTIONS.fromInt(StateObserverBlackJack.BlackJackActionDet.STAND.getAction()));
+            newSo.advance(Types.ACTIONS.fromInt(StateObserverBlackJack.BlackJackActionDet.STAND.getAction()), null);
             avgPayOffStand += newSo.getCurrentPlayer().getRoundPayoff();
         }
         avgPayOffStand /= NUM_ITERATIONS;
@@ -651,7 +651,7 @@ public class BasicStrategyChartTest {
         double avgPayOffSurrender = 0;
         for(int i = 0; i < NUM_ITERATIONS; i++){
             StateObserverBlackJack newSo = (StateObserverBlackJack) so.copy();
-            newSo.advance(Types.ACTIONS.fromInt(StateObserverBlackJack.BlackJackActionDet.SURRENDER.getAction()));
+            newSo.advance(Types.ACTIONS.fromInt(StateObserverBlackJack.BlackJackActionDet.SURRENDER.getAction()), null);
             avgPayOffSurrender += newSo.getCurrentPlayer().getRoundPayoff();
         }
         avgPayOffSurrender /= NUM_ITERATIONS;
@@ -659,7 +659,7 @@ public class BasicStrategyChartTest {
         double avgPayOffDoubleDown = 0;
         for(int i = 0; i < NUM_ITERATIONS; i++){
             StateObserverBlackJack newSo = (StateObserverBlackJack) so.copy();
-            newSo.advance(Types.ACTIONS.fromInt(StateObserverBlackJack.BlackJackActionDet.DOUBLEDOWN.getAction()));
+            newSo.advance(Types.ACTIONS.fromInt(StateObserverBlackJack.BlackJackActionDet.DOUBLEDOWN.getAction()), null);
             avgPayOffDoubleDown += newSo.getCurrentPlayer().getRoundPayoff();
         }
         avgPayOffDoubleDown /= NUM_ITERATIONS;
@@ -667,13 +667,13 @@ public class BasicStrategyChartTest {
         double avgPayOffHit = 0;
         for(int i = 0; i < NUM_ITERATIONS; i++){
             StateObserverBlackJack newSo = (StateObserverBlackJack) so.copy();
-            newSo.advance(Types.ACTIONS.fromInt(StateObserverBlackJack.BlackJackActionDet.HIT.getAction()));
+            newSo.advance(Types.ACTIONS.fromInt(StateObserverBlackJack.BlackJackActionDet.HIT.getAction()), null);
             BasicStrategyBlackJackAgent ba = new BasicStrategyBlackJackAgent();
             while(!newSo.isRoundOver()){
                 if(newSo.getCurrentPlayer().getActiveHand().isSoft())
-                    newSo.advance(Types.ACTIONS.fromInt(ba.lookUpBestMoveSoft(newSo)));
+                    newSo.advance(Types.ACTIONS.fromInt(ba.lookUpBestMoveSoft(newSo)), null);
                 else
-                    newSo.advance(Types.ACTIONS.fromInt(ba.lookUpBestMoveHard(newSo)));
+                    newSo.advance(Types.ACTIONS.fromInt(ba.lookUpBestMoveHard(newSo)), null);
             }
             avgPayOffHit += newSo.getCurrentPlayer().getRoundPayoff();
         }

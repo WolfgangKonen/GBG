@@ -145,8 +145,8 @@ public class TreeKuhnPokerTest extends GBGBatch {
 
                 // advance by CHECK-BET if pact==1 (do nothing if pact==0)
                 if (pact==1) {
-                    startSO.advance(new Types.ACTIONS(1));
-                    startSO.advance(new Types.ACTIONS(2));
+                    startSO.advance(new Types.ACTIONS(1), null);
+                    startSO.advance(new Types.ACTIONS(2), null);
                 }
 
                 // now measure the reaction of player 0 (one out of 0 (FOLD), 1 (CHECK), 2 (BET), 3 (CALL)):
@@ -288,7 +288,7 @@ public class TreeKuhnPokerTest extends GBGBatch {
                 //System.out.println(startSO.stringDescr());
 
                 // advance player 0 with 1 (CHECK) or 2 (BET):
-                startSO.advance(new Types.ACTIONS(p0act));
+                startSO.advance(new Types.ACTIONS(p0act), null);
 
                 // now measure the reaction of player 1 (one out of 0 (FOLD), 1 (CHECK), 2 (BET), 3 (CALL)):
                 int[] actHist = new int[4];

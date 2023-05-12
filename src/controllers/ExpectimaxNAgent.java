@@ -371,9 +371,9 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 			for(i = 0; i < rans.size(); ++i)
 			{
 				NewSO = soND.copy();
-				NewSO.advanceNondeterministic(rans.get(i));
+				NewSO.advanceNondeterministic(rans.get(i), null);
 				while(!NewSO.isNextActionDeterministic() && !NewSO.isRoundOver()){		// /WK/03/2021 NEW
-					NewSO.advanceNondeterministic();
+					NewSO.advanceNondeterministic(null);
 				}
 
 				// here is the recursion:
@@ -729,13 +729,13 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 		public DuoStateND duoAdvanceNonDet(Types.ACTIONS ranAct) {
 			StateObsNondeterministic s1 = this.element1().copy();
 			StateObsNondeterministic s2 = this.element2().copy();
-			s1.advanceNondeterministic(ranAct);
+			s1.advanceNondeterministic(ranAct, null);
 			while(!s1.isNextActionDeterministic() && !s1.isRoundOver()){		// /WK/03/2021 NEW
-				s1.advanceNondeterministic();
+				s1.advanceNondeterministic(null);
 			}
-			s2.advanceNondeterministic(ranAct);
+			s2.advanceNondeterministic(ranAct, null);
 			while(!s2.isNextActionDeterministic() && !s2.isRoundOver()){		// /WK/03/2021 NEW
-				s2.advanceNondeterministic();
+				s2.advanceNondeterministic(null);
 			}
 			return new DuoStateND(s1,s2);
 		}

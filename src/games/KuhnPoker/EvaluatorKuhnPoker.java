@@ -57,9 +57,9 @@ public class EvaluatorKuhnPoker extends Evaluator {
 //	}
 
 	public EvalResult evalAgent1(PlayAgent playAgent, PlayAgent opponent, GameBoard gb, double thresh) {
-		StateObservation so = gb.getDefaultStartState();
+		StateObservation so = gb.getDefaultStartState(null);
 		PlayAgent[] pavec = new PlayAgent[] {playAgent,opponent};
-		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pavec), so, 1000, 0, null);
+		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pavec), so, 1000, 0, null, null);
 		lastResult = sc.scTup[0];
 		m_msg = playAgent.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>0) System.out.println(m_msg);

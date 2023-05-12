@@ -59,7 +59,7 @@ public class GameBoardNim2P extends GameBoardNimBase implements GameBoard {
 	}
 
 	@Override
-	public void clearBoard(boolean boardClear, boolean vClear) {
+	public void clearBoard(boolean boardClear, boolean vClear, Random cmpRand) {
 		if (boardClear) {
 			m_so = new StateObserverNim();			// heaps according to NimConfig
 		}
@@ -116,7 +116,7 @@ public class GameBoardNim2P extends GameBoardNimBase implements GameBoard {
 		int iAction = NimConfig.MAX_MINUS*x+y;
 		Types.ACTIONS act = Types.ACTIONS.fromInt(iAction);
 		assert m_so.isLegalAction(act) : "Desired action is not legal";
-		m_so.advance(act);			// perform action (optionally add random elements from game 
+		m_so.advance(act, null);			// perform action (optionally add random elements from game
 									// environment - not necessary in Nim)
 		(m_Arena.getLogManager()).addLogEntry(act, m_so, m_Arena.getLogSessionID());
 //		updateBoard(null,false,false);
@@ -135,7 +135,7 @@ public class GameBoardNim2P extends GameBoardNimBase implements GameBoard {
 		} else {
 			m_Arena.setStatusMessage("Inspecting the value function ...");
 		}
-		m_so.advance(act);			// perform action (optionally add random elements from game 
+		m_so.advance(act, null);			// perform action (optionally add random elements from game
 									// environment - not necessary in Nim)
 //		updateBoard(null,false,false);
 		arenaActReq = true;		
@@ -148,10 +148,11 @@ public class GameBoardNim2P extends GameBoardNimBase implements GameBoard {
 
 	/**
 	 * @return the 'empty-board' start state
+     * @param cmpRand
 	 */
 	@Override
-	public StateObservation getDefaultStartState() {
-		clearBoard(true, true);
+	public StateObservation getDefaultStartState(Random cmpRand) {
+		clearBoard(true, true, null);
 		return m_so;
 	}
 
@@ -162,13 +163,13 @@ public class GameBoardNim2P extends GameBoardNimBase implements GameBoard {
 	 */
 	@Override
 	public StateObservation chooseStartState() {
-		getDefaultStartState();			// m_so is in default start state 
+		getDefaultStartState(null);			// m_so is in default start state
 		if (rand.nextDouble()>0.5) {
 			// choose randomly one of the possible actions in default 
 			// start state and advance m_so by one ply
 			ArrayList<Types.ACTIONS> acts = m_so.getAvailableActions();
 			int i = rand.nextInt(acts.size());
-			m_so.advance(acts.get(i));
+			m_so.advance(acts.get(i), null);
 		}
 		return m_so;
 	}

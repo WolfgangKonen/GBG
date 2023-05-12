@@ -2,7 +2,6 @@ package games.ZweiTausendAchtundVierzig;
 
 import games.ObsNondetBase;
 import games.StateObservation;
-import games.ObserverBase;
 import games.StateObsNondeterministic;
 import tools.Types;
 import tools.Types.ACTIONS;
@@ -452,7 +451,7 @@ public class StateObserver2048Slow extends ObsNondetBase implements StateObsNond
 	}
 
     @Override
-    public void advance(ACTIONS action) {
+    public void advance(ACTIONS action, Random cmpRand) {
         int iAction = action.toInt();
         assert (availableMoves.contains(iAction)) : "iAction is not viable.";
         if (ASSERTSAME) {
@@ -529,7 +528,7 @@ public class StateObserver2048Slow extends ObsNondetBase implements StateObsNond
 		super.incrementMoveCounter();
    }
 
-    public ACTIONS advanceNondeterministic(ACTIONS randAction) {
+    public ACTIONS advanceNondeterministic(ACTIONS randAction, Random cmpRand) {
         if(isNextActionDeterministic) {
             throw new RuntimeException("Next action is deterministic but called advanceNondeterministic()");
         }
@@ -549,10 +548,10 @@ public class StateObserver2048Slow extends ObsNondetBase implements StateObsNond
         return randAction;
     }
     
-    public ACTIONS advanceNondeterministic() {
+    public ACTIONS advanceNondeterministic(Random cmpRand) {
         setNextNondeterministicAction();
 
-        return advanceNondeterministic(nextNondeterministicAction);
+        return advanceNondeterministic(nextNondeterministicAction, null);
     }
 
     /**

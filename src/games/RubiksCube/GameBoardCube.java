@@ -109,7 +109,7 @@ public class GameBoardCube implements GameBoard {
 	}
 
 	@Override
-	public void clearBoard(boolean boardClear, boolean vClear) {
+	public void clearBoard(boolean boardClear, boolean vClear, Random cmpRand) {
 		if (boardClear) {
 			m_so = new StateObserverCube();			// solved cube
 		}
@@ -174,7 +174,7 @@ public class GameBoardCube implements GameBoard {
 		int iAction = 3*x+y;
 		Types.ACTIONS act = Types.ACTIONS.fromInt(iAction);
 		assert m_so.isLegalAction(act) : "Desired action is not legal";
-		m_so.advance(act);			// perform action (optionally add random elements)
+		m_so.advance(act, null);			// perform action (optionally add random elements)
 		System.out.println(m_so.stringDescr());
 		(m_Arena.getLogManager()).addLogEntry(act, m_so, m_Arena.getLogSessionID());
 		updateBoard(null,false,false);
@@ -194,7 +194,7 @@ public class GameBoardCube implements GameBoard {
 		} else {
 			m_Arena.setStatusMessage("Inspecting the value function ...");
 		}
-		m_so.advance(act);			// perform action (optionally add random elements from game 
+		m_so.advance(act, null);			// perform action (optionally add random elements from game
 									// environment - not necessary in RubiksCube)
 		m_so.getCubeState().clearLast();		// clear lastTwist and lastTimes of the CubeState,
 		m_so.setAvailableActions();				// then set the available actions which causes all
@@ -212,10 +212,11 @@ public class GameBoardCube implements GameBoard {
 
 	/**
 	 * @return the 'empty-board' start state
+	 * @param cmpRand
 	 */
 	@Override
-	public StateObservation getDefaultStartState() {
-		clearBoard(true, true);
+	public StateObservation getDefaultStartState(Random cmpRand) {
+		clearBoard(true, true, null);
 		return m_so;
 	}
 
@@ -245,7 +246,7 @@ public class GameBoardCube implements GameBoard {
 	 * @return	a scrambled cube
 	 */
 	public StateObservation chooseStartState(int p) {		
-		clearBoard(true, true);			// m_so is in default start state 
+		clearBoard(true, true, null);			// m_so is in default start state
 		m_so = selectByTwists1(p);
 
 		// StateObserverCubeCleared is important, so that no actions are 'forgotten' when 
@@ -277,7 +278,7 @@ public class GameBoardCube implements GameBoard {
 	@Override
 	public StateObservation chooseStartState(PlayAgent pa) {
 		int p;
-		clearBoard(true, true);			// m_so is in default start state 
+		clearBoard(true, true, null);			// m_so is in default start state
 		p = 1+rand.nextInt(CubeConfig.pMax);
 		// since rand.nextInt(K) selects from {0,...,K-1}, we have p from {1,...,pMax}
 		m_so = selectByTwists1(p);
@@ -323,7 +324,7 @@ public class GameBoardCube implements GameBoard {
 							// the drawn action (index) has the same twist type (e.g. U) as lastTwist. We need this because
 							// doublet U1U1 can be reached redundantly by single twist U2, but we want to make non-redundant twists.
 						} while (cond);
-						so.advance(so.getAction(index));
+						so.advance(so.getAction(index), null);
 					}
 					break;
 				case QTM:
@@ -336,7 +337,7 @@ public class GameBoardCube implements GameBoard {
 							// the same twist type (e.g. U) as lastTwist, but the opposite 'times' as lastTimes (only 1 and 3
 							// are possible here). This is because doublet U1U3 would leave the cube unchanged
 						} while (cond);
-						so.advance(so.getAction(index));
+						so.advance(so.getAction(index), null);
 					}
 					break;
 			}

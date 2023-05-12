@@ -73,7 +73,7 @@ public class GameBoardOthello implements GameBoard {
 	 * Resets the game to it starting state {@link StateObserverOthello}
 	 */
 	@Override
-	public void clearBoard(boolean boardClear, boolean vClear) {
+	public void clearBoard(boolean boardClear, boolean vClear, Random cmpRand) {
 		if(boardClear) {
 			m_so = new StateObserverOthello();
 		}
@@ -106,7 +106,7 @@ public class GameBoardOthello implements GameBoard {
 		int iAction = ConfigOthello.BOARD_SIZE * x + y;
 		Types.ACTIONS act = Types.ACTIONS.fromInt(iAction);
 		if( m_so.isLegalAction(act)) {			
-			m_so.advance(act);
+			m_so.advance(act, null);
 			updateBoard(m_so,false,false);   // show the human move (while agent might think about next move)
 			(m_Arena.getLogManager()).addLogEntry(act, m_so, m_Arena.getLogSessionID());
 			arenaActReq = true;	
@@ -122,7 +122,7 @@ public class GameBoardOthello implements GameBoard {
 		Types.ACTIONS act = Types.ACTIONS.fromInt(iAction);
 		if(m_so.isLegalAction(act)) {
 			m_Arena.setStatusMessage("Inspecting the value function ...");
-			m_so.advance(act);
+			m_so.advance(act, null);
 		}else {m_Arena.setStatusMessage("Desired Action is not legal");}
 		arenaActReq = true;
 	}
@@ -153,8 +153,8 @@ public class GameBoardOthello implements GameBoard {
 	}
 
 	@Override
-	public StateObservation getDefaultStartState() {
-		clearBoard(true,true);
+	public StateObservation getDefaultStartState(Random cmpRand) {
+		clearBoard(true,true, null);
 		return m_so;
 	}
 
@@ -172,14 +172,14 @@ public class GameBoardOthello implements GameBoard {
 	 */
 	@Override
 	public StateObservation chooseStartState() {
-		getDefaultStartState();				// m_so is in default start state
+		getDefaultStartState(null);				// m_so is in default start state
 		if (rand.nextDouble()>0.3) {
 			for (int k=0; k<4; k++) {
 				// choose randomly one of the possible actions in default 
 				// start state and advance m_so by one ply
 				ArrayList<Types.ACTIONS> acts = m_so.getAvailableActions();
 				int i = rand.nextInt(acts.size());
-				m_so.advance(acts.get(i));
+				m_so.advance(acts.get(i), null);
 			}
 		}
 		return m_so;

@@ -374,7 +374,7 @@ public class MCTSWrapperAgentTest extends GBGBatch {
 
         arenaTrain = SetupGBG.setupSelectedGame(selectedGame,scaPar,"",false,true);
         GameBoardC4 gb = new GameBoardC4(arenaTrain);
-        StateObservation so = gb.getDefaultStartState();
+        StateObservation so = gb.getDefaultStartState(null);
 
         switch(opponentName) {
             case "MCTS" -> {
@@ -441,7 +441,7 @@ public class MCTSWrapperAgentTest extends GBGBatch {
                         for (int p_MWrap : new int[]{playerMWrap})       // {0,1}
                         {     // p_MWrap: whether MCTSWrapper is player 0 or player 1
                             startTime = System.currentTimeMillis();
-                            sc = XArenaFuncs.competeNPlayer(paVector.shift(p_MWrap), 0, so, numEpisodes, 0, null, null);
+                            sc = XArenaFuncs.competeNPlayer(paVector.shift(p_MWrap), 0, so, numEpisodes, 0, null, null, null);
                             winrate = (sc.scTup[p_MWrap] + 1) / 2;
                             elapsedTime = (double)(System.currentTimeMillis() - startTime)/1000.0;
                             System.out.println("(iterMW,EPS,p_MWrap) = (" + iterMCTSWrap + "," + EPS + "," + p_MWrap + "): " +
@@ -517,7 +517,7 @@ public class MCTSWrapperAgentTest extends GBGBatch {
 
         arenaTrain = SetupGBG.setupSelectedGame(selectedGame,scaPar,"",false,true);
         GameBoardOthello gb = new GameBoardOthello(arenaTrain);
-        StateObservation so = gb.getDefaultStartState();
+        StateObservation so = gb.getDefaultStartState(null);
 
         switch(opponentName) {
             case "MCTS" -> {
@@ -578,7 +578,7 @@ public class MCTSWrapperAgentTest extends GBGBatch {
                         for (int p_MWrap : new int[]{playerMWrap})       // {0,1}
                         {     // p_MWrap: whether MCTSWrapper is player 0 or player 1
                             startTime = System.currentTimeMillis();
-                            sc = XArenaFuncs.competeNPlayer(paVector.shift(p_MWrap), 0, so, numEpisodes, 0, null, null);
+                            sc = XArenaFuncs.competeNPlayer(paVector.shift(p_MWrap), 0, so, numEpisodes, 0, null, null, null);
                             winrate = (sc.scTup[p_MWrap] + 1) / 2;
                             elapsedTime = (double)(System.currentTimeMillis() - startTime)/1000.0;
                             System.out.println("(iterMW,EPS,p_MWrap) = (" + iterMCTSWrap + "," + EPS + "," + p_MWrap + "): " +
@@ -614,7 +614,7 @@ public class MCTSWrapperAgentTest extends GBGBatch {
         scaPar = SetupGBG.setDefaultScaPars(selectedGame);
         arenaTrain = SetupGBG.setupSelectedGame(selectedGame, scaPar,"",false,true);
         GameBoard gb = new GameBoardOthello(arenaTrain);        // needed for chooseStartState()
-        StateObservation sob = gb.getDefaultStartState();
+        StateObservation sob = gb.getDefaultStartState(null);
         MCTSNode mctsNode = new MCTSNode(new GameStateIncludingPass(sob));
         Approximator approximator = new PlayAgentApproximator(new RandomAgent("rand"));
         MCTS mcts = new MCTS(approximator, 1.0, 50);

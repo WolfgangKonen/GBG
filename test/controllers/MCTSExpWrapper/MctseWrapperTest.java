@@ -184,21 +184,21 @@ public class MctseWrapperTest extends GBGBatch {
      */
     private StateObserverEWN buildStateA(Arena arenaEWN, int k) {
         GameBoardEWN gb = new GameBoardEWN(arenaEWN);
-        StateObserverEWN so = (StateObserverEWN) gb.getDefaultStartState();
+        StateObserverEWN so = (StateObserverEWN) gb.getDefaultStartState(null);
         so.setNextActionDeterministic(ACTIONS.fromInt(1));      // bestAction X: 0307, V=+0.827
         int[] bestAction = new int []{307,804,4,504};
 
         if (k>0) {
             so.advanceDeterministic(ACTIONS.fromInt(304));  // X: from 3 to 4
-            so.advanceNondeterministic(ACTIONS.fromInt(0));     // bestAction O: 0804, V=+5/9
+            so.advanceNondeterministic(ACTIONS.fromInt(0), null);     // bestAction O: 0804, V=+5/9
         }
         if (k>1) {
             so.advanceDeterministic(ACTIONS.fromInt(804));  // O: from 8 to 4
-            so.advanceNondeterministic(ACTIONS.fromInt(0));     // bestAction X: 0004, V=-5/9
+            so.advanceNondeterministic(ACTIONS.fromInt(0), null);     // bestAction X: 0004, V=-5/9
         }
         if (k>2) {
             so.advanceDeterministic(ACTIONS.fromInt(4));    // X: from 0 to 4
-            so.advanceNondeterministic(ACTIONS.fromInt(1));     // bestAction O: 0504, V=+1/3
+            so.advanceNondeterministic(ACTIONS.fromInt(1), null);     // bestAction O: 0504, V=+1/3
             /* Now we have the state (O moves)
                 [  ] [X2] [  ]     (diceVal:1,   availActions: 0501,0502,0504 )
                 [  ] [X0] [O1]
@@ -214,21 +214,21 @@ public class MctseWrapperTest extends GBGBatch {
      */
     private StateObserverEWN buildStateB(Arena arenaEWN, int k) {
         GameBoardEWN gb = new GameBoardEWN(arenaEWN);
-        StateObserverEWN so = (StateObserverEWN) gb.getDefaultStartState();
+        StateObserverEWN so = (StateObserverEWN) gb.getDefaultStartState(null);
         so.setNextActionDeterministic(ACTIONS.fromInt(0));      // bestAction X: 0004, V=-0.235
         int[] bestAction = new int []{4,804,105,704,307};
 
         if (k>0) {
             so.advanceDeterministic(ACTIONS.fromInt(1));    // X: from 0 to 1
-            so.advanceNondeterministic(ACTIONS.fromInt(0));     // bestAction O: 0804, V=-1/9
+            so.advanceNondeterministic(ACTIONS.fromInt(0), null);     // bestAction O: 0804, V=-1/9
         }
         if (k>1) {
             so.advanceDeterministic(ACTIONS.fromInt(805));   // O: from 8 to 5
-            so.advanceNondeterministic(ACTIONS.fromInt(0));     // bestAction X: 0105, V=+1
+            so.advanceNondeterministic(ACTIONS.fromInt(0), null);     // bestAction X: 0105, V=+1
         }
         if (k>2) {
             so.advanceDeterministic(ACTIONS.fromInt(104));   // X: from 1 to 4
-            so.advanceNondeterministic(ACTIONS.fromInt(2));     // bestAction O: 0704, V=+1/3
+            so.advanceNondeterministic(ACTIONS.fromInt(2), null);     // bestAction O: 0704, V=+1/3
             /* Now we have the state (O moves)
                 [  ] [  ] [  ]     (diceVal:2,   availActions: 0706,0704,0703 )
                 [X1] [X0] [O0]
@@ -237,7 +237,7 @@ public class MctseWrapperTest extends GBGBatch {
         }
         if (k>3) {
             so.advanceDeterministic(ACTIONS.fromInt(704));   // O: from 7 to 4
-            so.advanceNondeterministic(ACTIONS.fromInt(0));     // bestAction X: 0307
+            so.advanceNondeterministic(ACTIONS.fromInt(0), null);     // bestAction X: 0307
             /* Now we have the state (X moves)
                 [  ] [  ] [  ]     (diceVal:0,   availActions: 0706,0704,0703 )
                 [X1] [O2] [O0]
@@ -255,21 +255,21 @@ public class MctseWrapperTest extends GBGBatch {
      */
     private StateObserverEWN buildStateC(Arena arenaEWN, int k) {
         GameBoardEWN gb = new GameBoardEWN(arenaEWN);
-        StateObserverEWN so = (StateObserverEWN) gb.getDefaultStartState();
+        StateObserverEWN so = (StateObserverEWN) gb.getDefaultStartState(null);
         so.setNextActionDeterministic(ACTIONS.fromInt(1));      // bestAction X: 0307, V=+0.827
         int[] bestAction = new int []{307,504,408,805,4};
 
         if (k>0) {
             so.advanceDeterministic(ACTIONS.fromInt(304));    // X: from 3 to 4
-            so.advanceNondeterministic(ACTIONS.fromInt(1));     // bestAction O: 0504, V=+0.58
+            so.advanceNondeterministic(ACTIONS.fromInt(1), null);     // bestAction O: 0504, V=+0.58
         }
         if (k>1) {
             so.advanceDeterministic(ACTIONS.fromInt(501));   // O: from 5 to 1
-            so.advanceNondeterministic(ACTIONS.fromInt(1));     // bestAction X: 0408, V=+1
+            so.advanceNondeterministic(ACTIONS.fromInt(1), null);     // bestAction X: 0408, V=+1
         }
         if (k>2) {
             so.advanceDeterministic(ACTIONS.fromInt(405));   // X: from 4 to 5
-            so.advanceNondeterministic(ACTIONS.fromInt(0));     // bestAction O: 0805, V=+1
+            so.advanceNondeterministic(ACTIONS.fromInt(0), null);     // bestAction O: 0805, V=+1
             /* Now we have the state (O moves)
                 [X0] [O1] [  ]     (diceVal:2,   availActions: 0706,0704,0703 )
                 [  ] [  ] [X1]
@@ -278,7 +278,7 @@ public class MctseWrapperTest extends GBGBatch {
         }
         if (k>3) {
             so.advanceDeterministic(ACTIONS.fromInt(804));   // O: from 8 to 4
-            so.advanceNondeterministic(ACTIONS.fromInt(0));     // bestAction X: 0004
+            so.advanceNondeterministic(ACTIONS.fromInt(0), null);     // bestAction X: 0004
             /* Now we have the state (X moves)
                 [X0] [O1] [  ]     (diceVal:0,   availActions: 1,3,4 )
                 [  ] [O0] [X1]
@@ -296,25 +296,25 @@ public class MctseWrapperTest extends GBGBatch {
      */
     private StateObserverEWN buildStateD(Arena arenaEWN, int k) {
         GameBoardEWN gb = new GameBoardEWN(arenaEWN);
-        StateObserverEWN so = (StateObserverEWN) gb.getDefaultStartState();
+        StateObserverEWN so = (StateObserverEWN) gb.getDefaultStartState(null);
         so.setNextActionDeterministic(ACTIONS.fromInt(2));      // bestAction X: 0105, V=+0.48
         int[] bestAction = new int []{105,703,205,805,304};
 
         if (k>0) {
             so.advanceDeterministic(ACTIONS.fromInt(102));    // X: from 1 to 2, suboptimal, V=-0.09
-            so.advanceNondeterministic(ACTIONS.fromInt(2));     // bestAction O: 0703, V=+0.39
+            so.advanceNondeterministic(ACTIONS.fromInt(2), null);     // bestAction O: 0703, V=+0.39
         }
         if (k>1) {
             so.advanceDeterministic(ACTIONS.fromInt(704));   // O: from 7 to 4, suboptimal
-            so.advanceNondeterministic(ACTIONS.fromInt(2));     // bestAction X: 0205, V=+1
+            so.advanceNondeterministic(ACTIONS.fromInt(2), null);     // bestAction X: 0205, V=+1
         }
         if (k>2) {
             so.advanceDeterministic(ACTIONS.fromInt(205));   // X: from 2 to 5
-            so.advanceNondeterministic(ACTIONS.fromInt(0));     // bestAction O: 0805, V=+1
+            so.advanceNondeterministic(ACTIONS.fromInt(0), null);     // bestAction O: 0805, V=+1
         }
         if (k>3) {
             so.advanceDeterministic(ACTIONS.fromInt(805));   // O: from 8 to 5
-            so.advanceNondeterministic(ACTIONS.fromInt(2));     // bestAction X: 304
+            so.advanceNondeterministic(ACTIONS.fromInt(2), null);     // bestAction X: 304
             /* Now we have the state (X moves)
                 [X0] [  ] [  ]     (diceVal:2,   availActions: 304,306,307 )
                 [X1] [O2] [O0]
@@ -381,10 +381,10 @@ public class MctseWrapperTest extends GBGBatch {
                 for (int i=0; i<10; i++) {
                     // The actions are 0=FOLD, 1=CHECK, 2=BET, 3=CALL
                     // build the state to examine
-                    StateObserverKuhnPoker so = (StateObserverKuhnPoker) gb.getDefaultStartState();
+                    StateObserverKuhnPoker so = (StateObserverKuhnPoker) gb.getDefaultStartState(null);
                     // best action for p0 is {1,2} if p0=J, {2} if p0=Q, {1,2} if p0=K
 
-                    so.advance(new ACTIONS(1));   // p0 plays CHECK
+                    so.advance(new ACTIONS(1), null);   // p0 plays CHECK
                     // best action for p1 is {1,2} if p1=J, {2} if p1=Q, {2} if p1=K
 
                     //so.advance(new ACTIONS(1));   // p0 plays BET
@@ -466,7 +466,7 @@ public class MctseWrapperTest extends GBGBatch {
 
                     startTime = System.currentTimeMillis();
 
-                    StateObservation so = gb.getDefaultStartState();
+                    StateObservation so = gb.getDefaultStartState(null);
                     for (int i=0; i<10; i++) {
                         act_pa = pa.getNextAction2(so,false,true);
                         act_qa = qa.getNextAction2(so,false,true);
@@ -475,7 +475,7 @@ public class MctseWrapperTest extends GBGBatch {
                         System.out.println("i="+i+": "+so.stringDescr()+
                                 ", vBest="+act_pa.getVBest() + " " + act_qa.getVBest()+
                                 ", act="+act_pa.toInt()+"="+act_qa.toInt());
-                        so.advance(act_pa);
+                        so.advance(act_pa, null);
                     }
 
                     deltaTime = (double) (System.currentTimeMillis() - startTime) / 1000.0;
@@ -723,8 +723,8 @@ public class MctseWrapperTest extends GBGBatch {
     private HashMap<String, StateObserverEWN> createStateMap(int numStates, Random rand, GameBoardEWN gb) {
         int diceVal = 0;
         stateMap = new HashMap<>();
-        StateObserverEWN so = (StateObserverEWN) gb.getDefaultStartState();
-        so.advanceNondeterministic(new ACTIONS(diceVal));
+        StateObserverEWN so = (StateObserverEWN) gb.getDefaultStartState(null);
+        so.advanceNondeterministic(new ACTIONS(diceVal), null);
         while (stateMap.size()<numStates) {
             while (!so.isGameOver()) {
                 StateObserverEWN ewnState = new StateObserverEWN(so); // make a copy
@@ -737,13 +737,13 @@ public class MctseWrapperTest extends GBGBatch {
                 ACTIONS act = actlist.get(rand.nextInt(actlist.size()));
                 so.advanceDeterministic(act);
                 ACTIONS ranact = new ACTIONS(rand.nextInt(3));
-                so.advanceNondeterministic(ranact);
+                so.advanceNondeterministic(ranact, null);
             }
             // start a new episode
             diceVal++;
             diceVal = diceVal % 3;
-            so = (StateObserverEWN) gb.getDefaultStartState();
-            so.advanceNondeterministic(new ACTIONS(diceVal));
+            so = (StateObserverEWN) gb.getDefaultStartState(null);
+            so.advanceNondeterministic(new ACTIONS(diceVal), null);
         }
         System.err.println("we should not get here (the normal return is above)");
         return stateMap;

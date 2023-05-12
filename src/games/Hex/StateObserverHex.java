@@ -6,6 +6,7 @@ import tools.Types;
 import tools.Types.ACTIONS;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import static games.Hex.HexConfig.*;
 
@@ -237,7 +238,7 @@ public class StateObserverHex extends ObserverBase implements StateObservation {
 //    public String getName() {return "Hex";}
 
     @Override
-    public void advance(Types.ACTIONS action) {
+    public void advance(ACTIONS action, Random cmpRand) {
         super.advanceBase(action);		//		includes addToLastMoves(action)
         if (action == null) {
             System.out.println("HEX ERROR: null given as action in advance()");

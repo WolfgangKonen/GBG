@@ -6,6 +6,8 @@ import tools.Types.ACTIONS;
 import tools.Types.WINNER;
 
 import java.util.ArrayList;
+import java.util.Random;
+
 /**
  * This class holds valid Othello game state objects. It is coded
  * as a two-dimensional int[8][8] array, where each index represents either
@@ -273,7 +275,7 @@ public class StateObserverOthello extends ObserverBase{
 	 * Check if one player has to pass.
 	 */
 	@Override
-	public void advance(ACTIONS action) {
+	public void advance(ACTIONS action, Random cmpRand) {
 		int iAction = action.toInt();
 		int j = iAction % ConfigOthello.BOARD_SIZE;
 		int i = (iAction-j) / ConfigOthello.BOARD_SIZE;

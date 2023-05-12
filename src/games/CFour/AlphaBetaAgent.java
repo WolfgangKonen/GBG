@@ -1,23 +1,16 @@
 package games.CFour;
 
-import java.io.FileInputStream;
-import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Semaphore;
 
-import javax.swing.JDialog;
-
 import agentIO.LoadSaveGBG;
 import controllers.AgentBase;
 import controllers.PlayAgent;
-import controllers.PlayAgent.AgentState;
 import games.StateObservation;
-import games.XArenaMenu;
 //import nTupleTD.TDSAgent;
 import games.CFour.openingBook.BookSum;
-import params.ParOther;
 import tools.ScoreTuple;
 import tools.Types;
 import tools.Types.ACTIONS_VT;
@@ -4395,7 +4388,7 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
         // optional: print the best action
         if (!silent) {
         	newsc = sc.copy();
-        	newsc.advance(actBest);
+        	newsc.advance(actBest, null);
         	System.out.println("---Best Move: "+newsc.stringDescr()+"   "+vBest);
         }			
 

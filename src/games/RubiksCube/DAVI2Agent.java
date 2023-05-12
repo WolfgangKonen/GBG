@@ -83,7 +83,7 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
         for(i = 0; i < acts.size(); ++i)
         {
         	newSO = ((StateObserverCube) so).copy();
-        	newSO.advance(acts.get(i));
+        	newSO.advance(acts.get(i), null);
         	
         	// value is the V(s) for for taking action i in state s='so'. Action i leads to state newSO.
         	value = vTable[i] = newSO.getRewardTuple(false).scTup[0] +
@@ -104,7 +104,7 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
         // optional: print the best action
         if (!silent) {
         	newSO = ((StateObserverCube) so).copy();
-        	newSO.advance(actBest);
+        	newSO.advance(actBest, null);
         	System.out.println("---Best Move: "+newSO.stringDescr()+"   "+maxValue);
         }			
 
@@ -160,7 +160,7 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
 	        
 			//System.out.println(s_t.stringDescr()+", "+a_t.getVBest());
 	        
-			s_t.advance(a_t);		// advance the state 
+			s_t.advance(a_t, null);		// advance the state
 			s_t.storeBestActionInfo(a_t);	// /WK/ was missing before 2021-09-10. Now stored ScoreTuple is up-to-date.
 
 			if (s_t.isGameOver()) m_finished = true;

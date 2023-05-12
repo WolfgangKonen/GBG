@@ -7,6 +7,8 @@ import games.StateObservation;
 import games.TicTacToe.GameBoardTTTGui;
 import tools.Types;
 
+import java.util.Random;
+
 /**
  * This class implements the GameBoard interface for BlackJack.
  * Its member {@link GameBoardBlackJackGui} {@code m_gameGui} has the game board GUI.
@@ -54,7 +56,7 @@ public class GameBoardBlackJack implements GameBoard {
     public void updateParams() {}
 
     @Override
-    public void clearBoard(boolean boardClear, boolean vClear) {
+    public void clearBoard(boolean boardClear, boolean vClear, Random cmpRand) {
         if (boardClear) {
             m_so = new StateObserverBlackJack();
         }
@@ -160,10 +162,11 @@ public class GameBoardBlackJack implements GameBoard {
 
     /**
      * @return the 'empty-board' start state
+     * @param cmpRand
      */
     @Override
-    public StateObservation getDefaultStartState() {
-        clearBoard(true, true);
+    public StateObservation getDefaultStartState(Random cmpRand) {
+        clearBoard(true, true, null);
         return m_so;
     }
 
@@ -173,7 +176,7 @@ public class GameBoardBlackJack implements GameBoard {
      */
     @Override
     public StateObservation chooseStartState(PlayAgent pa) {
-        return getDefaultStartState();
+        return getDefaultStartState(null);
     }
 
     /**
@@ -182,20 +185,20 @@ public class GameBoardBlackJack implements GameBoard {
      */
     @Override
     public StateObservation chooseStartState() {
-        return getDefaultStartState();
+        return getDefaultStartState(null);
     }
 
 
     public void humanMove(int a) {
         Types.ACTIONS act = Types.ACTIONS.fromInt(a);
-        m_so.advance(act);
+        m_so.advance(act, null);
         arenaActReq = true;
     }
 
     public void inspectMove(int a) {
         Types.ACTIONS act = Types.ACTIONS.fromInt(a);
         m_Arena.setStatusMessage("Inspecting the value function ...");
-        m_so.advance(act);
+        m_so.advance(act, null);
         arenaActReq = true;
     }
 }

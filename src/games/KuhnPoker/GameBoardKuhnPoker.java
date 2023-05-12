@@ -51,7 +51,7 @@ public class GameBoardKuhnPoker implements GameBoard {
 	public void updateParams() {}
 
 	@Override
-	public void clearBoard(boolean boardClear, boolean vClear) {
+	public void clearBoard(boolean boardClear, boolean vClear, Random cmpRand) {
 		if (boardClear) {
 			m_so = new StateObserverKuhnPoker();
 			if (m_Arena!=null&&m_Arena.hasGUI() && m_gameGui!=null) {
@@ -103,7 +103,7 @@ public class GameBoardKuhnPoker implements GameBoard {
 	protected void inspectMove(int x){
 		Types.ACTIONS act = Types.ACTIONS.fromInt(x);
 		assert m_so.isLegalAction(act) : "Desired action is not legal";
-		m_so.advance(act);
+		m_so.advance(act, null);
 		arenaActReq = true;
 	}
 
@@ -113,7 +113,7 @@ public class GameBoardKuhnPoker implements GameBoard {
 		Types.ACTIONS act = Types.ACTIONS.fromInt(x);
 		assert m_so.isLegalAction(act) : "Desired action is not legal";
 		//m_Arena.roundOverWait = true;
-		m_so.advance(act);
+		m_so.advance(act, null);
 		//m_Arena.roundOverWait = m_so.isRoundOver();
 
 		if(m_Arena!=null)
@@ -133,10 +133,11 @@ public class GameBoardKuhnPoker implements GameBoard {
 
 	/**
 	 * @return the 'empty-board' start state
+     * @param cmpRand
 	 */
 	@Override
-	public StateObservation getDefaultStartState() {
-		clearBoard(true, true);
+	public StateObservation getDefaultStartState(Random cmpRand) {
+		clearBoard(true, true, null);
 		return m_so;
 	}
 
@@ -147,13 +148,13 @@ public class GameBoardKuhnPoker implements GameBoard {
 	 */
 	@Override
 	public StateObservation chooseStartState() {
-		getDefaultStartState();			// m_so is in default start state 
+		getDefaultStartState(null);			// m_so is in default start state
 		if (rand.nextDouble()>0.5) {
 			// choose randomly one of the possible actions in default 
 			// start state and advance m_so by one ply
 			ArrayList<Types.ACTIONS> acts = m_so.getAvailableActions();
 			int i = rand.nextInt(acts.size());
-			m_so.advance(acts.get(i));
+			m_so.advance(acts.get(i), null);
 		}
 		return m_so;
 	}

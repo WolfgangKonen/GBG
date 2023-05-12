@@ -3,6 +3,7 @@ package games.TicTacToe;
 import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Random;
 
 import games.ObserverBase;
 import games.StateObservation;
@@ -14,7 +15,7 @@ import tools.Types.ACTIONS;
  * It has utility functions for
  * <ul>
  * <li> returning the available actions ({@link #getAvailableActions()}), 
- * <li> advancing the state of the game with a specific action ({@link #advance(Types.ACTIONS)}),
+ * <li> advancing the state of the game with a specific action ({@link StateObservation#advance(ACTIONS, Random)}),
  * <li> copying the current state
  * <li> signaling end, score and winner of the game
  * </ul>
@@ -173,9 +174,10 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
 
 	/**
 	 * Advance the current state with 'action' to a new state
-	 * @param action
-	 */
-	public void advance(ACTIONS action) {
+     * @param action
+     * @param cmpRand
+     */
+	public void advance(ACTIONS action, Random cmpRand) {
 		int iAction = action.toInt();
 		assert (0<=iAction && iAction<9) : "iAction is not in 0,1,...,8.";
 		int j=iAction%3;

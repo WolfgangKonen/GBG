@@ -3,7 +3,6 @@ package games.EWN.gui;
 import games.Arena;
 import games.EWN.GameBoardEWN;
 import games.EWN.StateObserverEWN;
-import tools.Types;
 import tools.Types.ACTIONS;
 
 import javax.swing.*;
@@ -87,11 +86,11 @@ public class XrButton extends JButton implements MouseListener {
             StateObserverEWN theState = (StateObserverEWN)m_gb.getStateObs();
             ACTIONS diceAction = theState.getNextNondeterministicAction();     // diceAction is one smaller than the value shown on game board
             if (text.equals("-") && diceAction.toInt()>0) {
-                theState.advanceNondeterministic(new ACTIONS(diceAction.toInt()-1));
+                theState.advanceNondeterministic(new ACTIONS(diceAction.toInt()-1), null);
                 m_gb.setActionReq(true);
             }
             if (text.equals("+") && diceAction.toInt()<theState.getNumAvailableRandoms()-1)  {
-                theState.advanceNondeterministic(new ACTIONS(diceAction.toInt()+1));
+                theState.advanceNondeterministic(new ACTIONS(diceAction.toInt()+1), null);
                 m_gb.setActionReq(true);
             }
             // only debug info:

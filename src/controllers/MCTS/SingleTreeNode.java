@@ -368,7 +368,7 @@ public class SingleTreeNode implements Serializable
 
 		StateObservation nextState = m_state.copy();
 		// nextState.advance(m_player.actions[bestAction]);
-		nextState.advance(actBest); 		// /WK/ NEW!
+		nextState.advance(actBest, null); 		// /WK/ NEW!
 
 		SingleTreeNode tn = new SingleTreeNode(nextState, actBest, this, this.m_rnd, this.m_player);
 		children[bestAction] = tn;
@@ -540,7 +540,7 @@ public class SingleTreeNode implements Serializable
 				throw new RuntimeException("Oops, there are no available actions for current player!");
 			}
 			int action = m_rnd.nextInt(rollerState.getNumAvailableActions());
-			rollerState.advance(rollerState.getAction(action));
+			rollerState.advance(rollerState.getAction(action), null);
 			thisDepth++;
 		}
 		if (rollerState.isGameOver())

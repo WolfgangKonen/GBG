@@ -75,13 +75,14 @@ public class GameBoardEWN implements GameBoard {
 
     /**
      * Resets the game to starting state
-     * @param boardClear	whether to clear the board
-     * @param vClear		whether to clear the value table
+     * @param boardClear    whether to clear the board
+     * @param vClear        whether to clear the value table
+     * @param cmpRand       if non-null, use this (reproducible) RNG instead of StateObservation's RNG
      */
     @Override
-    public void clearBoard(boolean boardClear, boolean vClear) {
+    public void clearBoard(boolean boardClear, boolean vClear, Random cmpRand) {
         if(boardClear){
-            m_so = m_so.reset();
+            m_so = m_so.reset(cmpRand);
         }
         if(m_gameGui!=null && m_Arena.taskState!=Arena.Task.TRAIN){
             m_gameGui.clearBoard(boardClear,vClear);
@@ -148,7 +149,7 @@ public class GameBoardEWN implements GameBoard {
             }else{
                 Types.ACTIONS act = Helper.parseAction(selectedTokenPosition,index);
                 if( m_so.isLegalAction(act)) {
-                    m_so.advance(act);
+                    m_so.advance(act, null);
                     (m_Arena.getLogManager()).addLogEntry(act, m_so, m_Arena.getLogSessionID());
                     m_gameGui.unSelect();
                     arenaActReq = true;
@@ -233,8 +234,8 @@ public class GameBoardEWN implements GameBoard {
     }
 
     @Override
-    public StateObservation getDefaultStartState() {
-        clearBoard(true,true);
+    public StateObservation getDefaultStartState(Random cmpRand) {
+        clearBoard(true,true, cmpRand);        // resets m_so
         return m_so;
     }
 
@@ -249,7 +250,7 @@ public class GameBoardEWN implements GameBoard {
      */
     @Override
     public StateObservation chooseStartState() {
-        getDefaultStartState();
+        getDefaultStartState(null);
         return m_so;
     }
 }

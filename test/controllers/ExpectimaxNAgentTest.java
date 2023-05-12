@@ -34,12 +34,12 @@ public class ExpectimaxNAgentTest extends GBGBatch {
 
         for (int i=0; i<nEpi; i++) {
             System.out.println("\n*** Episode "+i+ " starts ***");
-            gb.clearBoard(true,true);
+            gb.clearBoard(true,true, null);
             so = (StateObserverEWN) gb.getStateObs();
             while(!so.isGameOver()) {
                 act_pa = pa.getNextAction2(so.partialState(),false,false);
                          // due to silent=false, each call to getNextAction2 has state-info-printout on console
-                so.advance(act_pa);
+                so.advance(act_pa, null);
             }
             int winner = so.getPlayerWin();
             System.out.println("Episode "+i+" finished, player "+winner+" wins");
@@ -81,13 +81,13 @@ public class ExpectimaxNAgentTest extends GBGBatch {
 //        pa = arenaTrain.loadAgent(agtFile);
 
         // select a state:
-        gb.clearBoard(true,true);
+        gb.clearBoard(true,true, null);
         startSO = (StateObserverEWN) gb.getStateObs();
         ArrayList<Types.ACTIONS> startRandoms = startSO.getAvailableRandoms();
 
         for (Types.ACTIONS startR : startRandoms) {
             so = (StateObserverEWN) startSO.copy();
-            so.advanceNondeterministic(startR);
+            so.advanceNondeterministic(startR, null);
 
             System.out.println("\n*** Episode with dice value "+startR.toInt()+ " starts ***");
             System.out.print(so);
@@ -126,13 +126,13 @@ public class ExpectimaxNAgentTest extends GBGBatch {
         pa = new ExpectimaxNAgent("ExpectimaxN",nDepth);
 
         // select a state:
-        gb.clearBoard(true,true);
+        gb.clearBoard(true,true, null);
         startSO = (StateObserverEWN) gb.getStateObs();
         ArrayList<Types.ACTIONS> startRandoms = startSO.getAvailableRandoms();
 
         for (Types.ACTIONS startR : startRandoms) {
             System.out.println("\n*** Branch with diceVal "+startR.toInt()+ " starts ***");
-            startSO.advanceNondeterministic(startR);
+            startSO.advanceNondeterministic(startR, null);
             ArrayList<Types.ACTIONS> nextActions = startSO.getAvailableActions();
 
             System.out.print(startSO);
@@ -141,7 +141,7 @@ public class ExpectimaxNAgentTest extends GBGBatch {
                 System.out.println("\n  *** Episode with action "+frmAct.format(a.toInt())+ " starts ***");
 
                 so = (StateObserverEWN) startSO.copy();
-                so.advance(a);
+                so.advance(a, null);
 
                 innerETreeTest(pa,so,silent,"action="+frmAct.format(a.toInt()));
             }
@@ -171,7 +171,7 @@ public class ExpectimaxNAgentTest extends GBGBatch {
         double prob;
         for (Types.ACTIONS r : nextRandoms) {
             newSO = (StateObserverEWN) afterstate.copy();
-            newSO.advanceNondeterministic(r);
+            newSO.advanceNondeterministic(r, null);
             act_pa = pa.getNextAction2(newSO.partialState(),false,silent);
             prob = afterstate.getProbability(r);
             vNew += act_pa.getVBest()*prob;

@@ -4,6 +4,8 @@ import controllers.PlayAgent;
 import games.RubiksCube.CubeConfig;
 import games.RubiksCube.GameBoardCube;
 
+import java.util.Random;
+
 /**
  * Each class implementing interface GameBoard has the board game GUI. 
  * It shows board game states, optionally the values of possible next actions,
@@ -29,10 +31,11 @@ public interface GameBoard {
 	void initialize();
 	/**
 	 * Set {@link GameBoard}'s state to the default start state and clear the game board
-	 * @param boardClear	whether to clear the board
-	 * @param vClear		whether to clear the value table
+	 * @param boardClear    whether to clear the board
+	 * @param vClear        whether to clear the value table
+	 * @param cmpRand		if non-null, use this (reproducible) RNG instead of StateObservation's RNG
 	 */
-	void clearBoard(boolean boardClear, boolean vClear);
+	void clearBoard(boolean boardClear, boolean vClear, Random cmpRand);
 
 	/**
 	 * update game-specific parameters from {@link Arena}'s param tabs
@@ -77,8 +80,9 @@ public interface GameBoard {
 	
 	/**
 	 * @return the 'empty-board' start state
+	 * @param cmpRand		if non-null, use this (reproducible) RNG instead of StateObservation's RNG
 	 */
-	StateObservation getDefaultStartState();
+	StateObservation getDefaultStartState(Random cmpRand);
 	
 	/**
 	 * Choose a random start state. Used when training an agent via self-play.

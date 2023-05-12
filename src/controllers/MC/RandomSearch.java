@@ -26,7 +26,7 @@ public class RandomSearch{
         	if (!stopConditionMet) {
                 if (sob.isRoundOver()) sob.initRound();     // NEW/03/21: for round-based games
                 if (sob.getNumAvailableActions() > 0) {
-                    sob.advance(sob.getAvailableActions().get(random.nextInt(sob.getNumAvailableActions())));
+                    sob.advance(sob.getAvailableActions().get(random.nextInt(sob.getNumAvailableActions())), null);
                 }
                 else {
                     //rolloutDepth = i+1;

@@ -288,7 +288,7 @@ public class EvaluatorBlackJack extends Evaluator {
                         noInsuranceButBlackJack++;
                     }
                 }
-                so.advance(Types.ACTIONS.fromInt(act));
+                so.advance(Types.ACTIONS.fromInt(act), null);
             }
             if (so.getDealer().getActiveHand().checkForBlackJack() && so.getDealer().getActiveHand().getCards().get(0).rank == Card.Rank.ACE) {
                 possibleInsuranceWins++;
@@ -331,7 +331,7 @@ public class EvaluatorBlackJack extends Evaluator {
                         so.getCurrentPhase() == StateObserverBlackJack.gamePhase.PLAYERONACTION )) {
                     moves++;
                 }
-                so.advance(Types.ACTIONS.fromInt(act));
+                so.advance(Types.ACTIONS.fromInt(act), null);
             }
             so.initRound();
         }
@@ -357,7 +357,7 @@ public class EvaluatorBlackJack extends Evaluator {
         for(int i = 0; i < NUM_ITER; i++) {
             while (!so.isRoundOver()) {
                 int act = playAgent.getNextAction2(so.partialState(), false, true).toInt();
-                so.advance(Types.ACTIONS.fromInt(act));
+                so.advance(Types.ACTIONS.fromInt(act), null);
             }
             avgPayOff += so.getCurrentPlayer().getRoundPayoff();
             if(so.getCurrentPlayer().getActiveHand().checkForBlackJack())

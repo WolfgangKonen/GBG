@@ -178,7 +178,7 @@ public class DAVI3Agent extends NTuple4Base implements PlayAgent {
 				continue;  // with next for-pass
 
 			newSO = ((StateObserverCube) so).copy();
-			newSO.advance(acts.get(i));
+			newSO.advance(acts.get(i), null);
 
 			// value is the r + V(s) for taking action i in state s='so'. Action i leads to state newSO.
 			value = vTable[i] = newSO.getRewardTuple(rgs).scTup[0] +
@@ -205,7 +205,7 @@ public class DAVI3Agent extends NTuple4Base implements PlayAgent {
         // optional: print the best action's after state newSO and its V(newSO) = delta reward + daviValue(newSO)
         if (!silent) {
         	newSO = ((StateObserverCube) so).copy();
-        	newSO.advance(actBest);
+        	newSO.advance(actBest, null);
         	System.out.println("---Best Move: "+newSO.stringDescr()+"   "+maxValue);
         }			
 
@@ -273,7 +273,7 @@ public class DAVI3Agent extends NTuple4Base implements PlayAgent {
 			
 			//System.out.println(s_t.stringDescr()+", "+a_t.getVBest());
 	        
-			s_t.advance(a_t);		// advance the state 
+			s_t.advance(a_t, null);		// advance the state
 			s_t.storeBestActionInfo(a_t);	// /WK/ was missing before 2021-09-10. Now stored ScoreTuple is up-to-date.
 
 			if (s_t.isGameOver()) m_finished = true;
@@ -329,7 +329,7 @@ public class DAVI3Agent extends NTuple4Base implements PlayAgent {
 			episodeList.addFirst(trainItem);
 			//System.out.println(s_t.stringDescr()+", "+a_t.getVBest());
 
-			s_t.advance(a_t);		// advance the state
+			s_t.advance(a_t, null);		// advance the state
 			s_t.storeBestActionInfo(a_t);	// /WK/ was missing before 2021-09-10. Now stored ScoreTuple is up-to-date.
 
 			if (s_t.isGameOver()) {

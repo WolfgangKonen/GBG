@@ -6,8 +6,6 @@ import games.Sim.ArenaSim;
 import games.StateObservation;
 import org.junit.Test;
 
-import java.io.IOException;
-
 /**
  *  Run tests to validate a Sim StateObservation. Perform the tests from {@link ValidateStateObsTest}
  *  that are generally admitted for any StateObservation in any game.
@@ -20,7 +18,7 @@ public class ValidateStateObsSimTest {
     private final static String gbgAgentPath = strDir + "TDNT3-15mover-fixed4-lam05-NEW.agt.zip";
     private static final Arena ar =  new ArenaSim("",false);  // default Sim: 6 nodes, 2 players
 
-    private static final StateObservation sob = ar.getGameBoard().getDefaultStartState();
+    private static final StateObservation sob = ar.getGameBoard().getDefaultStartState(null);
 
     //
     // choose an agent to validate - select one of the options in buildAgent for constructing pa:

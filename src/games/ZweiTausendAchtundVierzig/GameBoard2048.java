@@ -7,6 +7,8 @@ import tools.Types;
 
 import controllers.PlayAgent;
 
+import java.util.Random;
+
 /**
  * This class implements the GameBoard interface for 2048.
  * Its member {@link GameBoard2048Gui} {@code m_gameGui} has the game board GUI. 
@@ -48,7 +50,7 @@ public class GameBoard2048 implements GameBoard {
     public void updateParams() {}
 
     @Override
-    public void clearBoard(boolean boardClear, boolean vClear) {
+    public void clearBoard(boolean boardClear, boolean vClear, Random cmpRand) {
         if (boardClear) {
             m_so = new StateObserver2048();
         }
@@ -87,8 +89,8 @@ public class GameBoard2048 implements GameBoard {
     }
 
     @Override
-    public StateObservation getDefaultStartState() {
-        clearBoard(true, true);
+    public StateObservation getDefaultStartState(Random cmpRand) {
+        clearBoard(true, true, null);
 //        if (TDNTuple2Agt.DBG2_FIXEDSEQUENCE) 
 //        	return new StateObserver2048();
         return m_so;
@@ -96,7 +98,7 @@ public class GameBoard2048 implements GameBoard {
 
     @Override
     public StateObservation chooseStartState() {
-        return getDefaultStartState();
+        return getDefaultStartState(null);
     }
 
 	@Override
@@ -107,7 +109,7 @@ public class GameBoard2048 implements GameBoard {
     protected void HGameMove(int move) {
         Types.ACTIONS act = Types.ACTIONS.fromInt(move);
         assert m_so.isLegalAction(act) : "Desired action is not legal";
-        m_so.advance(act);
+        m_so.advance(act, null);
 		(m_Arena.getLogManager()).addLogEntry(act, m_so, m_Arena.getLogSessionID());
         arenaActReq = true;            // ask Arena for next action
     }
@@ -115,7 +117,7 @@ public class GameBoard2048 implements GameBoard {
     protected void InspectMove(int move) {
         Types.ACTIONS act = Types.ACTIONS.fromInt(move);
         assert m_so.isLegalAction(act) : "Desired action is not legal";
-        m_so.advance(act);
+        m_so.advance(act, null);
         arenaActReq = true;
     }
 

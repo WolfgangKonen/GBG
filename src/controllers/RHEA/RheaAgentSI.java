@@ -9,9 +9,7 @@ import params.ParMCTS;
 import tools.ScoreTuple;
 import tools.Types;
 
-import java.awt.desktop.SystemSleepEvent;
 import java.io.Serializable;
-import java.lang.reflect.Array;
 import java.util.*;
 
 
@@ -101,7 +99,7 @@ public class RheaAgentSI extends AgentBase implements PlayAgent, Serializable {
 
         StateObservation soCopy = so.copy();
         Types.ACTIONS action = soCopy.getAvailableActions().get(i);
-        soCopy.advance(action);
+        soCopy.advance(action, null);
 
         vtable[i] = simulate(whoAmI, soCopy, genome[i]);
         // System.out.println("Normalized Score for Action" + action + ": " + vtable[i]);
@@ -131,15 +129,15 @@ public class RheaAgentSI extends AgentBase implements PlayAgent, Serializable {
           break;
         }
         if (isMultiplayerGame && lastTurnRhea && RANDOM_OPPONENT_TURN) {
-          soCopy.advance(soCopy.getAvailableActions().get(rand.nextInt(soCopy.getAvailableActions().size())));
+          soCopy.advance(soCopy.getAvailableActions().get(rand.nextInt(soCopy.getAvailableActions().size())), null);
           lastTurnRhea = false;
           // System.out.println("enemy");
         } else if (isMultiplayerGame && lastTurnRhea && OPPONENT.equals("MCTS")) {
-          soCopy.advance(mctsAgent.getNextAction2(soCopy, false, false));
+          soCopy.advance(mctsAgent.getNextAction2(soCopy, false, false), null);
           lastTurnRhea = false;
         } else {
           if (population[i][depth] < soCopy.getAvailableActions().size()) {
-            soCopy.advance(soCopy.getAction(population[i][depth]));
+            soCopy.advance(soCopy.getAction(population[i][depth]), null);
             // System.out.println("RHEA");
             lastTurnRhea = true;
           }
@@ -182,15 +180,15 @@ public class RheaAgentSI extends AgentBase implements PlayAgent, Serializable {
             break;
           }
           if (isMultiplayerGame && lastTurnRhea && RANDOM_OPPONENT_TURN) {
-            soCopy.advance(soCopy.getAvailableActions().get(rand.nextInt(soCopy.getAvailableActions().size())));
+            soCopy.advance(soCopy.getAvailableActions().get(rand.nextInt(soCopy.getAvailableActions().size())), null);
             lastTurnRhea = false;
             // System.out.println("enemy");
           } else if (isMultiplayerGame && lastTurnRhea && OPPONENT.equals("MCTS")) {
-            soCopy.advance(mctsAgent.getNextAction2(soCopy, false, false));
+            soCopy.advance(mctsAgent.getNextAction2(soCopy, false, false), null);
             lastTurnRhea = false;
           } else {
             if (population[i][depth] < soCopy.getAvailableActions().size()) {
-              soCopy.advance(soCopy.getAction(population[i][depth]));
+              soCopy.advance(soCopy.getAction(population[i][depth]), null);
               // System.out.println("RHEA");
               lastTurnRhea = true;
             }
@@ -355,15 +353,15 @@ public class RheaAgentSI extends AgentBase implements PlayAgent, Serializable {
           break;
         }
         if (isMultiplayerGame && lastTurnRhea && RANDOM_OPPONENT_TURN) {
-          soCopy.advance(soCopy.getAvailableActions().get(rand.nextInt(soCopy.getAvailableActions().size())));
+          soCopy.advance(soCopy.getAvailableActions().get(rand.nextInt(soCopy.getAvailableActions().size())), null);
           lastTurnRhea = false;
           // System.out.println("enemy");
         } else if (isMultiplayerGame && lastTurnRhea && OPPONENT.equals("MCTS")) {
-          soCopy.advance(mctsAgent.getNextAction2(soCopy, false, false));
+          soCopy.advance(mctsAgent.getNextAction2(soCopy, false, false), null);
           lastTurnRhea = false;
         } else {
           if (population[i][depth] < soCopy.getAvailableActions().size()) {
-            soCopy.advance(soCopy.getAction(population[i][depth]));
+            soCopy.advance(soCopy.getAction(population[i][depth]), null);
             // System.out.println("RHEA");
             lastTurnRhea = true;
           }
@@ -408,15 +406,15 @@ public class RheaAgentSI extends AgentBase implements PlayAgent, Serializable {
             break;
           }
           if (isMultiplayerGame && lastTurnRhea && RANDOM_OPPONENT_TURN) {
-            soCopy.advance(soCopy.getAvailableActions().get(rand.nextInt(soCopy.getAvailableActions().size())));
+            soCopy.advance(soCopy.getAvailableActions().get(rand.nextInt(soCopy.getAvailableActions().size())), null);
             lastTurnRhea = false;
             // System.out.println("enemy");
           } else if (isMultiplayerGame && lastTurnRhea && OPPONENT.equals("MCTS")) {
-            soCopy.advance(mctsAgent.getNextAction2(soCopy, false, false));
+            soCopy.advance(mctsAgent.getNextAction2(soCopy, false, false), null);
             lastTurnRhea = false;
           } else {
             if (population[i][depth] < soCopy.getAvailableActions().size()) {
-              soCopy.advance(soCopy.getAction(population[i][depth]));
+              soCopy.advance(soCopy.getAction(population[i][depth]), null);
               // System.out.println("RHEA");
               lastTurnRhea = true;
             }

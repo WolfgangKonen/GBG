@@ -231,7 +231,7 @@ public class Evaluator2048_BoardPositions extends Evaluator{
                     List<StateObserver2048> tempGameStates = new ArrayList<>();
                     while (!gameState.isGameOver()) {
                         tempGameStates.add(gameState.copy());
-                        gameState.advance(playAgent.getNextAction2(gameState.partialState(), false, true));
+                        gameState.advance(playAgent.getNextAction2(gameState.partialState(), false, true), null);
                     }
                     System.out.println("Finished with Game " + gameNumber);
                     return tempGameStates;
@@ -261,7 +261,7 @@ public class Evaluator2048_BoardPositions extends Evaluator{
                 tempGameStates = new ArrayList<>();
                 while (!gameState.isGameOver()) {
                     tempGameStates.add(gameState.copy());
-                    gameState.advance(playAgent.getNextAction2(gameState.partialState(), false, true));
+                    gameState.advance(playAgent.getNextAction2(gameState.partialState(), false, true), null);
                 }
                 System.out.println("Finished with Game " + gameNumber);
                 gameStates.addAll(tempGameStates);

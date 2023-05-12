@@ -124,9 +124,9 @@ public class TestMain extends GBGBatch {
 			for (int p_MWrap : new int[]{0, 1}) {     // p_MWrap: whether agent qa is player 0 or player 1
 				ArrayList<XStateObs> finalSobList = new ArrayList<>();
 				startTime = System.currentTimeMillis();
-				StateObservation so = gb.getDefaultStartState();
+				StateObservation so = gb.getDefaultStartState(null);
 				ScoreTuple sc;
-				sc = XArenaFuncs.competeNPlayer(paVector, p_MWrap, so, 1, 0, null, finalSobList);
+				sc = XArenaFuncs.competeNPlayer(paVector, p_MWrap, so, 1, 0, null, finalSobList, null);
 				winrate = (sc.scTup[p_MWrap] + 1) / 2;
 				deltaTime = (double) (System.currentTimeMillis() - startTime) / 1000.0;
 				StateObserverOthello soO = (StateObserverOthello) finalSobList.get(0).getFinalState();

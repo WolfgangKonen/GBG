@@ -110,7 +110,7 @@ public class EvaluatorCube extends Evaluator {
 				pa.resetAgent();			// needed if pa is MCTSWrapperAgent
 
 				while (!so.isGameOver() && so.getMoveCounter()<ecp.epiLength) {
- 	                 so.advance(pa.getNextAction2(so.partialState(), false, true));
+ 	                 so.advance(pa.getNextAction2(so.partialState(), false, true), null);
                 }
                 int moveNum = so.getMoveCounter();
                 tstats = new TStats(n,p,moveNum,ecp.epiLength);	// both p and epiLength are later used in TAggreg(tsList,p) to form counters
