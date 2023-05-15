@@ -206,8 +206,10 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	/**
 	 * Get the best next action and return it 
 	 * 
-	 * @param so			current game state (is returned unchanged)
-	 * @param random		allow random action selection with probability m_epsilon
+	 * @param so            current game state (is returned unchanged)
+	 * @param random        allow random action selection with probability m_epsilon
+	 * @param deterministic
+	 * 			if true, the agent acts deterministically in case of several equivalent best actions (reproducibility)
 	 * @return actBest,		the best action. If several actions have the same
 	 * 						score, break ties by selecting one of them at random. 
 	 * <p>						
@@ -217,7 +219,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	 * action (as returned by so.getAvailableActions()) and the Q-value for the best action actBest, resp.
 	 */
 	@Override
-	public Types.ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
+	public Types.ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean deterministic, boolean silent) {
 		int i;
 		double bestValue;
         double value;			// the quantity to be maximized
@@ -321,13 +323,19 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 			}
 
         } // for
-        actBest = bestActions.get(rand.nextInt(bestActions.size()));
-        // if several actions have the same best value, select one of them randomly
+		assert bestActions.size()>0;
+		if (deterministic) {
+			actBest = bestActions.get(0);
+			// if several actions have the same best value, select the first one
+		} else {
+			actBest = bestActions.get(rand.nextInt(bestActions.size()));
+			// if several actions have the same best value, select one of them randomly
+		}
 
         assert actBest != null : "Oops, no best action actBest";
-		NewSO = so.copy();
-		NewSO.advance(actBest, null);
 		if (!silent) {
+			NewSO = so.copy();
+			NewSO.advance(actBest, null);
 			printDebugInfo(so,NewSO,bestValue,VTable);
 		}
 
@@ -367,7 +375,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 			// but MaxNAgent(...,12,true) only 2 seconds. If there are 15 moves to go, then
 			// MaxNAgent(...,15,true) will still take only a few seconds.
 			// So: activating the hash map is important for MaxN-speed!
-			ACTIONS_VT actMax = maxNAgent.getNextAction2(so.partialState(), false, true);
+			ACTIONS_VT actMax = maxNAgent.getNextAction2(so.partialState(), false, false, true);
 			double[] VTableMax = actMax.getVTable();
 			System.out.print("MaxN : ");
 			for (int i = 0; i < VTableMax.length - 1; i++)
@@ -417,7 +425,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	 * <p>
 	 * NOTE: For {@link TDNTuple3Agt} and N &gt; 1, this method should be only called in the form 
 	 * {@code getScore(NextSO,so)}. This is actually the case, 
-	 * see {@link #getNextAction2(StateObservation, boolean, boolean)}.
+	 * see {@link PlayAgent#getNextAction2(StateObservation, boolean, boolean, boolean)}.
 	 * 
 	 * @param so	the (after-)state s_t for which the value is desired
 	 * @param refer	the referring state
@@ -780,7 +788,7 @@ public class TDNTuple3Agt extends NTupleBase implements PlayAgent,NTupleAgt,Seri
 	        m_numTrnMoves++;		// number of train moves (including random moves)
 	        
 	        // choose action a_t, using epsilon-greedy policy based on V
-			a_t = acting_pa.getNextAction2(s_t.partialState(), true, true);
+			a_t = acting_pa.getNextAction2(s_t.partialState(), true, false, true);
 			// only for debug:
 //			if (a_t.isRandomAction() && s_t.getPlayer()==1) {
 //				int dummy = 1;

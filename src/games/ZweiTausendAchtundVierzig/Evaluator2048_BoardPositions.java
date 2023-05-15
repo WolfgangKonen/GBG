@@ -152,7 +152,7 @@ public class Evaluator2048_BoardPositions extends Evaluator{
             //analyse for MCTSE Agent
             if(ConfigEvaluator.EVALUATEMCTSE) {
                 for (int i = 0; i < ConfigEvaluator.NC; i++) {
-                    int MCTSAction = mctseAgent.getNextAction2(gameState.partialState(), false, true).toInt();
+                    int MCTSAction = mctseAgent.getNextAction2(gameState.partialState(), false, false, true).toInt();
                     mctsActions[MCTSAction] += 1;
                 }
             }
@@ -160,7 +160,7 @@ public class Evaluator2048_BoardPositions extends Evaluator{
             //analyse for MC Agent
             if(ConfigEvaluator.EVALUATEMC) {
                 for (int i = 0; i < ConfigEvaluator.NC; i++) {
-                    int MCAction = mcAgent.getNextAction2(gameState.partialState(), false, true).toInt();
+                    int MCAction = mcAgent.getNextAction2(gameState.partialState(), false, false, true).toInt();
                     mcActions[MCAction] += 1;
                     mcRolloutDepth += mcAgent.getAverageRolloutDepth();
                 }
@@ -231,7 +231,7 @@ public class Evaluator2048_BoardPositions extends Evaluator{
                     List<StateObserver2048> tempGameStates = new ArrayList<>();
                     while (!gameState.isGameOver()) {
                         tempGameStates.add(gameState.copy());
-                        gameState.advance(playAgent.getNextAction2(gameState.partialState(), false, true), null);
+                        gameState.advance(playAgent.getNextAction2(gameState.partialState(), false, false, true), null);
                     }
                     System.out.println("Finished with Game " + gameNumber);
                     return tempGameStates;
@@ -261,7 +261,7 @@ public class Evaluator2048_BoardPositions extends Evaluator{
                 tempGameStates = new ArrayList<>();
                 while (!gameState.isGameOver()) {
                     tempGameStates.add(gameState.copy());
-                    gameState.advance(playAgent.getNextAction2(gameState.partialState(), false, true), null);
+                    gameState.advance(playAgent.getNextAction2(gameState.partialState(), false, false, true), null);
                 }
                 System.out.println("Finished with Game " + gameNumber);
                 gameStates.addAll(tempGameStates);

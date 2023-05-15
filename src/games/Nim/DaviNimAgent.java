@@ -76,7 +76,7 @@ public class DaviNimAgent extends AgentBase implements PlayAgent {
 	}
 	
 	@Override
-	public ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
+	public ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean deterministic, boolean silent) {
 		int i,j;
 		StateObserverNim3P newSO;
         ACTIONS_ST actBest = null;
@@ -169,7 +169,7 @@ public class DaviNimAgent extends AgentBase implements PlayAgent {
 		do {
 	        m_numTrnMoves++;		// number of train moves 
 	        
-			a_t = getNextAction2(s_t.partialState(), true, true);	// choose action a_t (agent-specific behavior)
+			a_t = getNextAction2(s_t.partialState(), true, false, true);	// choose action a_t (agent-specific behavior)
 	        // put the best V-table value for state s_t into the HashMap
 			if (a_t.getScoreTuple().scTup[0]!=-9.0)
 				vm.put(s_t.stringDescr(), a_t.getScoreTuple());

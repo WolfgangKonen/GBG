@@ -63,9 +63,12 @@ public class StateObserver2048Slow extends ObsNondetBase implements StateObsNond
     private static final long serialVersionUID = 12L;
 
 	// never used
-//  public StateObserver2048Slow() {
-//      newBoard();
-//  }
+    public StateObserver2048Slow() {
+        this((Random) null);
+    }
+    public StateObserver2048Slow(Random cmpRand) {
+        newBoard(cmpRand);
+    }
 
     public StateObserver2048Slow(int[][] values, int score, int winState) {
         gameBoard = new Tile[ConfigGame.ROWS][ConfigGame.COLUMNS];
@@ -450,6 +453,11 @@ public class StateObserver2048Slow extends ObsNondetBase implements StateObsNond
 		return bvec;
 	}
 
+    /**
+     * Do a deterministic and a non-deterministic advance step
+     * @param action    the (deterministic) action
+     * @param cmpRand   if non-null, use this (reproducible) RNG instead of StateObservation's RNG
+     */
     @Override
     public void advance(ACTIONS action, Random cmpRand) {
         int iAction = action.toInt();
@@ -459,7 +467,7 @@ public class StateObserver2048Slow extends ObsNondetBase implements StateObsNond
         	if (succ==false) throw new RuntimeException("assertSameAdvance failed!");
         }
         move(iAction);
-        addRandomTile();
+        addRandomTile(cmpRand);
         updateAvailableMoves();
     }
 
@@ -528,7 +536,7 @@ public class StateObserver2048Slow extends ObsNondetBase implements StateObsNond
 		super.incrementMoveCounter();
    }
 
-    public ACTIONS advanceNondeterministic(ACTIONS randAction, Random cmpRand) {
+    public ACTIONS advanceNondetSpecific(ACTIONS randAction) {
         if(isNextActionDeterministic) {
             throw new RuntimeException("Next action is deterministic but called advanceNondeterministic()");
         }
@@ -547,11 +555,17 @@ public class StateObserver2048Slow extends ObsNondetBase implements StateObsNond
 
         return randAction;
     }
-    
-    public ACTIONS advanceNondeterministic(Random cmpRand) {
-        setNextNondeterministicAction();
 
-        return advanceNondeterministic(nextNondeterministicAction, null);
+    /**
+     * Advance the current afterstate to a new state (do the nondeterministic part of advance)
+     *
+     * Choose the nondeterministic tile value according to its probability of occurence (!)
+     * @param cmpRand   if non-null, use this (reproducible) RNG instead of StateObservation's RNG
+     */
+    public ACTIONS advanceNondeterministic(Random cmpRand) {
+        setNextNondeterministicAction(cmpRand);
+
+        return this.advanceNondetSpecific(nextNondeterministicAction);
     }
 
     /**
@@ -561,20 +575,27 @@ public class StateObserver2048Slow extends ObsNondetBase implements StateObsNond
      * 2 = second Tile, value 2
      * 3 = second Tile, value 4
      * ....
+     * Choose the nondeterministic action according to its probability of occurence (!)
+     * @param cmpRand   if non-null, use this (reproducible) RNG instead of StateObservation's RNG
      */
-    private void setNextNondeterministicAction() {
+    private void setNextNondeterministicAction(Random cmpRand) {
         if(isNextActionDeterministic) {
             throw new RuntimeException("next Action is Deterministic");
         } else if(nextNondeterministicAction != null) {
             return;
         }
-
+        Random rng;
+        if (cmpRand==null) {
+            rng = this.random;
+        } else {
+            rng = cmpRand;
+        }
 
         //select a Tile
-        int action = random.nextInt(emptyTiles.size()) * 2;
+        int action = rng.nextInt(emptyTiles.size()) * 2;
 
         //select the new Tile Value
-        if(random.nextInt(10) == 9) {
+        if(rng.nextInt(10) == 9) {
             action += 1;
         }
 
@@ -593,7 +614,7 @@ public class StateObserver2048Slow extends ObsNondetBase implements StateObsNond
     }
 
     public ACTIONS getNextNondeterministicAction() {
-        setNextNondeterministicAction();
+        setNextNondeterministicAction(null);
 
         return nextNondeterministicAction;
     }
@@ -876,10 +897,17 @@ public class StateObserver2048Slow extends ObsNondetBase implements StateObsNond
         System.out.println();
     }
 
-    public void addRandomTile () {
+    public void addRandomTile(Random cmpRand) {
+        Random rng;
+        if (cmpRand==null) {
+            rng = this.random;
+        } else {
+            rng = cmpRand;
+        }
+
         if(emptyTiles.size() > 0) {
-            Tile tile = emptyTiles.get(random.nextInt(emptyTiles.size()));
-            addTile(tile, ConfigGame.STARTINGVALUES[random.nextInt(ConfigGame.STARTINGVALUES.length)]);
+            Tile tile = emptyTiles.get(rng.nextInt(emptyTiles.size()));
+            addTile(tile, ConfigGame.STARTINGVALUES[rng.nextInt(ConfigGame.STARTINGVALUES.length)]);
         }
     }
 
@@ -1049,7 +1077,7 @@ public class StateObserver2048Slow extends ObsNondetBase implements StateObsNond
         }
     }
 
-    private void newBoard() {
+    private void newBoard(Random cmpRand) {
         gameBoard = new Tile[ConfigGame.ROWS][ConfigGame.COLUMNS];
         for(int row = 0; row < ConfigGame.ROWS; row++) {
             for(int column = 0; column < ConfigGame.COLUMNS; column++) {
@@ -1062,7 +1090,7 @@ public class StateObserver2048Slow extends ObsNondetBase implements StateObsNond
         winState = 0;
 
         for(int i = ConfigGame.STARTINGFIELDS; i > 0; i--) {
-            addRandomTile();
+            addRandomTile(cmpRand);
         }
 
         updateAvailableMoves();

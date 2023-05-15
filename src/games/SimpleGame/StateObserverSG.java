@@ -141,7 +141,7 @@ public class StateObserverSG extends ObsNondetBase implements StateObsNondetermi
 	}
 
 	@Override
-	public ACTIONS advanceNondeterministic(ACTIONS randAction, Random cmpRand) {
+	public ACTIONS advanceNondetSpecific(ACTIONS randAction) {
 		advanceNondeterministic(null);
 		return randAction;
 	}

@@ -232,6 +232,17 @@ public class Types {
         public double[] getVTable() {
         	return vTable;
         }
+
+		/**
+		 * For games where the vTable codes [-1,+1] = [player loses, wins certainly] and values in between a certain
+		 * degree of losing or winning:
+		 * @return	the probability that player wins for each vTable entry
+		 */
+		public double[] getWinProb() {
+        	double[] pwin = new double[vTable.length];
+        	for (int i=0; i< vTable.length; i++) pwin[i] = (vTable[i]+1)/2;
+        	return pwin;
+		}
         
         public double getVBest() {
         	return vBest;

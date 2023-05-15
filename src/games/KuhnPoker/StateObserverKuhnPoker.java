@@ -340,7 +340,7 @@ public class StateObserverKuhnPoker extends ObsNondetBase implements StateObsNon
 		setAvailableActions();
 	}
 
-	public ACTIONS advanceNondeterministic(ACTIONS randAction, Random cmpRand) {
+	public ACTIONS advanceNondetSpecific(ACTIONS randAction) {
 		if(isRoundOver())
 			return randAction;
 		if (isNextActionDeterministic) {
@@ -411,7 +411,7 @@ public class StateObserverKuhnPoker extends ObsNondetBase implements StateObsNon
 	public ACTIONS advanceNondeterministic(Random cmpRand) {
 		ArrayList<ACTIONS> possibleRandoms = getAvailableRandoms();
 		ACTIONS act = possibleRandoms.get(ThreadLocalRandom.current().nextInt(possibleRandoms.size()));
-		advanceNondeterministic(act, null);
+		advanceNondetSpecific(act);
 
 		return act;
 	}

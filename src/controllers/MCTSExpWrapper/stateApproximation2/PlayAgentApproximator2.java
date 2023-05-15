@@ -30,7 +30,7 @@ public final class PlayAgentApproximator2 implements Approximator2 {
      */
     @Override
     public Tuple<ScoreTuple, double[]> predict(final StateObservation stateObservation) {
-        final var actions_vt = agent.getNextAction2(stateObservation, false, true);
+        final var actions_vt = agent.getNextAction2(stateObservation, false, false, true);
         return new Tuple<>(
             actions_vt.getScoreTuple(),         // TODO: Check if this ScoreTuple contains the right values
             moveProbabilitiesForVTable(actions_vt.getVTable(), stateObservation)
@@ -38,7 +38,7 @@ public final class PlayAgentApproximator2 implements Approximator2 {
     }
 
     public Types.ACTIONS_VT getNextAction(StateObservation stateObservation) {
-        return agent.getNextAction2(stateObservation, false, true);
+        return agent.getNextAction2(stateObservation, false, false, true);
     }
 
     private static double[] moveProbabilitiesForVTable(final double[] vTable, final StateObservation stateObservation) {

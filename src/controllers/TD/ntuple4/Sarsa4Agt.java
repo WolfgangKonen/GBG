@@ -228,10 +228,12 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 	/**
 	 * Get the best next action and return it 
 	 * 
-	 * @param so			current game state (is returned unchanged)
-	 * @param random		allow random action selection with probability m_epsilon
-	 * @param silent		operate silently
-	 * @return actBest		the best action. If several actions have the same
+	 * @param so            current game state (is returned unchanged)
+	 * @param random        allow random action selection with probability m_epsilon
+	 * @param deterministic
+	 * 			if true, the agent acts deterministically in case of several equivalent best actions (reproducibility)
+     * @param silent        operate silently
+     * @return actBest		the best action. If several actions have the same
 	 * 						score, break ties by selecting one of them at random. 
 	 * <p>						
 	 * actBest has the predicate isRandomAction()  (true: if action was selected
@@ -240,7 +242,7 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 	 * action (as returned by so.getAvailableActions()) and the Q value for the best action actBest.
 	 */
 	@Override
-	public ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
+	public ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean deterministic, boolean silent) {
 		int i;
 		double bestQValue;
         double qValue;			// the quantity to be maximized
@@ -303,9 +305,14 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 			}
 
         }
-        assert bestActions.size()>0; 
-        actBest = bestActions.get(rand.nextInt(bestActions.size()));
-        // if several actions have the same best Q value, select one of them randomly
+        assert bestActions.size()>0;
+		if (deterministic) {
+			actBest = bestActions.get(0);
+			// if several actions have the same best value, select the first one
+		} else {
+			actBest = bestActions.get(rand.nextInt(bestActions.size()));
+			// if several actions have the same best value, select one of them randomly
+		}
 
         assert actBest != null : "Oops, no best action actBest";
 		NewSO = so.copy();
@@ -384,7 +391,7 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 			a_next = null;
 			qValue = 0.0;
 		} else {
-			a_next = getNextAction2(s_next.partialState(),true,true);
+			a_next = getNextAction2(s_next.partialState(),true, false, true);
 			StateObsWithBoardVector nextSOWB = new StateObsWithBoardVector(s_next,m_Net.xnf);	// WK: NEW: next state instead of afterstate
         	qValue = m_Net.getQFunc(nextSOWB,nextPlayer,a_next);
 		}
@@ -531,7 +538,7 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 		if (epiLength==-1) epiLength = Integer.MAX_VALUE;
 				
 		StateObservation s_t = so.copy();
-		a_next = acting_pa.getNextAction2(s_t.partialState(), true, true);
+		a_next = acting_pa.getNextAction2(s_t.partialState(), true, false, true);
 		ACTIONS a_t = a_next;
 		for (int n=0; n<numPlayers; n++) {
 			sLast[n] = (n==nextPlayer ? s_t : null);	// nextPlayer is X=so.getPlayer()

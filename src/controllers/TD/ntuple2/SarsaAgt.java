@@ -223,10 +223,11 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 	/**
 	 * Get the best next action and return it 
 	 * 
-	 * @param so			current game state (is returned unchanged)
-	 * @param random		allow random action selection with probability m_epsilon
-	 * @param silent		control verbosity
-	 * @return actBest		the best action. If several actions have the same
+	 * @param so            current game state (is returned unchanged)
+	 * @param random        allow random action selection with probability m_epsilon
+	 * @param deterministic
+     * @param silent        control verbosity
+     * @return actBest		the best action. If several actions have the same
 	 * 						score, break ties by selecting one of them at random. 
 	 * <p>						
 	 * actBest has predicate isRandomAction()  (true: if action was selected 
@@ -235,7 +236,7 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 	 * action (as returned by so.getAvailableActions()) and the Q value for the best action actBest.
 	 */
 	@Override
-	public Types.ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
+	public Types.ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean deterministic, boolean silent) {
 		int i;
 		double bestQValue;
         double qValue;			// the quantity to be maximized
@@ -394,7 +395,7 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 			a_next = null;
 			qValue = 0.0;
 		} else {
-			a_next = getNextAction2(s_next.partialState(),true,true);
+			a_next = getNextAction2(s_next.partialState(),true, false, true);
 			StateObsWithBoardVector nextSOWB = new StateObsWithBoardVector(s_next,m_Net.xnf);	// WK: NEW: next state instead of afterstate
         	qValue = m_Net.getQFunc(nextSOWB,nextPlayer,a_next);
 		}
@@ -520,7 +521,7 @@ public class SarsaAgt extends NTupleBase implements PlayAgent,NTupleAgt,Serializ
 		if (epiLength==-1) epiLength = Integer.MAX_VALUE;
 
 		StateObservation s_t = so.copy();
-		a_next = getNextAction2(s_t.partialState(), true, true);
+		a_next = getNextAction2(s_t.partialState(), true, false, true);
 		ACTIONS a_t = a_next;
 		for (int n=0; n<numPlayers; n++) {
 			sLast[n] = (n==nextPlayer ? s_t : null);	// nextPlayer is X=so.getPlayer()

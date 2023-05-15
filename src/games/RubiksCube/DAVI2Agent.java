@@ -67,7 +67,7 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
 
 	// param random is just for the interface, not used here
 	@Override
-	public ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
+	public ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean deterministic, boolean silent) {
 		int i;
 		StateObserverCube newSO;
         ACTIONS actBest;
@@ -151,7 +151,7 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
 		do {
 	        m_numTrnMoves++;		// number of train moves 
 	        
-			a_t = getNextAction2(s_t.partialState(), false, true);	// choose action a_t (agent-specific behavior)
+			a_t = getNextAction2(s_t.partialState(), false, false, true);	// choose action a_t (agent-specific behavior)
 	        // put the best value from V-table for state s_t into the HashMap
 			double stepReward = s_t.getStepRewardTuple().scTup[0];
 			if (a_t.getVBest()>stepReward+LOW_V)		// stepReward is c in pseudo code

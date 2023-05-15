@@ -103,7 +103,7 @@ public class EvaluatorNim2P extends Evaluator {
  	private EvalResult evaluateAgent0(PlayAgent pa, GameBoard gb, double thresh) {
  		StateObservation so = gb.getDefaultStartState(null);
 //		lastResult = XArenaFuncs.competeBoth(pa, random_agent, so, 100, 0, gb);
-		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pa,random_agent), so, 100, 0, null, null);
+		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pa,random_agent), so, 100, 0, null, null, false);
 		lastResult = sc.scTup[0];
 		m_msg = pa.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>0) System.out.println(m_msg);
@@ -125,7 +125,7 @@ public class EvaluatorNim2P extends Evaluator {
 			return new EvalResult(lastResult, false, m_msg, m_mode, thresh);
 		}
 //		lastResult = XArenaFuncs.competeBoth(pa, opponent, so, 1, 0, gb);
-		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pa,opponent), so, 10, 0, null, null);
+		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pa,opponent), so, 10, 0, null, null, false);
 		lastResult = sc.scTup[0];
 		m_msg = pa.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>0) System.out.println(m_msg);
@@ -169,7 +169,7 @@ public class EvaluatorNim2P extends Evaluator {
 //											// resp. \in [-1,0], if opponent never looses.
 //											// +1 is best for pa, -1 worst for pa.
 //			lastResult += (resX+resO)/2.0;
-			ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pa,opponent), startSO, competeNum, 0, null, null);
+			ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pa,opponent), startSO, competeNum, 0, null, null, false);
     		success = sc.scTup[0];
     		averageSuccess += success;
 		}

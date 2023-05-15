@@ -722,10 +722,10 @@ public class StateObserverPoker extends ObsNondetBase implements StateObsNondete
 	 * - 53 -&gt; determine winner of the round
 	 * - 53 -&gt; determine winner of the round
 	 * @param randAction to advance the state of the game
-	 * @param cmpRand
+	 *
 	 *
      */
-	public ACTIONS advanceNondeterministic(ACTIONS randAction, Random cmpRand) {
+	public ACTIONS advanceNondetSpecific(ACTIONS randAction) {
 		if(isRoundOver())
 			return randAction;
 		if (isNextActionDeterministic) {
@@ -814,7 +814,7 @@ public class StateObserverPoker extends ObsNondetBase implements StateObsNondete
 		//advanceNondeterministic(possibleRandoms.get(rand.nextInt(possibleRandoms.size())));
 		// above doesn't provide sufficiently random results
 		ACTIONS act = possibleRandoms.get(ThreadLocalRandom.current().nextInt(possibleRandoms.size()));
-		advanceNondeterministic(act, null);
+		advanceNondetSpecific(act);
 
 		return act;
 	}

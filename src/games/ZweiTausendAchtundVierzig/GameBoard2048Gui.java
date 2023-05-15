@@ -372,7 +372,7 @@ public class GameBoard2048Gui extends JFrame {
 
     public void clearBoard(boolean boardClear, boolean vClear) {
         if (boardClear) {
-        	m_gb.m_so = new StateObserver2048();
+        	//m_gb.m_so = new StateObserver2048();      // DON'T! WK/05/2023
             for (int pos = 0; pos < ConfigGame.ROWS * ConfigGame.COLUMNS; pos++) {
                 updateBoardLabel(pos);
             }

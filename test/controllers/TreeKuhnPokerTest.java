@@ -152,7 +152,7 @@ public class TreeKuhnPokerTest extends GBGBatch {
                 // now measure the reaction of player 0 (one out of 0 (FOLD), 1 (CHECK), 2 (BET), 3 (CALL)):
                 int[] actHist = new int[4];
                 for (int m = 0; m < 20; m++) {
-                    Types.ACTIONS_VT act = pa.getNextAction2(startSO.partialState(), false, true);
+                    Types.ACTIONS_VT act = pa.getNextAction2(startSO.partialState(), false, false, true);
                     actHist[act.toInt()]++;
 
                     //printDetailedResults(act);
@@ -293,7 +293,7 @@ public class TreeKuhnPokerTest extends GBGBatch {
                 // now measure the reaction of player 1 (one out of 0 (FOLD), 1 (CHECK), 2 (BET), 3 (CALL)):
                 int[] actHist = new int[4];
                 for (int m = 0; m < 20; m++) {
-                    Types.ACTIONS_VT act = pa.getNextAction2(startSO.partialState(), false, true);
+                    Types.ACTIONS_VT act = pa.getNextAction2(startSO.partialState(), false, false, true);
                     actHist[act.toInt()]++;
 
                     //printDetailedResults(act);

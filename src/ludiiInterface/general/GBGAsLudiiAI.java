@@ -148,7 +148,7 @@ public class GBGAsLudiiAI extends AI {
 
             StateObserverOthelloTranslationLayer soo2 = new StateObserverOthelloTranslationLayer(context, playerID);
 
-            Types.ACTIONS gbgAction = gbgAgent.getNextAction2(soo2.partialState(), false, true);
+            Types.ACTIONS gbgAction = gbgAgent.getNextAction2(soo2.partialState(), false, false, true);
             for (Move move : moves) {
                 if (move.to() == index.getLudiiIndexFromGBG(gbgAction.toInt())) returnMove = Optional.of(move);
             }
@@ -165,7 +165,7 @@ public class GBGAsLudiiAI extends AI {
         Optional<Move> returnMove = Optional.empty();
 
         SystemConversionYavalath index = new SystemConversionYavalath();
-        Types.ACTIONS gbgAction = gbgAgent.getNextAction2(new StateObserverYavalathTranslationLayer(context, playerID).partialState(),false, true);
+        Types.ACTIONS gbgAction = gbgAgent.getNextAction2(new StateObserverYavalathTranslationLayer(context, playerID).partialState(),false, false, true);
 
         FastArrayList<Move> moves = game.moves(context).moves();
         for(Move move : moves){
@@ -197,7 +197,7 @@ public class GBGAsLudiiAI extends AI {
 
         Types.ACTIONS gbgAction =null;
         try {
-            gbgAction = gbgAgent.getNextAction2(sohex,false,true);
+            gbgAction = gbgAgent.getNextAction2(sohex,false, false, true);
         } catch (Exception e){
             Util.errorDialog(e);
         }
@@ -241,7 +241,7 @@ public class GBGAsLudiiAI extends AI {
         } else {
             // gbgAgent might realize there's no available action in case of a draw and throw an exception
             try{
-                gbgAction = gbgAgent.getNextAction2(new StateObserverC4TranslationLayer(context, playerID).partialState(), false, true).toInt();
+                gbgAction = gbgAgent.getNextAction2(new StateObserverC4TranslationLayer(context, playerID).partialState(), false, false, true).toInt();
             } catch( Exception e){
                 // check whether exception was caused by a draw and assign a pass move to gbgAction
                 StateObserverC4TranslationLayer obs = new StateObserverC4TranslationLayer(context,playerID);
@@ -285,7 +285,7 @@ public class GBGAsLudiiAI extends AI {
         StateObserverNimTranslationLayer sobTNim = new StateObserverNimTranslationLayer(context, playerID, numberHeaps);
         FastArrayList<Move> moves = game.moves(context).moves();
 
-        Types.ACTIONS gbgAction = gbgAgent.getNextAction2(sobTNim.partialState(), false, true);
+        Types.ACTIONS gbgAction = gbgAgent.getNextAction2(sobTNim.partialState(), false, false, true);
         int moveRep = (gbgAction.toInt() % NimConfig.MAX_MINUS) + 1;  // calculates how many objects are taken off heap
 
         for (Move move : moves) {

@@ -63,7 +63,7 @@ public class EvaluatorSG extends Evaluator {
  		double avgReward=0.0;
  		for (int i=0; i<NUMEPISODES; i++) {
 			StateObservation so = gb.getDefaultStartState(null);
-			Types.ACTIONS_VT actBest = pa.getNextAction2(so.partialState(), false, true);
+			Types.ACTIONS_VT actBest = pa.getNextAction2(so.partialState(), false, false, true);
 			so.advance(actBest, null);
 			avgReward += so.getGameScore(so.getPlayer());
 		}
@@ -83,7 +83,7 @@ public class EvaluatorSG extends Evaluator {
 		double percCorrect=0.0;
 		for (int i=0; i<NUMEPISODES; i++) {
 			StateObserverSG so = (StateObserverSG) gb.getDefaultStartState(null);
-			Types.ACTIONS_VT actBest = pa.getNextAction2(so.partialState(), false, true);
+			Types.ACTIONS_VT actBest = pa.getNextAction2(so.partialState(), false, false, true);
 			if (so.get_sum() < 4)
 				if (actBest.toInt() == 0) {
 					percCorrect += 1;        // correct HIT

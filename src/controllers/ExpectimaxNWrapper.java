@@ -55,7 +55,7 @@ public class ExpectimaxNWrapper extends ExpectimaxNAgent implements Serializable
 		// this is just for safety: if sob needs a deterministic next move, return the ScoreTuple of actBest.
 		// But it may contain the wrong score in relation to the game's final score, so a warning is issued:
 		System.err.println("[estimateGameValueTuple] WARNING: we should not get here in the getNextAction2-branch!");
-		Types.ACTIONS_VT actBest = wrapped_pa.getNextAction2(sob,false,true);
+		Types.ACTIONS_VT actBest = wrapped_pa.getNextAction2(sob,false, false, true);
 		return actBest.getScoreTuple();
 
 	}

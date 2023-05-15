@@ -7,6 +7,7 @@ import java.util.Locale;
 import java.util.Random;
 
 import controllers.AgentBase;
+import controllers.PlayAgent;
 import controllers.RandomAgent;
 import games.Arena;
 import games.StateObsWithBoardVector;
@@ -33,7 +34,7 @@ abstract public class NTuple4Base extends AgentBase implements NTuple4Agt, Seria
 
 	/**
 	 * Controls the amount of explorative moves in
-	 * {@link TDNTuple4Agt#getNextAction2(StateObservation, boolean, boolean)}
+	 * {@link PlayAgent#getNextAction2(StateObservation, boolean, boolean, boolean)}
 	 * during training. <br>
 	 * m_epsilon = 0.0: no random moves, <br>
 	 * m_epsilon = 0.1 (def.): 10% of the moves are random, and so forth

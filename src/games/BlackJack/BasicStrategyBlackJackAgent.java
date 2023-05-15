@@ -4,17 +4,12 @@ import controllers.AgentBase;
 import controllers.MC.MCAgentConfig;
 import controllers.MC.RandomSearch;
 import controllers.PlayAgent;
-import games.Evaluator;
 import games.StateObservation;
 import params.ParMC;
-import tools.ScoreTuple;
 import tools.Types;
 
 import java.util.ArrayList;
 import java.util.Random;
-
-import javax.swing.*;
-import javax.swing.plaf.nimbus.State;
 
 public class BasicStrategyBlackJackAgent extends AgentBase implements PlayAgent {
 
@@ -45,14 +40,15 @@ public class BasicStrategyBlackJackAgent extends AgentBase implements PlayAgent 
      * Get the best next action and return it
      * (NEW version: returns ACTIONS_VT)
      *
-     * @param sob			current game state (is returned unchanged)
-     * @param random		not used
+     * @param sob            current game state (is returned unchanged)
+     * @param random        not used
+     * @param deterministic
      * @param silent        no output
      * @return actBest		the best action according to Basic Strategy.
      *
      */
     @Override
-    public Types.ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean silent) {
+    public Types.ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean deterministic, boolean silent) {
         StateObserverBlackJack m_so;
         int actVal = -1;
 

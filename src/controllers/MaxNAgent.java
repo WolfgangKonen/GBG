@@ -100,10 +100,12 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 	
 	/**
 	 * Get the best next action and return it
-	 * @param so			current game state (not changed on return)
-	 * @param random		allow epsilon-greedy random action selection (not relevant in MaxNAgent)
-	 * @param silent		true: no print-out
-	 * @return actBest		the best action 
+	 * @param so            current game state (not changed on return)
+	 * @param random        allow epsilon-greedy random action selection (not relevant in MaxNAgent)
+	 * @param deterministic
+	 * 			if true, the agent acts deterministically in case of several equivalent best actions (reproducibility)
+     * @param silent        true: no print-out
+     * @return actBest		the best action
 	 * <p>						
 	 * actBest has predicate isRandomAction()  (true: if action was selected 
 	 * at random, false: if action was selected by agent).<br>
@@ -112,10 +114,10 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 	 * 
 	 */	
 	@Override
-	public ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
+	public ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean deterministic, boolean silent) {
 
         // this starts the recursion:
-		ACTIONS_VT act_vt = getBestAction(so, so,  silent, 0, null);
+		ACTIONS_VT act_vt = getBestAction(so, so,  silent, 0, deterministic, null);
 		
 		return act_vt;
 	}
@@ -128,11 +130,13 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 	 * @param refer		(not used currently) referring game state (=so on initial call)	
 	 * @param silent	true: no print-out
 	 * @param depth		tree depth
+	 * @param deterministic
+	 * 			if true, the agent acts deterministically in case of several equivalent best actions (reproducibility)
 	 * @param prevTuple TODO
 	 * @return		best action + score tuple
 	 */
 	private ACTIONS_VT getBestAction(StateObservation so, StateObservation refer,
-			boolean silent, int depth, ScoreTuple prevTuple) 
+			boolean silent, int depth, boolean deterministic, ScoreTuple prevTuple)
 	{
 		assert so.isLegalState() : "Not a legal state";
 
@@ -170,7 +174,7 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
     	        	sc = retrieveFromHashMap(m_useHashMap,stringRep);
     				if (sc==null) {
     					// here is the recursion: getAllScores may call getBestAction back:
-    					currScoreTuple = getAllScores(NewSO,refer,depth+1, prevTuple);
+    					currScoreTuple = getAllScores(NewSO,refer,depth+1, deterministic, prevTuple);
     					
     					if (m_useHashMap) {
     						hm.put(stringRep, currScoreTuple);
@@ -213,10 +217,14 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 				scBest = new ScoreTuple(currScoreTuple);
         	}
         } // for
-        
-        // There might be one or more than one action with minValue. 
-        // Break ties by selecting one of them randomly:
-        actBest = bestActions.get(rand.nextInt(bestActions.size()));
+		assert bestActions.size()>0;
+		if (deterministic) {
+			actBest = bestActions.get(0);
+			// if several actions have the same best value, select the first one
+		} else {
+			actBest = bestActions.get(rand.nextInt(bestActions.size()));
+			// if several actions have the same best value, select one of them randomly
+		}
 
         assert actBest != null : "Oops, no best action actBest";
         // optional: print the best action
@@ -256,14 +264,15 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 //	}
 	@Override
 	public ScoreTuple getScoreTuple(StateObservation sob, ScoreTuple prevTuple) {
-		return getAllScores(sob,sob,0, null);
+		return getAllScores(sob,sob,0, false, null);
 	}
 
-	private ScoreTuple getAllScores(StateObservation sob, StateObservation refer, int depth, ScoreTuple prevTuple) {
+	private ScoreTuple getAllScores(StateObservation sob, StateObservation refer, int depth,
+									boolean deterministic, ScoreTuple prevTuple) {
         ACTIONS_VT act_vt;
 
 		// here is the recursion: getBestAction calls getAllScores(...,depth+1):
-		act_vt = getBestAction(sob, refer, true, depth, prevTuple);
+		act_vt = getBestAction(sob, refer, true, depth, deterministic, prevTuple);
 		
 		return act_vt.getScoreTuple();		// return ScoreTuple for best action
 	}

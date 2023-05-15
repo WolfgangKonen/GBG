@@ -69,7 +69,7 @@ class SingleCompetitor {
                         PlayAgtVector paVector = new PlayAgtVector(qa, edaxAgent);
                         for (int p_MWrap : new int[]{0, 1}) {     // p_MWrap: whether MCTSWrapper is player 0 or player 1
                             startTime = System.currentTimeMillis();
-                            sc = XArenaFuncs.competeNPlayer(paVector.shift(p_MWrap), 0, so, numEpisodes, 0, null, null, null);
+                            sc = XArenaFuncs.competeNPlayer(paVector.shift(p_MWrap), 0, so, numEpisodes, 0, null, null, null, false);
                             winrate = (sc.scTup[p_MWrap] + 1) / 2;
                             deltaTime = (double) (System.currentTimeMillis() - startTime) / 1000.0;
                             mCompete = new MCompeteMWrap(i, agtFile, numEpisodes, d, iter,

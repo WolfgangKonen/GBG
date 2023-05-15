@@ -87,7 +87,7 @@ public class HeuristicSettings2048 implements IObjectiveFunction {
                 StateObserver2048 so = new StateObserver2048();
 
                 while (!so.isGameOver()) {
-                    Types.ACTIONS action = mctseAgt.getNextAction2(so.partialState(), false, true);
+                    Types.ACTIONS action = mctseAgt.getNextAction2(so.partialState(), false, false, true);
                     so.advance(action, null);
                 }
 

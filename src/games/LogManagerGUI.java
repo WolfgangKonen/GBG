@@ -311,7 +311,7 @@ public class LogManagerGUI {
     		    currentState.setAvailableActions();
     		    if (currentState.getNumAvailableActions()>0) {
                     paX.resetAgent();
-                    Types.ACTIONS_VT paact = paX.getNextAction2(currentState,false,true);
+                    Types.ACTIONS_VT paact = paX.getNextAction2(currentState,false, false, true);
                     currentState.storeBestActionInfo(paact);
                 }
             }

@@ -40,7 +40,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	protected TD_func m_Net;
 	/**
 	 * Controls the amount of explorative moves in
-	 * {@link #getNextAction2(StateObservation, boolean, boolean)}
+	 * {@link PlayAgent#getNextAction2(StateObservation, boolean, boolean, boolean)}
 	 * during training. <br>
 	 * m_epsilon = 0.0: no random moves, <br>
 	 * m_epsilon = 0.1 (def.): 10% of the moves are random, and so forth
@@ -171,10 +171,11 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	 * Get the best next action and return it 
 	 * (NEW version: ACTIONS_VT and recursive part for multi-moves)
 	 * 
-	 * @param so			current game state (is returned unchanged)
-	 * @param random		allow random action selection with probability m_epsilon
-	 * @param silent        no printout
-	 * @return actBest		the best action. If several actions have the same
+	 * @param so            current game state (is returned unchanged)
+	 * @param random        allow random action selection with probability m_epsilon
+	 * @param deterministic
+     * @param silent        no printout
+     * @return actBest		the best action. If several actions have the same
 	 * 						score, break ties by selecting one of them at random. 
 	 * <p>						
 	 * actBest has predicate isRandomAction()  (true: if action was selected 
@@ -183,7 +184,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	 * action (as returned by so.getAvailableActions()) and the value for the best action actBest.
 	 */
 	@Override
-	public Types.ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) 
+	public Types.ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean deterministic, boolean silent)
 	{
 		if (so.getNumPlayers()>2)
 			return getNextAction4(so, so, random, silent);
@@ -522,7 +523,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 		}
 		int counter=0;		// count the number of moves
 		while (true) {
-			actBest = acting_pa.getNextAction2(so.partialState(), true, true);
+			actBest = acting_pa.getNextAction2(so.partialState(), true, false, true);
 			randomMove = actBest.isRandomAction();
 			oldSO = so.copy();
 			so.advance(actBest, null);
@@ -660,7 +661,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 					firstRound = false;
 			}
 			
-			actBest = acting_pa.getNextAction2(so.partialState(), true, true);
+			actBest = acting_pa.getNextAction2(so.partialState(), true, false, true);
 			randomMove = actBest.isRandomAction();
 			so.advance(actBest, null);
 			so.storeBestActionInfo(actBest);	// /WK/ was missing before 2021-09-10. Now stored ScoreTuple is up-to-date.

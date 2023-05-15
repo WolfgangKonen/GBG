@@ -53,7 +53,7 @@ public class ExpectimaxNWrapperTest extends GBGBatch {
 
             for (Types.ACTIONS startR : startRandoms) {
                 so = (StateObserverEWN) startSO.copy();
-                so.advanceNondeterministic(startR, null);
+                so.advanceNondetSpecific(startR);
 
                 //System.out.println("\n*** Episode with dice value "+startR.toInt()+ " starts ***");
                 //System.out.print(so);
@@ -107,7 +107,7 @@ public class ExpectimaxNWrapperTest extends GBGBatch {
             ArrayList<Types.ACTIONS> startRandoms = startSO.getAvailableRandoms();
 
             for (Types.ACTIONS startR : startRandoms) {
-                startSO.advanceNondeterministic(startR, null);
+                startSO.advanceNondetSpecific(startR);
                 ArrayList<Types.ACTIONS> nextActions = startSO.getAvailableActions();
 
                 //System.out.print(startSO);
@@ -127,7 +127,7 @@ public class ExpectimaxNWrapperTest extends GBGBatch {
 
     private void innerEWrapTest(PlayAgent qaDeep, PlayAgent qaShallow, StateObserverEWN so, boolean silent, String text) {
         StateObserverEWN afterstate, newSO;
-        Types.ACTIONS_VT act_pa = qaDeep.getNextAction2(so.partialState(),false,silent);
+        Types.ACTIONS_VT act_pa = qaDeep.getNextAction2(so.partialState(),false, false, silent);
         double vA = act_pa.getVBest();
         afterstate = (StateObserverEWN) so.copy();
         afterstate.advance(act_pa, null);
@@ -137,8 +137,8 @@ public class ExpectimaxNWrapperTest extends GBGBatch {
         double prob;
         for (Types.ACTIONS r : nextRandoms) {
             newSO = (StateObserverEWN) afterstate.copy();
-            newSO.advanceNondeterministic(r, null);
-            act_pa = qaShallow.getNextAction2(newSO.partialState(),false,silent);
+            newSO.advanceNondetSpecific(r);
+            act_pa = qaShallow.getNextAction2(newSO.partialState(),false, false, silent);
             prob = afterstate.getProbability(r);
             vNew += act_pa.getVBest()*prob;
         }

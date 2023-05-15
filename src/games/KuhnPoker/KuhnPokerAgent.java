@@ -3,7 +3,6 @@ package games.KuhnPoker;
 import controllers.AgentBase;
 import controllers.PlayAgent;
 import games.StateObservation;
-import params.ParOther;
 import tools.Types;
 
 import java.util.ArrayList;
@@ -49,9 +48,10 @@ public class KuhnPokerAgent extends AgentBase implements PlayAgent {
      * Get the best next action and return it
      * (NEW version: returns ACTIONS_VT and has a recursive part for multi-moves)
      *
-     * @param so			current game state (is returned unchanged)
-     * @param random		allow random action selection with probability m_epsilon
-     * @param silent		execute silently without outputs
+     * @param so            current game state (is returned unchanged)
+     * @param random        allow random action selection with probability m_epsilon
+     * @param deterministic
+     * @param silent        execute silently without outputs
      * @return actBest		the best action. If several actions have the same
      * 						score, break ties by selecting one of them at random.
      * <p>
@@ -61,7 +61,7 @@ public class KuhnPokerAgent extends AgentBase implements PlayAgent {
      * action (as returned by so.getAvailableActions()) and vBest to store the value for the best action actBest.
      */
     @Override
-    public Types.ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
+    public Types.ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean deterministic, boolean silent) {
 
         if(!(so instanceof StateObserverKuhnPoker)){
             throw new RuntimeException("This Agent is only suitable for KuhnPoker.");

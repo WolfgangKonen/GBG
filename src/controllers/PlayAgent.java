@@ -27,9 +27,10 @@ public interface PlayAgent {
 	 * Get the best next action and return it 
 	 * (NEW version: returns ACTIONS_VT and has a recursive part for multi-moves)
 	 * 
-	 * @param sob			current game state (is returned unchanged)
-	 * @param random		allow random action selection with probability m_epsilon
-	 * @param silent		whether to be silent
+	 * @param sob            current game state (is returned unchanged)
+	 * @param random        allow random action selection with probability m_epsilon
+	 * @param deterministic whether to act deterministic (if several actions have best value, return the 1st one)
+	 * @param silent        whether to be silent
 	 * @return actBest		the best action. If several actions have the same
 	 * 						score, break ties by selecting one of them at random. 
 	 * <p>						
@@ -38,7 +39,7 @@ public interface PlayAgent {
 	 * actBest has also the members vTable to store the value for each available
 	 * action (as returned by so.getAvailableActions()) and vBest to store the value for the best action actBest.
 	 */
-	Types.ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean silent);
+	Types.ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean deterministic, boolean silent);
 	
 //	/**
 //	 * Return the agent's estimate of the final score for that game state.
@@ -230,7 +231,7 @@ public interface PlayAgent {
 	/**
 	 * reset agent when starting a new episode
 	 * (needed when re-using an agent, e.g. in competeNum episodes during a competition
-	 * {@link games.XArenaFuncs#competeNPlayer(PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], java.util.ArrayList, java.util.Random)})
+	 * {@link games.XArenaFuncs#competeNPlayer(PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], java.util.ArrayList, java.util.Random, boolean)})
 	 */
 	void resetAgent();
 

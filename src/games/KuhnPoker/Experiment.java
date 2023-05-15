@@ -75,7 +75,7 @@ public class Experiment {
         do {
             so = new StateObserverKuhnPoker();
         }while(so.getHoleCards(0)[0].getRank()!=9);
-        Types.ACTIONS actBest = mctsex.getNextAction2(so.partialState(), false, true);
+        Types.ACTIONS actBest = mctsex.getNextAction2(so.partialState(), false, false, true);
         System.out.println(actBest.toInt());
     }
 
@@ -92,7 +92,7 @@ public class Experiment {
 
         MCAgentN mc = new MCAgentN(mcpar);
 
-        Types.ACTIONS act = mc.getNextAction2(so.partialState(), false, true);
+        Types.ACTIONS act = mc.getNextAction2(so.partialState(), false, false, true);
 
     }
 
@@ -505,7 +505,7 @@ public class Experiment {
 
                 while (true) {
                     long startTNano = System.nanoTime();
-                    actBest = qaVector.pavec[player].getNextAction2(so.partialState(), false, true);
+                    actBest = qaVector.pavec[player].getNextAction2(so.partialState(), false, false, true);
 
                     so.advance(actBest, null);
                     if (so.isRoundOver()) {
@@ -800,7 +800,7 @@ public class Experiment {
 
                 while (true) {
                     long startTNano = System.nanoTime();
-                    actBest = qaVector.pavec[player].getNextAction2(so.partialState(), false, true);
+                    actBest = qaVector.pavec[player].getNextAction2(so.partialState(), false, false, true);
 
                     so.advance(actBest, null);
                     if (so.isGameOver()) {
@@ -1391,7 +1391,7 @@ public class Experiment {
 
             while (true) {
                 long startTNano = System.nanoTime();
-                actBest = paVector.pavec[player].getNextAction2(so.partialState(), false, nextMoveSilent);
+                actBest = paVector.pavec[player].getNextAction2(so.partialState(), false, false, nextMoveSilent);
                 so.advance(actBest, null);
 
                 if (so.isGameOver()) {
@@ -1498,7 +1498,7 @@ public class Experiment {
 
             while (true) {
                 long startTNano = System.nanoTime();
-                actBest = paVector.pavec[player].getNextAction2(so.partialState(), false, nextMoveSilent);
+                actBest = paVector.pavec[player].getNextAction2(so.partialState(), false, false, nextMoveSilent);
                 so.advance(actBest, null);
 
                 if (so.isGameOver()) {
@@ -1573,7 +1573,7 @@ public class Experiment {
         so = startSO.copy();
 
         while (true) {
-            actBest = paVector.pavec[player].getNextAction2(so.partialState(), false, true);
+            actBest = paVector.pavec[player].getNextAction2(so.partialState(), false, false, true);
             so.advance(actBest, null);
 
             if (so.isGameOver()) {

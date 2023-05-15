@@ -1,6 +1,5 @@
 package games.BlackJack;
 import controllers.MC.MCAgentN;
-import games.StateObservation;
 import org.junit.Test;
 import params.ParMC;
 import tools.Types;
@@ -41,8 +40,8 @@ public class MCNRoundOverTrueFalse {
             noStop.setRolloutDepth(i);
             MCAgentN MCnoStop = new MCAgentN(noStop);
             MCAgentN MCStop = new MCAgentN(stop);
-            Types.ACTIONS_VT resultNoStop = MCnoStop.getNextAction2(so, true, true);
-            Types.ACTIONS_VT resultStop = MCStop.getNextAction2(so, true, true);
+            Types.ACTIONS_VT resultNoStop = MCnoStop.getNextAction2(so, true, false, true);
+            Types.ACTIONS_VT resultStop = MCStop.getNextAction2(so, true, false, true);
             //for(int f = 1; f < 2; f++){
             //    System.out.println(resultNoStop.getVTable()[f]+ "," + StateObserverBlackJack.BlackJackActionDet.values()[so.getAvailableActions().get(f).toInt()].name()+","+i);
             //}

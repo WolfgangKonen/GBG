@@ -633,7 +633,7 @@ public class StateObserverSim extends ObserverBase implements StateObservation {
 		for (int i=0; i<R; i++) {
 			StateObserverSim sob = (StateObserverSim) ar.getGameBoard().getDefaultStartState(null);
 			while (!sob.isGameOver()) 
-				sob.advance(p.getNextAction2(sob.partialState(), true, true), null);
+				sob.advance(p.getNextAction2(sob.partialState(), true, false, true), null);
 			
 			for (int k=0; k<sob.getNumPlayers(); k++) {
 //				System.out.println("i="+i+",k="+k+":"+(int)sob.getGameScore(k)+"/"+sob.getAllRewards()[k]);

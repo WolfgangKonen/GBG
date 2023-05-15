@@ -670,13 +670,13 @@ public class StateObserverBlackJack extends ObsNondetBase implements StateObsNon
     @Override
     public ACTIONS advanceNondeterministic(Random cmpRand) {
         ACTIONS act = getNextNondeterministicAction();
-        advanceNondeterministic(act, null);
+        this.advanceNondetSpecific(act);
 
         return act;
     }
 
     @Override
-    public ACTIONS advanceNondeterministic(ACTIONS randAction, Random cmpRand) {
+    public ACTIONS advanceNondetSpecific(ACTIONS randAction) {
         if (isNextActionDeterministic) {
             throw new RuntimeException("Next action should be deterministic");
         }

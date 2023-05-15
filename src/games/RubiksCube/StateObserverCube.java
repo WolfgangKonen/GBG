@@ -459,7 +459,7 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 		pa.resetAgent();			// needed if pa is MCTSWrapperAgent
 
 		while (!so.isGameOver() && so.getMoveCounter()<epiLength) {
-			so.advance(pa.getNextAction2(so.partialState(), false, true), null);
+			so.advance(pa.getNextAction2(so.partialState(), false, false, true), null);
 		}
 
 		int plength = so.getMoveCounter();

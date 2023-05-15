@@ -33,12 +33,8 @@ public interface StateObsNondeterministic extends StateObservation {
     /**
      * Advance the current afterstate to a new state (with a specific nondeterministic action)
 	 * @param randAction the nondeterministic action
-	 * @param cmpRand	if non-null, use this (reproducible) RNG instead of StateObservation's RNG <br>
-	 *                  ({@code cmpRand} is not really needed here, but the signature of this method should be different from
-	 *                  {@link #advanceNondeterministic(Random)} even if we pass in {@code null})
-	 *
 	 */
-	Types.ACTIONS advanceNondeterministic(ACTIONS randAction, Random cmpRand);
+	Types.ACTIONS advanceNondetSpecific(ACTIONS randAction);
     
     boolean isNextActionDeterministic();
 

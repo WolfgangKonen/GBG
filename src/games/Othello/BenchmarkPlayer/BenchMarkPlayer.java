@@ -90,7 +90,7 @@ public class BenchMarkPlayer extends AgentBase implements PlayAgent, Serializabl
 	 * Recursive part can be found in {@link #evaluateState(StateObservation, ACTIONS, boolean)}
 	 */
 	@Override
-	public ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean silent) {
+	public ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean deterministic, boolean silent) {
 		assert ( sob instanceof StateObserverOthello) : "sob is not an instance of StateObserverOthello";
 		StateObserverOthello so = (StateObserverOthello)sob;
 		int count = 0;
@@ -126,7 +126,7 @@ public class BenchMarkPlayer extends AgentBase implements PlayAgent, Serializabl
 
 	/**
 	 * Used to advance the game state with given action. Including game winning move. <br>
-	 * Using {@link BenchMarkPlayer#getNextAction2(StateObservation, boolean, boolean)} for recursive part. <br>
+	 * Using {@link PlayAgent#getNextAction2(StateObservation, boolean, boolean, boolean)} for recursive part. <br>
 	 * Using helper method: {@linkplain BenchMarkPlayer#finalMove(StateObserverOthello)} for game winning move.
 	 * @param sob	the state
 	 * @param action which is used to advance the game state
@@ -152,7 +152,7 @@ public class BenchMarkPlayer extends AgentBase implements PlayAgent, Serializabl
 		//We want the maximal score after the agents turn end.
 			if(!newSO.isGameOver()) {
 				if(newSO.getPlayer() == player) {
-					ACTIONS_VT actionVT = getNextAction2(newSO.partialState(), false, silent);
+					ACTIONS_VT actionVT = getNextAction2(newSO.partialState(), false, false, silent);
 					return actionVT.getVBest();
 				}
 			}

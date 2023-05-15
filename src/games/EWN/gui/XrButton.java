@@ -86,11 +86,11 @@ public class XrButton extends JButton implements MouseListener {
             StateObserverEWN theState = (StateObserverEWN)m_gb.getStateObs();
             ACTIONS diceAction = theState.getNextNondeterministicAction();     // diceAction is one smaller than the value shown on game board
             if (text.equals("-") && diceAction.toInt()>0) {
-                theState.advanceNondeterministic(new ACTIONS(diceAction.toInt()-1), null);
+                theState.advanceNondetSpecific(new ACTIONS(diceAction.toInt()-1));
                 m_gb.setActionReq(true);
             }
             if (text.equals("+") && diceAction.toInt()<theState.getNumAvailableRandoms()-1)  {
-                theState.advanceNondeterministic(new ACTIONS(diceAction.toInt()+1), null);
+                theState.advanceNondetSpecific(new ACTIONS(diceAction.toInt()+1));
                 m_gb.setActionReq(true);
             }
             // only debug info:

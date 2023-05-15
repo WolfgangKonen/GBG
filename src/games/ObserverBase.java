@@ -69,7 +69,7 @@ abstract public class ObserverBase extends PartialPerfect implements StateObserv
 	/**
 	 * Given the current state, store some useful information for inspecting the  
 	 * action actBest and double[] vtable returned by a call to <br>
-	 * {@code ACTION_VT} {@link PlayAgent#getNextAction2(StateObservation, boolean, boolean)}. 
+	 * {@code ACTION_VT} {@link PlayAgent#getNextAction2(StateObservation, boolean, boolean, boolean)}.
 	 *  
 	 * @param actBest	the best action
 	 */
@@ -151,7 +151,7 @@ abstract public class ObserverBase extends PartialPerfect implements StateObserv
 	/**
 	 * Advance the current afterstate to a new state (do the nondeterministic part of advance)
 	 */
-	public ACTIONS advanceNondeterministic(ACTIONS randAction, Random cmpRand) {
+	public ACTIONS advanceNondetSpecific(ACTIONS randAction) {
 		// nothing to do here, since ObserverBase is for a deterministic game
 		return null;
 	}
@@ -283,6 +283,10 @@ abstract public class ObserverBase extends PartialPerfect implements StateObserv
 	 */
 	abstract public double getGameScore(int player);
 
+	public double getGameScoreRaw(int player) {
+		return getGameScore(player);
+	}
+
 	/**
 	 * This implementation is valid for all classes implementing {@link StateObservation}, once
 	 * they have a valid implementation for {@link #getGameScore(int)}.
@@ -295,6 +299,14 @@ abstract public class ObserverBase extends PartialPerfect implements StateObserv
 		ScoreTuple sc = new ScoreTuple(N);
 		for (int i=0; i<N; i++)
 			sc.scTup[i] = this.getGameScore(i);
+		return sc;
+	}
+
+	public ScoreTuple getGameScoreTupleRaw() {
+		int N = this.getNumPlayers();
+		ScoreTuple sc = new ScoreTuple(N);
+		for (int i=0; i<N; i++)
+			sc.scTup[i] = this.getGameScoreRaw(i);
 		return sc;
 	}
 
@@ -419,7 +431,7 @@ abstract public class ObserverBase extends PartialPerfect implements StateObserv
     public boolean isRoundBasedGame(){return false;}
 
 	/**
-	 * Signals for {@link XArenaFuncs#competeNPlayer(PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], ArrayList, Random) XArenaFuncs.competeNPlayer}
+	 * Signals for {@link XArenaFuncs#competeNPlayer(PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], ArrayList, Random, boolean) XArenaFuncs.competeNPlayer}
 	 * whether the start state needs randomization when doing such a competition.
 	 *
 	 * @return true or false
@@ -427,7 +439,7 @@ abstract public class ObserverBase extends PartialPerfect implements StateObserv
 	public boolean needsRandomization(){return false;}
 
 	/**
-	 *  Randomize the start state in {@link XArenaFuncs#competeNPlayer(PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], ArrayList, Random) XArenaFuncs.competeNPlayer}
+	 *  Randomize the start state in {@link XArenaFuncs#competeNPlayer(PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], ArrayList, Random, boolean) XArenaFuncs.competeNPlayer}
 	 *  if {@link #needsRandomization()} returns true
      * @param cmpRand
      */

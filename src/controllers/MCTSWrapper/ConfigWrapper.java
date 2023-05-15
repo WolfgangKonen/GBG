@@ -1,6 +1,7 @@
 package controllers.MCTSWrapper;
 
 import controllers.MCTSWrapper.stateApproximation.PlayAgentApproximator;
+import controllers.PlayAgent;
 import games.StateObservation;
 import params.ParWrapper;
 
@@ -34,7 +35,7 @@ public class ConfigWrapper {
 
     /**
      * A switch for {@link MCTSWrapperAgent}: If this wrapper agent is trained, use one of the following exploration modes
-     * during training. Exploration will be used if {@link MCTSWrapperAgent#getNextAction2(StateObservation, boolean, boolean) getNextAction2}
+     * during training. Exploration will be used if {@link PlayAgent#getNextAction2(StateObservation, boolean, boolean, boolean) getNextAction2}
      * is called with parameter {@code random = true}.
      * <ul>
      *  <li>  <strong>mode 0</strong>: no explicit exploration (there is only implicit exploration through the iteration-wise

@@ -74,10 +74,11 @@ public class MaxN2Wrapper extends AgentBase implements PlayAgent, Serializable {
 
 	/**
 	 * Get the best next action and return it
-	 * @param so_in			current game state (not changed on return)
-	 * @param random		allow epsilon-greedy random action selection	
-	 * @param silent		controls printout
-	 * @return actBest		the best action 
+	 * @param so_in            current game state (not changed on return)
+	 * @param random        allow epsilon-greedy random action selection
+	 * @param deterministic
+     * @param silent        controls printout
+     * @return actBest		the best action
 	 * <p>						
 	 * actBest has predicate isRandomAction()  (true: if action was selected 
 	 * at random, false: if action was selected by agent).<br>
@@ -86,7 +87,7 @@ public class MaxN2Wrapper extends AgentBase implements PlayAgent, Serializable {
 	 * 
 	 */	
 	@Override
-	public ACTIONS_VT getNextAction2(StateObservation so_in, boolean random, boolean silent) {
+	public ACTIONS_VT getNextAction2(StateObservation so_in, boolean random, boolean deterministic, boolean silent) {
 		StateObservation so = so_in.copy(); // just for safety
 
         assert so.isLegalState() : "Not a legal state";
@@ -126,7 +127,7 @@ public class MaxN2Wrapper extends AgentBase implements PlayAgent, Serializable {
 
 		if (depth>=this.m_depth) {
 			// this terminates the recursion. It returns the right ScoreTuple based on r(s)+gamma*V(s).
-			return this.getWrappedPlayAgent().getNextAction2(so.partialState()/*.clearedCopy()*/, random, true);
+			return this.getWrappedPlayAgent().getNextAction2(so.partialState()/*.clearedCopy()*/, random, false, true);
 		}
 
 		ArrayList<ACTIONS> acts = so.getAvailableActions();

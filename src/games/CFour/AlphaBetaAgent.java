@@ -4333,7 +4333,7 @@ public class AlphaBetaAgent extends C4Base implements Serializable, PlayAgent {
 	}
 
 	@Override
-	public ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean silent) {
+	public ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean deterministic, boolean silent) {
 		int i,j,sign;
         int iBest;
 		int count = 1; // counts the moves with same vBest

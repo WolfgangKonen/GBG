@@ -107,7 +107,7 @@ public class EvaluatorTTT extends Evaluator {
 	 */
  	private EvalResult evaluateAgent1(PlayAgent pa, PlayAgent opponent, GameBoard gb, double thresh) {
  		StateObservation so = gb.getDefaultStartState(null);
-		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pa,opponent), so, 1, 0, null, null);
+		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pa,opponent), so, 1, 0, null, null, false);
 		lastResult = sc.scTup[0];
 		m_msg = pa.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>0) System.out.println(m_msg);
@@ -144,7 +144,7 @@ public class EvaluatorTTT extends Evaluator {
         int numStartStates = diffStartList.size();
         // evaluate each start state in turn and return average success rate: 
         for (StateObserverTTT so : diffStartList) {
-    		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pa, opponent), so, competeNum, 0, null, null);
+    		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pa, opponent), so, competeNum, 0, null, null, false);
     		success = sc.scTup[0];
     		averageSuccess += success;
         }

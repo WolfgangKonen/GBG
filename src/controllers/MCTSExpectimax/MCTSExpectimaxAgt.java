@@ -5,16 +5,12 @@ import controllers.PlayAgent;
 import controllers.MCTS.MCTSAgentT;
 import games.Arena;
 import games.StateObservation;
-import games.XArenaMenu;
 //import params.MCTSExpectimaxParams;
 //import params.MCTSParams;
 //import params.OtherParams;
-import params.ParMCTS;
 import params.ParMCTSE;
 import params.ParOther;
-import tools.ElapsedCpuTimer;
 import tools.Types;
-import tools.ElapsedCpuTimer.TimerType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -172,7 +168,8 @@ public class MCTSExpectimaxAgt extends AgentBase implements PlayAgent
      * Get the best next action and return it (new version, NEW_GNA==true).
      * Called by calcCertainty and getNextAction.
      * 
-     * @param so 			current game state (not changed on return)
+     * @param so            current game state (not changed on return)
+     * @param deterministic
      * @return actBest		the next action
 	 * <p>						
 	 * actBest has predicate isRandomAction()  (true: if action was selected 
@@ -180,7 +177,7 @@ public class MCTSExpectimaxAgt extends AgentBase implements PlayAgent
 	 * actBest has also the members vTable and vBest to store the value for each available
 	 * action (as returned by so.getAvailableActions()) and the value for the best action actBest.
      */
-    public Types.ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
+    public Types.ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean deterministic, boolean silent) {
 		
         Types.ACTIONS actBest = null;
         Types.ACTIONS_VT actBestVT = null;

@@ -52,7 +52,8 @@ public class GameBoard2048 implements GameBoard {
     @Override
     public void clearBoard(boolean boardClear, boolean vClear, Random cmpRand) {
         if (boardClear) {
-            m_so = new StateObserver2048();
+            m_so = m_so.reset(cmpRand);
+            //m_so = new StateObserver2048();
         }
         					// considerable speed-up during training (!)
         if (m_gameGui!=null && m_Arena.taskState!=Arena.Task.TRAIN)
@@ -90,7 +91,7 @@ public class GameBoard2048 implements GameBoard {
 
     @Override
     public StateObservation getDefaultStartState(Random cmpRand) {
-        clearBoard(true, true, null);
+        clearBoard(true, true, cmpRand);
 //        if (TDNTuple2Agt.DBG2_FIXEDSEQUENCE) 
 //        	return new StateObserver2048();
         return m_so;

@@ -147,8 +147,8 @@ public class EvaluatorBlackJack extends Evaluator {
         String bestMove;
         m_msg = "";
         for(StateObserverBlackJack so: sos){
-            int nextActAgent = playAgent.getNextAction2(so.partialState(), false, true).toInt();
-            int nextActionByBasicStrategy = bsbja.getNextAction2(so.partialState(), false, true).toInt();
+            int nextActAgent = playAgent.getNextAction2(so.partialState(), false, false, true).toInt();
+            int nextActionByBasicStrategy = bsbja.getNextAction2(so.partialState(), false, false, true).toInt();
             chosenMove = StateObserverBlackJack.BlackJackActionDet.values()[nextActAgent].name();
             bestMove = StateObserverBlackJack.BlackJackActionDet.values()[nextActionByBasicStrategy].name();
             if (nextActAgent == nextActionByBasicStrategy)
@@ -196,7 +196,7 @@ public class EvaluatorBlackJack extends Evaluator {
 
         int agentChoseHit = 0;
         for(StateObserverBlackJack so: sos){
-            int nextActAgent = playAgent.getNextAction2(so.partialState(), false, true).toInt();
+            int nextActAgent = playAgent.getNextAction2(so.partialState(), false, false, true).toInt();
             if (nextActAgent == StateObserverBlackJack.BlackJackActionDet.HIT.getAction())
                 agentChoseHit++;
         }
@@ -245,7 +245,7 @@ public class EvaluatorBlackJack extends Evaluator {
 
         int agentChoseStand = 0;
         for(StateObserverBlackJack so: sos){
-            int nextActAgent = playAgent.getNextAction2(so.partialState(), false, true).toInt();
+            int nextActAgent = playAgent.getNextAction2(so.partialState(), false, false, true).toInt();
             if (nextActAgent == StateObserverBlackJack.BlackJackActionDet.STAND.getAction())
                 agentChoseStand++;
         }
@@ -276,7 +276,7 @@ public class EvaluatorBlackJack extends Evaluator {
         for(int i = 0; i < NUM_ITER; i++) {
 
             while (!so.isRoundOver()) {
-                int act = playAgent.getNextAction2(so.partialState(), false, true).toInt();
+                int act = playAgent.getNextAction2(so.partialState(), false, false, true).toInt();
                 if (act == 6) {
                     countInsuranceTaken++;
                     if (so.getDealer().getActiveHand().checkForBlackJack() && so.getDealer().getActiveHand().getCards().get(0).rank == Card.Rank.ACE) {
@@ -322,8 +322,8 @@ public class EvaluatorBlackJack extends Evaluator {
 
         for(int i = 0; i < NUM_ITER; i++) {
             while (!so.isRoundOver()) {
-                int act = playAgent.getNextAction2(so.partialState(), false, true).toInt();
-                if(bsbja.getNextAction2(so.partialState(), false, true).toInt() == act &&
+                int act = playAgent.getNextAction2(so.partialState(), false, false, true).toInt();
+                if(bsbja.getNextAction2(so.partialState(), false, false, true).toInt() == act &&
                         (so.getCurrentPhase() == StateObserverBlackJack.gamePhase.ASKFORINSURANCE ||
                 so.getCurrentPhase() == StateObserverBlackJack.gamePhase.PLAYERONACTION ))
                     movesFromBasicStrategy++;
@@ -356,7 +356,7 @@ public class EvaluatorBlackJack extends Evaluator {
 
         for(int i = 0; i < NUM_ITER; i++) {
             while (!so.isRoundOver()) {
-                int act = playAgent.getNextAction2(so.partialState(), false, true).toInt();
+                int act = playAgent.getNextAction2(so.partialState(), false, false, true).toInt();
                 so.advance(Types.ACTIONS.fromInt(act), null);
             }
             avgPayOff += so.getCurrentPlayer().getRoundPayoff();

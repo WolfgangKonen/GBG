@@ -101,7 +101,7 @@ public class Evaluator2048 extends Evaluator {
                     playAgent = new MCTSExpectimaxAgt("MCTS Expectimax", mctsExpectimaxAgt.params, pa.getParOther());
 
                     while (!so.isGameOver()) {
-                        Types.ACTIONS action = playAgent.getNextAction2(so.partialState(), false, true);
+                        Types.ACTIONS action = playAgent.getNextAction2(so.partialState(), false, false, true);
                         so.advance(action, null);
                         
                         // TODO: integrate a branch for ConfigEvaluator.PLAYSTATS_CSV, if needed
@@ -147,7 +147,7 @@ public class Evaluator2048 extends Evaluator {
                     PlayAgent playAgent = m_PlayAgent;
 
                     while (!so.isGameOver()) {
-                        Types.ACTIONS action = playAgent.getNextAction2(so.partialState(), false, true);
+                        Types.ACTIONS action = playAgent.getNextAction2(so.partialState(), false, false, true);
                         so.advance(action, null);
                         
                         // TODO: integrate a branch for ConfigEvaluator.PLAYSTATS_CSV, if needed
@@ -189,7 +189,7 @@ public class Evaluator2048 extends Evaluator {
         		psList.add(makePStats2048(i, so2048, null, cumEmpty));
 
                 while (!so2048.isGameOver()) {
-                    actBest = m_PlayAgent.getNextAction2(so2048.partialState(), false, true);
+                    actBest = m_PlayAgent.getNextAction2(so2048.partialState(), false, false, true);
                     so2048.advance(actBest, null);
 //                  System.out.print("Finished move " + (so.moves) + " with score " + so.score + " after " + (System.currentTimeMillis() - gameMoveTime) + "ms.\n");
                     

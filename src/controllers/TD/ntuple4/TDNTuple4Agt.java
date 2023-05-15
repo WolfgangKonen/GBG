@@ -193,9 +193,11 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	/**
 	 * Get the best next action and return it 
 	 *
-	 * @param so			current game state (is returned unchanged)
-	 * @param random		allow random action selection with probability m_epsilon
-	 * @param silent		no output
+	 * @param so            current game state (is returned unchanged)
+	 * @param random        allow random action selection with probability m_epsilon
+	 * @param deterministic
+	 * 			if true, the agent acts deterministically in case of several equivalent best actions (reproducibility)
+	 * @param silent        no output
 	 * @return actBest,		the best action. If several actions have the same
 	 * 						score, break ties by selecting one of them at random. 
 	 * <p>						
@@ -205,7 +207,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	 * action (as returned by so.getAvailableActions()) and the Q-value for the best action actBest, resp.
 	 */
 	@Override
-	public Types.ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
+	public Types.ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean deterministic, boolean silent) {
 		int i;
 		double bestValue;
 		double value;			// the quantity to be maximized
@@ -213,7 +215,6 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 		boolean rgs = this.getParOther().getRewardIsGameScore();
 		if (!so.isFinalRewardGame()) this.TERNARY=false;		// we use TD target r + gamma*V
 		StateObservation NewSO;
-		Types.ACTIONS thisAct;
 		Types.ACTIONS actBest;
 		Types.ACTIONS_VT actBestVT;
 		bestValue = -Double.MAX_VALUE;
@@ -244,7 +245,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 		assert acts.size()>0 : "Oops, no available action";
 		for(i = 0; i < acts.size(); ++i)
 		{
-			thisAct = acts.get(i);
+			Types.ACTIONS thisAct = acts.get(i);
 
 			// this is just relevant for game RubiksCube: If an action is the inverse of the last action, it would
 			// lead to the previous state again, resulting in a cycle of 2. We avoid such cycles and continue with
@@ -321,8 +322,14 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 			}
 
 		} // for
-		actBest = bestActions.get(rand.nextInt(bestActions.size()));
-		// if several actions have the same best value, select one of them randomly
+		assert bestActions.size()>0;
+		if (deterministic) {
+			actBest = bestActions.get(0);
+			// if several actions have the same best value, select the first one
+		} else {
+			actBest = bestActions.get(rand.nextInt(bestActions.size()));
+			// if several actions have the same best value, select one of them randomly
+		}
 
 		assert actBest != null : "Oops, no best action actBest";
 
@@ -362,7 +369,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 			// but MaxNAgent(...,12,true) only 2 seconds. If there are 15 moves to go, then
 			// MaxNAgent(...,15,true) will still take only a few seconds.
 			// So: activating the hash map is important for MaxN-speed!
-			ACTIONS_VT actMax = maxNAgent.getNextAction2(so.partialState(), false, true);
+			ACTIONS_VT actMax = maxNAgent.getNextAction2(so.partialState(), false, false, true);
 			double[] VTableMax = actMax.getVTable();
 			System.out.print("MaxN : ");
 			for (int i = 0; i < VTableMax.length - 1; i++)
@@ -377,7 +384,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 
 		if (DBG_BJ) {
 			BasicStrategyBlackJackAgent bsbja = new BasicStrategyBlackJackAgent();
-			Types.ACTIONS actBsbja = bsbja.getNextAction2(so,false,true);
+			Types.ACTIONS actBsbja = bsbja.getNextAction2(so,false, false, true);
 			System.out.print("getNextAction2:  "+StateObserverBlackJack.BlackJackActionDet.values()[actBest.toInt()].name() );
 			System.out.println("  [BSBJA: "+ StateObserverBlackJack.BlackJackActionDet.values()[actBsbja.toInt()].name()+" ]");
 		}
@@ -420,7 +427,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 	 * <p>
 	 * NOTE: For {@link TDNTuple4Agt} and N &gt; 1, this method should be only called in the form
 	 * {@code getScore(NextSO,so)}. This is actually the case, 
-	 * see {@link #getNextAction2(StateObservation, boolean, boolean)}.
+	 * see {@link PlayAgent#getNextAction2(StateObservation, boolean, boolean, boolean)}.
 	 *
 	 * @param so	the (after-)state s_t for which the value is desired
 	 * @param refer	the referring state
@@ -773,7 +780,7 @@ public class TDNTuple4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,S
 		do {
 			m_numTrnMoves++;		// number of train moves (including random moves)
 			// choose action a_t, using epsilon-greedy policy based on V
-			a_t = acting_pa.getNextAction2(s_t.partialState(), true, true);
+			a_t = acting_pa.getNextAction2(s_t.partialState(), true, false, true);
 
 			// take action a_t and observe reward & next state
 			ns = new NextState4(this,s_t,a_t);

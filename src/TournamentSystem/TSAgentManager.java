@@ -497,7 +497,7 @@ public class TSAgentManager {
                 RandomAgent raX = new RandomAgent("Random Agent X", rnd);
 
                 for (int i = 0; i < results.numberOfRandomStartMoves; i++) {
-                    randomStartStates[game].advance(raX.getNextAction2(randomStartStates[game].partialState(), false, true), null);
+                    randomStartStates[game].advance(raX.getNextAction2(randomStartStates[game].partialState(), false, false, true), null);
                 }
 
                 //try { Thread.sleep(200); } catch (InterruptedException e) { e.printStackTrace(); } // replaced by externally set random seed in new random agent constructor

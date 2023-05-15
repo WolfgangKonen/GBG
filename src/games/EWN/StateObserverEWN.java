@@ -235,8 +235,8 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
     }
 
     /**
-     * Splitting the advancing step to deterministic and non-deterministic
-     * @param action    the action
+     * Do a deterministic and a non-deterministic advance step
+     * @param action    the (deterministic) action
      * @param cmpRand   if non-null, use this (reproducible) RNG instead of StateObservation's RNG
      */
     @Override
@@ -267,6 +267,7 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
 
      * @param action    the action
      */
+    @Override
     public void advanceDeterministic(ACTIONS action){
         if(!(action.toInt() == -1)){
             int[] convertedAction = Helper.getIntsFromAction(action); // [from, to] int array
@@ -304,7 +305,7 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
         } else {
             actIndex = cmpRand.nextInt(availableRandomActions.size());
         }
-        advanceNondeterministic(availableRandomActions.get(actIndex), null);  // this sets also isNextActionDeterministic
+        advanceNondetSpecific(availableRandomActions.get(actIndex));  // sets isNextActionDeterministic, nextNondeterministicAction
         if(this.availableActions.size() == 0){
             this.availableActions.add(new ACTIONS(-1)); // Add empty action
         }
@@ -314,7 +315,7 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
 
 
     @Override
-    public ACTIONS advanceNondeterministic(ACTIONS action, Random cmpRand) {
+    public ACTIONS advanceNondetSpecific(ACTIONS action) {
         nextNondeterministicAction = action;
         this.setAvailableActions();
         this.isNextActionDeterministic = true;
@@ -355,8 +356,8 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
 
     /**
      * Reset {@link StateObserverEWN} object {@code this}
-     * @return a new default object (with new random dice value and potential new token config)
      * @param cmpRand       if non-null, use this (reproducible) RNG instead of StateObservation's RNG
+     * @return {@code this} (with new random dice value and potential new token config)
      */
     public StateObserverEWN reset(Random cmpRand){
         init(cmpRand);
@@ -367,15 +368,15 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
     public boolean needsRandomization() { return true; }
 
     /**
-     * Randomize the start state in
-     * {@link XArenaFuncs#competeNPlayer(PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], ArrayList, Random)
+     * Randomize the start state (roll the dice). Used in
+     * {@link XArenaFuncs#competeNPlayer(PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], ArrayList, Random, boolean)
      * competeNPlayer(..)} if {@link #needsRandomization()} returns true
      *
      * @param cmpRand	if non-null, use this (reproducible) RNG instead of StateObservation's RNG
      */
     @Override
     public void randomizeStartState(Random cmpRand){
-        reset(cmpRand); // roll the dice and setAvailableActions when we start a new state
+        reset(cmpRand); // roll the dice and setAvailableActions when we start a new episode
     }
 
 

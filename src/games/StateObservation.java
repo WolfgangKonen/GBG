@@ -137,12 +137,16 @@ public interface StateObservation extends PartialState, Serializable{
 	 * 			For 2-player games we have usually {@code getGameScore(0) = -getGameScore(1)}.
 	 */
 	double getGameScore(int player);
-	
+
+	double getGameScoreRaw(int player);
+
 	/**
 	 * @return	a score tuple which has as {@code i}th value  {@link #getGameScore(int)} 
 	 * 			with {@code i} as argument
 	 */
 	ScoreTuple getGameScoreTuple();
+
+	ScoreTuple getGameScoreTupleRaw();
 
 //	/**
 //	 * *** This method is deprecated, use instead getReward(referringState.getPlayer(), rgs) ***
@@ -297,7 +301,7 @@ public interface StateObservation extends PartialState, Serializable{
 	/**
 	 * Given the current state {@code this}, store some info useful for inspecting the
 	 * action actBest and double[] vtable returned by a call to <br>
-	 * {@code ACTION_VT} {@link PlayAgent#getNextAction2(StateObservation, boolean, boolean)}. 
+	 * {@code ACTION_VT} {@link PlayAgent#getNextAction2(StateObservation, boolean, boolean, boolean)}.
 	 *  
 	 * @param actBest	the best action
 	 */
@@ -329,7 +333,7 @@ public interface StateObservation extends PartialState, Serializable{
 
 	/**
 	 * Signals for
-	 * {@link XArenaFuncs#competeNPlayer(PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], ArrayList, Random)
+	 * {@link XArenaFuncs#competeNPlayer(PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], ArrayList, Random, boolean)
 	 * competeNPlayer(..)} whether the start state needs randomization when doing such a competition.
 	 *
 	 * @return true or false
@@ -341,7 +345,7 @@ public interface StateObservation extends PartialState, Serializable{
 
 	/**
 	 * Randomize the start state in
-	 * {@link XArenaFuncs#competeNPlayer(PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], ArrayList, Random)
+	 * {@link XArenaFuncs#competeNPlayer(PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], ArrayList, Random, boolean)
 	 * competeNPlayer(..)} if {@link #needsRandomization()} returns true
 	 *
 	 * @param cmpRand	if non-null, use this (reproducible) RNG instead of StateObservation's RNG

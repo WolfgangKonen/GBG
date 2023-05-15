@@ -34,7 +34,7 @@ public class BoutonAgent extends AgentBase implements PlayAgent {
 	}
 	
 	@Override
-	public ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
+	public ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean deterministic, boolean silent) {
 		int i,j;
         ArrayList<ACTIONS> acts = so.getAvailableActions();
 		double[] VTable = new double[acts.size()];

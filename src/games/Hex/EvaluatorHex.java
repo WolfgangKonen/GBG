@@ -209,7 +209,7 @@ public class EvaluatorHex extends Evaluator {
      * @return Percentage of games won on a scale of [0, 1] as double
      */
     private double competeAgainstRandom(PlayAgent playAgent) {
-		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(playAgent, randomAgent), 0, new StateObserverHex(), 100, verbose, null, null, null);
+		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(playAgent, randomAgent), 0, new StateObserverHex(), 100, verbose, null, null, null, false);
 		lastResult = sc.scTup[0];
         m_msg = playAgent.getName() + ": " + this.getPrintString() + lastResult;
         if (this.verbose > 0) System.out.println(m_msg);
@@ -225,7 +225,7 @@ public class EvaluatorHex extends Evaluator {
      * @return Percentage of games won on a scale of [0, 1] as double
      */
     private double competeAgainstMaxN(PlayAgent playAgent, int numEpisodes) {
-		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(playAgent, maxNAgent), 0, new StateObserverHex(), numEpisodes, verbose, null, null, null);
+		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(playAgent, maxNAgent), 0, new StateObserverHex(), numEpisodes, verbose, null, null, null, false);
 		lastResult = sc.scTup[0];
         m_msg = playAgent.getName() + ": " + this.getPrintString() + lastResult + "  (#="+numEpisodes+")";
         if (this.verbose > 0) System.out.println(m_msg);
@@ -247,7 +247,7 @@ public class EvaluatorHex extends Evaluator {
         params.setNumIter((int) Math.pow(10, numIterExp));
         mctsAgent = new MCTSAgentT("MCTS", new StateObserverHex(), params);
 
-		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(playAgent, mctsAgent), 0, new StateObserverHex(), numEpisodes, 0, null, null, null);
+		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(playAgent, mctsAgent), 0, new StateObserverHex(), numEpisodes, 0, null, null, null, false);
 		lastResult = sc.scTup[0];
         m_msg = playAgent.getName() + ": " + this.getPrintString() + lastResult;
         //if (this.verbose > 0) 
@@ -288,7 +288,7 @@ public class EvaluatorHex extends Evaluator {
         int i=0;
         for (StateObserverHex so : diffStartList) {
             long gameStartTime = System.currentTimeMillis();
-    		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent), so, numEpisodes, 0, null, null);
+    		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent), so, numEpisodes, 0, null, null, false);
     		success = sc.scTup[0];
     		averageSuccess += success;
         	long duration = System.currentTimeMillis() - gameStartTime;
@@ -355,11 +355,11 @@ public class EvaluatorHex extends Evaluator {
         	StateObserverHex so = new StateObserverHex();
             long gameStartTime = System.currentTimeMillis();
         	if (startAction[i] == -1) {
-        		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(playAgent, opponent), 0, so, numEpisodes, 0, null, null, null);
+        		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(playAgent, opponent), 0, so, numEpisodes, 0, null, null, null, false);
         		success = sc.scTup[0];
         	} else {
         		so.advance(new ACTIONS(startAction[i]), null);
-        		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(opponent, playAgent), 0, so, numEpisodes, 0, null, null, null);
+        		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(opponent, playAgent), 0, so, numEpisodes, 0, null, null, null, false);
         		success = sc.scTup[1];
         	}
     		averageSuccess += success;
@@ -422,7 +422,7 @@ public class EvaluatorHex extends Evaluator {
                 // garbage.
                 MCTSAgentT mctsAgent2 = new MCTSAgentT("MCTS", new StateObserverHex(), params);
 
-        		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, mctsAgent2), so2, numEpisodes, 0, null, null);
+        		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, mctsAgent2), so2, numEpisodes, 0, null, null, false);
         		success = sc.scTup[0];
         		
                 if(verbose == 0) {
@@ -526,11 +526,11 @@ public class EvaluatorHex extends Evaluator {
                 MCTSAgentT mctsAgent2 = new MCTSAgentT("MCTS", new StateObserverHex(), params);
 
             	if (startAction2[i2] == -1) {
-            		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(playAgent, mctsAgent2), 0, so, numEpisodes, 0, null, null, null);
+            		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(playAgent, mctsAgent2), 0, so, numEpisodes, 0, null, null, null, false);
             		success = sc.scTup[0];
             	} else {
             		so.advance(new ACTIONS(startAction2[i2]), null);
-            		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(mctsAgent2, playAgent), 0, so, numEpisodes, 0, null, null, null);
+            		ScoreTuple sc = XArenaFuncs.competeNPlayer(new PlayAgtVector(mctsAgent2, playAgent), 0, so, numEpisodes, 0, null, null, null, false);
             		success = sc.scTup[1];
             	}
                 if(verbose == 0) {

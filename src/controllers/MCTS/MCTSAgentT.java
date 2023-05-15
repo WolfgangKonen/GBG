@@ -207,16 +207,17 @@ public class MCTSAgentT extends AgentBase implements PlayAgent, Serializable
      * Get the best next action and return it (new version, NEW_GNA==true).
      * Called by calcCertainty and getNextAction.
      * 
-     * @param so			current game state (not changed on return)
-	 * @param random		currently not used (we act always as if random were false)
-	 * @param silent		currently not used
-     * @return actBest		the next action
+     * @param so            current game state (not changed on return)
+	 * @param random        currently not used (we act always as if random were false)
+	 * @param deterministic
+     * @param silent        currently not used
+* @return actBest		the next action
 	 * <p>						
 	 * actBest has predicate isRandomAction() which is always false.<br>
 	 * actBest has also the members vTable and vBest to store the value for each available
 	 * action (as returned by so.getAvailableActions()) and the value for the best action actBest.
      */
-    public Types.ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
+    public Types.ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean deterministic, boolean silent) {
 		
         Types.ACTIONS actBest;
         Types.ACTIONS_VT actBestVT;

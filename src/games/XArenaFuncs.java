@@ -20,12 +20,14 @@ import controllers.TD.ntuple4.*;
 import games.BlackJack.BasicStrategyBlackJackAgent;
 import games.CFour.AlphaBetaAgent;
 import games.CFour.openingBook.BookSum;
+import games.EWN.StateObserverEWN;
 import games.KuhnPoker.KuhnPokerAgent;
 import games.Nim.BoutonAgent;
 import games.Nim.DaviNimAgent;
 import games.Othello.BenchmarkPlayer.BenchMarkPlayer;
 import games.Othello.Edax.Edax2;
 import games.RubiksCube.*;
+import games.ZweiTausendAchtundVierzig.StateObserver2048;
 import tools.TStats.TAggreg;
 import gui.DeviationWeightsChart;
 import gui.LineChartSuccess;
@@ -1151,14 +1153,17 @@ public class XArenaFuncs {
 	 * 			first player P0 has performed this competition episode). If {@code null} on input, it returns {@code null}.
 	 * @param cmpRand
 	 * 			if non-null, use this (reproducible) RNG instead of StateObservation's RNG
+	 * @param deterministic
+	 * 			if true, let the agents act deterministically in case of several equivalent best actions (reproducibility)
 	 * @return
 	 * 			a score tuple which holds in the kth position the average score
 	 *         	of the kth agent from all {@code competeNum} episodes.
 	 *
-	 * @see #competeNPlayerAllRoles(PlayAgtVector, StateObservation, int, int, ArrayList, Random)
+	 * @see #competeNPlayerAllRoles(PlayAgtVector, StateObservation, int, int, ArrayList, Random, boolean)
 	 */
 	public static ScoreTuple competeNPlayer(PlayAgtVector paVector, int p0Role, StateObservation startSO, int competeNum,
-											int verbose, TSTimeStorage[] nextTimes, ArrayList<XStateObs> finalSobList, Random cmpRand) {
+											int verbose, TSTimeStorage[] nextTimes, ArrayList<XStateObs> finalSobList,
+											Random cmpRand, boolean deterministic) {
 		int numPlayers = paVector.getNumPlayers();
 		ScoreTuple sc, scMean = new ScoreTuple(numPlayers);
 		double sWeight = 1 / (double) competeNum;
@@ -1221,24 +1226,30 @@ public class XArenaFuncs {
 
 			while (true) {
 				long startTNano = System.nanoTime();
-				actBest = qaVector.pavec[player].getNextAction2(so.partialState(), false, nextMoveSilent);
+				actBest = qaVector.pavec[player].getNextAction2(so.partialState(), false, deterministic, nextMoveSilent);
 				long endTNano = System.nanoTime();
 				if (nextTimes != null)
 					nextTimes[player].addNewTimeNS(endTNano - startTNano);
 				so.advance(actBest, cmpRand);
 				// --- only debug ---
-				if (verbose > 1 && so instanceof StateObsNondeterministic)
-					System.out.println("k="+k+", dice="+(((StateObsNondeterministic)so).getNextNondeterministicAction().toInt()+1)
-					+ ", actBest="+actBest.toInt());
+				if (verbose > 1) {
+					if (so instanceof StateObserverEWN)
+						System.out.println("k="+k+", dice="+(((StateObsNondeterministic)so).getNextNondeterministicAction().toInt()+1)
+								+ ", actBest="+actBest.toInt());
+					if (so instanceof StateObserver2048)
+						System.out.println("k="+k+", act = "+ actBest.toInt()
+								+ ", so = "+((StateObserver2048)so).stringDescr()
+								+ ", SCORE="+((StateObserver2048)so).getGameScoreRaw(0));
+				}
 				so.storeBestActionInfo(actBest);	// /WK/ added 2021-09-10, but probably never needed
 
 
 				if (so.isGameOver()) {
-					sc = so.getGameScoreTuple();
+					sc = so.getGameScoreTupleRaw();
 					scMean.combine(sc, ScoreTuple.CombineOP.AVG, 0, sWeight);
 					moveCount += so.getMoveCounter();
 					if (verbose > 0)
-						System.out.println(sc.printEpisodeWinner(k));
+						System.out.println(sc.printEpisodeWinner(k, so));
 
 					if (finalSobList != null) {
 						finalSobList.add(new XStateObs(so,k,p0Role));
@@ -1292,14 +1303,17 @@ public class XArenaFuncs {
 	 * 			first player P0 has performed this competition episode). If {@code null} on input, it returns {@code null}.
 	 * @param cmpRand
 	 * 			if non-null, use this (reproducible) RNG instead of StateObservation's RNG
+	 * @param deterministic
+	 * 			if true, let the agents act deterministically in case of several equivalent best actions (reproducibility)
 	 * @return
 	 * 			a score tuple which holds in the kth position the average score
 	 *         	for the kth agent from all {@code competeNum}*{@code N} episodes.
 	 *
-	 * @see #competeNPlayer(PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], ArrayList, Random)
+	 * @see #competeNPlayer(PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], ArrayList, Random, boolean)
 	 */
 	public static ScoreTuple competeNPlayerAllRoles(PlayAgtVector paVector, StateObservation startSO, int competeNum,
-													int verbose, ArrayList<XStateObs> finalSobList, Random cmpRand) {
+													int verbose, ArrayList<XStateObs> finalSobList,
+													Random cmpRand, boolean deterministic) {
 		int N = startSO.getNumPlayers();
 		double sWeight = 1 / (double) N;
 		ScoreTuple sc, shiftedTuple, scMean = new ScoreTuple(N);
@@ -1307,7 +1321,7 @@ public class XArenaFuncs {
 		//PlayAgtVector qaVector;
 		for (int k = 0; k < N; k++) {
 			//qaVector = paVector.shift(k);
-			sc = competeNPlayer(paVector, k, startSO, competeNum, verbose, null, finalSobList, cmpRand);
+			sc = competeNPlayer(paVector, k, startSO, competeNum, verbose, null, finalSobList, cmpRand, deterministic);
 			shiftedTuple = sc.shift(N - k);
 			scMean.combine(shiftedTuple, ScoreTuple.CombineOP.AVG, 0, sWeight);
 		}
@@ -1348,7 +1362,8 @@ public class XArenaFuncs {
 		int competeNum = xab.winCompOptions.getNumGames();
 		int verbose = xab.winCompOptions.getVerbose();
 		long seed;
-		if (xab.winCompOptions.useSeed()) {
+		boolean deterministic = xab.winCompOptions.useSeed();
+		if (deterministic) {
 			seed = xab.winCompOptions.getSeed();
 		} else {
 			seed = ThreadLocalRandom.current().nextLong();
@@ -1376,18 +1391,19 @@ public class XArenaFuncs {
 
 
 			if (allRoles) {
-				ScoreTuple sc = competeNPlayerAllRoles(raVector, startSO, competeNum, verbose, null, cmpRand);
+				ScoreTuple sc = competeNPlayerAllRoles(raVector, startSO, competeNum,
+						verbose, null, cmpRand, deterministic);
 				System.out.println("Avg score for all players: " + sc.toStringFrm());
 				return sc.scTup[0];
 			} else {
 				if (swap) {
 					ScoreTuple sc = competeNPlayer(raVector, 1, startSO, competeNum,
-							verbose, null, null, cmpRand);
+							verbose, null, null, cmpRand, deterministic);
 					System.out.println("Avg score for all players: " + sc.toStringFrm());
 					return sc.scTup[1];
 				} else {
 					ScoreTuple sc = competeNPlayer(raVector, 0, startSO, competeNum,
-							verbose, null, null, cmpRand);
+							verbose, null, null, cmpRand, deterministic);
 					System.out.println("Avg score for all players: " + sc.toStringFrm());
 					return sc.scTup[0];
 				}
@@ -1476,7 +1492,7 @@ public class XArenaFuncs {
 					qaVector = wrapAgents(paVector, xab, startSO);
 				}
 
-				sc = competeNPlayer(new PlayAgtVector(qaVector), 0, dataTS.startSO, competeNum, 0, dataTS.nextTimes, null, null);
+				sc = competeNPlayer(new PlayAgtVector(qaVector), 0, dataTS.startSO, competeNum, 0, dataTS.nextTimes, null, null, false);
 
 				xab.disableTournamentRemoteData();
 			}

@@ -87,7 +87,7 @@ public final class MCTSWrapperAgent extends AgentBase implements PlayAgent, Seri
      * reset agent: when starting a new episode, a new tree should be built. Therefore, set
      * {@link #lastSelectedNode}{@code =null}
      * (needed when re-using an existing agent, e.g. in competeNum episodes during a competition, see
-     * {@link games.XArenaFuncs#competeNPlayer(PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], java.util.ArrayList, Random)
+     * {@link games.XArenaFuncs#competeNPlayer(PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], java.util.ArrayList, Random, boolean)
      * XArenaFuncs.competeNPlayer})
      *
      */
@@ -100,17 +100,18 @@ public final class MCTSWrapperAgent extends AgentBase implements PlayAgent, Seri
     /**
      * Get the best next action and return it
      *
-     * @param sob			current game state (is returned unchanged)
-     * @param random		allow random action selection (exploration)
-     * @param silent		whether to be silent
+     * @param sob            current game state (is returned unchanged)
+     * @param random        allow random action selection (exploration)
+     * @param deterministic
+     * @param silent        whether to be silent
      * @return the best action (or random action). If several actions have the same
      * 		   score, break ties by selecting one of them at random.
      */
     @Override
     public Types.ACTIONS_VT getNextAction2(
-        final StateObservation sob,
-        final boolean random,
-        final boolean silent
+            final StateObservation sob,
+            final boolean random,
+            boolean deterministic, final boolean silent
     ) {
 
         MCTSNode mctsNode;

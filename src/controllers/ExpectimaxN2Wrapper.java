@@ -80,11 +80,12 @@ public class ExpectimaxN2Wrapper extends AgentBase implements PlayAgent, Seriali
 	
 	/**
 	 * Get the best next action and return it
-	 * @param so			current game state (not changed on return), has to be an 
+	 * @param so            current game state (not changed on return), has to be an
 	 * 						object of class {@link StateObsNondeterministic}
-	 * @param random		allow epsilon-greedy random action selection	
-	 * @param silent
-	 * @return actBest		the best action 
+	 * @param random        allow epsilon-greedy random action selection
+	 * @param deterministic
+     * @param silent
+     * @return actBest		the best action
 	 * @throws RuntimeException if {@code so} is not of class {@link StateObsNondeterministic}
 	 * <p>						
 	 * actBest has predicate isRandomAction()  (true: if action was selected 
@@ -94,7 +95,7 @@ public class ExpectimaxN2Wrapper extends AgentBase implements PlayAgent, Seriali
 	 * 
 	 */	
 	@Override
-	public ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
+	public ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean deterministic, boolean silent) {
         List<ACTIONS> actions = so.getAvailableActions();
 		double[] vTable = new double[actions.size()];
 //		silent=false;
@@ -156,7 +157,7 @@ public class ExpectimaxN2Wrapper extends AgentBase implements PlayAgent, Seriali
 		if (depth>=this.m_depth) {
 			countMaxDepth++;
 			// this terminates the recursion. It returns the right ScoreTuple based on r(s)+gamma*V(s).
-			ACTIONS_VT act_vt = this.getWrappedPlayAgent().getNextAction2(soND.partialState(), random, true);
+			ACTIONS_VT act_vt = this.getWrappedPlayAgent().getNextAction2(soND.partialState(), random, false, true);
 			return act_vt;
 		}
 
@@ -224,7 +225,7 @@ public class ExpectimaxN2Wrapper extends AgentBase implements PlayAgent, Seriali
             {
             	actions[i] = rans.get(i);
             	NewSO = soND.copy();
-            	NewSO.advanceNondeterministic(actions[i], null);
+            	NewSO.advanceNondetSpecific(actions[i]);
             	
 				// here is the recursion: getAllScores may call getBestAction back:
 				currScoreTuple = getAllScores(NewSO,refer,silent,depth+1);		
@@ -302,7 +303,7 @@ public class ExpectimaxN2Wrapper extends AgentBase implements PlayAgent, Seriali
 	 */
 	@Override
 	public ScoreTuple estimateGameValueTuple(StateObservation sob, ScoreTuple prevTuple) {
-		Types.ACTIONS_VT actBest = wrapped_pa.getNextAction2(sob,false,true);
+		Types.ACTIONS_VT actBest = wrapped_pa.getNextAction2(sob,false, false, true);
 		return actBest.getScoreTuple();
 //		return wrapped_pa.getScoreTuple(sob, prevTuple);		// /WK/ 2021-09-10: old and flawed
 	}

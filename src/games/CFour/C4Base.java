@@ -2155,7 +2155,7 @@ public class C4Base extends AgentBase implements Serializable {
 	}
 
 	@Override
-	public ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean silent) {
+	public ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean deterministic, boolean silent) {
 		throw new RuntimeException("C4Base.getNextAction2 has to be overridden by derived classes!");
 //		return null;
 	}

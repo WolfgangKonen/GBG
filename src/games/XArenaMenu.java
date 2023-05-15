@@ -275,7 +275,7 @@ public class XArenaMenu extends JMenuBar {
 		menuItem.setToolTipText("<html><body>Start a single competition between the selected Agents "
 				+ " The results are printed to <br>"
 				+ "the console</body></html>");
-		menuItem.setEnabled(numPlayers>1);
+		//menuItem.setEnabled(numPlayers>1);
 		menu.add(menuItem);
 		menuItem = new JMenuItem("Swap Compete");
 		menuItem.addActionListener(new ActionListener() {
