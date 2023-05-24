@@ -99,20 +99,22 @@ public class MaxNAgent extends AgentBase implements PlayAgent, Serializable
 	}
 	
 	/**
-	 * Get the best next action and return it
+	 * Get the best next action and return it.
+	 * <p>
+	 * The return value {@code actBest} has the predicate isRandomAction()  (true: if action was selected
+	 * at random, false: if action was selected by agent).<p>
+	 * {@code actBest} has also the members vTable and vBest to store the Q-value for each available
+	 * action (as returned by so.getAvailableActions()) and the Q-value for the best action {@code actBest}, resp.
+	 *
 	 * @param so            current game state (not changed on return)
 	 * @param random        allow epsilon-greedy random action selection (not relevant in MaxNAgent)
 	 * @param deterministic
 	 * 			if true, the agent acts deterministically in case of several equivalent best actions (reproducibility)
      * @param silent        true: no print-out
-     * @return actBest		the best action
-	 * <p>						
-	 * actBest has predicate isRandomAction()  (true: if action was selected 
-	 * at random, false: if action was selected by agent).<br>
-	 * actBest has also the members vTable and bestValue to store the value for each available
-	 * action (as returned by so.getAvailableActions()) and the value for the best action actBest.
-	 * 
-	 */	
+	 * @return {@code actBest},	the best action. If several actions have the same score:
+	 * 			break ties by selecting one of them at random (if {@code deterministic==false}) or
+	 * 			return the first one (if {@code deterministic==true}) .
+	 */
 	@Override
 	public ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean deterministic, boolean silent) {
 

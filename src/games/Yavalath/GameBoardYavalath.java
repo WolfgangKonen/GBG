@@ -3,6 +3,7 @@ package games.Yavalath;
 import controllers.PlayAgent;
 import games.Arena;
 import games.GameBoard;
+import games.GameBoardBase;
 import games.StateObservation;
 import games.Yavalath.GUI.GameBoardGUIYavalath;
 import tools.Types;
@@ -11,7 +12,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class GameBoardYavalath implements GameBoard {
+public class GameBoardYavalath extends GameBoardBase implements GameBoard {
 
     private boolean actionReq = false;
     public StateObserverYavalath m_so;
@@ -19,7 +20,8 @@ public class GameBoardYavalath implements GameBoard {
     private GameBoardGUIYavalath gb_gui;
     protected Random rand;
 
-    public GameBoardYavalath(Arena arena){
+    public GameBoardYavalath(Arena arena) {
+        super(arena);
         m_arena = arena;
         m_so = new StateObserverYavalath();
         if(m_arena.hasGUI() && gb_gui==null) {

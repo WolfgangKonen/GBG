@@ -38,6 +38,7 @@ public class GameBoardNim2P extends GameBoardNimBase implements GameBoard {
 	private boolean arenaActReq=false;
 	
 	public GameBoardNim2P(Arena nimGame) {
+		super(nimGame);
 		initGameBoard(nimGame);
 //		clearBoard(true,true);
 	}

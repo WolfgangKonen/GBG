@@ -3,13 +3,14 @@ package games.Poker;
 import controllers.PlayAgent;
 import games.Arena;
 import games.GameBoard;
+import games.GameBoardBase;
 import games.StateObservation;
 import tools.Types;
 
 import java.util.ArrayList;
 import java.util.Random;
 
-public class GameBoardPoker implements GameBoard {
+public class GameBoardPoker extends GameBoardBase implements GameBoard {
 
 	protected Arena  m_Arena;		// a reference to the Arena object, needed to
 									// infer the current taskState
@@ -21,10 +22,12 @@ public class GameBoardPoker implements GameBoard {
 	private boolean arenaActReq=false;
 
 	public GameBoardPoker(Arena pokerGame) {
+		super(pokerGame);
 		initGameBoard(pokerGame);
 	}
 
 	public GameBoardPoker() {
+		super(null);
 		initGameBoard(null);
 	}
 	

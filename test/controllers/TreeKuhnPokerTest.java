@@ -34,7 +34,7 @@ public class TreeKuhnPokerTest extends GBGBatch {
     //
 
     /**
-     * Checks for KuhnPoker and the starting player 0: Far a given state with a certain card {@code numCard}
+     * Checks for KuhnPoker and the starting player 0: For a given state with a certain card {@code numCard}
      * and a certain action {@code pact} that has been played before (either 0 (NONE) or 1 (CHECK-BET)):
      * Is the agent MCTSExpectimax able to find the optimal next action for player 0 or not?
      * <p>

@@ -3,13 +3,14 @@ package games.KuhnPoker;
 import controllers.PlayAgent;
 import games.Arena;
 import games.GameBoard;
+import games.GameBoardBase;
 import games.StateObservation;
 import tools.Types;
 
 import java.util.ArrayList;
 import java.util.Random;
 
-public class GameBoardKuhnPoker implements GameBoard {
+public class GameBoardKuhnPoker extends GameBoardBase implements GameBoard {
 
 	protected Arena  m_Arena;		// a reference to the Arena object, needed to
 									// infer the current taskState
@@ -23,10 +24,12 @@ public class GameBoardKuhnPoker implements GameBoard {
 	private boolean waitAtEndOfRound = true;
 
 	public GameBoardKuhnPoker(Arena pokerGame) {
+		super(pokerGame);
 		initGameBoard(pokerGame);
 	}
 
 	public GameBoardKuhnPoker() {
+		super(null);
 		initGameBoard(null);
 	}
 	

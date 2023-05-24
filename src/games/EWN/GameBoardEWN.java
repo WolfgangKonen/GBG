@@ -6,17 +6,19 @@ import games.EWN.StateObserverHelper.Helper;
 import games.EWN.config.ConfigEWN;
 import games.EWN.gui.GameBoardGuiEWN;
 import games.GameBoard;
+import games.GameBoardBase;
 import games.Othello.ConfigOthello;
 import games.StateObservation;
 import tools.Types;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Random;
 
 /**
  * GameBoardEWN contains the 'game-theoretic' part of the game board. See {@link GameBoardGuiEWN} for the GUI.
  */
-public class GameBoardEWN implements GameBoard {
+public class GameBoardEWN extends GameBoardBase implements GameBoard {
 
     /**
      * Serialnumber
@@ -26,10 +28,9 @@ public class GameBoardEWN implements GameBoard {
     /**
      * Game board Attributes
      */
-    public Arena m_Arena;
     private StateObserverEWN m_so;
     protected Random rand;
-    private boolean arenaActReq = false;
+    // private boolean arenaActReq = false;
     private transient GameBoardGuiEWN m_gameGui;
     double[][] vGameState;
     private int selectedTokenPosition;
@@ -37,8 +38,7 @@ public class GameBoardEWN implements GameBoard {
     //private int[] cubed;      // never used
 
     public GameBoardEWN(Arena arena){
-        super();
-        m_Arena = arena;
+        super(arena);
         m_so = new StateObserverEWN();
         rand = new Random();
         selecting = true;
@@ -83,6 +83,7 @@ public class GameBoardEWN implements GameBoard {
     public void clearBoard(boolean boardClear, boolean vClear, Random cmpRand) {
         if(boardClear){
             m_so = m_so.reset(cmpRand);
+            this.getStateQueue().clear();
         }
         if(m_gameGui!=null && m_Arena.taskState!=Arena.Task.TRAIN){
             m_gameGui.clearBoard(boardClear,vClear);
@@ -152,7 +153,7 @@ public class GameBoardEWN implements GameBoard {
                     m_so.advance(act, null);
                     (m_Arena.getLogManager()).addLogEntry(act, m_so, m_Arena.getLogSessionID());
                     m_gameGui.unSelect();
-                    arenaActReq = true;
+                    this.setActionReq(true);
                     selecting = true;
                     selectedTokenPosition = -1;
 
@@ -174,10 +175,11 @@ public class GameBoardEWN implements GameBoard {
 
 
 
-    @Override
-    public boolean isActionReq() {
-        return arenaActReq;
-    }
+    // --- now in GameBoardBase
+//    @Override
+//    public boolean isActionReq() {
+//        return arenaActReq;
+//    }
 
     @Override
     public void showGameBoard(Arena arena, boolean alignToMain) {
@@ -189,11 +191,6 @@ public class GameBoardEWN implements GameBoard {
     public void toFront() {
         if (m_gameGui!=null)
             m_gameGui.toFront();
-    }
-
-    @Override
-    public void setActionReq(boolean actionReq) {
-        arenaActReq = actionReq;
     }
 
     @Override
@@ -226,11 +223,6 @@ public class GameBoardEWN implements GameBoard {
         return board+players+" "+ConfigEWN.CELL_CODE_DIR_NAMING[cellCoding]+isRandom;
 
 
-    }
-
-    @Override
-    public Arena getArena() {
-        return m_Arena;
     }
 
     @Override

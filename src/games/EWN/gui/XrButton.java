@@ -3,6 +3,8 @@ package games.EWN.gui;
 import games.Arena;
 import games.EWN.GameBoardEWN;
 import games.EWN.StateObserverEWN;
+import games.StateObsNondeterministic;
+import games.StateObservation;
 import tools.Types.ACTIONS;
 
 import javax.swing.*;
@@ -10,6 +12,7 @@ import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.geom.RoundRectangle2D;
+import java.util.LinkedList;
 
 /**
  * A {@link JButton} extension for a button with rounded corners. <br>
@@ -81,7 +84,7 @@ public class XrButton extends JButton implements MouseListener {
      * @param e (required by the interface, not needed here)
      */
     public void mouseClicked(MouseEvent e) {
-        Arena.Task aTaskState = m_gb.m_Arena.taskState;
+        Arena.Task aTaskState = m_gb.getArena().taskState;
         if( aTaskState == Arena.Task.INSPECTV) {
             StateObserverEWN theState = (StateObserverEWN)m_gb.getStateObs();
             ACTIONS diceAction = theState.getNextNondeterministicAction();     // diceAction is one smaller than the value shown on game board
@@ -92,6 +95,19 @@ public class XrButton extends JButton implements MouseListener {
             if (text.equals("+") && diceAction.toInt()<theState.getNumAvailableRandoms()-1)  {
                 theState.advanceNondetSpecific(new ACTIONS(diceAction.toInt()+1));
                 m_gb.setActionReq(true);
+            }
+            if (text.equals("back")) {
+                LinkedList<StateObservation> q = m_gb.getStateQueue();
+                if (q != null) {
+                    if (q.size()>1) {
+                        q.removeFirst();
+                        StateObservation backstate = q.getFirst();
+                        StateObsNondeterministic soN = (StateObsNondeterministic) backstate;
+                        System.out.println("Returned to state with player "+soN.getPlayer()
+                                + " and diceval "+soN.getNextNondeterministicAction().toInt());
+                        m_gb.updateBoard(backstate, false, true);
+                    }
+                }
             }
             // only debug info:
             if (m_gb.isActionReq()) {

@@ -5,6 +5,7 @@ import java.util.Random;
 
 import controllers.PlayAgent;
 import games.GameBoard;
+import games.GameBoardBase;
 import games.StateObservation;
 import games.Othello.Gui.GameBoardOthelloGui;
 import games.Sim.Gui.GameBoardSimGui;
@@ -24,7 +25,7 @@ import games.Arena;
  * 
  * @author Percy Wuensch, Wolfgang Konen, TH Koeln, 2019-2020
  */
-public class GameBoardSim implements GameBoard {
+public class GameBoardSim extends GameBoardBase implements GameBoard {
 
 	/**
 	 * SerialNumber
@@ -46,6 +47,7 @@ public class GameBoardSim implements GameBoard {
 	
 	public GameBoardSim(Arena simGame)
 	{
+		super(simGame);
 		//Framework
 		m_Arena = simGame;
 		m_so = new StateObserverSim();

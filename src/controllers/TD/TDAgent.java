@@ -187,12 +187,12 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	public Types.ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean deterministic, boolean silent)
 	{
 		if (so.getNumPlayers()>2)
-			return getNextAction4(so, so, random, silent);
+			return getNextAction4(so, so, random, deterministic, silent);
 		else
-			return getNextAction3(so, so, random, silent);
+			return getNextAction3(so, so, random, deterministic, silent);
 	}
 	private Types.ACTIONS_VT getNextAction3(StateObservation so, StateObservation refer, 
-			boolean random, boolean silent) {
+			boolean random, boolean deterministic, boolean silent) {
 		int i;
 		double CurrentScore;     	// NetScore*Player, the quantity to be
 									// maximized
@@ -233,7 +233,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 			if (thisAct.isEqualToInverseOfLastAction(so))
 				continue;	// with next for-pass
 
-            CurrentScore = g3_Evaluate(so,thisAct,refer,silent);
+            CurrentScore = g3_Evaluate(so,thisAct,refer,deterministic, silent);
 				
 			// just a debug check:
 			if (Double.isInfinite(CurrentScore)) {
@@ -256,8 +256,14 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 				bestActions.add(acts.get(i));
 			}
         } // for
-		actBest = bestActions.get(rand.nextInt(bestActions.size()));
-		// if several actions have the same best value, select one of them randomly
+		assert bestActions.size()>0;
+		if (deterministic) {
+			actBest = bestActions.get(0);
+			// if several actions have the same best value, select the first one
+		} else {
+			actBest = bestActions.get(rand.nextInt(bestActions.size()));
+			// if several actions have the same best value, select one of them randomly
+		}
 
         assert actBest != null : "Oops, no best action actBest";
 		if (!silent) {
@@ -272,7 +278,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	}
 
 	private Types.ACTIONS_VT getNextAction4(StateObservation so, StateObservation refer, 
-			boolean random, boolean silent) {
+			boolean random, boolean deterministic, boolean silent) {
 		int i;
 		double CurrentScore;     	// NetScore*Player, the quantity to be
 									// maximized
@@ -336,8 +342,14 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 				bestActions.add(acts.get(i));
 			}
         } // for
-		actBest = bestActions.get(rand.nextInt(bestActions.size()));
-		// if several actions have the same best value, select one of them randomly
+		assert bestActions.size()>0;
+		if (deterministic) {
+			actBest = bestActions.get(0);
+			// if several actions have the same best value, select the first one
+		} else {
+			actBest = bestActions.get(rand.nextInt(bestActions.size()));
+			// if several actions have the same best value, select one of them randomly
+		}
 
         assert actBest != null : "Oops, no best action actBest";
 		if (!silent) {
@@ -353,7 +365,8 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 
 	// calculate CurrentScore:
 	// (g3_Evaluate is helper function for getNextAction3)
-	private double g3_Evaluate(	StateObservation so, Types.ACTIONS act, StateObservation refer, boolean silent)
+	private double g3_Evaluate(	StateObservation so, Types.ACTIONS act, StateObservation refer,
+								   boolean deterministic, boolean silent)
 	{
 		double CurrentScore;
 		int player = Types.PLAYER_PM[refer.getPlayer()]; 	 
@@ -379,7 +392,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 			int newPlayer =  Types.PLAYER_PM[NewSO.getPlayer()];
 			if (newPlayer==player) 
 			{
-				actBestVT = getNextAction3(NewSO, refer, false, silent);
+				actBestVT = getNextAction3(NewSO, refer, false, deterministic, silent);
 				NewSO.advance(actBestVT, null);
 				CurrentScore = actBestVT.getVBest();
 				return CurrentScore;

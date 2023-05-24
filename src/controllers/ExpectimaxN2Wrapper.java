@@ -6,9 +6,9 @@ import games.StateObservation;
 import tools.ScoreTuple;
 import tools.Types;
 import tools.Types.ACTIONS;
-import tools.Types.ACTIONS_ST;
 import tools.Types.ACTIONS_VT;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -35,9 +35,10 @@ public class ExpectimaxN2Wrapper extends AgentBase implements PlayAgent, Seriali
 
 	/**
 	 * change the version ID for serialization only if a newer version is no longer
-	 * compatible with an older one (older .agt.zip will become unreadable or you have
+	 * compatible with an older one (older .agt.zip will become unreadable, or you have
 	 * to provide a special version transformation)
 	 */
+	@Serial
 	private static final long  serialVersionUID = 12L;
 
 	public ExpectimaxN2Wrapper(PlayAgent pa, int nply) {
@@ -79,21 +80,24 @@ public class ExpectimaxN2Wrapper extends AgentBase implements PlayAgent, Seriali
 	}
 	
 	/**
-	 * Get the best next action and return it
+	 * Get the best next action and return it.
+	 * <p>
+	 * The return value {@code actBest} has the predicate isRandomAction()  (true: if action was selected
+	 * at random, false: if action was selected by agent).<p>
+	 * {@code actBest} has also the members vTable and vBest to store the Q-value for each available
+	 * action (as returned by so.getAvailableActions()) and the Q-value for the best action {@code actBest}, resp.
+	 *
 	 * @param so            current game state (not changed on return), has to be an
 	 * 						object of class {@link StateObsNondeterministic}
 	 * @param random        allow epsilon-greedy random action selection
 	 * @param deterministic
-     * @param silent
-     * @return actBest		the best action
+	 * 			if true, the agent acts deterministically in case of several equivalent best actions (reproducibility)
+     * @param silent		controls printout
+	 * @return {@code actBest},	the best action. If several actions have the same score:
+	 * 			break ties by selecting one of them at random (if {@code deterministic==false}) or
+	 * 			return the first one (if {@code deterministic==true}) .
 	 * @throws RuntimeException if {@code so} is not of class {@link StateObsNondeterministic}
-	 * <p>						
-	 * actBest has predicate isRandomAction()  (true: if action was selected 
-	 * at random, false: if action was selected by agent).<br>
-	 * actBest has also the members vTable and vBest to store the value for each available
-	 * action (as returned by so.getAvailableActions()) and the value for the best action actBest.
-	 * 
-	 */	
+	 */
 	@Override
 	public ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean deterministic, boolean silent) {
         List<ACTIONS> actions = so.getAvailableActions();
@@ -110,7 +114,7 @@ public class ExpectimaxN2Wrapper extends AgentBase implements PlayAgent, Seriali
 			System.out.print(soND);
 		}
 
-		ACTIONS_VT actBest = getBestAction(soND, so,  random,  vTable,  silent, 1);
+		ACTIONS_VT actBest = getBestAction(soND, so,  random,  vTable,  silent, 1, deterministic);
 
 		if (!silent) {
 			DecimalFormat frmAct = new DecimalFormat("0000");
@@ -134,13 +138,15 @@ public class ExpectimaxN2Wrapper extends AgentBase implements PlayAgent, Seriali
 	 * @param refer		referring game state (=soND on initial call)	
 	 * @param random	allow epsilon-greedy random action selection	
 	 * @param vTable	size soND.getAvailableActions()+1
-	 * @param silent
+	 * @param silent	controls printout
+	 * @param deterministic
+	 * 			if true, the agent acts deterministically in case of several equivalent best actions (reproducibility)
 	 * @param depth		tree depth
 	 * @return best action + V-table + vBest + score tuple. Note that best action, V-table and vBest
 	 *		   are only relevant if {@code soND.isNextActionDeterministic}
 	 */
 	private ACTIONS_VT getBestAction(StateObsNondeterministic soND, StateObservation refer, boolean random,
-			double[] vTable, boolean silent, int depth)
+			double[] vTable, boolean silent, int depth, boolean deterministic)
 	{
 		int i,j;
 		double vBest;
@@ -148,7 +154,7 @@ public class ExpectimaxN2Wrapper extends AgentBase implements PlayAgent, Seriali
         ScoreTuple sc, scBest=null;
 		StateObsNondeterministic NewSO;
         ACTIONS actBest = null;
-        ACTIONS_ST act_st = null;
+		double maxValue = -Double.MAX_VALUE;
 
         assert soND.isLegalState() : "Not a legal state"; 
 
@@ -167,44 +173,57 @@ public class ExpectimaxN2Wrapper extends AgentBase implements PlayAgent, Seriali
         	//
             ArrayList<ACTIONS> acts = soND.getAvailableActions();
             ACTIONS[] actions = new ACTIONS[acts.size()];
-        	scBest=new ScoreTuple(soND);		// make a new ScoreTuple with lowest possible maxValue
+			ArrayList<ACTIONS> bestActions = new ArrayList<>();
+			double value;
+        	scBest=new ScoreTuple(soND);		// make a new ScoreTuple with the lowest possible maxValue
             for(i = 0; i < acts.size(); ++i)
             {
             	actions[i] = acts.get(i);
             	NewSO = soND.copy();
             	NewSO.advanceDeterministic(actions[i]);
-            	
-//           	if (depth<this.m_depth) {
-    				// here is the recursion: getAllScores may call getBestAction back:
-    				currScoreTuple = getAllScores(NewSO,refer,silent,depth+1);						
-//    			} else {
-//    				// this terminates the recursion:
-//    				// (after finishing the for-loop for every element of acts)
-//    				currScoreTuple = estimateGameValueTuple(NewSO, null);
-//    				// For derived class ExpectimaxWrapper, estimateGameValueTuple returns
-//    				// the score tuple of the wrapped agent.
-//    			}
+
+				// here is the recursion: getAllScores may call getBestAction back:
+				currScoreTuple = getAllScores(NewSO,refer,silent,depth+1, deterministic);
+
             	//if (!silent && depth<3) printAfterstate(soND,actions[i],currScoreTuple,depth);
             	vTable[i] = currScoreTuple.scTup[player];
-            	
-    			// always *maximize* P's element in the tuple currScoreTuple, 
-    			// where P is the player to move in state soND:
+
+// --- Version in other agents ---
+//    			// always *maximize* P's element in the tuple currScoreTuple,
+//    			// where P is the player to move in state soND:
+//				value = currScoreTuple.scTup[player];
+//				if (value==maxValue) bestActions.add(acts.get(i));
+//				if (value>maxValue) {
+//					maxValue = value;
+//					scBest = new ScoreTuple(currScoreTuple);	// make a copy
+//					bestActions.clear();
+//					bestActions.add(acts.get(i));
+//				}
+// --- Version ExpectimaxN2Wrapper ---
     			ScoreTuple.CombineOP cOP = ScoreTuple.CombineOP.MAX;
-    			scBest.combine(currScoreTuple, cOP, player, 0.0);            	
+    			scBest.combine(currScoreTuple, cOP, player, 0.0);
             } // for
-            
-            // There might be one or more than one action with pMaxScore. 
-            // Break ties by selecting one of them randomly:
-        	double pMaxScore = scBest.scTup[player];
-        	int selectJ = (int)(rand.nextDouble()*scBest.count);
-        	for (i=0, j=0; i < actions.length; ++i) {
-        		if (vTable[i]==pMaxScore) {
+
+// --- Version in other agents ---
+//			assert bestActions.size()>0;
+//			if (deterministic) {
+//				actBest = bestActions.get(0);
+//				// if several actions have the same best value, select the first one
+//			} else {
+//				actBest = bestActions.get(rand.nextInt(bestActions.size()));
+//				// if several actions have the same best value, select one of them randomly
+//			}
+// --- Version ExpectimaxN2Wrapper ---
+            // There might be one or more than one action with maxValue.
+            // If deterministic==true, take the first one. Else reak ties by selecting one of them randomly:
+        	maxValue = scBest.scTup[player];
+        	int selectJ = (deterministic) ? 0 : rand.nextInt(scBest.count);
+        	for (i=0, j=0; i < actions.length; ++i)
+        		if (vTable[i]==maxValue)
         			if ((j++)==selectJ) actBest = new ACTIONS(actions[i]);
-        		}
-        	}
-            
-            vBest = pMaxScore;
-            //if (!silent && depth<3) printBestAfterstate(soND,actBest,pMaxScore,depth);
+
+			vBest = maxValue;
+            //if (!silent && depth<3) printBestAfterstate(soND,actBest,maxValue,depth);
 
         } // if (isNextActionDeterministic)
         else 
@@ -228,7 +247,7 @@ public class ExpectimaxN2Wrapper extends AgentBase implements PlayAgent, Seriali
             	NewSO.advanceNondetSpecific(actions[i]);
             	
 				// here is the recursion: getAllScores may call getBestAction back:
-				currScoreTuple = getAllScores(NewSO,refer,silent,depth+1);		
+				currScoreTuple = getAllScores(NewSO,refer,silent,depth+1, deterministic);
 				
 				currProbab = soND.getProbability(actions[i]);
             	//if (!silent) printNondet(NewSO,currScoreTuple,currProbab,depth);
@@ -252,7 +271,8 @@ public class ExpectimaxN2Wrapper extends AgentBase implements PlayAgent, Seriali
         return act_vt;
 	}
 
-	private ScoreTuple getAllScores(StateObsNondeterministic sob, StateObservation refer, boolean silent, int depth) {
+	private ScoreTuple getAllScores(StateObsNondeterministic sob, StateObservation refer, boolean silent,
+									int depth, boolean deterministic) {
 		if (sob.isGameOver())
 		{
 			countTerminal++;
@@ -264,14 +284,14 @@ public class ExpectimaxN2Wrapper extends AgentBase implements PlayAgent, Seriali
 		double[] vTable	= new double[n];
 		
 		// here is the recursion: getBestAction calls getAllScores(...,depth+1):
-		ACTIONS_VT act_vt = getBestAction(sob, refer, false,  vTable,  silent, depth);
+		ACTIONS_VT act_vt = getBestAction(sob, refer, false,  vTable,  silent, depth, deterministic);
 
 		return act_vt.getScoreTuple();		// return ScoreTuple for best action
 	}
 
 //	/**
 //	 * Return the agent's score for that after state.
-//	 * @param sob			the current game state;
+//	 * @param sob			the current game state
 //	 * @return				the probability that the player to move wins from that
 //	 * 						state. If game is over: the score for the player who
 //	 * 						*would* move (if the game were not over).
@@ -289,7 +309,7 @@ public class ExpectimaxN2Wrapper extends AgentBase implements PlayAgent, Seriali
 		assert sob instanceof StateObsNondeterministic : "Error, sob must be of class StateObservationNondet";
 		StateObsNondeterministic soND = (StateObsNondeterministic) sob;
 		
-		return getAllScores(soND,sob,true,0);
+		return getAllScores(soND,sob,true,0, false);
 	}
 	
 	/**
@@ -338,11 +358,11 @@ public class ExpectimaxN2Wrapper extends AgentBase implements PlayAgent, Seriali
     }	 
 
     private void printBestAfterstate(StateObsNondeterministic soND,ACTIONS actBest,
-    		double pMaxScore, int depth)
+    		double maxValue, int depth)
     {
 		StateObsNondeterministic NewSO = soND.copy();
     	NewSO.advanceDeterministic(actBest);
-    	System.out.println("---Best Move: "+NewSO.stringDescr()+"   "+pMaxScore+", depth="+depth);
+    	System.out.println("---Best Move: "+NewSO.stringDescr()+"   "+maxValue+", depth="+depth);
     }	
 
     private void printNondet(StateObsNondeterministic NewSO,

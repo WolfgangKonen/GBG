@@ -3,6 +3,7 @@ package games.SimpleGame;
 import controllers.PlayAgent;
 import games.Arena;
 import games.GameBoard;
+import games.GameBoardBase;
 import games.StateObservation;
 import tools.Types;
 
@@ -21,7 +22,7 @@ import java.util.Random;
  * @author Wolfgang Konen, TH Koeln, 2016-2020
  *
  */
-public class GameBoardSG implements GameBoard {
+public class GameBoardSG extends GameBoardBase implements GameBoard {
 
 	protected Arena  m_Arena;		// a reference to the Arena object, needed to 
 									// infer the current taskState
@@ -32,6 +33,7 @@ public class GameBoardSG implements GameBoard {
 	private boolean arenaActReq=false;
 	
 	public GameBoardSG(Arena sgGame) {
+		super(sgGame);
 		initGameBoard(sgGame);
 	}
 	

@@ -5,6 +5,7 @@ import java.util.Random;
 import controllers.PlayAgent;
 import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.GameBoard;
+import games.GameBoardBase;
 import games.StateObservation;
 import games.Arena;
 import tools.Types;
@@ -21,7 +22,7 @@ import tools.Types;
  * 
  * @author Wolfgang Konen, TH Koeln, 2018-2020
  */
-public class GameBoardCube implements GameBoard {
+public class GameBoardCube extends GameBoardBase implements GameBoard {
 
 	private transient GameBoardCubeGui m_gameGui = null;
 	
@@ -38,6 +39,7 @@ public class GameBoardCube implements GameBoard {
 	private final StateObserverCube def = new StateObserverCube();
 
 	public GameBoardCube(Arena arena) {
+		super(arena);
 		m_Arena		= arena;
 		this.initialize();
 		

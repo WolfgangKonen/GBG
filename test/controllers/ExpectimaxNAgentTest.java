@@ -207,16 +207,13 @@ public class ExpectimaxNAgentTest extends GBGBatch {
         arenaTrain = SetupGBG.setupSelectedGame("EWN",scaPar,"",false,true);
         GameBoardEWN gb = new GameBoardEWN(arenaTrain); //,3,2);		// needed for chooseStartState()
         StateObserverEWN startSO, so;
-        DecimalFormat frmAct = new DecimalFormat("0000");
+        //DecimalFormat frmAct = new DecimalFormat("0000");
 
         pa = new ExpectimaxNAgent("ExpectimaxN",nDepth);
 
-        // select a state:
+        // build the specific state:
         gb.clearBoard(true,true, null);
         startSO = (StateObserverEWN) gb.getStateObs();
-        ArrayList<Types.ACTIONS> startRandoms = startSO.getAvailableRandoms();
-        //System.out.println(startSO);
-
         int[] actList = new int[]{4,804,304,703,407};
         for (int a : actList) {
             startSO.advanceDeterministic(new Types.ACTIONS(a));

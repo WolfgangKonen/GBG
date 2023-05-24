@@ -3,6 +3,7 @@ package games.BlackJack;
 import controllers.PlayAgent;
 import games.Arena;
 import games.GameBoard;
+import games.GameBoardBase;
 import games.StateObservation;
 import games.TicTacToe.GameBoardTTTGui;
 import tools.Types;
@@ -20,7 +21,7 @@ import java.util.Random;
  * action handlers
  *
  */
-public class GameBoardBlackJack implements GameBoard {
+public class GameBoardBlackJack extends GameBoardBase implements GameBoard {
 
     protected StateObserverBlackJack m_so;
     protected Arena m_Arena; // a reference to the Arena object, needed to
@@ -31,6 +32,7 @@ public class GameBoardBlackJack implements GameBoard {
     private boolean arenaActReq = false;
 
     public GameBoardBlackJack(Arena bjArena) {
+        super(bjArena);
         initGameBoard(bjArena);
     }
 

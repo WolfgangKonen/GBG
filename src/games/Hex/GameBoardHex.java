@@ -2,6 +2,7 @@ package games.Hex;
 
 import games.Arena;
 import games.GameBoard;
+import games.GameBoardBase;
 import games.StateObservation;
 import tools.Types;
 
@@ -21,7 +22,7 @@ import static games.Hex.HexConfig.PLAYER_TWO;
  * 
  * @author Kevin Galitzki, TH Koeln, 2018
  */
-public class GameBoardHex implements GameBoard {
+public class GameBoardHex extends GameBoardBase implements GameBoard {
     private Arena m_Arena;
     protected StateObserverHex m_so;
     private boolean arenaActReq = false;
@@ -36,6 +37,7 @@ public class GameBoardHex implements GameBoard {
 	private transient GameBoardHexGui m_gameGui = null;
 	
     public GameBoardHex(Arena arena) {
+        super(arena);
         m_Arena = arena;
         m_so = new StateObserverHex();
         rand = new Random(System.currentTimeMillis());

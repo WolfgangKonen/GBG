@@ -9,6 +9,7 @@ import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.LinkedList;
 import java.util.Random;
 
 import javax.swing.JButton;
@@ -16,6 +17,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import games.Arena;
+import games.StateObservation;
 import tools.ScoreTuple;
 import tools.Types;
 
@@ -35,9 +37,12 @@ public class GameBoardTTTGui extends JFrame {
 	private final int TICGAMEHEIGHT=280;
 	private final JLabel leftInfo=new JLabel("");
 	private final JLabel rightInfo=new JLabel("");
+	private JButton rollback;
 //	private JPanel BoardPanel;
-//	protected Arena  m_Arena;		// a reference to the Arena object, needed to
-									// infer the current taskState
+
+	// --- use now GameBoardBase.getArena()
+//	protected Arena  m_Arena;		// a reference to the Arena object, needed to infer the current taskState
+
 	protected Random rand;
 	/**
 	 * The clickable representation of the board in the GUI. The buttons of {@code Board} will
@@ -90,10 +95,11 @@ public class GameBoardTTTGui extends JFrame {
 //		System.out.println("leftInfo size = " +leftInfo.getFont().getSize());
 		Font font=new Font("Arial",0,(int)(1.2*Types.GUI_HELPFONTSIZE));			
 		leftInfo.setFont(font);	
-		rightInfo.setFont(font);	
+		rightInfo.setFont(font);
 //		System.out.println("leftInfo size = " +leftInfo.getFont().getSize());
 		infoPanel.add(leftInfo);
 		infoPanel.add(rightInfo);
+		infoPanel.add(rollback);
 //		infoPanel.setSize(100,10);
 		
 		setLayout(new BorderLayout(10,0));
@@ -126,11 +132,11 @@ public class GameBoardTTTGui extends JFrame {
 				Board[i][j].setEnabled(false);
 				Board[i][j].setPreferredSize(minimumSize); 
 				Board[i][j].addActionListener(					
-						new ActionHandler(i,j)  // constructor copies (i,j) to members (x,y)
+						new BoardActionHandler(i,j)  // constructor copies (i,j) to members (x,y)
 						{
 							public void actionPerformed(ActionEvent e)
 							{
-								Arena.Task aTaskState = m_gb.m_Arena.taskState;
+								Arena.Task aTaskState = m_gb.getArena().taskState;
 								if (aTaskState == Arena.Task.PLAY)
 								{
 									m_gb.HGameMove(x,y);		// i.e. make human move (i,j), if Board[i][j] is clicked								
@@ -145,6 +151,30 @@ public class GameBoardTTTGui extends JFrame {
 				panel.add(Board[i][j]);
 			}
 		}
+		rollback = new JButton("back");
+		rollback.setVisible(false);
+		rollback.addActionListener(
+				new ActionListener() {
+					public void actionPerformed(ActionEvent e)
+					{
+						LinkedList<StateObservation> q = m_gb.getStateQueue();
+						if (q != null) {
+							if (q.size() > 1) {
+								q.removeFirst();
+								StateObservation backstate = q.removeFirst();
+								System.out.println("Returned to state with player " + backstate.getPlayer()
+										+ " and string " + backstate.stringDescr());
+								m_gb.setBoard(backstate);	// set m_gb.m_so to backstate
+								m_gb.setActionReq(true);	// loop with the newly set state of m_gb through the
+															// gb.isActionReq()-branch of InspectGame --> sets the
+															// stored actions and their values correctly (with the
+															// agent only available in InspectGame)
+							}
+						}
+					}
+				}
+		);
+
 		return panel;
 	}
 	
@@ -213,8 +243,8 @@ public class GameBoardTTTGui extends JFrame {
 					}	
 				}
 
-				String splus = (m_gb.m_Arena.taskState == Arena.Task.INSPECTV) ? "X" : "O";
-				String sminus= (m_gb.m_Arena.taskState == Arena.Task.INSPECTV) ? "O" : "X";
+				String splus = (m_gb.getArena().taskState == Arena.Task.INSPECTV) ? "X" : "O";
+				String sminus= (m_gb.getArena().taskState == Arena.Task.INSPECTV) ? "O" : "X";
 				switch (Player) {
 					case (+1) -> rightInfo.setText("    Score for " + splus);
 					case (-1) -> rightInfo.setText("    Score for " + sminus);
@@ -223,7 +253,14 @@ public class GameBoardTTTGui extends JFrame {
 				rightInfo.setText("");					
 			}
 		} // if(so!=null)
-		
+		boolean isInspectV = (m_gb.getArena().taskState == Arena.Task.INSPECTV);
+		rollback.setVisible(isInspectV);
+		rollback.setEnabled(false);
+		LinkedList<StateObservation> q = m_gb.getStateQueue();
+		if (q != null) {
+			rollback.setEnabled(isInspectV && q.size()>1);
+		}
+
 		guiUpdateBoard(false,showValueOnGameboard);
 	}
 
@@ -294,13 +331,12 @@ public class GameBoardTTTGui extends JFrame {
 	/**
 	 * This class is needed for each ActionListener of {@code Board[i][j]} in 
 	 * {@link #InitBoard()}
-	 *
 	 */
-	class ActionHandler implements ActionListener
+	class BoardActionHandler implements ActionListener
 	{
 		int x,y;
 		
-		ActionHandler(int num1,int num2)			
+		BoardActionHandler(int num1, int num2)
 		{		
 			x=num1;
 			y=num2;

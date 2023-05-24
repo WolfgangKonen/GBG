@@ -5,6 +5,7 @@ import java.util.Random;
 
 import controllers.PlayAgent;
 import games.GameBoard;
+import games.GameBoardBase;
 import games.StateObservation;
 import games.Arena;
 import tools.Types;
@@ -22,7 +23,7 @@ import tools.Types;
  * @author Wolfgang Konen, TH Koeln, May'18
  *
  */
-public class GameBoardC4 implements GameBoard {
+public class GameBoardC4 extends GameBoardBase implements GameBoard {
 
 	protected Arena  m_Arena;		// a reference to the Arena object, needed to 
 									// infer the current taskState
@@ -32,6 +33,7 @@ public class GameBoardC4 implements GameBoard {
 	private GameBoardC4Gui m_gameGui = null;
 	
 	public GameBoardC4(Arena arGame) {
+		super(arGame);
 		initGameBoard(arGame);
 	}
 	

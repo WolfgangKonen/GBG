@@ -227,20 +227,21 @@ public class QLearn4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Ser
 	}
 	
 	/**
-	 * Get the best next action and return it 
-	 * 
+	 * Get the best next action and return it.
+	 * <p>
+	 * The return value {@code actBest} has the predicate isRandomAction()  (true: if action was selected
+	 * at random, false: if action was selected by agent).<p>
+	 * {@code actBest} has also the members vTable and vBest to store the Q-value for each available
+	 * action (as returned by so.getAvailableActions()) and the Q-value for the best action {@code actBest}, resp.
+	 *
 	 * @param so            current game state (is returned unchanged)
 	 * @param random        allow random action selection with probability m_epsilon
 	 * @param deterministic
 	 * 			if true, the agent acts deterministically in case of several equivalent best actions (reproducibility)
      * @param silent        no printout
-     * @return actBest		the best action. If several actions have the same
-	 * 						score, break ties by selecting one of them at random. 
-	 * <p>						
-	 * actBest has the predicate isRandomAction()  (true: if action was selected
-	 * at random, false: if action was selected by agent).<br>
-	 * actBest has also the members vTable and vBest to store the Q value for each available
-	 * action (as returned by so.getAvailableActions()) and the Q value for the best action actBest.
+	 * @return {@code actBest},	the best action. If several actions have the same score:
+	 * 			break ties by selecting one of them at random (if {@code deterministic==false}) or
+	 * 			return the first one (if {@code deterministic==true}) .
 	 */
 	@Override
 	public ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean deterministic, boolean silent) {

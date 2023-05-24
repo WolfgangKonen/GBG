@@ -6,6 +6,7 @@ import controllers.HumanPlayer;
 import controllers.MC.MCAgentN;
 import controllers.MCTS.MCTSAgentT;
 import controllers.PlayAgent;
+import games.EWN.StateObserverEWN;
 import games.Hex.HexTile;
 import games.Hex.StateObserverHex;
 import games.Sim.StateObserverSim;
@@ -343,6 +344,8 @@ abstract public class Arena implements Runnable {
 
 		so = gb.getStateObs();  // just to initialize it
 
+		//gb.getStateQueue().addFirst(so);
+
 		while (taskState == Task.INSPECTV) {
 			if (gb.isActionReq()) {
 				gb.setActionReq(false);
@@ -357,6 +360,17 @@ abstract public class Arena implements Runnable {
 				// state we clear the last action (set it to unknown) and thus allow all actions in getNextAction2.
 				//
 				// For all other games, clearedCopy is identical to copy.
+
+				gb.getStateQueue().addFirst(so.copy());
+				if (so instanceof StateObserverEWN) {
+					StateObsNondeterministic soN = (StateObsNondeterministic) so;
+					System.out.println("Added state with player "+(so.getPlayer()+1)+" to move"
+							+ " and dice "+(soN.getNextNondeterministicAction().toInt()+1));
+				} else {
+					System.out.println("Added to queue state with string "+so.stringDescr()
+							+ " and player "+so.getPlayer()+" to move");
+
+				}
 
 				if (!so.isGameOver()&&so.isRoundOver()) so.initRound();
 				if (DBG_HEX && (so instanceof StateObserverHex)) {
@@ -418,8 +432,7 @@ abstract public class Arena implements Runnable {
 					// MyMouseListener
 					// in GameBoardHex), which will set gb.isActionReq() to true
 					// again.
-				} catch (Exception e) {
-				}
+				} catch (Exception e) { }
 			}
 			if (so.isRoundOver()) {
 				gb.updateBoard(so, true, true);

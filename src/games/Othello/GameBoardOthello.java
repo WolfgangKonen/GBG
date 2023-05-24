@@ -6,6 +6,7 @@ import java.util.Random;
 import controllers.PlayAgent;
 import games.Arena;
 import games.GameBoard;
+import games.GameBoardBase;
 import games.StateObservation;
 import games.Othello.Gui.GameBoardOthelloGui;
 import games.RubiksCube.GameBoardCube;
@@ -24,7 +25,7 @@ import tools.Types;
  * 
  * @author Julian Coeln, Yannick Dittmar, TH Koeln, 2019
  */
-public class GameBoardOthello implements GameBoard {
+public class GameBoardOthello extends GameBoardBase implements GameBoard {
 
 	/**
 	 * SerialNumber
@@ -41,8 +42,8 @@ public class GameBoardOthello implements GameBoard {
 	
 	private transient GameBoardOthelloGui m_gameGui = null;
 	
-	public GameBoardOthello(Arena arena)
-	{
+	public GameBoardOthello(Arena arena) {
+		super(arena);
 		initGameBoard(arena);
 	}
 	

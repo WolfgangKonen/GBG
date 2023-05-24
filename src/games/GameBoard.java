@@ -4,6 +4,7 @@ import controllers.PlayAgent;
 import games.RubiksCube.CubeConfig;
 import games.RubiksCube.GameBoardCube;
 
+import java.util.LinkedList;
 import java.util.Random;
 
 /**
@@ -66,8 +67,7 @@ public interface GameBoard {
 	boolean isActionReq();
 	void setActionReq(boolean actionReq);
 	void enableInteraction(boolean enable);
-	StateObservation getStateObs();
-	
+
 	/**
 	 * If logs and agents should be placed in a subdirectory (e.g. Hex: BoardSize), then
 	 * this method returns a suitable string. If it returns {@code null}, then logs and 
@@ -83,7 +83,10 @@ public interface GameBoard {
 	 * @param cmpRand		if non-null, use this (reproducible) RNG instead of StateObservation's RNG
 	 */
 	StateObservation getDefaultStartState(Random cmpRand);
-	
+
+	StateObservation getStateObs();
+	LinkedList<StateObservation> getStateQueue();
+
 	/**
 	 * Choose a random start state. Used when training an agent via self-play.
 	 * 
