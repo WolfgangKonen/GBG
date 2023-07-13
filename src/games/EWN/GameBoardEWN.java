@@ -9,6 +9,7 @@ import games.GameBoard;
 import games.GameBoardBase;
 import games.Othello.ConfigOthello;
 import games.StateObservation;
+import games.TicTacToe.StateObserverTTT;
 import tools.Types;
 
 import java.util.ArrayList;
@@ -91,25 +92,33 @@ public class GameBoardEWN extends GameBoardBase implements GameBoard {
     }
 
     @Override
-    public void updateBoard(StateObservation so, boolean withReset, boolean showValueOnGameboard) {
+    public void setStateObs(StateObservation so) {
         StateObserverEWN soN = null;
         if(so!=null){
             assert( so instanceof StateObserverEWN):"StateObservation 'so' is not an instance of StateObserverEWN";
             soN = (StateObserverEWN) so;
             m_so = soN;
         }
+    }
+
+    @Override
+    public void updateBoard(StateObservation so, boolean withReset, boolean showValueOnGameboard) {
+        setStateObs(so);    // asserts that so is StateObserverEWN
+
+        StateObserverEWN soN = (StateObserverEWN) so;
         if(m_gameGui != null){
             m_gameGui.updateBoard(soN, withReset,showValueOnGameboard);
         }
 
+        // --- TODO: check if this is really needed ---
         if(soN != null && showValueOnGameboard && soN.getStoredValues() != null) {
-            for(int i = 0; i < ConfigOthello.BOARD_SIZE; i++)
-                for( int j = 0; j < ConfigOthello.BOARD_SIZE; j++)
+            for(int i = 0; i < ConfigEWN.BOARD_SIZE; i++)
+                for( int j = 0; j < ConfigEWN.BOARD_SIZE; j++)
                     vGameState[i][j] = Double.NaN;
 
             for(int y = 0 ; y < soN.getStoredValues().length; y++)
             {
-                System.out.println("index: " + y + " Values" + soN.getStoredValues()[y]);
+                System.out.println("index: " + y + " Values " + soN.getStoredValues()[y]);
                 /*Types.ACTIONS action = sot.getStoredAction(y);
                 int iAction = action.toInt();
                 int jFirst= iAction%ConfigOthello.BOARD_SIZE;

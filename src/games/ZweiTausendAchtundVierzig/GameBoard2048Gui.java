@@ -164,7 +164,7 @@ public class GameBoard2048Gui extends JFrame {
                     new ActionHandler(i)  // constructor copies (i) to member 'move'
                     {
                         public void actionPerformed(ActionEvent e) {
-                            Arena.Task aTaskState = m_gb.m_Arena.taskState;
+                            Arena.Task aTaskState = m_gb.getArena().taskState;
                             if (aTaskState == Arena.Task.PLAY) {
                                 m_gb.HGameMove(move);        // i.e. make human move (i), if buttons[i] is clicked
                             }

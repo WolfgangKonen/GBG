@@ -26,8 +26,6 @@ public class GameBoardCube extends GameBoardBase implements GameBoard {
 
 	private transient GameBoardCubeGui m_gameGui = null;
 	
-	protected Arena  m_Arena;		// a reference to the Arena object, needed to 
-									// infer the current taskState
 	protected Random rand;
 	protected Random rand2;
 	/**
@@ -35,12 +33,10 @@ public class GameBoardCube extends GameBoardBase implements GameBoard {
 	 * board position.
 	 */
 	protected StateObserverCube m_so;
-	private boolean arenaActReq=false;
 	private final StateObserverCube def = new StateObserverCube();
 
 	public GameBoardCube(Arena arena) {
 		super(arena);
-		m_Arena		= arena;
 		this.initialize();
 		
 	}
@@ -55,7 +51,7 @@ public class GameBoardCube extends GameBoardBase implements GameBoard {
         rand2 		= new Random(2*System.currentTimeMillis());	
 		m_so		= new StateObserverCube();	// solved cube
 		
-        if (m_Arena.hasGUI() && m_gameGui==null) {
+        if (getArena().hasGUI() && m_gameGui==null) {
 			switch (CubeConfig.cubeSize) {
 				case POCKET -> m_gameGui = new GameBoardCubeGui2x2(this);
 				case RUBIKS -> m_gameGui = new GameBoardCubeGui3x3(this);
@@ -74,26 +70,26 @@ public class GameBoardCube extends GameBoardBase implements GameBoard {
 	 */
 	@Override
 	public void updateParams() {
-		if (m_Arena.m_xab!=null) {
+		if (getArena().m_xab!=null) {
 			// fetch the most actual values from tab "Other Pars"
-			CubeConfig.pMin = m_Arena.m_xab.oPar[0].getpMinRubiks();
-			CubeConfig.pMax = m_Arena.m_xab.oPar[0].getpMaxRubiks();
+			CubeConfig.pMin = getArena().m_xab.oPar[0].getpMinRubiks();
+			CubeConfig.pMax = getArena().m_xab.oPar[0].getpMaxRubiks();
 			if (CubeConfig.pMin<1) CubeConfig.pMin=1;
-			CubeConfig.REPLAYBUFFER = m_Arena.m_xab.oPar[0].getReplayBuffer();
+			CubeConfig.REPLAYBUFFER = getArena().m_xab.oPar[0].getReplayBuffer();
 
-			CubeConfig.stepReward = m_Arena.m_xab.tdPar[0].getStepReward();
-			CubeConfig.REWARD_POSITIVE = m_Arena.m_xab.tdPar[0].getRewardPositive();
+			CubeConfig.stepReward = getArena().m_xab.tdPar[0].getStepReward();
+			CubeConfig.REWARD_POSITIVE = getArena().m_xab.tdPar[0].getRewardPositive();
 		}
 	}
 
 	// --- should be obsolete now, we use updateParams and have pMax on CubeConfig.pMax ---
 //	public int getPMax() {
-//		if (m_Arena.m_xab!=null) {
+//		if (getArena().m_xab!=null) {
 //			// fetch the most actual values from tab "Other Pars"
-//			CubeConfig.pMin = m_Arena.m_xab.oPar[0].getpMinRubiks();
-//			CubeConfig.pMax = m_Arena.m_xab.oPar[0].getpMaxRubiks();
+//			CubeConfig.pMin = getArena().m_xab.oPar[0].getpMinRubiks();
+//			CubeConfig.pMax = getArena().m_xab.oPar[0].getpMaxRubiks();
 //			if (CubeConfig.pMin<1) CubeConfig.pMin=1;
-//			CubeConfig.REPLAYBUFFER = m_Arena.m_xab.oPar[0].getReplayBuffer();
+//			CubeConfig.REPLAYBUFFER = getArena().m_xab.oPar[0].getReplayBuffer();
 //		}
 //        return CubeConfig.pMax;
 //	}
@@ -116,8 +112,18 @@ public class GameBoardCube extends GameBoardBase implements GameBoard {
 			m_so = new StateObserverCube();			// solved cube
 		}
 							// considerable speed-up during training (!)
-        if (m_gameGui!=null && m_Arena.taskState!=Arena.Task.TRAIN)
+        if (m_gameGui!=null && getArena().taskState!=Arena.Task.TRAIN)
 			m_gameGui.clearBoard(boardClear, vClear);
+	}
+
+	@Override
+	public void setStateObs(StateObservation so) {
+		if (so!=null) {
+			assert (so instanceof StateObserverCube)
+					: "StateObservation 'so' is not an instance of StateObserverCube";
+			StateObserverCube soN = (StateObserverCube) so;
+			m_so = soN;//.copy();
+		}
 	}
 
 	/**
@@ -131,42 +137,17 @@ public class GameBoardCube extends GameBoardBase implements GameBoard {
 	@Override
 	public void updateBoard(StateObservation so, 
 							boolean withReset, boolean showValueOnGameboard) {
-		StateObserverCube soN = null;
-		if (so!=null) {
-	        assert (so instanceof StateObserverCube)
-			: "StateObservation 'so' is not an instance of StateObserverCube";
-	        soN = (StateObserverCube) so;
-			m_so = soN;//.copy();
-		}
+		setStateObs(so);    // asserts that so is StateObserverCube
 
 		updateParams();
 		
 		if (m_gameGui!=null) {
-			this.setPMin(m_Arena.m_xab.oPar[0].getpMinRubiks());  		// update GUI's pMin from oPar
-			this.setPMax(m_Arena.m_xab.oPar[0].getpMaxRubiks());  		// update GUI's pMax from oPar
-			m_gameGui.updateBoard(soN, withReset, showValueOnGameboard);
+			this.setPMin(getArena().m_xab.oPar[0].getpMinRubiks());  		// update GUI's pMin from oPar
+			this.setPMax(getArena().m_xab.oPar[0].getpMaxRubiks());  		// update GUI's pMax from oPar
+			m_gameGui.updateBoard((StateObserverCube)so, withReset, showValueOnGameboard);
 		}
 
 		
-	}
-
-	/**
-	 * @return  true: if an action is requested from Arena or ArenaTrain
-	 * 			false: no action requested from Arena, next action has to come 
-	 * 			from GameBoard (e.g. user input / human move) 
-	 */
-	@Override
-	public boolean isActionReq() {
-		return arenaActReq;
-	}
-
-	/**
-	 * @param	actReq true : GameBoard requests an action from Arena 
-	 * 			(see {@link #isActionReq()})
-	 */
-	@Override
-	public void setActionReq(boolean actReq) {
-		arenaActReq=actReq;
 	}
 
 	protected void HGameMove(int x, int y)
@@ -178,9 +159,9 @@ public class GameBoardCube extends GameBoardBase implements GameBoard {
 		assert m_so.isLegalAction(act) : "Desired action is not legal";
 		m_so.advance(act, null);			// perform action (optionally add random elements)
 		System.out.println(m_so.stringDescr());
-		(m_Arena.getLogManager()).addLogEntry(act, m_so, m_Arena.getLogSessionID());
+		(getArena().getLogManager()).addLogEntry(act, m_so, getArena().getLogSessionID());
 		updateBoard(null,false,false);
-		arenaActReq = true;			// ask Arena for next action
+		setActionReq(true);			// ask Arena for next action
 	}
 	
 	protected void InspectMove(int x, int y)
@@ -191,10 +172,10 @@ public class GameBoardCube extends GameBoardBase implements GameBoard {
 		Types.ACTIONS act = Types.ACTIONS.fromInt(iAction);
 		if (!m_so.isLegalAction(act)) {
 			System.out.println("Desired action is not legal!");
-			m_Arena.setStatusMessage("Desired action is not legal");
+			getArena().setStatusMessage("Desired action is not legal");
 			return;
 		} else {
-			m_Arena.setStatusMessage("Inspecting the value function ...");
+			getArena().setStatusMessage("Inspecting the value function ...");
 		}
 		m_so.advance(act, null);			// perform action (optionally add random elements from game
 									// environment - not necessary in RubiksCube)
@@ -205,7 +186,7 @@ public class GameBoardCube extends GameBoardBase implements GameBoard {
 												// (If lastTwist were set, 3 actions would be excluded
 												// which we do not want during INSPECTV.) 
 		updateBoard(null,false,false);
-		arenaActReq = true;		
+		setActionReq(true);
 	}
 	
 	public StateObservation getStateObs() {
@@ -373,13 +354,8 @@ public class GameBoardCube extends GameBoardBase implements GameBoard {
 		return substr;
 	}
 	
-    @Override
-    public Arena getArena() {
-        return m_Arena;
-    }
-    
-    /* ---- METHODS BELOW ARE ONLY FOR DEBUG --- */
 
+    /* ---- METHODS BELOW ARE ONLY FOR DEBUG --- */
 
 	@Override
 	public void enableInteraction(boolean enable) {

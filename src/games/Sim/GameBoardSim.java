@@ -33,9 +33,7 @@ public class GameBoardSim extends GameBoardBase implements GameBoard {
 	private static final long serialVersionUID = 12L;
 	
 	//Framework
-	protected Arena m_Arena;
 	public StateObserverSim m_so;		// is public so that the classes in games.Sim.Gui can access it
-	private boolean arenaActReq = false;
 	public boolean isEnabled = false;	// is public so that GameBoardSimGui.Mouse can access it
 	
 	protected Random rand;
@@ -49,12 +47,10 @@ public class GameBoardSim extends GameBoardBase implements GameBoard {
 	{
 		super(simGame);
 		//Framework
-		m_Arena = simGame;
 		m_so = new StateObserverSim();
         rand 		= new Random(System.currentTimeMillis());	
-		arenaActReq = false;
-		
-        if (m_Arena.hasGUI() && m_gameGui==null) {
+
+        if (getArena().hasGUI() && m_gameGui==null) {
         	m_gameGui = new GameBoardSimGui(this);
         }
 	}
@@ -74,54 +70,26 @@ public class GameBoardSim extends GameBoardBase implements GameBoard {
             m_so = new StateObserverSim();
 		}
 							// considerable speed-up during training (!)
-        if (m_gameGui!=null && m_Arena.taskState!=Arena.Task.TRAIN)
+        if (m_gameGui!=null && getArena().taskState!=Arena.Task.TRAIN)
 			m_gameGui.clearBoard(boardClear, vClear);
 	}
 
 	@Override
-	public void updateBoard(StateObservation so, boolean withReset, boolean showValueOnGameboard) {
-		StateObserverSim soS=null;
+	public void setStateObs(StateObservation so) {
 		if (so!=null) {
-	        assert (so instanceof StateObserverSim)
-			: "StateObservation 'so' is not an instance of StateObserverSim";
-	        soS = (StateObserverSim) so;
+			assert (so instanceof StateObserverSim)
+					: "StateObservation 'so' is not an instance of StateObserverSim";
+			StateObserverSim soS = (StateObserverSim) so;
 			m_so = soS; //.copy();
-	
-			// --- this is now all done in m_gameGui.updateBoard ---
-//			if (so.isGameOver()) {				
-//				ScoreTuple sc = soS.getGameScoreTuple();
-//				int winner = sc.argmax();
-//				if (sc.max()==0.0) winner = -2;	// tie indicator
-////				int winner = som.getGameWinner3player();		// make getGameWinner3player obsolete
-//				if(winner < 0)
-//					System.out.println("Tie");
-//				else
-//					System.out.println(winner  + " has won");
-//					
-//			} else {
-////				int player = soS.getPlayer();
-////				switch(player) {
-////					case(0): 	System.out.println("0 to move   "); break;
-////					case(1):	System.out.println("1 to move   "); break;
-////					case(2):	System.out.println("2 to move   "); break;
-////				}
-//			}
-		} // if (so!=null)
-		
+		}
+	}
+
+	@Override
+	public void updateBoard(StateObservation so, boolean withReset, boolean showValueOnGameboard) {
+		setStateObs(so);    // asserts that so is StateObserverSim
+
 		if (m_gameGui!=null)
-			m_gameGui.updateBoard(soS, withReset, showValueOnGameboard);
-	}
-
-	@Override
-	public boolean isActionReq() 
-	{
-		return arenaActReq;
-	}
-
-	@Override
-	public void setActionReq(boolean actionReq) 
-	{
-		arenaActReq = actionReq;
+			m_gameGui.updateBoard((StateObserverSim) so, withReset, showValueOnGameboard);
 	}
 
 	@Override
@@ -133,12 +101,6 @@ public class GameBoardSim extends GameBoardBase implements GameBoard {
 	@Override
 	public String getSubDir() {
 		return "K"+ConfigSim.NUM_NODES+"_Player"+ConfigSim.NUM_PLAYERS;
-	}
-
-	@Override
-	public Arena getArena() 
-	{
-		return m_Arena;
 	}
 
 	/**

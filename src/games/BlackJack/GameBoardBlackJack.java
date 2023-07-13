@@ -2,6 +2,7 @@ package games.BlackJack;
 
 import controllers.PlayAgent;
 import games.Arena;
+import games.EWN.StateObserverEWN;
 import games.GameBoard;
 import games.GameBoardBase;
 import games.StateObservation;
@@ -75,6 +76,16 @@ public class GameBoardBlackJack extends GameBoardBase implements GameBoard {
 
     }
 
+    @Override
+    public void setStateObs(StateObservation so) {
+        StateObserverBlackJack soT;
+        if(so!=null){
+            assert( so instanceof StateObserverBlackJack):"StateObservation 'so' is not an instance of StateObserverBlackJack";
+            soT = (StateObserverBlackJack) so;
+            m_so = soT;
+        }
+    }
+
     /**
      * Update the play board and the associated values (labels).
      *
@@ -85,6 +96,7 @@ public class GameBoardBlackJack extends GameBoardBase implements GameBoard {
      */
     @Override
     public void updateBoard(StateObservation so, boolean withReset, boolean showValueOnGameboard) {
+        setStateObs(so);        // asserts that so is StateObserverBlackJack
         StateObserverBlackJack soT = (StateObserverBlackJack) so;
         
 

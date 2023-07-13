@@ -185,8 +185,8 @@ public class GameBoardSGGui extends JFrame {
 					}	
 				}
 
-				String splus = (m_gb.m_Arena.taskState == Arena.Task.INSPECTV) ? "X" : "O";
-				String sminus= (m_gb.m_Arena.taskState == Arena.Task.INSPECTV) ? "O" : "X";
+				String splus = (m_gb.getArena().taskState == Arena.Task.INSPECTV) ? "X" : "O";
+				String sminus= (m_gb.getArena().taskState == Arena.Task.INSPECTV) ? "O" : "X";
 				switch (Player) {
 					case (+1) -> rightInfo.setText("    Score for " + splus);
 					case (-1) -> rightInfo.setText("    Score for " + sminus);

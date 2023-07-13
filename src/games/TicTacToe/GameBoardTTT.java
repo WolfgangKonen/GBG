@@ -80,13 +80,13 @@ public class GameBoardTTT extends GameBoardBase implements GameBoard {
 	@Override
 	public void updateBoard(StateObservation so, 
 							boolean withReset, boolean showValueOnGameboard) {
-		StateObserverTTT soT = setBoard(so);
+		setStateObs(so);	// asserts that so is StateObserverTTT
 
 		if (m_gameGui!=null)
-			m_gameGui.updateBoard(soT, withReset, showValueOnGameboard);
+			m_gameGui.updateBoard((StateObserverTTT) so, withReset, showValueOnGameboard);
 	}
 
-	public StateObserverTTT setBoard(StateObservation so) {
+	public void setStateObs(StateObservation so) {
 		StateObserverTTT soT = null;
 		if (so!=null) {
 			assert (so instanceof StateObserverTTT)
@@ -94,7 +94,6 @@ public class GameBoardTTT extends GameBoardBase implements GameBoard {
 			soT = (StateObserverTTT) so;
 			m_so = soT;//.copy();
 		} // if(so!=null)
-		return soT;
 	}
 
 	// --- now in GameBoardBase ---

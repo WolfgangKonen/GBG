@@ -31,15 +31,12 @@ import tools.Types;
 public class GameBoardNim2P extends GameBoardNimBase implements GameBoard {
 
 	protected StateObserverNim m_so;
-	protected Arena  m_Arena;		// a reference to the Arena object, needed to 
-									// infer the current taskState
 	protected Random rand;
 	private transient GameBoardNimGui m_gameGui = null;
-	private boolean arenaActReq=false;
-	
+
 	public GameBoardNim2P(Arena nimGame) {
 		super(nimGame);
-		initGameBoard(nimGame);
+		initGameBoard();
 //		clearBoard(true,true);
 	}
 	
@@ -49,12 +46,11 @@ public class GameBoardNim2P extends GameBoardNimBase implements GameBoard {
     @Override
     public void initialize() {}
 
-    private void initGameBoard(Arena nimGame) 
+    private void initGameBoard()
 	{
 		m_so		= new StateObserverNim();	// heaps according to NimConfig
-		m_Arena		= nimGame;
-        rand 		= new Random(System.currentTimeMillis());	
-        if (m_Arena.hasGUI() && m_gameGui==null) {
+        rand 		= new Random(System.currentTimeMillis());
+        if (getArena().hasGUI() && m_gameGui==null) {
         	m_gameGui = new GameBoardNimGui(this);
         }
 	}
@@ -65,8 +61,17 @@ public class GameBoardNim2P extends GameBoardNimBase implements GameBoard {
 			m_so = new StateObserverNim();			// heaps according to NimConfig
 		}
 							// considerable speed-up during training (!)
-		if (m_gameGui!=null && m_Arena.taskState!=Arena.Task.TRAIN)
+		if (m_gameGui!=null && getArena().taskState!=Arena.Task.TRAIN)
 			m_gameGui.clearBoard(boardClear, vClear);
+	}
+
+	@Override
+	public void setStateObs(StateObservation so) {
+		if(so!=null){
+			assert( so instanceof StateObserverNim):"StateObservation 'so' is not an instance of StateObserverNim";
+			StateObserverNim soN = (StateObserverNim) so;
+			m_so = soN;
+		}
 	}
 
 	/**
@@ -80,35 +85,10 @@ public class GameBoardNim2P extends GameBoardNimBase implements GameBoard {
 	@Override
 	public void updateBoard(StateObservation so, 
 							boolean withReset, boolean showValueOnGameboard) {
-		StateObserverNim soN = null;
-		if (so!=null) {
-	        assert (so instanceof StateObserverNim)
-			: "StateObservation 'so' is not an instance of StateObserverNim";
-	        soN = (StateObserverNim) so;
-			m_so = soN;//.copy();
-		} 
-		
+		setStateObs(so);    // asserts that so is StateObserverNim
+
 		if (m_gameGui!=null)
-			m_gameGui.updateBoard(soN, withReset, showValueOnGameboard);
-	}
-
-	/**
-	 * @return  true: if an action is requested from Arena or ArenaTrain
-	 * 			false: no action requested from Arena, next action has to come 
-	 * 			from GameBoard (e.g. user input / human move) 
-	 */
-	@Override
-	public boolean isActionReq() {
-		return arenaActReq;
-	}
-
-	/**
-	 * @param	actReq true : GameBoard requests an action from Arena 
-	 * 			(see {@link #isActionReq()})
-	 */
-	@Override
-	public void setActionReq(boolean actReq) {
-		arenaActReq=actReq;
+			m_gameGui.updateBoard((StateObserverNim) so, withReset, showValueOnGameboard);
 	}
 
 	protected void HGameMove(int x, int y)
@@ -119,9 +99,9 @@ public class GameBoardNim2P extends GameBoardNimBase implements GameBoard {
 		assert m_so.isLegalAction(act) : "Desired action is not legal";
 		m_so.advance(act, null);			// perform action (optionally add random elements from game
 									// environment - not necessary in Nim)
-		(m_Arena.getLogManager()).addLogEntry(act, m_so, m_Arena.getLogSessionID());
+		(getArena().getLogManager()).addLogEntry(act, m_so, getArena().getLogSessionID());
 //		updateBoard(null,false,false);
-		arenaActReq = true;			// ask Arena for next action
+		setActionReq(true);			// ask Arena for next action
 	}
 	
 	protected void InspectMove(int x, int y)
@@ -131,15 +111,15 @@ public class GameBoardNim2P extends GameBoardNimBase implements GameBoard {
 		Types.ACTIONS act = Types.ACTIONS.fromInt(iAction);
 		if (!m_so.isLegalAction(act)) {
 			System.out.println("Desired action is not legal!");
-			m_Arena.setStatusMessage("Desired action is not legal");
+			getArena().setStatusMessage("Desired action is not legal");
 			return;
 		} else {
-			m_Arena.setStatusMessage("Inspecting the value function ...");
+			getArena().setStatusMessage("Inspecting the value function ...");
 		}
 		m_so.advance(act, null);			// perform action (optionally add random elements from game
 									// environment - not necessary in Nim)
 //		updateBoard(null,false,false);
-		arenaActReq = true;		
+		setActionReq(true);			// ask Arena for next action
 	}
 	
 	@Override
@@ -189,11 +169,6 @@ public class GameBoardNim2P extends GameBoardNimBase implements GameBoard {
 				"-M"+form.format(NimConfig.MAX_MINUS);
 	}
 	
-    @Override
-    public Arena getArena() {
-        return m_Arena;
-    }
-   
 	@Override
 	public void enableInteraction(boolean enable) {
 		if (m_gameGui!=null)

@@ -23,26 +23,24 @@ import static games.Hex.HexConfig.PLAYER_TWO;
  * @author Kevin Galitzki, TH Koeln, 2018
  */
 public class GameBoardHex extends GameBoardBase implements GameBoard {
-    private Arena m_Arena;
     protected StateObserverHex m_so;
-    private boolean arenaActReq = false;
     protected Random rand;
     final boolean verbose = false;
 
-	/**
-	 * SerialNumber
-	 */
-	private static final long serialVersionUID = 12L;
+//	/**
+//	 * SerialNumber
+//	 */
+//	@Serial
+//    public static final long serialVersionUID = 12L;
 	
 	private transient GameBoardHexGui m_gameGui = null;
 	
     public GameBoardHex(Arena arena) {
         super(arena);
-        m_Arena = arena;
         m_so = new StateObserverHex();
         rand = new Random(System.currentTimeMillis());
 
-        if (m_Arena.hasGUI() && m_gameGui==null) {
+        if (getArena().hasGUI() && m_gameGui==null) {
         	m_gameGui = new GameBoardHexGui(this);
         }
     }
@@ -64,28 +62,29 @@ public class GameBoardHex extends GameBoardBase implements GameBoard {
             m_so.clearTileValues();
         }
 							// considerable speed-up during training (!)
-        if (m_gameGui!=null && m_Arena.taskState!=Arena.Task.TRAIN)
+        if (m_gameGui!=null && getArena().taskState!=Arena.Task.TRAIN)
         	m_gameGui.clearBoard(boardClear, vClear);
     }
 
 
     @Override
-    public void updateBoard(StateObservation so,  
-							boolean withReset, boolean showValueOnGameboard) {
-        StateObserverHex soHex=null;
-    	
+    public void setStateObs(StateObservation so) {
+        StateObserverHex soHex;
+
         if (so != null) {
             assert (so instanceof StateObserverHex)
-            : "StateObservation 'so' is not an instance of StateObserverHex";
+                    : "StateObservation 'so' is not an instance of StateObserverHex";
             soHex = (StateObserverHex) so;
-            m_so = soHex.copy();
-        } else {
-        	// do we need this?
-//            m_frame.paint(m_frame.getGraphics());
-//            return;        	
+            m_so = soHex; //.copy();
         }
+    }
 
-        
+    @Override
+    public void updateBoard(StateObservation so,  
+							boolean withReset, boolean showValueOnGameboard) {
+        setStateObs(so);	// asserts that so is StateObserverHex
+        StateObserverHex soHex = (StateObserverHex) so;
+
 		if (m_gameGui!=null)
 			m_gameGui.updateBoard(soHex, withReset, showValueOnGameboard);
 
@@ -104,25 +103,6 @@ public class GameBoardHex extends GameBoardBase implements GameBoard {
             System.out.println("Dir. Con. for player BLACK: " + featureVectorP1[4]);
             System.out.println("Dir. Con. for player WHITE: " + featureVectorP2[4]);
         }
-    }
-
-	/**
-	 * @return  true: if an action is requested from Arena or ArenaTrain
-	 * 			false: no action requested from Arena, next action has to come 
-	 * 			from GameBoard (e.g. user input / human move) 
-	 */
-    @Override
-    public boolean isActionReq() {
-        return arenaActReq;
-    }
-
-	/**
-	 * @param	actionReq true : GameBoard requests an action from Arena 
-	 * 			(see {@link #isActionReq()})
-	 */
-    @Override
-    public void setActionReq(boolean actionReq) {
-        arenaActReq = actionReq;
     }
 
     @Override
@@ -165,11 +145,6 @@ public class GameBoardHex extends GameBoardBase implements GameBoard {
         return form.format(HexConfig.BOARD_SIZE);
     }
 
-    @Override
-    public Arena getArena() {
-        return m_Arena;
-    }
-    
 	@Override
 	public void enableInteraction(boolean enable) {
 		if (m_gameGui!=null)

@@ -69,7 +69,7 @@ public class Tile extends JButton{
 		this.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				Arena.Task aTaskState = gb.m_Arena.taskState;
+				Arena.Task aTaskState = gb.getArena().taskState;
 				if(aTaskState == Arena.Task.PLAY) {
 					gb.hGameMove(i,j); // Human play
 				}else if( aTaskState == Arena.Task.INSPECTV) {

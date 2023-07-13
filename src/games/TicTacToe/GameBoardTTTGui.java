@@ -157,20 +157,7 @@ public class GameBoardTTTGui extends JFrame {
 				new ActionListener() {
 					public void actionPerformed(ActionEvent e)
 					{
-						LinkedList<StateObservation> q = m_gb.getStateQueue();
-						if (q != null) {
-							if (q.size() > 1) {
-								q.removeFirst();
-								StateObservation backstate = q.removeFirst();
-								System.out.println("Returned to state with player " + backstate.getPlayer()
-										+ " and string " + backstate.stringDescr());
-								m_gb.setBoard(backstate);	// set m_gb.m_so to backstate
-								m_gb.setActionReq(true);	// loop with the newly set state of m_gb through the
-															// gb.isActionReq()-branch of InspectGame --> sets the
-															// stored actions and their values correctly (with the
-															// agent only available in InspectGame)
-							}
-						}
+						m_gb.rollbackFromQueue();
 					}
 				}
 		);

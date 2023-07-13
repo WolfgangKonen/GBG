@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import controllers.PlayAgent;
+import games.EWN.StateObserverEWN;
 import games.GameBoard;
 import games.GameBoardBase;
 import games.StateObservation;
@@ -78,6 +79,21 @@ public class GameBoardC4 extends GameBoardBase implements GameBoard {
 			m_gameGui.clearBoard(boardClear, vClear, m_so);
 	}
 
+	@Override
+	public void setStateObs(StateObservation so) {
+		StateObserverC4 soT = null;
+		if (so!=null) {
+			assert (so instanceof StateObserverC4)
+					: "StateObservation 'so' is not an instance of StateObserverC4";
+			soT = (StateObserverC4) so;
+			m_so = soT;//.copy();		// we do not need a copy here (!)
+			// unclear why, but it leads to wrong behavior if we code
+			//		m_so = (StateObserverC4) so;
+			// (the GameBoard stays empty!)
+
+		} // if(so!=null)
+	}
+
 	/**
 	 * Update the play board and the associated values (labels).
 	 * 
@@ -89,18 +105,8 @@ public class GameBoardC4 extends GameBoardBase implements GameBoard {
 	@Override
 	public void updateBoard(StateObservation so, 
 							boolean withReset, boolean showValueOnGameboard) {
-		StateObserverC4 soT = null;
-		
-		if (so!=null) {
-	        assert (so instanceof StateObserverC4)
-			: "StateObservation 'so' is not an instance of StateObserverC4";
-			soT = (StateObserverC4) so;
-			m_so = soT;//.copy();		// we do not need a copy here (!)
-			// unclear why, but it leads to wrong behavior if we code
-			//		m_so = (StateObserverC4) so;
-			// (the GameBoard stays empty!)
-			
-		} // if(so!=null)
+		setStateObs(so);	// asserts that so is StateObserverC4
+		StateObserverC4 soT = (StateObserverC4) so;
 		
 		if (m_gameGui!=null)
 			m_gameGui.guiUpdateBoard(soT, m_Arena.taskState, withReset,showValueOnGameboard);

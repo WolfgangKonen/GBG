@@ -12,34 +12,30 @@ import java.util.Random;
 
 public class GameBoardPoker extends GameBoardBase implements GameBoard {
 
-	protected Arena  m_Arena;		// a reference to the Arena object, needed to
-									// infer the current taskState
 	protected Random rand;
 	//private transient GameBoardPokerGui m_gameGui = null;
 	private transient GameBoardPokerGui m_gameGui = null;
 
 	protected StateObserverPoker m_so;
-	private boolean arenaActReq=false;
 
 	public GameBoardPoker(Arena pokerGame) {
 		super(pokerGame);
-		initGameBoard(pokerGame);
+		initGameBoard();
 	}
 
 	public GameBoardPoker() {
 		super(null);
-		initGameBoard(null);
+		initGameBoard();
 	}
 	
     @Override
     public void initialize() {}
 
-    private void initGameBoard(Arena arGame) 
+    private void initGameBoard()
 	{
-		m_Arena		= arGame;
 		m_so		= new StateObserverPoker();	// empty table
         rand 		= new Random(System.currentTimeMillis());	
-        if (m_Arena!=null&&m_Arena.hasGUI() && m_gameGui==null) {
+        if (getArena()!=null&&getArena().hasGUI() && m_gameGui==null) {
 			m_gameGui = new GameBoardPokerGui(this);
         }
 
@@ -55,9 +51,19 @@ public class GameBoardPoker extends GameBoardBase implements GameBoard {
 	public void clearBoard(boolean boardClear, boolean vClear, Random cmpRand) {
 		if (boardClear) {
 			m_so = new StateObserverPoker();			// empty Table
-			if (m_Arena!=null&&m_Arena.hasGUI() && m_gameGui!=null) {
+			if (getArena()!=null&&getArena().hasGUI() && m_gameGui!=null) {
 				m_gameGui.resetLog();
 			}
+		}
+	}
+
+	@Override
+	public void setStateObs(StateObservation so) {
+		if (so!=null) {
+			assert (so instanceof StateObserverPoker)
+					: "StateObservation 'so' is not an instance of StateObserverPoker";
+			StateObserverPoker soN = (StateObserverPoker) so;
+			m_so = soN; //.copy();
 		}
 	}
 
@@ -72,33 +78,13 @@ public class GameBoardPoker extends GameBoardBase implements GameBoard {
 	@Override
 	public void updateBoard(StateObservation so, 
 							boolean withReset, boolean showValueOnGameboard) {
+		setStateObs(so);    // asserts that so is StateObserverPoker
+
 		if(so!=null) {
-			StateObserverPoker soT = (StateObserverPoker) so;
-			m_so = soT;
 			if (m_gameGui != null)
-				m_gameGui.updateBoard(soT, withReset, showValueOnGameboard);
+				m_gameGui.updateBoard((StateObserverPoker) so, withReset, showValueOnGameboard);
 		}
 	}
-
-	/**
-	 * @return  true: if an action is requested from Arena or ArenaTrain
-	 * 			false: no action requested from Arena, next action has to come 
-	 * 			from GameBoard (e.g. user input / human move) 
-	 */
-	@Override
-	public boolean isActionReq() {
-		return arenaActReq;
-	}
-
-	/**
-	 * @param	actReq true : GameBoard requests an action from Arena 
-	 * 			(see {@link #isActionReq()})
-	 */
-	@Override
-	public void setActionReq(boolean actReq) {
-		arenaActReq=actReq;
-	}
-
 
 	// Human Game Move
 	protected void HGameMove(int x)
@@ -106,9 +92,9 @@ public class GameBoardPoker extends GameBoardBase implements GameBoard {
 		Types.ACTIONS act = Types.ACTIONS.fromInt(x);
 		assert m_so.isLegalAction(act) : "Desired action is not legal";
 		m_so.advance(act, null);
-		if(m_Arena!=null)
-			(m_Arena.getLogManager()).addLogEntry(act, m_so, m_Arena.getLogSessionID());
-		arenaActReq = true;			// ask Arena for next action
+		if(getArena()!=null)
+			(getArena().getLogManager()).addLogEntry(act, m_so, getArena().getLogSessionID());
+		setActionReq(true);			// ask Arena for next action
 	}
 
 	public StateObservation getStateObs() {
@@ -127,8 +113,7 @@ public class GameBoardPoker extends GameBoardBase implements GameBoard {
 
 	/**
 	 * @return a start state which is with probability 0.5 the default start state 
-	 * 		start state and with probability 0.5 one of the possible one-ply 
-	 * 		successors
+	 * 		and with probability 0.5 one of the possible one-ply successors
 	 */
 	@Override
 	public StateObservation chooseStartState() {
@@ -153,11 +138,6 @@ public class GameBoardPoker extends GameBoardBase implements GameBoard {
 		return null;
 	}
 	
-    @Override
-    public Arena getArena() {
-        return m_Arena;
-    }
-    
 	@Override
 	public void enableInteraction(boolean enable) {
 		if (m_gameGui!=null)

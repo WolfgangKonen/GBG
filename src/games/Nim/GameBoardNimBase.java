@@ -47,12 +47,6 @@ public abstract class GameBoardNimBase extends GameBoardBase implements GameBoar
 	abstract public void toFront();
 
 	@Override
-	abstract public boolean isActionReq();
-
-	@Override
-	abstract public void setActionReq(boolean actionReq);
-	
-	@Override
 	abstract public void enableInteraction(boolean enable);
 
 	@Override
@@ -60,9 +54,6 @@ public abstract class GameBoardNimBase extends GameBoardBase implements GameBoar
 
 	@Override
 	abstract public String getSubDir();
-
-	@Override
-	abstract public Arena getArena();
 
 	@Override
 	abstract public StateObservation getDefaultStartState(Random cmpRand);

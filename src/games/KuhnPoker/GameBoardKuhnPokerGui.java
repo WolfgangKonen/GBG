@@ -106,40 +106,40 @@ public class GameBoardKuhnPokerGui extends JFrame {
         oneRoundCheck.setSelected(StateObserverKuhnPoker.PLAY_ONE_ROUND_ONLY);
 
         checkButton.addActionListener( e -> {
-            if (m_gb.m_Arena.taskState == Arena.Task.PLAY){
+            if (m_gb.getArena().taskState == Arena.Task.PLAY){
                 m_gb.HGameMove(1);
             }
-            if (m_gb.m_Arena.taskState == Arena.Task.INSPECTV){
+            if (m_gb.getArena().taskState == Arena.Task.INSPECTV){
                 m_gb.inspectMove(1);
             }
         });
         betButton.addActionListener(e -> {
-            if (m_gb.m_Arena.taskState == Arena.Task.PLAY){
+            if (m_gb.getArena().taskState == Arena.Task.PLAY){
                 m_gb.HGameMove(2);
             }
-            if (m_gb.m_Arena.taskState == Arena.Task.INSPECTV){
+            if (m_gb.getArena().taskState == Arena.Task.INSPECTV){
                 m_gb.inspectMove(2);
             }
         });
         callButton.addActionListener(e -> {
-            if (m_gb.m_Arena.taskState == Arena.Task.PLAY){
+            if (m_gb.getArena().taskState == Arena.Task.PLAY){
                 m_gb.HGameMove(3);
             }
-            if (m_gb.m_Arena.taskState == Arena.Task.INSPECTV){
+            if (m_gb.getArena().taskState == Arena.Task.INSPECTV){
                 m_gb.inspectMove(3);
             }
         });
         foldButton.addActionListener(e -> {
-            if (m_gb.m_Arena.taskState == Arena.Task.PLAY){
+            if (m_gb.getArena().taskState == Arena.Task.PLAY){
                 m_gb.HGameMove(0);
             }
-            if (m_gb.m_Arena.taskState == Arena.Task.INSPECTV){
+            if (m_gb.getArena().taskState == Arena.Task.INSPECTV){
                 m_gb.inspectMove(0);
             }
         });
 
         continueButton.addActionListener(e -> {
-            if (m_gb.m_Arena.taskState == Arena.Task.PLAY)
+            if (m_gb.getArena().taskState == Arena.Task.PLAY)
                 continueWithTheGame();
         });
 
@@ -461,7 +461,7 @@ public class GameBoardKuhnPokerGui extends JFrame {
 
     private void continueWithTheGame(){
         pause = false;
-        //m_gb.m_Arena.roundOverWait = false;
+        //m_gb.getArena().roundOverWait = false;
         m_gb.setActionReq(true);
         continueButton.setEnabled(false);
     }

@@ -15,9 +15,9 @@ import java.util.Random;
  * inspected. 
  * <p>
  * {@link GameBoard} has an internal object derived from {@link StateObservation} which represents the 
- * current game state. This game state can be retrieved (getStateObs()), 
- * reset-retrieved (getDefaultStartState()) , or a random start state can be retrieved 
- * with {@link #chooseStartState(PlayAgent)}.
+ * current game state. This game state can be set (setStateObs()), retrieved (getStateObs()),
+ * reset-retrieved ({@link #getDefaultStartState(Random)}), or a random start state can be retrieved
+ * with {@link #chooseStartState()} or {@link #chooseStartState(PlayAgent)}.
  * <p>
  * {@link GameBoard} has a reference to an object derived from {@link Arena} which allows access to
  * {@link Arena}-specific settings (which players, params, ...)
@@ -47,9 +47,10 @@ public interface GameBoard {
 	 * things to be done when disposing a GameBoard object
 	 */
 	void destroy();
-	
+
 	/**
-	 * Update the play board and the associated values (labels).
+	 * Update {@link GameBoard}'s state to the given state {@code so} and show it and the associated values (labels)
+	 * on the game board.
 	 * 
 	 * @param so	the game state
 	 * @param withReset  if true, reset the board prior to updating it to state so
@@ -84,6 +85,11 @@ public interface GameBoard {
 	 */
 	StateObservation getDefaultStartState(Random cmpRand);
 
+	/**
+	 * Set {@link GameBoard}'s state to the given state {@code so}.
+	 * @param so	the game state
+	 */
+	void setStateObs(StateObservation so);
 	StateObservation getStateObs();
 	LinkedList<StateObservation> getStateQueue();
 
@@ -110,7 +116,7 @@ public interface GameBoard {
 	 * @return a) for 2-player games: a start state which is with probability 0.5 the empty board 
 	 * 		and with probability 0.5 one of the possible one-ply successors. <br>
 	 *   b) for RubiksCube: a random start state which is p twists away from the solved cube. 
-	 *      p is picked randomly from {1,...,{@link CubeConfig#pMax}}.
+	 *      p is picked uniform-randomly from {1,...,{@link CubeConfig#pMax}}.
 	 *      
 	 * @see Arena#PlayGame()
 	 */

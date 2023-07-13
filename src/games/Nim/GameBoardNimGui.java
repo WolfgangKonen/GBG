@@ -53,7 +53,7 @@ public class GameBoardNimGui extends JFrame {
 	private double[][] OptTable;
 
 	/**
-	 * a reference to the 'parent' {@link GameBoardNim2P} object
+	 * a reference to the 'parent' {@link GameBoardNimBase} object
 	 */
 	private GameBoardNimBase m_gb=null;
 	private int iBest,jBest;

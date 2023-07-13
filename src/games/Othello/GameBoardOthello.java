@@ -5,6 +5,7 @@ import java.util.Random;
 
 import controllers.PlayAgent;
 import games.Arena;
+import games.EWN.StateObserverEWN;
 import games.GameBoard;
 import games.GameBoardBase;
 import games.StateObservation;
@@ -35,28 +36,25 @@ public class GameBoardOthello extends GameBoardBase implements GameBoard {
 	/**
 	 * Game Attributes
 	 */
-	public Arena m_Arena;
 	private StateObserverOthello m_so;
 	protected Random rand;
-	private boolean arenaActReq = false;
-	
+
 	private transient GameBoardOthelloGui m_gameGui = null;
 	
 	public GameBoardOthello(Arena arena) {
 		super(arena);
-		initGameBoard(arena);
+		initGameBoard();
 	}
 	
 	/**
 	 * Initialising the game board using {@code initBoard()} and other game relevant information
 	 * @param arena	the parent Arena object
 	 */
-	public void initGameBoard(Arena arena)
+	public void initGameBoard()
 	{
-		m_Arena = arena;
 		m_so = new StateObserverOthello();
 		rand = new Random();
-        if (m_Arena.hasGUI() && m_gameGui==null) {
+        if (getArena().hasGUI() && m_gameGui==null) {
         	m_gameGui = new GameBoardOthelloGui(this);
         }
 	}
@@ -79,22 +77,27 @@ public class GameBoardOthello extends GameBoardBase implements GameBoard {
 			m_so = new StateObserverOthello();
 		}
 							// considerable speed-up during training (!)
-        if (m_gameGui!=null && m_Arena.taskState!=Arena.Task.TRAIN)
+        if (m_gameGui!=null && getArena().taskState!=Arena.Task.TRAIN)
 			m_gameGui.clearBoard(vClear);
 	}
 
 	@Override
-	public void updateBoard(StateObservation so, boolean withReset, boolean showValueOnGameboard) {
+	public void setStateObs(StateObservation so) {
 		StateObserverOthello soN=null;
 		if (so!=null) {
-	        assert (so instanceof StateObserverOthello)
-			: "StateObservation 'so' is not an instance of StateObserverOthello";
-	        soN = (StateObserverOthello) so;
+			assert (so instanceof StateObserverOthello)
+					: "StateObservation 'so' is not an instance of StateObserverOthello";
+			soN = (StateObserverOthello) so;
 			m_so = soN; //.copy();
-		} 
-		
+		}
+	}
+
+	@Override
+	public void updateBoard(StateObservation so, boolean withReset, boolean showValueOnGameboard) {
+		setStateObs(so);    // asserts that so is StateObserverOthello
+
 		if (m_gameGui!=null)
-			m_gameGui.updateBoard(soN, withReset, showValueOnGameboard);
+			m_gameGui.updateBoard(so, withReset, showValueOnGameboard);
 	}
 	
 	
@@ -109,8 +112,8 @@ public class GameBoardOthello extends GameBoardBase implements GameBoard {
 		if( m_so.isLegalAction(act)) {			
 			m_so.advance(act, null);
 			updateBoard(m_so,false,false);   // show the human move (while agent might think about next move)
-			(m_Arena.getLogManager()).addLogEntry(act, m_so, m_Arena.getLogSessionID());
-			arenaActReq = true;	
+			(getArena().getLogManager()).addLogEntry(act, m_so, getArena().getLogSessionID());
+			setActionReq(true);
 		}
 		else {
 			System.out.println("Not Allowed: illegal Action");
@@ -122,22 +125,12 @@ public class GameBoardOthello extends GameBoardBase implements GameBoard {
 		int iAction = ConfigOthello.BOARD_SIZE * x + y;
 		Types.ACTIONS act = Types.ACTIONS.fromInt(iAction);
 		if(m_so.isLegalAction(act)) {
-			m_Arena.setStatusMessage("Inspecting the value function ...");
+			getArena().setStatusMessage("Inspecting the value function ...");
 			m_so.advance(act, null);
-		}else {m_Arena.setStatusMessage("Desired Action is not legal");}
-		arenaActReq = true;
+		}else {getArena().setStatusMessage("Desired Action is not legal");}
+		setActionReq(true);
 	}
 		
-	@Override
-	public boolean isActionReq() {
-		return arenaActReq;
-	}
-
-	@Override
-	public void setActionReq(boolean actionReq) {
-		arenaActReq=actionReq;
-	}
-
 	@Override
 	public StateObservation getStateObs() {
 		return m_so;
@@ -146,11 +139,6 @@ public class GameBoardOthello extends GameBoardBase implements GameBoard {
 	@Override
 	public String getSubDir() {
 		return null;
-	}
-
-	@Override
-	public Arena getArena() {
-		return m_Arena;
 	}
 
 	@Override

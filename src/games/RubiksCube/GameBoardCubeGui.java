@@ -186,7 +186,7 @@ abstract public class GameBoardCubeGui extends JFrame {
 						{
 							public void actionPerformed(ActionEvent e)
 							{
-								Arena.Task aTaskState = m_gb.m_Arena.taskState;
+								Arena.Task aTaskState = m_gb.getArena().taskState;
 								if (aTaskState == Arena.Task.PLAY)
 								{
 									m_gb.HGameMove(x,y);		// i.e. make human move (i,j), if Button[i][j] is clicked
@@ -250,9 +250,9 @@ abstract public class GameBoardCubeGui extends JFrame {
 		int i,j;
 		
 		// show ButtonPanel only if it is needed (for showing action values or for entering actions) 
-		switch (m_gb.m_Arena.taskState) {
+		switch (m_gb.getArena().taskState) {
 			case INSPECTV -> ButtonPanel.setVisible(true);
-			case PLAY -> ButtonPanel.setVisible(m_gb.m_Arena.hasHumanAgent() || showValueOnGameboard);
+			case PLAY -> ButtonPanel.setVisible(m_gb.getArena().hasHumanAgent() || showValueOnGameboard);
 			default -> ButtonPanel.setVisible(false);
 		}
 		
@@ -264,8 +264,8 @@ abstract public class GameBoardCubeGui extends JFrame {
 				leftInfo.setText("Solved in "+soN.getMoveCounter() +" twists! (p=" 
 						+soN.getCubeState().minTwists+")"); 				
 			} else {
-				if (m_gb.m_Arena.m_xab!=null) {
-					if (soN.getMoveCounter() > m_gb.m_Arena.m_xab.getEpisodeLength(0)) {
+				if (m_gb.getArena().m_xab!=null) {
+					if (soN.getMoveCounter() > m_gb.getArena().m_xab.getEpisodeLength(0)) {
 						leftInfo.setText("NOT solved in "+soN.getMoveCounter() +" twists! (p="
 								+soN.getCubeState().minTwists+")");
 

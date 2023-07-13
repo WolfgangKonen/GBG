@@ -14,17 +14,14 @@ import java.util.Random;
 
 public class GameBoardYavalath extends GameBoardBase implements GameBoard {
 
-    private boolean actionReq = false;
     public StateObserverYavalath m_so;
-    protected Arena m_arena;
     private GameBoardGUIYavalath gb_gui;
     protected Random rand;
 
     public GameBoardYavalath(Arena arena) {
         super(arena);
-        m_arena = arena;
         m_so = new StateObserverYavalath();
-        if(m_arena.hasGUI() && gb_gui==null) {
+        if(getArena().hasGUI() && gb_gui==null) {
             gb_gui = new GameBoardGUIYavalath(this);
         }
         rand = new Random(System.currentTimeMillis());
@@ -50,7 +47,7 @@ public class GameBoardYavalath extends GameBoardBase implements GameBoard {
         if(vClear){
             m_so.clearValues();
         }
-        if(gb_gui != null && m_arena.taskState != Arena.Task.TRAIN){
+        if(gb_gui != null && getArena().taskState != Arena.Task.TRAIN){
             gb_gui.clearBoard(boardClear,vClear);
         }
     }
@@ -61,16 +58,21 @@ public class GameBoardYavalath extends GameBoardBase implements GameBoard {
     }
 
     @Override
-    public void updateBoard(StateObservation so, boolean withReset, boolean showValueOnGameboard) {
-        StateObserverYavalath soYav = null;
+    public void setStateObs(StateObservation so) {
         if(so!=null){
             assert (so instanceof StateObserverYavalath)
                     :"StateObservation 'so' is not an instance of StateObserverYavalath";
-            soYav = (StateObserverYavalath) so;
+            StateObserverYavalath soYav = (StateObserverYavalath) so;
             this.m_so = soYav;
         }
+    }
+
+    @Override
+    public void updateBoard(StateObservation so, boolean withReset, boolean showValueOnGameboard) {
+        setStateObs(so);    	// asserts that so is StateObserverYavalath
+
         if(gb_gui!=null)
-            gb_gui.updateBoard(soYav,withReset,showValueOnGameboard);
+            gb_gui.updateBoard((StateObserverYavalath) so,withReset,showValueOnGameboard);
     }
 
     @Override
@@ -83,16 +85,6 @@ public class GameBoardYavalath extends GameBoardBase implements GameBoard {
     @Override
     public void toFront() {
         if(gb_gui!=null) gb_gui.toFront();
-    }
-
-    @Override
-    public boolean isActionReq() {
-        return actionReq;
-    }
-
-    @Override
-    public void setActionReq(boolean actionReq) {
-        this.actionReq = actionReq;
     }
 
     @Override
@@ -109,11 +101,6 @@ public class GameBoardYavalath extends GameBoardBase implements GameBoard {
     public String getSubDir() {
         DecimalFormat form = new DecimalFormat("00");
         return form.format(ConfigYavalath.getPlayers()) + " Players Size " + form.format(ConfigYavalath.getBoardSize());
-    }
-
-    @Override
-    public Arena getArena() {
-        return m_arena;
     }
 
     @Override
@@ -142,8 +129,8 @@ public class GameBoardYavalath extends GameBoardBase implements GameBoard {
     public void HGameMove(Types.ACTIONS action){
         if(m_so.isLegalAction(action)){
             m_so.advance(action, null);
-            if(m_arena.taskState == Arena.Task.PLAY){
-                m_arena.getLogManager().addLogEntry(action,m_so,m_arena.getLogSessionID());
+            if(getArena().taskState == Arena.Task.PLAY){
+                getArena().getLogManager().addLogEntry(action,m_so,getArena().getLogSessionID());
             }
             setActionReq(true);
         }

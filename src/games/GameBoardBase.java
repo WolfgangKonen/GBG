@@ -66,6 +66,26 @@ abstract public class GameBoardBase implements GameBoard {
         return queue;
     }
 
+    public StateObservation rollbackFromQueue() {
+        LinkedList<StateObservation> q = this.getStateQueue();
+        StateObservation backstate = null;
+        if (q != null) {
+            if (q.size() > 1) {
+                q.removeFirst();
+                backstate = q.removeFirst();
+                // we remove backstate from the queue, because it will later, in the
+                // gb.isActionReq()-branch of InspectGame, again be added to the queue
+                System.out.println("Returned to state with player " + backstate.getPlayer()
+                        + " and string " + backstate.stringDescr());
+                this.setStateObs(backstate);	// set m_gb.m_so to backstate
+                this.setActionReq(true);	// loop with the newly set state of m_gb through the
+                                            // gb.isActionReq()-branch of InspectGame --> sets the
+                                            // stored actions and their values correctly (with the
+                                            // agent only available in InspectGame)
+            }
+        }
+        return backstate;
+    }
 
 
     //
@@ -83,7 +103,8 @@ abstract public class GameBoardBase implements GameBoard {
     abstract public void clearBoard(boolean boardClear, boolean vClear, Random cmpRand);
 
     /**
-     * Update the play board and the associated values (labels).
+     * Update {@link GameBoard}'s state to the given state {@code so} and show it and the associated values (labels)
+     * on the game board.
      *
      * @param so                   the game state
      * @param withReset            if true, reset the board prior to updating it to state so
@@ -118,6 +139,9 @@ abstract public class GameBoardBase implements GameBoard {
      */
     @Override
     abstract public StateObservation getDefaultStartState(Random cmpRand);
+
+    @Override
+    abstract public void setStateObs(StateObservation so);
 
     @Override
     abstract public StateObservation getStateObs();
