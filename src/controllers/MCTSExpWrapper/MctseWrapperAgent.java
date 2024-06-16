@@ -63,7 +63,7 @@ public final class MctseWrapperAgent extends AgentBase implements PlayAgent, Ser
      * reset agent: when starting a new episode, a new tree should be built. Therefore, set
      * {@code lastSelectedNode=null}
      * (needed when re-using an existing agent, e.g. in competeNum episodes during a competition, see
-     * {@link games.XArenaFuncs#competeNPlayer(PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], java.util.ArrayList)
+     * {@link games.XArenaFuncs#competeNPlayer(PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], java.util.ArrayList, java.util.Random, boolean)
      * XArenaFuncs.competeNPlayer})
      *
      */
@@ -75,9 +75,9 @@ public final class MctseWrapperAgent extends AgentBase implements PlayAgent, Ser
 
     @Override
     public Types.ACTIONS_VT getNextAction2(
-        final StateObservation sob,
-        final boolean random,
-        final boolean silent)
+            final StateObservation sob,
+            final boolean random,
+            boolean deterministic, final boolean silent)
     {
         rootNode = new MctseChanceNode(new GameStateIncludingPass(sob));
 
@@ -143,7 +143,7 @@ public final class MctseWrapperAgent extends AgentBase implements PlayAgent, Ser
 
     private void printMoveInfo(StateObservation sob, int lastSelectedAction, double vBest){
         StateObservation NewSO = sob.copy();
-        NewSO.advance(Types.ACTIONS.fromInt(lastSelectedAction));
+        NewSO.advance(Types.ACTIONS.fromInt(lastSelectedAction), null);
         System.out.println("---Best Move: " + NewSO.stringDescr() + ", " + (vBest));
     }
 

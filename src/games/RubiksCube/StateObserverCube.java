@@ -18,7 +18,7 @@ import tools.Types.ACTIONS;
  * Class StateObserverCube observes the current state of the game, it has utility functions for
  * <ul>
  * <li> returning the available actions ({@link #getAvailableActions()}), 
- * <li> advancing the state of the game with a specific action ({@link #advance(Types.ACTIONS)}),
+ * <li> advancing the state of the game with a specific action ({@link StateObservation#advance(ACTIONS, Random)}),
  * <li> copying the current state
  * <li> signaling end, score and winner of the game
  * </ul>
@@ -280,10 +280,11 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	/**
 	 * Advance the current state with 'action' to a new state. 
 	 * Set the available actions for the new state.
-	 * @param action: 0,1,2: UTw; 3,4,5: LTw; 6,7,8: FTw
-	 */
+     * @param action : 0,1,2: UTw; 3,4,5: LTw; 6,7,8: FTw
+     * @param cmpRand
+     */
 	@Override
-	public void advance(ACTIONS action) {
+	public void advance(ACTIONS action, Random cmpRand) {
 		m_action = action;
 		int iAction = action.toInt();
 
@@ -428,7 +429,7 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 			// distance set D[p] (which is often not true for p>5)
 			for (int k=0; k<p; k++)  {
 				index = rand.nextInt(StateObserverCube.allActs.length);
-				so.advance(Types.ACTIONS.fromInt(allActs[index]));
+				so.advance(Types.ACTIONS.fromInt(allActs[index]), null);
 			}
 		}
 		so.m_state.minTwists=p;
@@ -458,7 +459,7 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 		pa.resetAgent();			// needed if pa is MCTSWrapperAgent
 
 		while (!so.isGameOver() && so.getMoveCounter()<epiLength) {
-			so.advance(pa.getNextAction2(so.partialState(), false, true));
+			so.advance(pa.getNextAction2(so.partialState(), false, false, true), null);
 		}
 
 		int plength = so.getMoveCounter();

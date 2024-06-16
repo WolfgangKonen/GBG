@@ -232,6 +232,17 @@ public class Types {
         public double[] getVTable() {
         	return vTable;
         }
+
+		/**
+		 * For games where the vTable codes [-1,+1] = [player loses, wins certainly] and values in between a certain
+		 * degree of losing or winning:
+		 * @return	the probability that player wins for each vTable entry
+		 */
+		public double[] getWinProb() {
+        	double[] pwin = new double[vTable.length];
+        	for (int i=0; i< vTable.length; i++) pwin[i] = (vTable[i]+1)/2;
+        	return pwin;
+		}
         
         public double getVBest() {
         	return vBest;
@@ -309,7 +320,7 @@ public class Types {
      * width and height of 'Competition Options'  window
      */
 	public static int GUI_WINCOMP_WIDTH = (int)(200*GUI_SCALING_FACTOR_X);	
-	public static int GUI_WINCOMP_HEIGHT = (int)(250*GUI_SCALING_FACTOR_Y);
+	public static int GUI_WINCOMP_HEIGHT = (int)(500*GUI_SCALING_FACTOR_Y);
     /**
      * width and height of Param Tabs window, wide enough to hold 6 tabs
      */
@@ -360,7 +371,7 @@ public class Types {
 		GUI_ARENATRAIN_WIDTH = (int)(465*GUI_SCALING_FACTOR_X);	 
 		GUI_ARENATRAIN_HEIGHT = (int)(380*GUI_SCALING_FACTOR_Y);
 		GUI_WINCOMP_WIDTH = (int)(200*GUI_SCALING_FACTOR_X);	
-		GUI_WINCOMP_HEIGHT = (int)(210*GUI_SCALING_FACTOR_Y);
+		GUI_WINCOMP_HEIGHT = (int)(320*GUI_SCALING_FACTOR_Y);
 		GUI_PARAMTABS_WIDTH = (int)(464*GUI_SCALING_FACTOR_X); 
 		GUI_PARAMTABS_HEIGHT = (int)(330*GUI_SCALING_FACTOR_Y);
 

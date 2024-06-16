@@ -5,7 +5,6 @@ import tools.Types;
 
 import java.util.HashMap;
 import java.util.Random;
-import java.util.TreeMap;
 
 /**
  * This class represents a MCTS Expectimax Tree Node. (Min/Max Node)
@@ -52,7 +51,7 @@ public class AltTreeNode extends MCTSETreeNode {
 
         if(!childrenNodes.containsKey(action)) {
             //create a new child node
-            childSo.advanceNondeterministic();
+            childSo.advanceNondeterministic(null);
             child = new AltChanceNode(childSo, action, this, random, m_player);
             childrenNodes.put(action, child);
         } else {

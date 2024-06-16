@@ -1,5 +1,6 @@
 package controllers;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Random;
@@ -30,9 +31,10 @@ public class MaxN2Wrapper extends AgentBase implements PlayAgent, Serializable {
 	
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
-	 * compatible with an older one (older .agt.zip will become unreadable or you have
+	 * compatible with an older one (older .agt.zip will become unreadable, or you have
 	 * to provide a special version transformation)
 	 */
+	@Serial
 	private static final long  serialVersionUID = 12L;
 
 	// --- never used ---
@@ -73,26 +75,30 @@ public class MaxN2Wrapper extends AgentBase implements PlayAgent, Serializable {
 	}
 
 	/**
-	 * Get the best next action and return it
-	 * @param so_in			current game state (not changed on return)
-	 * @param random		allow epsilon-greedy random action selection	
-	 * @param silent		controls printout
-	 * @return actBest		the best action 
-	 * <p>						
-	 * actBest has predicate isRandomAction()  (true: if action was selected 
-	 * at random, false: if action was selected by agent).<br>
-	 * actBest has also the members vTable and vBest to store the value for each available
-	 * action (as returned by so.getAvailableActions()) and the value for the best action actBest.
-	 * 
-	 */	
+	 * Get the best next action and return it.
+	 * <p>
+	 * The return value {@code actBest} has the predicate isRandomAction()  (true: if action was selected
+	 * at random, false: if action was selected by agent).<p>
+	 * {@code actBest} has also the members vTable and vBest to store the Q-value for each available
+	 * action (as returned by so.getAvailableActions()) and the Q-value for the best action {@code actBest}, resp.
+	 *
+	 * @param so_in            current game state (not changed on return)
+	 * @param random        allow epsilon-greedy random action selection
+	 * @param deterministic
+	 * 			if true, the agent acts deterministically in case of several equivalent best actions (reproducibility)
+     * @param silent        controls printout
+	 * @return {@code actBest},	the best action. If several actions have the same score:
+	 * 			break ties by selecting one of them at random (if {@code deterministic==false}) or
+	 * 			return the first one (if {@code deterministic==true}) .
+	 */
 	@Override
-	public ACTIONS_VT getNextAction2(StateObservation so_in, boolean random, boolean silent) {
+	public ACTIONS_VT getNextAction2(StateObservation so_in, boolean random, boolean deterministic, boolean silent) {
 		StateObservation so = so_in.copy(); // just for safety
 
         assert so.isLegalState() : "Not a legal state";
         
         // this starts the recursion:
-		ACTIONS_VT act_best = getBestAction(so/*.clearedCopy()*/, random,  silent, 0, null);
+		ACTIONS_VT act_best = getBestAction(so/*.clearedCopy()*/, random,  silent, 0, deterministic, null);
 											// bug fix 2020-09-25: clearedCopy leads to inferior MaxN2Wrapper[nply=0] (!)
 
         return act_best;
@@ -110,7 +116,7 @@ public class MaxN2Wrapper extends AgentBase implements PlayAgent, Serializable {
 	 * @return		best action + V-table + score tuple
 	 */
 	private ACTIONS_VT getBestAction(StateObservation so, boolean random, 
-			boolean silent, int depth, ScoreTuple prevTuple) 
+			boolean silent, int depth, boolean deterministic, ScoreTuple prevTuple)
 	{
 		int i;
 		ScoreTuple currScoreTuple;
@@ -126,7 +132,7 @@ public class MaxN2Wrapper extends AgentBase implements PlayAgent, Serializable {
 
 		if (depth>=this.m_depth) {
 			// this terminates the recursion. It returns the right ScoreTuple based on r(s)+gamma*V(s).
-			return this.getWrappedPlayAgent().getNextAction2(so.partialState()/*.clearedCopy()*/, random, true);
+			return this.getWrappedPlayAgent().getNextAction2(so.partialState()/*.clearedCopy()*/, random, false, true);
 		}
 
 		ArrayList<ACTIONS> acts = so.getAvailableActions();
@@ -136,7 +142,7 @@ public class MaxN2Wrapper extends AgentBase implements PlayAgent, Serializable {
         for(i = 0; i < acts.size(); ++i)
         {
         	NewSO = so.copy();
-        	NewSO.advance(acts.get(i));
+        	NewSO.advance(acts.get(i), null);
         	
     		if (NewSO.isGameOver())
     		{
@@ -150,18 +156,13 @@ public class MaxN2Wrapper extends AgentBase implements PlayAgent, Serializable {
 				// then unknown value for that player.
 
 				// here is the recursion: call this method again with depth+1:
-				act_vt = getBestAction(NewSO/*.clearedCopy()*/, random, silent, depth+1, prevTuple);
+				act_vt = getBestAction(NewSO/*.clearedCopy()*/, random, silent, depth+1, deterministic, prevTuple);
 				currScoreTuple = act_vt.getScoreTuple();
 
 				currScoreTuple.combine(NewSO.getStepRewardTuple(), ScoreTuple.CombineOP.SUM,0,0);
 				// NewSO.getStepRewardTuple returns 0.0, except for Rubik's Cube, where it returns CubeConfig.stepReward.
 				// The increment by stepReward is very important for Rubik's Cube, because there every depth level means
 				// an additional twist, thus additional costs (stepReward is negative). Otherwise, MaxN2Wrapper won't work.
-				// The former implementation of the above line:
-//				     if (so instanceof StateObserverCube)
-//		  		          currScoreTuple.scTup[P] += CubeConfig.stepReward;
-				// was not so nice SW design, because we had to clutter the generic MaxN2Wrapper code with
-				// cube-specific code.]
 			}
 
 			// only debug for RubiksCube:
@@ -178,16 +179,20 @@ public class MaxN2Wrapper extends AgentBase implements PlayAgent, Serializable {
         		bestActions.add(acts.get(i));
         	}
         } // for
-        
-        // There might be one or more than one action with minValue. 
-        // Break ties by selecting one of them randomly:
-        actBest = bestActions.get(rand.nextInt(bestActions.size()));
+		assert bestActions.size()>0;
+		if (deterministic) {
+			actBest = bestActions.get(0);
+			// if several actions have the same best value, select the first one
+		} else {
+			actBest = bestActions.get(rand.nextInt(bestActions.size()));
+			// if several actions have the same best value, select one of them randomly
+		}
 
         assert actBest != null : "Oops, no best action actBest";
         // optional: print the best action
         if (!silent) {
         	NewSO = so.copy();
-        	NewSO.advance(actBest);
+        	NewSO.advance(actBest, null);
         	if (depth<=0)
         		System.out.println("--- "+depth+": Best Move: "+NewSO.stringDescr()+"   "+maxValue);
         }			
@@ -346,7 +351,7 @@ public class MaxN2Wrapper extends AgentBase implements PlayAgent, Serializable {
 //	}
 	@Override
 	public ScoreTuple getScoreTuple(StateObservation sob, ScoreTuple prevTuple) {
-		return getBestAction(sob, false, true, 0, null).getScoreTuple();
+		return getBestAction(sob, false, true, 0, false, null).getScoreTuple();
 	}
 
 	@Override

@@ -1,10 +1,7 @@
 package controllers;
 
-import controllers.PlayAgent;
-import controllers.PlayAgent.AgentState;
 import games.StateObservation;
 import tools.Types;
-import tools.Types.ACTIONS;
 
 public class HumanPlayer extends AgentBase implements PlayAgent
 {	
@@ -24,7 +21,7 @@ public class HumanPlayer extends AgentBase implements PlayAgent
 //	}
 
 	@Override
-	public Types.ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean silent) {
+	public Types.ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean deterministic, boolean silent) {
 		return null;
 	}
 

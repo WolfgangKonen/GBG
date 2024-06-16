@@ -1,6 +1,5 @@
 package games.Poker;
 
-import TournamentSystem.TSTimeStorage;
 import agentIO.LoadSaveGBG;
 import controllers.ExpectimaxNAgent;
 import controllers.MC.MCAgentN;
@@ -76,7 +75,7 @@ public class Experiment {
             if(oPar.getChooseStart01()){
                 so = gb.chooseStartState();
             }else{
-                so = gb.getDefaultStartState();
+                so = gb.getDefaultStartState(null);
             }
             pa.trainAgent(so);
         }
@@ -169,7 +168,7 @@ public class Experiment {
         int[][] nTuples = ntupfac.makeNTupleSet(ntPar, xnf);
         // int numOutputs =
         // m_xab.m_game.gb.getDefaultStartState().getAllAvailableActions().size();
-        ArrayList<Types.ACTIONS> allAvailActions = gb.getDefaultStartState().getAllAvailableActions();
+        ArrayList<Types.ACTIONS> allAvailActions = gb.getDefaultStartState(null).getAllAvailableActions();
         PlayAgent pa = new SarsaAgt(agentName, tdPar, ntPar,
                 oPar, nTuples, xnf, allAvailActions, maxGameNum);
 
@@ -199,7 +198,7 @@ public class Experiment {
 
         NTuple4Factory ntupfac = new NTuple4Factory();
         int[][] nTuples = ntupfac.makeNTupleSet(ntPar, xnf);
-        ArrayList<Types.ACTIONS> allAvailActions = gb.getDefaultStartState().getAllAvailableActions();
+        ArrayList<Types.ACTIONS> allAvailActions = gb.getDefaultStartState(null).getAllAvailableActions();
         PlayAgent pa = new Sarsa4Agt(agentName, tdPar, ntPar,
                 oPar, nTuples, xnf, allAvailActions, maxGameNum);
 
@@ -230,7 +229,7 @@ public class Experiment {
 
         NTuple4Factory ntupfac = new NTuple4Factory();
         int[][] nTuples = ntupfac.makeNTupleSet(ntPar, xnf);
-        ArrayList<Types.ACTIONS> allAvailActions = gb.getDefaultStartState().getAllAvailableActions();
+        ArrayList<Types.ACTIONS> allAvailActions = gb.getDefaultStartState(null).getAllAvailableActions();
         PlayAgent pa = new QLearn4Agt(agentName, tdPar, ntPar,
                 oPar, nTuples, xnf, allAvailActions, maxGameNum);
 
@@ -452,9 +451,9 @@ public class Experiment {
 
                 while (true) {
                     long startTNano = System.nanoTime();
-                    actBest = qaVector.pavec[player].getNextAction2(so.partialState(), false, true);
+                    actBest = qaVector.pavec[player].getNextAction2(so.partialState(), false, false, true);
 
-                    so.advance(actBest);
+                    so.advance(actBest, null);
                     if (so.isRoundOver()) {
                         sc = so.getGameScoreTuple();
                         // calculate "reward" as score change for the turn
@@ -746,9 +745,9 @@ public class Experiment {
 
                 while (true) {
                     long startTNano = System.nanoTime();
-                    actBest = qaVector.pavec[player].getNextAction2(so.partialState(), false, true);
+                    actBest = qaVector.pavec[player].getNextAction2(so.partialState(), false, false, true);
 
-                    so.advance(actBest);
+                    so.advance(actBest, null);
                     if (so.isGameOver()) {
                         sc = so.getGameScoreTuple();
                         // calculate "reward"

@@ -9,6 +9,7 @@ import tools.Types;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class ExpectimaxNAgentTest extends GBGBatch {
 
@@ -34,12 +35,12 @@ public class ExpectimaxNAgentTest extends GBGBatch {
 
         for (int i=0; i<nEpi; i++) {
             System.out.println("\n*** Episode "+i+ " starts ***");
-            gb.clearBoard(true,true);
+            gb.clearBoard(true,true, null);
             so = (StateObserverEWN) gb.getStateObs();
             while(!so.isGameOver()) {
-                act_pa = pa.getNextAction2(so.partialState(),false,false);
+                act_pa = pa.getNextAction2(so.partialState(),false, false, false);
                          // due to silent=false, each call to getNextAction2 has state-info-printout on console
-                so.advance(act_pa);
+                so.advance(act_pa, null);
             }
             int winner = so.getPlayerWin();
             System.out.println("Episode "+i+" finished, player "+winner+" wins");
@@ -81,13 +82,13 @@ public class ExpectimaxNAgentTest extends GBGBatch {
 //        pa = arenaTrain.loadAgent(agtFile);
 
         // select a state:
-        gb.clearBoard(true,true);
+        gb.clearBoard(true,true, null);
         startSO = (StateObserverEWN) gb.getStateObs();
         ArrayList<Types.ACTIONS> startRandoms = startSO.getAvailableRandoms();
 
         for (Types.ACTIONS startR : startRandoms) {
             so = (StateObserverEWN) startSO.copy();
-            so.advanceNondeterministic(startR);
+            so.advanceNondetSpecific(startR);
 
             System.out.println("\n*** Episode with dice value "+startR.toInt()+ " starts ***");
             System.out.print(so);
@@ -126,13 +127,13 @@ public class ExpectimaxNAgentTest extends GBGBatch {
         pa = new ExpectimaxNAgent("ExpectimaxN",nDepth);
 
         // select a state:
-        gb.clearBoard(true,true);
+        gb.clearBoard(true,true, null);
         startSO = (StateObserverEWN) gb.getStateObs();
         ArrayList<Types.ACTIONS> startRandoms = startSO.getAvailableRandoms();
 
         for (Types.ACTIONS startR : startRandoms) {
             System.out.println("\n*** Branch with diceVal "+startR.toInt()+ " starts ***");
-            startSO.advanceNondeterministic(startR);
+            startSO.advanceNondetSpecific(startR);
             ArrayList<Types.ACTIONS> nextActions = startSO.getAvailableActions();
 
             System.out.print(startSO);
@@ -141,7 +142,7 @@ public class ExpectimaxNAgentTest extends GBGBatch {
                 System.out.println("\n  *** Episode with action "+frmAct.format(a.toInt())+ " starts ***");
 
                 so = (StateObserverEWN) startSO.copy();
-                so.advance(a);
+                so.advance(a, null);
 
                 innerETreeTest(pa,so,silent,"action="+frmAct.format(a.toInt()));
             }
@@ -161,7 +162,7 @@ public class ExpectimaxNAgentTest extends GBGBatch {
      */
     private void innerETreeTest(PlayAgent pa, StateObserverEWN so, boolean silent, String text) {
         StateObserverEWN afterstate, newSO;
-        Types.ACTIONS_VT act_pa = pa.getNextAction2(so.partialState(),false,silent);
+        Types.ACTIONS_VT act_pa = pa.getNextAction2(so.partialState(),false, false, silent);
         double vA = act_pa.getVBest();
         afterstate = (StateObserverEWN) so.copy();
         afterstate.advanceDeterministic(act_pa);
@@ -171,13 +172,75 @@ public class ExpectimaxNAgentTest extends GBGBatch {
         double prob;
         for (Types.ACTIONS r : nextRandoms) {
             newSO = (StateObserverEWN) afterstate.copy();
-            newSO.advanceNondeterministic(r);
-            act_pa = pa.getNextAction2(newSO.partialState(),false,silent);
+            newSO.advanceNondetSpecific(r);
+            act_pa = pa.getNextAction2(newSO.partialState(),false, false, silent);
             prob = afterstate.getProbability(r);
             vNew += act_pa.getVBest()*prob;
         }
         System.out.println(text+":  vA = "+vA+",  vNew = "+vNew);
         assert Math.abs(vA+vNew)<1e-8 : "Assertion vA+vNew=0 failed!";
+    }
+
+    /**
+     * This test checks for 2-player 3x3 EWN a certain state
+     * <pre>
+     *     .. X2 ..
+     *     O2 .. O1   with dice 1 and O to move
+     *     .. X1 ..
+     * </pre>
+     * the win probabilities that {@link ExpectimaxNAgent} returns: What is the probability for player O
+     * to win, if he takes one of its available moves (504, 502, 501)?
+     * <p>
+     * The theoretical expectation is (can be analyzed by following all paths and multiplying their win rate with
+     * their probability: P(O wins) = {1/3, 1/9, 0}.
+     * <p>
+     * The test will fail, if the discrepancy between theoretical and calculated result is larger than 1e-8.
+     */
+    @Test
+    public void certainEWNTest() {
+        PlayAgent pa;
+        int nDepth=9;
+        boolean silent = false;  // passed on to getNextAction2
+        Types.ACTIONS_VT act_pa;
+
+        String[] scaPar = SetupGBG.setDefaultScaPars("EWN");        // for EWN currently: 3x3 2-player
+        arenaTrain = SetupGBG.setupSelectedGame("EWN",scaPar,"",false,true);
+        GameBoardEWN gb = new GameBoardEWN(arenaTrain); //,3,2);		// needed for chooseStartState()
+        StateObserverEWN startSO, so;
+        //DecimalFormat frmAct = new DecimalFormat("0000");
+
+        pa = new ExpectimaxNAgent("ExpectimaxN",nDepth);
+
+        // build the specific state:
+        gb.clearBoard(true,true, null);
+        startSO = (StateObserverEWN) gb.getStateObs();
+        int[] actList = new int[]{4,804,304,703,407};
+        for (int a : actList) {
+            startSO.advanceDeterministic(new Types.ACTIONS(a));
+        }
+        startSO.advanceNondetSpecific(new Types.ACTIONS(1));
+        System.out.println(startSO);
+
+        for (int run=0; run<1; run++) {
+            ArrayList<Types.ACTIONS> availActs = startSO.getAvailableActions();
+            int[] iActs = new int[availActs.size()];
+            for (int i=0; i<iActs.length; i++) iActs[i] = availActs.get(i).toInt();
+
+            act_pa = pa.getNextAction2(startSO.partialState(),false, false, silent);
+
+            System.out.println("For available actions  "+Arrays.toString(iActs));
+            double[] expnWinProb = act_pa.getWinProb();
+            System.out.println("ExpectimaxN win probs: "+Arrays.toString(expnWinProb));
+            double[] theoWinProb = new double[]{1/3., 1/9., 0};
+            System.out.println("theoretical win probs: "+Arrays.toString(theoWinProb));
+
+            for (int i=0; i<theoWinProb.length; i++) {
+                assert Math.abs(theoWinProb[i]-expnWinProb[i]) < 1e-8
+                        : "theoWinProb[i]="+theoWinProb[i]+" != expnWinProb[i]"+ expnWinProb[i];
+            }
+
+        }
+        System.out.println("[certainEWNTest] successfully passed");
     }
 
 }

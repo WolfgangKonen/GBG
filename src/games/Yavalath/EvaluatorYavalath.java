@@ -47,12 +47,12 @@ public class EvaluatorYavalath extends Evaluator {
     }
 
     private ArrayList<StateObserverYavalath> addAll1PlyStates(ArrayList<StateObserverYavalath> diffStartList){
-        StateObserverYavalath so = (StateObserverYavalath) m_gb.getDefaultStartState();
+        StateObserverYavalath so = (StateObserverYavalath) m_gb.getDefaultStartState(null);
         ArrayList<Types.ACTIONS> actions = so.getAllAvailableActions();
 
         for (Types.ACTIONS action : actions){
             StateObserverYavalath so_copy = so.copy();
-            so_copy.advance(action);
+            so_copy.advance(action, null);
             diffStartList.add(so_copy);
         }
         diffStartList.add(so);
@@ -85,7 +85,7 @@ public class EvaluatorYavalath extends Evaluator {
 
     private EvalResult evaluateAgainstOpponent(PlayAgent playAgent, PlayAgent opponent,
                                                boolean diffStarts, int numEpisodes, double thresh) {
-        StateObservation so = m_gb.getDefaultStartState();
+        StateObservation so = m_gb.getDefaultStartState(null);
 
         int n = m_gb.getStateObs().getNumPlayers();
         ScoreTuple scMean = new ScoreTuple(n);
@@ -94,12 +94,12 @@ public class EvaluatorYavalath extends Evaluator {
             ScoreTuple sc;
             double scWeight = 1 / (double) diffStartList.size();
             for(StateObserverYavalath soYav : diffStartList){
-                sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent,opponent), soYav, numEpisodes,0, null);
+                sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent,opponent), soYav, numEpisodes,0, null, null, false);
                 scMean.combine(sc, ScoreTuple.CombineOP.AVG,1,scWeight);
             }
 
         }else {
-            scMean = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent), so, numEpisodes, 0, null);
+            scMean = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent), so, numEpisodes, 0, null, null, false);
         }
         lastResult = scMean.scTup[0];
         m_msg = playAgent.getName()+": " +getPrintString() + lastResult;

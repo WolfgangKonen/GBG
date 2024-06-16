@@ -2,7 +2,6 @@ package ludiiInterface.matches.Othello;
 
 import controllers.PlayAgent;
 import game.Game;
-import games.Arena;
 import games.LogManager;
 import games.Othello.StateObserverOthello;
 import ludiiInterface.games.othello.SystemConversionOthello;
@@ -184,7 +183,7 @@ public class OthelloMatches extends GBGBatch {
             if(ludiiMove.isPass()) continue;
 
             Types.ACTIONS action = Types.ACTIONS.fromInt(systemConversionOthello.getGBGIndexFromLudii(ludiiMove.to()));
-            stateObserverOthello.advance(action);
+            stateObserverOthello.advance(action, null);
             logManager.addLogEntry(action,stateObserverOthello,sessionID);
         }
 

@@ -15,11 +15,9 @@ import controllers.TD.ntuple4.NTuple4Factory;
 import controllers.TD.ntuple4.QLearn4Agt;
 import controllers.TD.ntuple4.Sarsa4Agt;
 import controllers.TD.ntuple4.TDNTuple4Agt;
-import games.Feature;
 import games.GameBoard;
 import games.KuhnPoker.KuhnPokerAgent;
 import games.StateObservation;
-import games.XNTupleFuncs;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import params.*;
@@ -490,7 +488,7 @@ public class ExperimentNew {
         GameBoardPoker gb = new GameBoardPoker();
         NTupleFactory ntupfac = new NTupleFactory();
         int[][] nTuples = ntupfac.makeNTupleSet(ntPar, xnTuple);
-        ArrayList<Types.ACTIONS> allAvailActions = gb.getDefaultStartState().getAllAvailableActions();
+        ArrayList<Types.ACTIONS> allAvailActions = gb.getDefaultStartState(null).getAllAvailableActions();
         PlayAgent pa = new SarsaAgt(agentName, tdPar, ntPar,
                 oPar, nTuples, xnTuple, allAvailActions, numberOfTrainingGames);
 
@@ -502,7 +500,7 @@ public class ExperimentNew {
         GameBoardPoker gb = new GameBoardPoker();
         NTuple4Factory ntupfac = new NTuple4Factory();
         int[][] nTuples = ntupfac.makeNTupleSet(ntPar, xnTuple);
-        ArrayList<Types.ACTIONS> allAvailActions = gb.getDefaultStartState().getAllAvailableActions();
+        ArrayList<Types.ACTIONS> allAvailActions = gb.getDefaultStartState(null).getAllAvailableActions();
         PlayAgent pa = new Sarsa4Agt(agentName, tdPar, ntPar,
                 oPar, nTuples, xnTuple, allAvailActions, numberOfTrainingGames);
 
@@ -516,7 +514,7 @@ public class ExperimentNew {
         GameBoardPoker gb = new GameBoardPoker();
         NTuple4Factory ntupfac = new NTuple4Factory();
         int[][] nTuples = ntupfac.makeNTupleSet(ntPar, xnTuple);
-        ArrayList<Types.ACTIONS> allAvailActions = gb.getDefaultStartState().getAllAvailableActions();
+        ArrayList<Types.ACTIONS> allAvailActions = gb.getDefaultStartState(null).getAllAvailableActions();
         PlayAgent pa = new QLearn4Agt(agentName, tdPar, ntPar,
                 oPar, nTuples, xnTuple, allAvailActions, numberOfTrainingGames);
 
@@ -563,7 +561,7 @@ public class ExperimentNew {
             if( pa.getParOther().getChooseStart01()){
                 so = gb.chooseStartState();
             }else{
-                so = gb.getDefaultStartState();
+                so = gb.getDefaultStartState(null);
             }
             pa.trainAgent(so);
 
@@ -627,8 +625,8 @@ public class ExperimentNew {
                 player = so.getPlayer();
 
                 while (true) {
-                    actBest = qaVector.pavec[player].getNextAction2(so.partialState(), false, true);
-                    so.advance(actBest);
+                    actBest = qaVector.pavec[player].getNextAction2(so.partialState(), false, false, true);
+                    so.advance(actBest, null);
                     if (so.isRoundOver()) {
                         sc = so.getGameScoreTuple();
 

@@ -15,7 +15,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * Class StateObservation observes the current state of the game, it has utility functions for
  * <ul>
  * <li> returning the available actions ({@link #getAvailableActions()}), 
- * <li> advancing the state of the game with a specific action ({@link #advance(ACTIONS)}),
+ * <li> advancing the state of the game with a specific action ({@link StateObservation#advance(ACTIONS, Random)}),
  * <li> copying the current state
  * <li> signaling end, score and winner of the game
  * </ul>
@@ -285,13 +285,14 @@ public class StateObserverKuhnPoker extends ObsNondetBase implements StateObsNon
 	 * NOTE: If the deterministic advance results in a next-adction-deterministic state (as it can happen in Poker),
 	 * then the non-deterministic part is skipped.
 	 * @param action to advance the state of the game
+	 * @param cmpRand
 	 */
-	public void advance(ACTIONS action){
+	public void advance(ACTIONS action, Random cmpRand){
 		if(isNextActionDeterministic()){
 			advanceDeterministic(action);
 		}
 		if(!isNextActionDeterministic()){
-			advanceNondeterministic();
+			advanceNondeterministic(null);
 		}
 	}
 
@@ -339,7 +340,7 @@ public class StateObserverKuhnPoker extends ObsNondetBase implements StateObsNon
 		setAvailableActions();
 	}
 
-	public ACTIONS advanceNondeterministic(ACTIONS randAction) {
+	public ACTIONS advanceNondetSpecific(ACTIONS randAction) {
 		if(isRoundOver())
 			return randAction;
 		if (isNextActionDeterministic) {
@@ -407,10 +408,10 @@ public class StateObserverKuhnPoker extends ObsNondetBase implements StateObsNon
 		return randAction;
 	}
 
-	public ACTIONS advanceNondeterministic() {
+	public ACTIONS advanceNondeterministic(Random cmpRand) {
 		ArrayList<ACTIONS> possibleRandoms = getAvailableRandoms();
 		ACTIONS act = possibleRandoms.get(ThreadLocalRandom.current().nextInt(possibleRandoms.size()));
-		advanceNondeterministic(act);
+		advanceNondetSpecific(act);
 
 		return act;
 	}

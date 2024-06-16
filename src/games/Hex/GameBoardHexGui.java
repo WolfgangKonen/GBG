@@ -1,20 +1,16 @@
 package games.Hex;
 
 import games.Arena;
-import games.GameBoard;
 import games.StateObservation;
 import tools.Types;
 
 import javax.swing.*;
-
-import controllers.PlayAgent;
 
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import static games.Hex.HexConfig.PLAYER_ONE;
-import static games.Hex.HexConfig.PLAYER_TWO;
 
 /**
  * This class has the board game GUI for Hex. 
@@ -240,7 +236,7 @@ public class GameBoardHexGui {
                 if (p.x < 0 || p.y < 0 || p.x >= HexConfig.BOARD_SIZE || p.y >= HexConfig.BOARD_SIZE) return;
 
         		Types.ACTIONS act = Types.ACTIONS.fromInt(p.x * HexConfig.BOARD_SIZE + p.y);
-        		m_gb.m_so.advance(act);
+        		m_gb.m_so.advance(act, null);
                 if (m_gb.getArena().taskState == Arena.Task.PLAY) {
                 	// only do this when passing here during 'PLAY': add a log entry in case of Human move
                 	// Do NOT do this during 'INSPECT', because then we have (currently) no valid log session ID

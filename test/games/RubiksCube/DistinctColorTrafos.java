@@ -83,7 +83,7 @@ public class DistinctColorTrafos {
         ColorTrafoMap allCT = new ColorTrafoMap(ColorTrafoMap.ColMapType.AllColorTrafos);
         initPocket(scaPar);
         System.out.println("\nExample 2x2x2 cube state after U^1:");
-        CubeState cs = ((StateObserverCube) gb.getDefaultStartState()).getCubeState();
+        CubeState cs = ((StateObserverCube) gb.getDefaultStartState(null)).getCubeState();
         cs.UTw();
         System.out.println(cs);
         System.out.println(cs.print_inv_sloc());

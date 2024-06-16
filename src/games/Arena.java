@@ -6,6 +6,7 @@ import controllers.HumanPlayer;
 import controllers.MC.MCAgentN;
 import controllers.MCTS.MCTSAgentT;
 import controllers.PlayAgent;
+import games.EWN.StateObserverEWN;
 import games.Hex.HexTile;
 import games.Hex.StateObserverHex;
 import games.Sim.StateObserverSim;
@@ -182,8 +183,13 @@ abstract public class Arena implements Runnable {
 				firstScore = m_xfun.singleCompete(m_xab, gb);
 
 				enableButtons(true);
-				str = "Compete finished. Avg. score for "+firstPlayer+": "+frm.format(firstScore)+" (from range [-1.0,1.0]),"
-						+ " win rate: " + frm.format((firstScore+1)/2)+".";
+				//str = "Compete finished. Avg. score for "+firstPlayer+": "+frm.format(firstScore)+" (from range [-1.0,1.0]),"
+				//		+ " win rate: " + frm.format((firstScore+1)/2)+".";
+				if (gb.getStateObs().getNumPlayers()==1) {
+					str = "Compete finished. Avg. score for player: "+frm.format(firstScore);
+				} else {
+					str = "Compete finished. Win rate for "+firstPlayer+": "+frm.format((firstScore+1)/2)+" (best is 1.0).";
+				}
 				System.out.println(str);
 				setStatusMessage(str);
 				updateBoard();
@@ -196,8 +202,9 @@ abstract public class Arena implements Runnable {
 				firstScore = m_xfun.swapCompete(m_xab, gb);
 
 				enableButtons(true);
-				str = "Swap Compete finished. Avg. score for X: "+frm.format(firstScore)+" (from range [-1.0,1.0]),"
-						+ " win rate: " + frm.format((firstScore+1)/2)+".";
+				//str = "Swap Compete finished. Avg. score for X: "+frm.format(firstScore)+" (from range [-1.0,1.0]),"
+				//		+ " win rate: " + frm.format((firstScore+1)/2)+".";
+				str = "Swap Compete finished. Win rate for "+firstPlayer+": "+frm.format((firstScore+1)/2)+" (best is 1.0).";
 				System.out.println(str);
 				setStatusMessage(str);
 				updateBoard();
@@ -205,13 +212,14 @@ abstract public class Arena implements Runnable {
 				break;
 			case ALLCMP:
 				enableButtons(false);
-				setStatusMessage("Running Compete Both ...");
+				setStatusMessage("Running Compete All Roles ...");
 
 				firstScore = m_xfun.allCompete(m_xab, gb);
 
 				enableButtons(true);
-				str = "Compete All Roles finished. Avg. score for "+firstPlayer+": "+frm.format(firstScore)+" (from range [-1.0,1.0]),"
-						+ " win rate: " + frm.format((firstScore+1)/2)+".";
+				//str = "Compete All Roles finished. Avg. score for "+firstPlayer+": "+frm.format(firstScore)+" (from range [-1.0,1.0]),"
+				//		+ " win rate: " + frm.format((firstScore+1)/2)+".";
+				str = "Compete All Roles finished. Win rate for "+firstPlayer+": "+frm.format((firstScore+1)/2)+" (best is 1.0).";
 				System.out.println(str);
 				setStatusMessage(str);
 				updateBoard();
@@ -234,7 +242,7 @@ abstract public class Arena implements Runnable {
 				enableButtons(false,true,false); 
 				if (!singlePlayerTSRunning) {
 					gb.showGameBoard(this, false);
-					gb.clearBoard(false, true);
+					gb.clearBoard(false, true, null);
 					
 					PlayGame();
 					
@@ -245,7 +253,7 @@ abstract public class Arena implements Runnable {
 			case INSPECTV:
 				enableButtons(false,true,true); 
 				gb.showGameBoard(this, false);
-				gb.clearBoard(false, true);
+				gb.clearBoard(false, true, null);
 				gb.setActionReq(true);
 				
 				InspectGame();
@@ -325,7 +333,7 @@ abstract public class Arena implements Runnable {
 							"Warning", JOptionPane.WARNING_MESSAGE);
 		}
 
-		gb.clearBoard(true, true);
+		gb.clearBoard(true, true, null);
 		gb.updateBoard(null, true, true); // update with reset
 		gb.enableInteraction(true); // needed for CFour
 
@@ -335,6 +343,8 @@ abstract public class Arena implements Runnable {
 		// We restore it later, when finishing InspectV
 
 		so = gb.getStateObs();  // just to initialize it
+
+		//gb.getStateQueue().addFirst(so);
 
 		while (taskState == Task.INSPECTV) {
 			if (gb.isActionReq()) {
@@ -351,6 +361,17 @@ abstract public class Arena implements Runnable {
 				//
 				// For all other games, clearedCopy is identical to copy.
 
+				gb.getStateQueue().addFirst(so.copy());
+				if (so instanceof StateObserverEWN) {
+					StateObsNondeterministic soN = (StateObsNondeterministic) so;
+					System.out.println("Added state with player "+(so.getPlayer()+1)+" to move"
+							+ " and dice "+(soN.getNextNondeterministicAction().toInt()+1));
+				} else {
+					System.out.println("Added to queue state with string "+so.stringDescr()
+							+ " and player "+so.getPlayer()+" to move");
+
+				}
+
 				if (!so.isGameOver()&&so.isRoundOver()) so.initRound();
 				if (DBG_HEX && (so instanceof StateObserverHex)) {
 					StateObserverHex soh = (StateObserverHex) so;
@@ -366,7 +387,7 @@ abstract public class Arena implements Runnable {
 
 
 				if (so.isLegalState() && !so.isGameOver()) {
-					actBest = paX.getNextAction2(so.partialState(), false, true);
+					actBest = paX.getNextAction2(so.partialState(), false, false, true);
 					if (actBest != null) 	// a HumanAgent will return
 											// actBest=null
 						so.storeBestActionInfo(actBest);
@@ -390,7 +411,7 @@ abstract public class Arena implements Runnable {
 						// not a valid play position >> show the board settings,
 						// i.e.
 						// the game-over position, but clear the values:
-						gb.clearBoard(false, true);
+						gb.clearBoard(false, true, null);
 //						this.enableButtons(true);
 				
 						break; // out of while, i.e. finish INSPECTV
@@ -399,7 +420,7 @@ abstract public class Arena implements Runnable {
 						// in INSPECTV is usually the default (game-over, solved-cube)
 						// state: In this case we only clear the action values, but
 						// stay in INSPECTV
-						gb.clearBoard(false, true);
+						gb.clearBoard(false, true, null);
 					}
 				}
 				gb.enableInteraction(true);
@@ -411,8 +432,7 @@ abstract public class Arena implements Runnable {
 					// MyMouseListener
 					// in GameBoardHex), which will set gb.isActionReq() to true
 					// again.
-				} catch (Exception e) {
-				}
+				} catch (Exception e) { }
 			}
 			if (so.isRoundOver()) {
 				gb.updateBoard(so, true, true);
@@ -534,7 +554,7 @@ abstract public class Arena implements Runnable {
 							actBest = getNextAction_DEBG(so.partialState(), pa, p2, N_EMPTY);
 						} else {
 							long startTNano = System.nanoTime();
-							actBest = pa.getNextAction2(so.partialState(), false, silent);
+							actBest = pa.getNextAction2(so.partialState(), false, false, silent);
 
 							if (m_spDT!=null) {
 								long endTNano = System.nanoTime();
@@ -552,7 +572,7 @@ abstract public class Arena implements Runnable {
 						}
 
 						so.storeBestActionInfo(actBest);
-						so.advance(actBest);
+						so.advance(actBest, null);
 						logManager.addLogEntry(actBest, so, logSessionid);
 						if (m_spDT==null) {		// the normal play (non-TS, i.e. no tournament)
 							try {
@@ -680,7 +700,7 @@ abstract public class Arena implements Runnable {
 			pa = qaVector[so.getPlayer()];
 			assert !(pa instanceof controllers.HumanPlayer) :"[playInnerGame] HumanPlayer not allowed";
 
-			actBest = pa.getNextAction2(so.partialState(), false, false);
+			actBest = pa.getNextAction2(so.partialState(), false, false, false);
 
 			if (actBest==null) {
 				// s.th. went wrong:
@@ -689,7 +709,7 @@ abstract public class Arena implements Runnable {
 			}
 
 			so.storeBestActionInfo(actBest);
-			so.advance(actBest);
+			so.advance(actBest, null);
 
 			if (so.isRoundOver()) {
 
@@ -807,7 +827,7 @@ abstract public class Arena implements Runnable {
 		} else {
 			// if taskBefore!=INSPECTV, select here the start state:
 			//gb.clearBoard(true, true); // reset game board to default start state
-			so = gb.getDefaultStartState();
+			so = gb.getDefaultStartState(null);
 			//if (m_xab.oPar[0].getChooseStart01()) {
 			// this is not recommended: an innocent start of Play where chooseStart01 in ParOther remains set
 			// from a previous training will let the first agent make (silently) an unfortunate 1st move in
@@ -1081,13 +1101,13 @@ abstract public class Arena implements Runnable {
 		if (so instanceof StateObserver2048) {
 			nEmpty = ((StateObserver2048) so).getNumEmptyTiles();
 		} else {
-			return pa.getNextAction2(so.partialState(), false, true);
+			return pa.getNextAction2(so.partialState(), false, false, true);
 		}
 		if (nEmpty >= N_EMPTY)
-			return pa.getNextAction2(so.partialState(), false, true);
+			return pa.getNextAction2(so.partialState(), false, false, true);
 
 		for (int k = 0; k < 3; k++) {
-			actBest = p2.getNextAction2(so.partialState(), false, true);
+			actBest = p2.getNextAction2(so.partialState(), false, false, true);
 			vtable = actBest.getVTable();
 			System.out.print("p2 [" + p2.getName() + "]: ");
 			double vbest = -Double.MAX_VALUE;
@@ -1104,7 +1124,7 @@ abstract public class Arena implements Runnable {
 			System.out.println(";  Best = " + ibest + ", Finished=" + nRolloutFinished + "/" + nIterations);
 		}
 		for (int k = 0; k < 2; k++) {
-			actBest = pa.getNextAction2(so.partialState(), false, true);
+			actBest = pa.getNextAction2(so.partialState(), false, false, true);
 			vtable = actBest.getVTable();
 			System.out.print("pa [" + pa.getName() + "]: ");
 			double vbest = -Double.MAX_VALUE;

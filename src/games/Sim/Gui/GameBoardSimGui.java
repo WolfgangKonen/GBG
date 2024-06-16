@@ -1,27 +1,15 @@
 package games.Sim.Gui;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.ArrayList;
-import java.util.Random;
 
-import controllers.PlayAgent;
-import games.GameBoard;
-import games.StateObservation;
-import games.Hex.StateObserverHex;
 import games.Sim.GameBoardSim;
 import games.Sim.StateObserverSim;
-import games.Sim.Gui.GameStatsSim;
 import tools.ScoreTuple;
 import tools.Types;
-import tools.Types.ACTIONS;
 import games.Arena;
 
 /**
@@ -206,7 +194,7 @@ public class GameBoardSimGui {
 			Types.ACTIONS act = Types.ACTIONS.fromInt(m_gb.m_so.inputToActionInt(node, i));
 			if(m_gb.m_so.isLegalAction(act))
 			{
-				m_gb.m_so.advance(act);
+				m_gb.m_so.advance(act, null);
 				
 				m_gb.setActionReq(true);
 				gameInfo.changeMessage("");

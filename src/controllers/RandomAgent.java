@@ -55,10 +55,11 @@ public class RandomAgent extends AgentBase implements PlayAgent {
 	 * Get the best next action and return it 
 	 * (NEW version: returns ACTIONS_VT and has a recursive part for multi-moves)
 	 * 
-	 * @param so			current game state (is returned unchanged)
-	 * @param random		allow random action selection with probability m_epsilon
-	 * @param silent		execute silently without outputs
-	 * @return actBest		the best action. If several actions have the same
+	 * @param so            current game state (is returned unchanged)
+	 * @param random        allow random action selection with probability m_epsilon
+	 * @param deterministic
+     * @param silent        execute silently without outputs
+     * @return actBest		the best action. If several actions have the same
 	 * 						score, break ties by selecting one of them at random. 
 	 * <p>						
 	 * actBest has predicate isRandomAction()  (true: if action was selected 
@@ -67,7 +68,7 @@ public class RandomAgent extends AgentBase implements PlayAgent {
 	 * action (as returned by so.getAvailableActions()) and vBest to store the value for the best action actBest.
 	 */
 	@Override
-	public Types.ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
+	public Types.ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean deterministic, boolean silent) {
         Types.ACTIONS actBest = null;
         Types.ACTIONS_VT actBestVT = null;
         ArrayList<Types.ACTIONS> acts = so.getAvailableActions();
@@ -99,7 +100,7 @@ public class RandomAgent extends AgentBase implements PlayAgent {
 
         assert actBest != null : "Oops, no best action actBest";
 		StateObservation NewSO = so.copy();
-		NewSO.advance(actBest);
+		NewSO.advance(actBest, null);
         if (!silent) {
 			// optional: show the best action
         	System.out.println("---Best Move: "+NewSO.stringDescr()+"   "+maxScore);

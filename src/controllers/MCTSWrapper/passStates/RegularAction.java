@@ -32,7 +32,7 @@ public final class RegularAction implements ApplicableAction {
     @Override
     public StateObservation applyTo(final StateObservation so) {
         final var stateCopy = so.copy();
-        stateCopy.advance(action);
+        stateCopy.advance(action, null);
 
         if (so.getNumPlayers()==1)  return stateCopy;
         // WK: fix for all 1-player games. If we don't return here, the app will run into swapCurrentPlayer and then
@@ -64,7 +64,7 @@ public final class RegularAction implements ApplicableAction {
     @Override
     public Tuple<Types.ACTIONS,StateObsNondeterministic> advanceNonDet(final StateObsNondeterministic so) {
         final var stateCopy = so.copy();
-        final var r = stateCopy.advanceNondeterministic(action);
+        final var r = stateCopy.advanceNondetSpecific(action);
         return new Tuple( r, stateCopy);
     }
 

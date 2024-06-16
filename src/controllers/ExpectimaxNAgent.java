@@ -60,7 +60,7 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 	protected int countTerminal;		// # of terminal node visits in getNextAction2
 	protected int countMaxDepth;		// # of premature returns due to maxDepth in getNextAction2
 	private final boolean DBG_EWN = false;
-	private final int DBG_EWN_DEPTH = 2;
+	private final int DBG_EWN_DEPTH = -1;
 
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -129,21 +129,28 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 	}
 
 	/**
-	 * Get the best next action and return it
-	 * @param so			current game state (not changed on return), has to implement
+	 * Get the best next action and return it.
+	 * <p>
+	 * The return value {@code actBest} has the predicate isRandomAction()  (true: if action was selected
+	 * at random, false: if action was selected by agent).<p>
+	 * {@code actBest} has also the members vTable and vBest to store the Q-value for each available
+	 * action (as returned by so.getAvailableActions()) and the Q-value for the best action {@code actBest}, resp.
+	 *
+	 * @param so            current game state (not changed on return), has to implement
 	 * 						interface {@link StateObsNondeterministic}
-	 * @param random		needed for the interface, but ExpectimaxNAgent does not support random
-	 * @param silent		operate w/o printouts
-	 * @return actBest		the best action 
+	 * @param random        needed for the interface, but ExpectimaxNAgent does not support random
+	 * @param deterministic
+	 * 			if true, the agent acts deterministically in case of several equivalent best actions (reproducibility)
+	 * @param silent        operate w/o printouts
+	 * @return {@code actBest},	the best action. If several actions have the same score:
+	 * 			break ties by selecting one of them at random (if {@code deterministic==false}) or
+	 * 			return the first one (if {@code deterministic==true}) .
 	 * @throws RuntimeException if {@code so} is not implementing {@link StateObsNondeterministic} or
-	 * if {@code so}'s next action is not deterministic
-	 * <p>						
-	 * actBest has the members vTable and vBest to store the value for each available
-	 * action (as returned by so.getAvailableActions()), the value for the best action actBest,
-	 * and the best ScoreTuple scBest.
-	 */	
+	 * 			if {@code so}'s next action is not deterministic
+	 */
 	@Override
-	public ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
+	public ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean deterministic, boolean silent) {
+		//silent = false;
 
 		if (!(so instanceof StateObsNondeterministic))
 			throw new RuntimeException(" Error in "
@@ -226,8 +233,15 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 
 		} // for
 
-		// if several actions have the same best value, select one of them randomly
-		actBest = bestActions.get(rand.nextInt(bestActions.size()));
+		assert bestActions.size()>0;
+		if (deterministic) {
+			// if several actions have the same best value, select the first one:
+			actBest = bestActions.get(0);
+		} else {
+			// If several actions have the same best value, select one of them randomly.
+			actBest = bestActions.get(rand.nextInt(bestActions.size()));
+		}
+
 		assert actBest != null : "Oops, no best action actBest";
 
 		if (DBG_EWN) {
@@ -371,9 +385,9 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 			for(i = 0; i < rans.size(); ++i)
 			{
 				NewSO = soND.copy();
-				NewSO.advanceNondeterministic(rans.get(i));
+				NewSO.advanceNondetSpecific(rans.get(i));
 				while(!NewSO.isNextActionDeterministic() && !NewSO.isRoundOver()){		// /WK/03/2021 NEW
-					NewSO.advanceNondeterministic();
+					NewSO.advanceNondeterministic(null);
 				}
 
 				// here is the recursion:
@@ -729,13 +743,13 @@ public class ExpectimaxNAgent extends AgentBase implements PlayAgent, Serializab
 		public DuoStateND duoAdvanceNonDet(Types.ACTIONS ranAct) {
 			StateObsNondeterministic s1 = this.element1().copy();
 			StateObsNondeterministic s2 = this.element2().copy();
-			s1.advanceNondeterministic(ranAct);
+			s1.advanceNondetSpecific(ranAct);
 			while(!s1.isNextActionDeterministic() && !s1.isRoundOver()){		// /WK/03/2021 NEW
-				s1.advanceNondeterministic();
+				s1.advanceNondeterministic(null);
 			}
-			s2.advanceNondeterministic(ranAct);
+			s2.advanceNondetSpecific(ranAct);
 			while(!s2.isNextActionDeterministic() && !s2.isRoundOver()){		// /WK/03/2021 NEW
-				s2.advanceNondeterministic();
+				s2.advanceNondeterministic(null);
 			}
 			return new DuoStateND(s1,s2);
 		}

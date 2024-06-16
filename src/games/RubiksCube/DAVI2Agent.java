@@ -67,7 +67,7 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
 
 	// param random is just for the interface, not used here
 	@Override
-	public ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
+	public ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean deterministic, boolean silent) {
 		int i;
 		StateObserverCube newSO;
         ACTIONS actBest;
@@ -83,7 +83,7 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
         for(i = 0; i < acts.size(); ++i)
         {
         	newSO = ((StateObserverCube) so).copy();
-        	newSO.advance(acts.get(i));
+        	newSO.advance(acts.get(i), null);
         	
         	// value is the V(s) for for taking action i in state s='so'. Action i leads to state newSO.
         	value = vTable[i] = newSO.getRewardTuple(false).scTup[0] +
@@ -104,7 +104,7 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
         // optional: print the best action
         if (!silent) {
         	newSO = ((StateObserverCube) so).copy();
-        	newSO.advance(actBest);
+        	newSO.advance(actBest, null);
         	System.out.println("---Best Move: "+newSO.stringDescr()+"   "+maxValue);
         }			
 
@@ -151,7 +151,7 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
 		do {
 	        m_numTrnMoves++;		// number of train moves 
 	        
-			a_t = getNextAction2(s_t.partialState(), false, true);	// choose action a_t (agent-specific behavior)
+			a_t = getNextAction2(s_t.partialState(), false, false, true);	// choose action a_t (agent-specific behavior)
 	        // put the best value from V-table for state s_t into the HashMap
 			double stepReward = s_t.getStepRewardTuple().scTup[0];
 			if (a_t.getVBest()>stepReward+LOW_V)		// stepReward is c in pseudo code
@@ -160,7 +160,7 @@ public class DAVI2Agent extends AgentBase implements PlayAgent {
 	        
 			//System.out.println(s_t.stringDescr()+", "+a_t.getVBest());
 	        
-			s_t.advance(a_t);		// advance the state 
+			s_t.advance(a_t, null);		// advance the state
 			s_t.storeBestActionInfo(a_t);	// /WK/ was missing before 2021-09-10. Now stored ScoreTuple is up-to-date.
 
 			if (s_t.isGameOver()) m_finished = true;

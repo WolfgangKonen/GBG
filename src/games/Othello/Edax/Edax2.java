@@ -92,7 +92,7 @@ public class Edax2 extends AgentBase implements PlayAgent, Serializable
 	 * by Edax, 0.0 for all other available actions (needed for display in InspectV).	 
 	 */
 	@Override
-	public ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean silent) {
+	public ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean deterministic, boolean silent) {
 		assert sob instanceof StateObserverOthello: "sob not instance of StateObserverOthello";
 		StateObserverOthello so = (StateObserverOthello) sob;
 		ArrayList<ACTIONS> availActions = so.getAvailableActions();

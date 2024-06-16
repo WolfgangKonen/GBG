@@ -92,7 +92,7 @@ public class EvaluatorEWN extends Evaluator {
      */
     private EvalResult evalAgainstOpponent(PlayAgent playAgent, PlayAgent opponent, boolean diffStarts,
                                        int numEpisodes, double thresh){
-        StateObservation so = m_gb.getDefaultStartState();
+        StateObservation so = m_gb.getDefaultStartState(null);
         // Weight stuff we maybe need this later
         int N = ConfigEWN.NUM_PLAYERS;
         ScoreTuple scMean = new ScoreTuple(N);
@@ -103,14 +103,14 @@ public class EvaluatorEWN extends Evaluator {
             ScoreTuple sc;
             for (int c=0; c<numEpisodes; c++) {
                 for (StateObservation sd : diffStartList) {
-                    sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent), sd, 100, 0, null);
+                    sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent), sd, 100, 0, null, null, false);
                     scMean.combine(sc, ScoreTuple.CombineOP.AVG, 0, sWeight);
                     count++;
                 }
             }
             System.out.println("count = "+ count);
         }else {
-            scMean= XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent,opponent), so, numEpisodes,0, null);
+            scMean= XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent,opponent), so, numEpisodes,0, null, null, false);
         }
         lastResult = scMean.scTup[0];
         m_msg = playAgent.getName() + ": " + getPrintString() + lastResult;
@@ -127,7 +127,7 @@ public class EvaluatorEWN extends Evaluator {
      */
     private EvalResult evalAgainstTwoOpponents(PlayAgent playAgent, PlayAgent opponent, PlayAgent opponent2,
                                                boolean diffStarts, int numEpisodes, double thresh){
-        StateObservation so = m_gb.getDefaultStartState();
+        StateObservation so = m_gb.getDefaultStartState(null);
         // Weight stuff we maybe need this later
         int N = ConfigEWN.NUM_PLAYERS;
         ScoreTuple scMean = new ScoreTuple(N);
@@ -138,13 +138,13 @@ public class EvaluatorEWN extends Evaluator {
             ScoreTuple sc;
             for (int c=0; c<numEpisodes; c++) {
                 for (StateObservation sd : diffStartList) {
-                    sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent, opponent2), sd, 100, 0, null);
+                    sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent, opponent2), sd, 100, 0, null, null, false);
                     scMean.combine(sc, ScoreTuple.CombineOP.AVG, 0, sWeight);
                     //count++;
                 }
             }
         }else {
-            scMean= XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent,opponent, opponent2), so, numEpisodes,0, null);
+            scMean= XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent,opponent, opponent2), so, numEpisodes,0, null, null, false);
         }
         lastResult = scMean.scTup[0];
         m_msg = playAgent.getName() + ": " + getPrintString() + lastResult;
@@ -154,7 +154,7 @@ public class EvaluatorEWN extends Evaluator {
 
     private EvalResult evalAgainstThreeOpponents(PlayAgent playAgent, PlayAgent opponent, PlayAgent opponent2,PlayAgent opponent3,
                                              boolean diffStarts, int numEpisodes, double thresh){
-        StateObservation so = m_gb.getDefaultStartState();
+        StateObservation so = m_gb.getDefaultStartState(null);
         // Weight stuff we maybe need this later
         int N = ConfigEWN.NUM_PLAYERS;
         ScoreTuple scMean = new ScoreTuple(N);
@@ -165,13 +165,13 @@ public class EvaluatorEWN extends Evaluator {
             ScoreTuple sc;
             for (int c=0; c<numEpisodes; c++) {
                 for (StateObservation sd : diffStartList) {
-                    sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(new PlayAgent[]{playAgent,opponent, opponent2, opponent3}), sd, 100, 0, null);
+                    sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(new PlayAgent[]{playAgent,opponent, opponent2, opponent3}), sd, 100, 0, null, null, false);
                     scMean.combine(sc, ScoreTuple.CombineOP.AVG, 0, sWeight);
                     //count++;
                 }
             }
         }else {
-            scMean= XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(new PlayAgent[]{playAgent,opponent, opponent2, opponent3}), so, numEpisodes,0, null);
+            scMean= XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(new PlayAgent[]{playAgent,opponent, opponent2, opponent3}), so, numEpisodes,0, null, null, false);
         }
         lastResult = scMean.scTup[0];
         m_msg = playAgent.getName() + ": " + getPrintString() + lastResult;
@@ -233,7 +233,7 @@ public class EvaluatorEWN extends Evaluator {
      * @return {@code ScoreTuple} Tuple which holds the average score for {@code playAgent} and {@code opponent}
      */
     public double evaluateFree(PlayAgent playAgent, PlayAgent opponent, boolean diffStarts, int numEpisodes){
-        StateObservation so = m_gb.getDefaultStartState();
+        StateObservation so = m_gb.getDefaultStartState(null);
         // Weight stuff we maybe need this later
         int N = ConfigEWN.NUM_PLAYERS;
         ScoreTuple scMean = new ScoreTuple(N);
@@ -244,14 +244,14 @@ public class EvaluatorEWN extends Evaluator {
             ScoreTuple sc;
             for (int c=0; c<numEpisodes; c++) {
                 for (StateObservation sd : diffStartList) {
-                    sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent), sd, 100, 0, null);
+                    sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent), sd, 100, 0, null, null, false);
                     scMean.combine(sc, ScoreTuple.CombineOP.AVG, 0, sWeight);
                     count++;
                 }
             }
             System.out.println("count = "+ count);
         }else {
-            scMean= XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent,opponent), so, numEpisodes,0, null);
+            scMean= XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent,opponent), so, numEpisodes,0, null, null, false);
         }
         lastResult = scMean.scTup[0];
         m_msg = playAgent.getName() + ": " + getPrintString() + lastResult;

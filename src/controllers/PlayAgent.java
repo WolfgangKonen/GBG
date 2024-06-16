@@ -23,37 +23,14 @@ import tools.Types;
 public interface PlayAgent {
 	enum AgentState {RAW, INIT, TRAINED}
 	
-//	/**
-//	 * <em> This function is now deprecated. Use instead: </em>
-//	 * {@code ACTION_VT} {@link PlayAgent#getNextAction2(StateObservation, boolean, boolean)}. 
-//	 * <p>
-//	 * Get the best next action and return it
-//	 * @param sob			current game state (not changed on return)
-//	 * @param random		allow epsilon-greedy random action selection	
-//	 * @param vtable		must be an array of size n+1 on input, where 
-//	 * 						n=sob.getNumAvailableActions(). On output,
-//	 * 						elements 0,...,n-1 hold the score for each available 
-//	 * 						action (corresponding to sob.getAvailableActions())
-//	 * 						In addition, vtable[n] has the score for the 
-//	 * 						best action.
-//	 * @param silent
-//	 * @return actBest		the best action 
-//	 * 
-//	 * Side effect: sets member randomSelect (true: if action was selected 
-//	 * at random, false: if action was selected by agent).
-//	 * 
-//	 */	
-//	@Deprecated
-//	public Types.ACTIONS getNextAction(StateObservation sob, boolean random, 
-//			double[] vtable, boolean silent);
-	
 	/**
 	 * Get the best next action and return it 
 	 * (NEW version: returns ACTIONS_VT and has a recursive part for multi-moves)
 	 * 
-	 * @param sob			current game state (is returned unchanged)
-	 * @param random		allow random action selection with probability m_epsilon
-	 * @param silent		whether to be silent
+	 * @param sob            current game state (is returned unchanged)
+	 * @param random        allow random action selection with probability m_epsilon
+	 * @param deterministic whether to act deterministic (if several actions have best value, return the 1st one)
+	 * @param silent        whether to be silent
 	 * @return actBest		the best action. If several actions have the same
 	 * 						score, break ties by selecting one of them at random. 
 	 * <p>						
@@ -62,7 +39,7 @@ public interface PlayAgent {
 	 * actBest has also the members vTable to store the value for each available
 	 * action (as returned by so.getAvailableActions()) and vBest to store the value for the best action actBest.
 	 */
-	Types.ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean silent);
+	Types.ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean deterministic, boolean silent);
 	
 //	/**
 //	 * Return the agent's estimate of the final score for that game state.
@@ -93,22 +70,6 @@ public interface PlayAgent {
 	 * 				the **future** score for s_t from the perspective of player i.
 	 */
 	ScoreTuple getScoreTuple(StateObservation sob, ScoreTuple prevTuple);
-	
-//	/**
-//	 * Return the agent's estimate of the final game value (final reward). Is called when
-//	 * maximum episode length (TD) or maximum tree depth for certain agents ({@link MaxNAgent},
-//	 * {@link ExpectimaxNAgent}) is reached.
-//	 *
-//	 * This method is deprecated, use estimateGameValueTuple instead.
-//	 *
-//	 * @param sob			the current game state;
-//	 * @return				the agent's estimate of the final reward. This may be
-//	 * 						the same as {@link #getScore(StateObservation)} (as
-//	 * 						implemented in {@link AgentBase}). But it may as well be
-//	 * 						overridden by derived classes.
-//	 */
-//	@Deprecated
-//	public double estimateGameValue(StateObservation sob);
 	
 	/**
 	 * Return the agent's estimate of {@code sob}'s final game value (final reward) <b>for all players</b>. 
@@ -270,7 +231,7 @@ public interface PlayAgent {
 	/**
 	 * reset agent when starting a new episode
 	 * (needed when re-using an agent, e.g. in competeNum episodes during a competition
-	 * {@link games.XArenaFuncs#competeNPlayer(PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], java.util.ArrayList)})
+	 * {@link games.XArenaFuncs#competeNPlayer(PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], java.util.ArrayList, java.util.Random, boolean)})
 	 */
 	void resetAgent();
 

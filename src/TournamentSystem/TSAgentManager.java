@@ -488,7 +488,7 @@ public class TSAgentManager {
 
         randomStartStates = new StateObservation[results.numberOfEpisodes];
         for (int game=0; game<results.numberOfEpisodes; game++) {
-            randomStartStates[game] = gb.getDefaultStartState();
+            randomStartStates[game] = gb.getDefaultStartState(null);
 
             if (results.numberOfRandomStartMoves>0) {
                 System.out.println(TAG+"Calculation Random Start Moves...");
@@ -497,7 +497,7 @@ public class TSAgentManager {
                 RandomAgent raX = new RandomAgent("Random Agent X", rnd);
 
                 for (int i = 0; i < results.numberOfRandomStartMoves; i++) {
-                    randomStartStates[game].advance(raX.getNextAction2(randomStartStates[game].partialState(), false, true));
+                    randomStartStates[game].advance(raX.getNextAction2(randomStartStates[game].partialState(), false, false, true), null);
                 }
 
                 //try { Thread.sleep(200); } catch (InterruptedException e) { e.printStackTrace(); } // replaced by externally set random seed in new random agent constructor

@@ -6,17 +6,20 @@ import games.EWN.StateObserverHelper.Helper;
 import games.EWN.config.ConfigEWN;
 import games.EWN.gui.GameBoardGuiEWN;
 import games.GameBoard;
+import games.GameBoardBase;
 import games.Othello.ConfigOthello;
 import games.StateObservation;
+import games.TicTacToe.StateObserverTTT;
 import tools.Types;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Random;
 
 /**
  * GameBoardEWN contains the 'game-theoretic' part of the game board. See {@link GameBoardGuiEWN} for the GUI.
  */
-public class GameBoardEWN implements GameBoard {
+public class GameBoardEWN extends GameBoardBase implements GameBoard {
 
     /**
      * Serialnumber
@@ -26,10 +29,9 @@ public class GameBoardEWN implements GameBoard {
     /**
      * Game board Attributes
      */
-    public Arena m_Arena;
     private StateObserverEWN m_so;
     protected Random rand;
-    private boolean arenaActReq = false;
+    // private boolean arenaActReq = false;
     private transient GameBoardGuiEWN m_gameGui;
     double[][] vGameState;
     private int selectedTokenPosition;
@@ -37,8 +39,7 @@ public class GameBoardEWN implements GameBoard {
     //private int[] cubed;      // never used
 
     public GameBoardEWN(Arena arena){
-        super();
-        m_Arena = arena;
+        super(arena);
         m_so = new StateObserverEWN();
         rand = new Random();
         selecting = true;
@@ -75,13 +76,15 @@ public class GameBoardEWN implements GameBoard {
 
     /**
      * Resets the game to starting state
-     * @param boardClear	whether to clear the board
-     * @param vClear		whether to clear the value table
+     * @param boardClear    whether to clear the board
+     * @param vClear        whether to clear the value table
+     * @param cmpRand       if non-null, use this (reproducible) RNG instead of StateObservation's RNG
      */
     @Override
-    public void clearBoard(boolean boardClear, boolean vClear) {
+    public void clearBoard(boolean boardClear, boolean vClear, Random cmpRand) {
         if(boardClear){
-            m_so = m_so.reset();
+            m_so = m_so.reset(cmpRand);
+            this.getStateQueue().clear();
         }
         if(m_gameGui!=null && m_Arena.taskState!=Arena.Task.TRAIN){
             m_gameGui.clearBoard(boardClear,vClear);
@@ -89,25 +92,33 @@ public class GameBoardEWN implements GameBoard {
     }
 
     @Override
-    public void updateBoard(StateObservation so, boolean withReset, boolean showValueOnGameboard) {
+    public void setStateObs(StateObservation so) {
         StateObserverEWN soN = null;
         if(so!=null){
             assert( so instanceof StateObserverEWN):"StateObservation 'so' is not an instance of StateObserverEWN";
             soN = (StateObserverEWN) so;
             m_so = soN;
         }
+    }
+
+    @Override
+    public void updateBoard(StateObservation so, boolean withReset, boolean showValueOnGameboard) {
+        setStateObs(so);    // asserts that so is StateObserverEWN
+
+        StateObserverEWN soN = (StateObserverEWN) so;
         if(m_gameGui != null){
             m_gameGui.updateBoard(soN, withReset,showValueOnGameboard);
         }
 
+        // --- TODO: check if this is really needed ---
         if(soN != null && showValueOnGameboard && soN.getStoredValues() != null) {
-            for(int i = 0; i < ConfigOthello.BOARD_SIZE; i++)
-                for( int j = 0; j < ConfigOthello.BOARD_SIZE; j++)
+            for(int i = 0; i < ConfigEWN.BOARD_SIZE; i++)
+                for( int j = 0; j < ConfigEWN.BOARD_SIZE; j++)
                     vGameState[i][j] = Double.NaN;
 
             for(int y = 0 ; y < soN.getStoredValues().length; y++)
             {
-                System.out.println("index: " + y + " Values" + soN.getStoredValues()[y]);
+                System.out.println("index: " + y + " Values " + soN.getStoredValues()[y]);
                 /*Types.ACTIONS action = sot.getStoredAction(y);
                 int iAction = action.toInt();
                 int jFirst= iAction%ConfigOthello.BOARD_SIZE;
@@ -148,10 +159,10 @@ public class GameBoardEWN implements GameBoard {
             }else{
                 Types.ACTIONS act = Helper.parseAction(selectedTokenPosition,index);
                 if( m_so.isLegalAction(act)) {
-                    m_so.advance(act);
+                    m_so.advance(act, null);
                     (m_Arena.getLogManager()).addLogEntry(act, m_so, m_Arena.getLogSessionID());
                     m_gameGui.unSelect();
-                    arenaActReq = true;
+                    this.setActionReq(true);
                     selecting = true;
                     selectedTokenPosition = -1;
 
@@ -173,10 +184,11 @@ public class GameBoardEWN implements GameBoard {
 
 
 
-    @Override
-    public boolean isActionReq() {
-        return arenaActReq;
-    }
+    // --- now in GameBoardBase
+//    @Override
+//    public boolean isActionReq() {
+//        return arenaActReq;
+//    }
 
     @Override
     public void showGameBoard(Arena arena, boolean alignToMain) {
@@ -188,11 +200,6 @@ public class GameBoardEWN implements GameBoard {
     public void toFront() {
         if (m_gameGui!=null)
             m_gameGui.toFront();
-    }
-
-    @Override
-    public void setActionReq(boolean actionReq) {
-        arenaActReq = actionReq;
     }
 
     @Override
@@ -228,13 +235,8 @@ public class GameBoardEWN implements GameBoard {
     }
 
     @Override
-    public Arena getArena() {
-        return m_Arena;
-    }
-
-    @Override
-    public StateObservation getDefaultStartState() {
-        clearBoard(true,true);
+    public StateObservation getDefaultStartState(Random cmpRand) {
+        clearBoard(true,true, cmpRand);        // resets m_so
         return m_so;
     }
 
@@ -249,7 +251,7 @@ public class GameBoardEWN implements GameBoard {
      */
     @Override
     public StateObservation chooseStartState() {
-        getDefaultStartState();
+        getDefaultStartState(null);
         return m_so;
     }
 }

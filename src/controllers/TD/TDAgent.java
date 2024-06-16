@@ -40,7 +40,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	protected TD_func m_Net;
 	/**
 	 * Controls the amount of explorative moves in
-	 * {@link #getNextAction2(StateObservation, boolean, boolean)}
+	 * {@link PlayAgent#getNextAction2(StateObservation, boolean, boolean, boolean)}
 	 * during training. <br>
 	 * m_epsilon = 0.0: no random moves, <br>
 	 * m_epsilon = 0.1 (def.): 10% of the moves are random, and so forth
@@ -171,10 +171,11 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	 * Get the best next action and return it 
 	 * (NEW version: ACTIONS_VT and recursive part for multi-moves)
 	 * 
-	 * @param so			current game state (is returned unchanged)
-	 * @param random		allow random action selection with probability m_epsilon
-	 * @param silent        no printout
-	 * @return actBest		the best action. If several actions have the same
+	 * @param so            current game state (is returned unchanged)
+	 * @param random        allow random action selection with probability m_epsilon
+	 * @param deterministic
+     * @param silent        no printout
+     * @return actBest		the best action. If several actions have the same
 	 * 						score, break ties by selecting one of them at random. 
 	 * <p>						
 	 * actBest has predicate isRandomAction()  (true: if action was selected 
@@ -183,15 +184,15 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	 * action (as returned by so.getAvailableActions()) and the value for the best action actBest.
 	 */
 	@Override
-	public Types.ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) 
+	public Types.ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean deterministic, boolean silent)
 	{
 		if (so.getNumPlayers()>2)
-			return getNextAction4(so, so, random, silent);
+			return getNextAction4(so, so, random, deterministic, silent);
 		else
-			return getNextAction3(so, so, random, silent);
+			return getNextAction3(so, so, random, deterministic, silent);
 	}
 	private Types.ACTIONS_VT getNextAction3(StateObservation so, StateObservation refer, 
-			boolean random, boolean silent) {
+			boolean random, boolean deterministic, boolean silent) {
 		int i;
 		double CurrentScore;     	// NetScore*Player, the quantity to be
 									// maximized
@@ -232,7 +233,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 			if (thisAct.isEqualToInverseOfLastAction(so))
 				continue;	// with next for-pass
 
-            CurrentScore = g3_Evaluate(so,thisAct,refer,silent);
+            CurrentScore = g3_Evaluate(so,thisAct,refer,deterministic, silent);
 				
 			// just a debug check:
 			if (Double.isInfinite(CurrentScore)) {
@@ -255,14 +256,20 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 				bestActions.add(acts.get(i));
 			}
         } // for
-		actBest = bestActions.get(rand.nextInt(bestActions.size()));
-		// if several actions have the same best value, select one of them randomly
+		assert bestActions.size()>0;
+		if (deterministic) {
+			actBest = bestActions.get(0);
+			// if several actions have the same best value, select the first one
+		} else {
+			actBest = bestActions.get(rand.nextInt(bestActions.size()));
+			// if several actions have the same best value, select one of them randomly
+		}
 
         assert actBest != null : "Oops, no best action actBest";
 		if (!silent) {
 			System.out.print("---Best Move: ");
             NewSO = so.copy();
-            NewSO.advance(actBest);
+            NewSO.advance(actBest, null);
 			System.out.println(NewSO.stringDescr()+", "+(2*BestScore*player-1));
 		}			
 		
@@ -271,7 +278,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 	}
 
 	private Types.ACTIONS_VT getNextAction4(StateObservation so, StateObservation refer, 
-			boolean random, boolean silent) {
+			boolean random, boolean deterministic, boolean silent) {
 		int i;
 		double CurrentScore;     	// NetScore*Player, the quantity to be
 									// maximized
@@ -335,14 +342,20 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 				bestActions.add(acts.get(i));
 			}
         } // for
-		actBest = bestActions.get(rand.nextInt(bestActions.size()));
-		// if several actions have the same best value, select one of them randomly
+		assert bestActions.size()>0;
+		if (deterministic) {
+			actBest = bestActions.get(0);
+			// if several actions have the same best value, select the first one
+		} else {
+			actBest = bestActions.get(rand.nextInt(bestActions.size()));
+			// if several actions have the same best value, select one of them randomly
+		}
 
         assert actBest != null : "Oops, no best action actBest";
 		if (!silent) {
 			System.out.print("---Best Move: ");
             NewSO = so.copy();
-            NewSO.advance(actBest);
+            NewSO.advance(actBest, null);
 			System.out.println(NewSO.stringDescr()+", "+(2*BestScore*player-1));
 		}			
 		
@@ -352,7 +365,8 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 
 	// calculate CurrentScore:
 	// (g3_Evaluate is helper function for getNextAction3)
-	private double g3_Evaluate(	StateObservation so, Types.ACTIONS act, StateObservation refer, boolean silent)
+	private double g3_Evaluate(	StateObservation so, Types.ACTIONS act, StateObservation refer,
+								   boolean deterministic, boolean silent)
 	{
 		double CurrentScore;
 		int player = Types.PLAYER_PM[refer.getPlayer()]; 	 
@@ -367,7 +381,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 
 		// the normal part for the case of single moves:
 		NewSO = so.copy();
-		NewSO.advance(act);
+		NewSO.advance(act, null);
 
 		// the recursive part (only for deterministic games) is for the case of 
 		// multi-moves: the player who just moved gets from StateObservation 
@@ -378,8 +392,8 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 			int newPlayer =  Types.PLAYER_PM[NewSO.getPlayer()];
 			if (newPlayer==player) 
 			{
-				actBestVT = getNextAction3(NewSO, refer, false, silent);
-				NewSO.advance(actBestVT);
+				actBestVT = getNextAction3(NewSO, refer, false, deterministic, silent);
+				NewSO.advance(actBestVT, null);
 				CurrentScore = actBestVT.getVBest();
 				return CurrentScore;
 			}
@@ -418,7 +432,7 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
         
     	// the normal part for the case of single moves:
         NewSO = so.copy();
-        NewSO.advance(act);
+        NewSO.advance(act, null);
         
         //
         // the recursive part (only for deterministic games) is for the case of 
@@ -522,10 +536,10 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 		}
 		int counter=0;		// count the number of moves
 		while (true) {
-			actBest = acting_pa.getNextAction2(so.partialState(), true, true);
+			actBest = acting_pa.getNextAction2(so.partialState(), true, false, true);
 			randomMove = actBest.isRandomAction();
 			oldSO = so.copy();
-			so.advance(actBest);
+			so.advance(actBest, null);
 			so.storeBestActionInfo(actBest);	// /WK/ was missing before 2021-09-10. Now stored ScoreTuple is up-to-date.
 
 			//couldn't we just train till round over?
@@ -660,9 +674,9 @@ public class TDAgent extends AgentBase implements PlayAgent,Serializable {
 					firstRound = false;
 			}
 			
-			actBest = acting_pa.getNextAction2(so.partialState(), true, true);
+			actBest = acting_pa.getNextAction2(so.partialState(), true, false, true);
 			randomMove = actBest.isRandomAction();
-			so.advance(actBest);
+			so.advance(actBest, null);
 			so.storeBestActionInfo(actBest);	// /WK/ was missing before 2021-09-10. Now stored ScoreTuple is up-to-date.
 
 			counter++;

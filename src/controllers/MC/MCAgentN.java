@@ -81,10 +81,11 @@ public class MCAgentN extends AgentBase implements PlayAgent {
 	 * Get the best next action and return it 
 	 * (NEW version: returns ACTIONS_VT)
 	 * 
-	 * @param so			current game state (is returned unchanged)
-	 * @param random		allow random action selection with probability m_epsilon
-	 * @param silent        no output
-	 * @return actBest		the best action. If several actions have the same
+	 * @param so            current game state (is returned unchanged)
+	 * @param random        allow random action selection with probability m_epsilon
+	 * @param deterministic
+     * @param silent        no output
+     * @return actBest		the best action. If several actions have the same
 	 * 						score, break ties by selecting one of them at random. 
 	 * <p>						
 	 * actBest has predicate isRandomAction()  (true: if action was selected 
@@ -96,7 +97,7 @@ public class MCAgentN extends AgentBase implements PlayAgent {
      * selected action.
 	 */
 	@Override
-	public Types.ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
+	public Types.ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean deterministic, boolean silent) {
         int iterations = m_mcPar.getNumIter();
         int numberAgents = m_mcPar.getNumAgents();
         int depth = m_mcPar.getRolloutDepth();
@@ -201,7 +202,7 @@ public class MCAgentN extends AgentBase implements PlayAgent {
                     StateObservation newSob = sob.copy();
                     
                 	//fetch the first action (of rollout) and execute it on the game state:
-                    newSob.advance(actions.get(firstActionIdentifier));
+                    newSob.advance(actions.get(firstActionIdentifier), null);
 
                     //construct Random Agent and let it simulate a (random) rollout until game over:
                     agent.startAgent(newSob, depth, stopOnRoundOver);			// contains BUG1 fix
@@ -301,7 +302,7 @@ public class MCAgentN extends AgentBase implements PlayAgent {
      * The parallelization is done over the available actions AND over the rollout
      * iterations as well. This might be an alternative for games like 2048, where there are only 
      * up to 4 actions. If you want to activate this function, you have to change the source
-     * code in {@link #getNextAction2(StateObservation, boolean, boolean).} 
+     * code in {@link PlayAgent#getNextAction2(StateObservation, boolean, boolean, boolean) .}
      */
     private Types.ACTIONS_VT getNextAction_MassivePAR(StateObservation sob,
                                                       int iterations,
@@ -361,7 +362,7 @@ public class MCAgentN extends AgentBase implements PlayAgent {
 
                 	//fetch the first action and execute it on the game state:
                     Types.ACTIONS firstAction = actions.get(firstActionIdentifier);
-                    newSob.advance(firstAction);
+                    newSob.advance(firstAction, null);
 
                     //construct Random Agent and let it simulate a (random) rollout:
                     RandomSearch agent = new RandomSearch();
@@ -435,7 +436,7 @@ public class MCAgentN extends AgentBase implements PlayAgent {
 
     /**
      * Get the best next action and return it (single-core version, multiple agents).<br>
-     * Called by {@code calcCertainty(..)} and {@link #getNextAction2(StateObservation, boolean, boolean)}.
+     * Called by {@code calcCertainty(..)} and {@link PlayAgent#getNextAction2(StateObservation, boolean, boolean, boolean)}.
      * 
      * @param sob			current game state (not changed on return)
      * @param iterations    rollout repeats (for each available action)
@@ -493,7 +494,7 @@ public class MCAgentN extends AgentBase implements PlayAgent {
                 for (int k = 0; k < iterations; k++) {
                     StateObservation newSob = sob.copy();
 
-                    newSob.advance(actions.get(j));
+                    newSob.advance(actions.get(j), null);
 
                     RandomSearch agent = new RandomSearch();
                     agent.startAgent(newSob, depth, stopOnRoundOver);			// contains BUG1 fix
@@ -577,7 +578,7 @@ public class MCAgentN extends AgentBase implements PlayAgent {
 	 * 				the future score for s_t from the perspective of player i.
 	 * <p>
 	 * The {@link ScoreTuple} is obtained by running  
-	 * {@link #getNextAction2(StateObservation, boolean, boolean)} and retrieving from 
+	 * {@link PlayAgent#getNextAction2(StateObservation, boolean, boolean, boolean)} and retrieving from
 	 * the returned {@link Types.ACTIONS_VT} object the score tuple.
 	 */
 	@Override
@@ -586,7 +587,7 @@ public class MCAgentN extends AgentBase implements PlayAgent {
             return so.getGameScoreTuple();
         } else {
             if (so.isNextActionDeterministic()) {
-                Types.ACTIONS_VT actBestVT = getNextAction2(so.partialState(), false, true);
+                Types.ACTIONS_VT actBestVT = getNextAction2(so.partialState(), false, false, true);
                 return actBestVT.getScoreTuple();
             } else {
                 return getScoreTuple_NextActionNonDet((StateObsNondeterministic) so);
@@ -597,7 +598,7 @@ public class MCAgentN extends AgentBase implements PlayAgent {
     /**
      * This is for the case that getScoreTuple is called with a next-action-nondeterministic state.
      * In that case we average over all nondeterministic actions and call for each of the resulting
-     * states with next-action-deterministic {@link #getNextAction2(StateObservation, boolean, boolean)}.
+     * states with next-action-deterministic {@link PlayAgent#getNextAction2(StateObservation, boolean, boolean, boolean)}.
      *
      * @param soND  the state whose next action is nondeterministic
      * @return the weighted average over all non-deterministic choices (weight = probability of each choice)
@@ -613,12 +614,12 @@ public class MCAgentN extends AgentBase implements PlayAgent {
         for(int i = 0; i < rans.size(); ++i)
         {
             NewSO = soND.copy();
-            NewSO.advanceNondeterministic(rans.get(i));
+            NewSO.advanceNondetSpecific(rans.get(i));
             while(!NewSO.isNextActionDeterministic() && !NewSO.isRoundOver()){		// /WK/03/2021 NEW
-                NewSO.advanceNondeterministic();
+                NewSO.advanceNondeterministic(null);
             }
 
-            currScoreTuple = getNextAction2(NewSO.partialState(), false, true).getScoreTuple();
+            currScoreTuple = getNextAction2(NewSO.partialState(), false, false, true).getScoreTuple();
 
             currProbab = soND.getProbability(rans.get(i));
             sumProbab += currProbab;

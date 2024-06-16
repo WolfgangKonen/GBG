@@ -72,18 +72,19 @@ public class DAVI4Agent extends DAVI3Agent implements PlayAgent {
 	/**
 	 * Get the best next action and return it
 	 *
-	 * @param so			current game state (is returned unchanged)
-	 * @param random		irrelevant here
-	 * @param silent		if false, print best action
-	 * @return actBest,		the best action. If several actions have the same
+	 * @param so            current game state (is returned unchanged)
+	 * @param random        irrelevant here
+	 * @param deterministic
+     * @param silent        if false, print best action
+     * @return actBest,		the best action. If several actions have the same
 	 * 						score, break ties by selecting one of them at random.
 	 * actBest has also the members vTable and vBest to store the V-value for each available
 	 * action nd the V-value for the best action actBest, resp.
 	 */
 	@Override
-	public ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean silent) {
+	public ACTIONS_VT getNextAction2(StateObservation so, boolean random, boolean deterministic, boolean silent) {
 		if (!STACKED_TCL)
-			return super.getNextAction2(so,random,silent);
+			return super.getNextAction2(so,random, deterministic, silent);
 
 		int i;
 		StateObserverCube newSO;
@@ -111,7 +112,7 @@ public class DAVI4Agent extends DAVI3Agent implements PlayAgent {
 				continue;  // with next for-pass
 
 			newSO = ((StateObserverCube) so).copy();
-			newSO.advance(acts.get(i));
+			newSO.advance(acts.get(i), null);
 
 			// value is the r + V(s) for taking action i in state s='so'. Action i leads to state newSO.
 			value = vTable[i] = newSO.getRewardTuple(rgs).scTup[0] +
@@ -138,7 +139,7 @@ public class DAVI4Agent extends DAVI3Agent implements PlayAgent {
 		// optional: print the best action's after state newSO and its V(newSO) = delta reward + daviValue(newSO)
 		if (!silent) {
 			newSO = ((StateObserverCube) so).copy();
-			newSO.advance(actBest);
+			newSO.advance(actBest, null);
 			System.out.println("---Best Move: "+newSO.stringDescr()+"   "+maxValue);
 		}
 
@@ -179,7 +180,7 @@ public class DAVI4Agent extends DAVI3Agent implements PlayAgent {
 		do {
 			m_numTrnMoves++;		// number of train moves
 
-			a_t = getNextAction2(s_t.partialState(), false, true);	// choose action a_t (agent-specific behavior)
+			a_t = getNextAction2(s_t.partialState(), false, false, true);	// choose action a_t (agent-specific behavior)
 
 			// update the network's response to current state s_t: Let it move towards the desired target:
 			target = a_t.getVBest();
@@ -191,7 +192,7 @@ public class DAVI4Agent extends DAVI3Agent implements PlayAgent {
 
 			//System.out.println(s_t.stringDescr()+", "+a_t.getVBest());
 
-			s_t.advance(a_t);		// advance the state
+			s_t.advance(a_t, null);		// advance the state
 			s_t.storeBestActionInfo(a_t);	// /WK/ was missing before 2021-09-10. Now stored ScoreTuple is up-to-date.
 
 			if (s_t.isGameOver()) m_finished = true;
@@ -231,12 +232,12 @@ public class DAVI4Agent extends DAVI3Agent implements PlayAgent {
 			// advance with an action that brings the cube one twist further away from the solved cube
 			do {
 				act = s_t.getAction(rand.nextInt(s_t.getNumAvailableActions()));
-				s_t.advance(act);
+				s_t.advance(act, null);
 			} while (s_t.isEqual(def));
 			s_t = (StateObserverCube) s_t.clearedAction();
 
 			// select the best action back according to the current policy
-			a_t = getNextAction2(s_t.partialState(), false, true);
+			a_t = getNextAction2(s_t.partialState(), false, false, true);
 
 			// update the network's response to current state s_t: Let it move towards the desired target:
 			target = a_t.getVBest();
@@ -289,7 +290,7 @@ public class DAVI4Agent extends DAVI3Agent implements PlayAgent {
 			s_t = StateObserverCube.chooseNewState(p);
 
 			// select the best action back according to the current policy
-			a_t = getNextAction2(s_t.partialState(), false, true);
+			a_t = getNextAction2(s_t.partialState(), false, false, true);
 
 			// update the network's response to current state s_t: Let it move towards the desired target:
 			target = a_t.getVBest();
@@ -339,7 +340,7 @@ public class DAVI4Agent extends DAVI3Agent implements PlayAgent {
 		do {
 			m_numTrnMoves++;		// number of train moves
 
-			a_t = getNextAction2(s_t.partialState(), false, true);	// choose action a_t (agent-specific behavior)
+			a_t = getNextAction2(s_t.partialState(), false, false, true);	// choose action a_t (agent-specific behavior)
 
 			// add a new TrainingElem to episodeList
 			TrainingItem trainItem = new TrainingItem(
@@ -350,7 +351,7 @@ public class DAVI4Agent extends DAVI3Agent implements PlayAgent {
 			episodeList.addFirst(trainItem);
 			//System.out.println(s_t.stringDescr()+", "+a_t.getVBest());
 
-			s_t.advance(a_t);		// advance the state
+			s_t.advance(a_t, null);		// advance the state
 			s_t.storeBestActionInfo(a_t);	// /WK/ was missing before 2021-09-10. Now stored ScoreTuple is up-to-date.
 
 			if (s_t.isGameOver()) {

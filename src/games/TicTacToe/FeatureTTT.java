@@ -6,7 +6,6 @@ import controllers.AgentBase;
 import controllers.PlayAgent;
 import games.Feature;
 import games.StateObservation;
-import games.TicTacToe.StateObserverTTT;
 import tools.Types;
 
 
@@ -42,7 +41,7 @@ public class FeatureTTT extends TicTDBase implements Feature, Serializable {
 	 * {@link AgentBase}, which implements {@link PlayAgent} and thus requires this method. 
 	 * It should not be called. If called, it throws a RuntimeException.
 	 */
-	public Types.ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean silent) {
+	public Types.ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean deterministic, boolean silent) {
 		throw new RuntimeException("FeatureTTT does not implement getNextAction2");
 	}
 	

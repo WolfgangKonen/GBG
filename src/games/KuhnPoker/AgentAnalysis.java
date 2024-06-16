@@ -232,8 +232,8 @@ public class AgentAnalysis {
                 int player = so.getPlayer();
 
                 while (true) {
-                    actBest = qaVector.pavec[player].getNextAction2(so.partialState(), false, true);
-                    so.advance(actBest);
+                    actBest = qaVector.pavec[player].getNextAction2(so.partialState(), false, false, true);
+                    so.advance(actBest, null);
                     if (so.isRoundOver()) {
                         sc = so.getGameScoreTuple();
 

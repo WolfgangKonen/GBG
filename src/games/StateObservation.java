@@ -2,6 +2,7 @@ package games;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Random;
 
 import TournamentSystem.TSTimeStorage;
 import controllers.PlayAgent;
@@ -20,7 +21,7 @@ import controllers.MaxNAgent;
  * Interface StateObservation observes the current state of the game, it has utility functions for
  * <ul>
  * <li> returning the available actions ({@link #getAvailableActions()}), 
- * <li> advancing the state of the game with a specific action ({@link #advance(Types.ACTIONS)}),
+ * <li> advancing the state of the game with a specific action ({@link #advance(ACTIONS, Random)}),
  * <li> copying the current state
  * <li> signaling end, score and winner of the game
  * <li> and others.
@@ -136,12 +137,16 @@ public interface StateObservation extends PartialState, Serializable{
 	 * 			For 2-player games we have usually {@code getGameScore(0) = -getGameScore(1)}.
 	 */
 	double getGameScore(int player);
-	
+
+	double getGameScoreRaw(int player);
+
 	/**
 	 * @return	a score tuple which has as {@code i}th value  {@link #getGameScore(int)} 
 	 * 			with {@code i} as argument
 	 */
 	ScoreTuple getGameScoreTuple();
+
+	ScoreTuple getGameScoreTupleRaw();
 
 //	/**
 //	 * *** This method is deprecated, use instead getReward(referringState.getPlayer(), rgs) ***
@@ -202,16 +207,17 @@ public interface StateObservation extends PartialState, Serializable{
 	
 	/**
 	 * Advance the current state with {@code action} to a new state
-	 * 
-	 * @param action the action
+	 *
+	 * @param action 	the action
+	 * @param cmpRand	if non-null, use this (reproducible) RNG instead of StateObservation's RNG
 	 */
-	void advance(ACTIONS action);
+	void advance(ACTIONS action, Random cmpRand);
 
     /**
      * Advance the current state to a new afterstate (do the deterministic part of advance).<p>
      *
      * (This method is not really necessary for deterministic games - it does the same as 
-     * {@link #advance(ACTIONS)} - but we have it in the interface to allow the same syntax in 
+     * {@link #advance(ACTIONS, Random)} - but we have it in the interface to allow the same syntax in
      * {@link TDNTuple3Agt} when making an action for any StateObservation, deterministic 
      * or nondeterministic.)
      * 
@@ -225,8 +231,9 @@ public interface StateObservation extends PartialState, Serializable{
      * (This method is not really necessary for deterministic games - then it does just nothing - but we
      * have it here to allow the same syntax in {@link TDNTuple3Agt} and {@link TDNTuple4Agt} when making an action for
      * any StateObservation, deterministic or nondeterministic.)
-     */
-	Types.ACTIONS advanceNondeterministic();
+	 * @param cmpRand	if non-null, use this (reproducible) RNG instead of StateObservation's RNG
+	 */
+	Types.ACTIONS advanceNondeterministic(Random cmpRand);
 
 	/**
 	 * Return true if the next action is deterministic.<p>
@@ -294,7 +301,7 @@ public interface StateObservation extends PartialState, Serializable{
 	/**
 	 * Given the current state {@code this}, store some info useful for inspecting the
 	 * action actBest and double[] vtable returned by a call to <br>
-	 * {@code ACTION_VT} {@link PlayAgent#getNextAction2(StateObservation, boolean, boolean)}. 
+	 * {@code ACTION_VT} {@link PlayAgent#getNextAction2(StateObservation, boolean, boolean, boolean)}.
 	 *  
 	 * @param actBest	the best action
 	 */
@@ -325,21 +332,27 @@ public interface StateObservation extends PartialState, Serializable{
 	int getNumPlayers();
 
 	/**
-	 * Signals for {@link XArenaFuncs#competeNPlayer(PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], ArrayList) XArenaFuncs.competeNPlayer}
-	 * whether the start state needs randomization when doing such a competition.
-	 * <p>
-	 * Currently only used by {@link games.Poker.StateObserverPoker}
+	 * Signals for
+	 * {@link XArenaFuncs#competeNPlayer(PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], ArrayList, Random, boolean)
+	 * competeNPlayer(..)} whether the start state needs randomization when doing such a competition.
 	 *
 	 * @return true or false
+	 *
+	 * @see games.Poker.StateObserverPoker
+	 * @see games.EWN.StateObserverEWN
 	 */
 	boolean needsRandomization();
 
 	/**
-	 *  Randomize the start state in {@link XArenaFuncs#competeNPlayer(PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], ArrayList) XArenaFuncs.competeNPlayer}
-	 *  if {@link #needsRandomization()} returns true
-	 * <p>
-	 * Currently, only used by {@link games.Poker.StateObserverPoker}
+	 * Randomize the start state in
+	 * {@link XArenaFuncs#competeNPlayer(PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], ArrayList, Random, boolean)
+	 * competeNPlayer(..)} if {@link #needsRandomization()} returns true
+	 *
+	 * @param cmpRand	if non-null, use this (reproducible) RNG instead of StateObservation's RNG
+	 *
+	 * @see games.Poker.StateObserverPoker
+	 * @see games.EWN.StateObserverEWN
 	 */
-	void randomizeStartState();
+	void randomizeStartState(Random cmpRand);
 
 }

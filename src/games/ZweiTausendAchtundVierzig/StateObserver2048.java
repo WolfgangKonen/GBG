@@ -2,10 +2,12 @@ package games.ZweiTausendAchtundVierzig;
 
 import controllers.TD.ntuple2.NTupleBase;
 import games.*;
+import games.EWN.StateObserverEWN;
 import games.ZweiTausendAchtundVierzig.Heuristic.HeuristicSettings2048;
 import tools.Types;
 import tools.Types.ACTIONS;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -67,14 +69,46 @@ public class StateObserver2048 extends ObsNondetBase implements StateObsNondeter
 	 * compatible with an older one (older .gamelog containing this object will become 
 	 * unreadable or you have to provide a special version transformation)
 	 */
+	@Serial
 	private static final long serialVersionUID = 12L;
 
     public StateObserver2048() {
+        this((Random) null);
+    }
+
+    public StateObserver2048(Random cmpRand) {
         if (NTupleBase.DBG2_FIXEDSEQUENCE) {
             long seed=42L;					// DEBUG only
             random = new Random(seed);		//
         }
-        newBoard();
+        init(cmpRand);
+    }
+
+    private void init(Random cmpRand) {
+        this.boardB = 0x0L;
+        this.score = 0;
+        this.winState = 0;
+        this.isNextActionDeterministic = true;
+
+        updateEmptyTiles(); // fixed Empty Tiles JK
+        this.cumulEmptyTiles = 0L;
+
+        for(int i = ConfigGame.STARTINGFIELDS; i > 0; i--) {
+            addRandomTile(cmpRand);
+        }
+
+        updateEmptyTiles();
+        updateAvailableMoves();
+    }
+
+    /**
+     * Reset {@link StateObserver2048} object {@code this}
+     * @param cmpRand       if non-null, use this (reproducible) RNG instead of StateObservation's RNG
+     * @return {@code this} (empty, except for two new random tiles)
+     */
+    public StateObserver2048 reset(Random cmpRand){
+        init(cmpRand);
+        return this;
     }
 
     public StateObserver2048(long board) {
@@ -161,14 +195,13 @@ public class StateObserver2048 extends ObsNondetBase implements StateObsNondeter
     
     // Note: StateObserver2048::copyOLD() copies the board state, score, winState, cumulEmptyTiles, 
     // but it does NOT copy storedActions, storedActBest, storedValues, storedMaxScore.
-    public StateObserver2048 copyOLD() {
-    	StateObserver2048 so2 =  new StateObserver2048(boardB, score, winState, cumulEmptyTiles, isNextActionDeterministic);
-    	so2.m_counter = this.m_counter;
-    	so2.winState = this.winState;
-    	so2.highestTileValue = this.highestTileValue;
-//    	so2.moves = this.moves;
-    	return so2;
-    }
+//    public StateObserver2048 copyOLD() {
+//    	StateObserver2048 so2 =  new StateObserver2048(boardB, score, winState, cumulEmptyTiles, isNextActionDeterministic);
+//    	so2.m_counter = this.m_counter;
+//    	so2.winState = this.winState;
+//    	so2.highestTileValue = this.highestTileValue;
+//    	return so2;
+//    }
 
     // Note: StateObserver2048::copyNEW() copies everything, but is faster since it avoids updateEmptyTiles and
     // updateAvailableMoves
@@ -205,31 +238,19 @@ public class StateObserver2048 extends ObsNondetBase implements StateObsNondeter
         //Empty Tile Heuristic
         if(settings.enableEmptyTiles) {
             switch (settings.emptyTilesMethod) {
-                case 0:
-                    bonus += Math.pow(settings.emptyTilesWeighting0 + 1, emptyTiles.size());
-                    break;
-                case 1:
-                    bonus += highestTileValue * emptyTiles.size() * settings.emptyTilesWeighting1;
-                    break;
-                case 2:
-                    bonus += score * emptyTiles.size() * settings.emptyTilesWeighting2;
-                    break;
-                default:
-                    throw new RuntimeException(settings.emptyTilesMethod + " is not a valid Empty Tiles Method");
+                case 0 -> bonus += Math.pow(settings.emptyTilesWeighting0 + 1, emptyTiles.size());
+                case 1 -> bonus += highestTileValue * emptyTiles.size() * settings.emptyTilesWeighting1;
+                case 2 -> bonus += score * emptyTiles.size() * settings.emptyTilesWeighting2;
+                default -> throw new RuntimeException(settings.emptyTilesMethod + " is not a valid Empty Tiles Method");
             }
         }
 
         //Row Heuristic
         if(settings.enableRow) {
             switch (settings.rowMethod) {
-                case 0:
-                    bonus += rowValue * settings.rowWeighting0;
-                    break;
-                case 1:
-                    bonus += rowValue * settings.rowWeighting1;
-                    break;
-                default:
-                    throw new RuntimeException(settings.emptyTilesMethod + " is not a valid Row Method");
+                case 0 -> bonus += rowValue * settings.rowWeighting0;
+                case 1 -> bonus += rowValue * settings.rowWeighting1;
+                default -> throw new RuntimeException(settings.emptyTilesMethod + " is not a valid Row Method");
             }
         }
 
@@ -421,7 +442,7 @@ public class StateObserver2048 extends ObsNondetBase implements StateObsNondeter
      */
     private RowInformationContainer evaluateRow(int currentTileValue, int currentRowLength, int currentRowValue, int position, int offset, int direction, int method, int newRowDirection) {
         switch (direction) {
-            case 0:
+            case 0 -> {
                 //left
                 for (int i = 3 - offset; i >= 0; i--) {
                     switch (method) {
@@ -445,10 +466,9 @@ public class StateObserver2048 extends ObsNondetBase implements StateObsNondeter
                             break;
                     }
                 }
-
                 return evaluateRow(currentTileValue, currentRowLength, currentRowValue, position + newRowDirection, 0, 2, method, newRowDirection);
-
-            case 1:
+            }
+            case 1 -> {
                 //up
                 for (int i = 3 - offset; i >= 0; i--) {
                     switch (method) {
@@ -472,10 +492,9 @@ public class StateObserver2048 extends ObsNondetBase implements StateObsNondeter
                             break;
                     }
                 }
-
                 return evaluateRow(currentTileValue, currentRowLength, currentRowValue, position + newRowDirection, 0, 3, method, newRowDirection);
-
-            case 2:
+            }
+            case 2 -> {
                 //right
                 for (int i = offset; i < ConfigGame.COLUMNS; i++) {
                     switch (method) {
@@ -500,8 +519,8 @@ public class StateObserver2048 extends ObsNondetBase implements StateObsNondeter
                     }
                 }
                 return evaluateRow(currentTileValue, currentRowLength, currentRowValue, position + newRowDirection, 0, 0, method, newRowDirection);
-
-            case 3:
+            }
+            case 3 -> {
                 //down
                 for (int i = offset; i < ConfigGame.ROWS; i++) {
                     switch (method) {
@@ -526,6 +545,7 @@ public class StateObserver2048 extends ObsNondetBase implements StateObsNondeter
                     }
                 }
                 return evaluateRow(currentTileValue, currentRowLength, currentRowValue, position + newRowDirection, 0, 1, method, newRowDirection);
+            }
         }
 
         return null;
@@ -547,7 +567,9 @@ public class StateObserver2048 extends ObsNondetBase implements StateObsNondeter
 	public double getGameScore(int player) {
         return score / MAXSCORE;
 	}
-	
+
+    public double getGameScoreRaw(int player)  { return score; }
+
 //	/**
 //	 * The cumulative reward, seen from the perspective of {@code referringState}'s player. This
 //	 * player dependence is only relevant for games with more than one player.
@@ -663,18 +685,29 @@ public class StateObserver2048 extends ObsNondetBase implements StateObsNondeter
         return actions[i];
     }
 
-    public void advance(ACTIONS action) {
+    /**
+     * Do a deterministic and a non-deterministic advance step
+     * @param action    the (deterministic) action
+     * @param cmpRand   if non-null, use this (reproducible) RNG instead of StateObservation's RNG
+     */
+    @Override
+    public void advance(ACTIONS action, Random cmpRand) {
         super.advanceBase(action);		//		includes addToLastMoves(action)
         int iAction = action.toInt();
         assert (availableMoves.contains(iAction)) : "iAction is not viable.";
         move(iAction);				// deterministic part, contains super.incrementMoveCounter()
         updateEmptyTiles();
-        addRandomTile();			// non-deterministic part
+        addRandomTile(cmpRand);			// non-deterministic part
         updateAvailableMoves();
         isNextActionDeterministic = true;
         nextNondeterministicAction = null;
     }
 
+    /**
+     * Advancing step, the deterministic part
+     * @param action    the (deterministic) action
+     */
+    @Override
     public void advanceDeterministic(ACTIONS action) {
         super.advanceBase(action);		//		includes addToLastMoves(action)
         if(!isNextActionDeterministic) {
@@ -689,7 +722,18 @@ public class StateObserver2048 extends ObsNondetBase implements StateObsNondeter
         isNextActionDeterministic = false;
     }
 
-    public ACTIONS advanceNondeterministic(ACTIONS randAction) {
+    /**
+     * Advance the current afterstate to a new state (do the nondeterministic part of advance)
+     *
+     * Choose the nondeterministic tile value according to its probability of occurence (!)
+     * @param cmpRand   if non-null, use this (reproducible) RNG instead of StateObservation's RNG
+     */
+    public ACTIONS advanceNondeterministic(Random cmpRand) {
+        setNextNondeterministicAction(cmpRand);
+        return advanceNondetSpecific(nextNondeterministicAction);
+    }
+
+    public ACTIONS advanceNondetSpecific(ACTIONS randAction) {
         if(isNextActionDeterministic) {
             throw new RuntimeException("Next action is deterministic but called advanceNondeterministic()");
         }
@@ -711,16 +755,6 @@ public class StateObserver2048 extends ObsNondetBase implements StateObsNondeter
     }
 
     /**
-     * Advance the current afterstate to a new state (do the nondeterministic part of advance)
-     *
-     * Choose the nondeterministic action according to its probability of occurence (!)
-     */
-    public ACTIONS advanceNondeterministic() {
-        setNextNondeterministicAction();
-        return advanceNondeterministic(nextNondeterministicAction);
-    }
-
-    /**
      * Select a random next nondeterministic action: Select an empty tile and the new value of the tile
      * and translate this into an action:<br>
      * 0 = first tile, value 2 <br>
@@ -730,21 +764,27 @@ public class StateObserver2048 extends ObsNondetBase implements StateObsNondeter
      * ....
      *
      * Choose the nondeterministic action according to its probability of occurence (!)
+     * @param cmpRand   if non-null, use this (reproducible) RNG instead of StateObservation's RNG
      */
-    private void setNextNondeterministicAction() {
+    private void setNextNondeterministicAction(Random cmpRand) {
         if(isNextActionDeterministic) {
             throw new RuntimeException("next Action is Deterministic");
         } else if(nextNondeterministicAction != null) {
             return;
         }
-
+        Random rng;
+        if (cmpRand==null) {
+            rng = this.random;
+        } else {
+            rng = cmpRand;
+        }
         //select a tile
-        int action = random.nextInt(emptyTiles.size()) * 2;
+        int action = rng.nextInt(emptyTiles.size()) * 2;
 
         //select the new tile value:
         // 90% no change in action --> tile value 2,
         // 10% (if nextInt(10)==9) incrementing action by 1 --> tile value 4
-        if(random.nextInt(10) == 9) {
+        if(rng.nextInt(10) == 9) {
             action += 1;
         }
         
@@ -762,7 +802,7 @@ public class StateObserver2048 extends ObsNondetBase implements StateObsNondeter
     }
 
     public ACTIONS getNextNondeterministicAction() {
-        setNextNondeterministicAction();
+        setNextNondeterministicAction(null);
 
         return nextNondeterministicAction;
     }
@@ -983,10 +1023,18 @@ public class StateObserver2048 extends ObsNondetBase implements StateObsNondeter
         System.out.println();
     }
 
-    private void addRandomTile () {
+    private void addRandomTile(Random cmpRand) {
+        Random rng;
+        if (cmpRand==null) {
+            rng = this.random;
+        } else {
+            rng = cmpRand;
+        }
+
         if(emptyTiles.size() > 0) {
-            int position = emptyTiles.get(random.nextInt(emptyTiles.size()));
-            int value = ConfigGame.STARTINGVALUES[random.nextInt(ConfigGame.STARTINGVALUES.length)] >> 1;
+            int position = emptyTiles.get(rng.nextInt(emptyTiles.size()));
+            int value = ConfigGame.STARTINGVALUES[rng.nextInt(ConfigGame.STARTINGVALUES.length)] >> 1;
+            //System.out.println("p:"+position+", v:"+value);
             addTile(position, value);
         }
     }
@@ -997,21 +1045,10 @@ public class StateObserver2048 extends ObsNondetBase implements StateObsNondeter
      */
     public void move(int move) {
         switch (move) {
-            case 0:
-                leftAction();
-                break;
-
-            case 1:
-                upAction();
-                break;
-
-            case 2:
-                rightAction();
-                break;
-
-            case 3:
-                downAction();
-                break;
+            case 0 -> leftAction();
+            case 1 -> upAction();
+            case 2 -> rightAction();
+            case 3 -> downAction();
         }
 //      moves++;
         super.incrementMoveCounter();
@@ -1019,23 +1056,6 @@ public class StateObserver2048 extends ObsNondetBase implements StateObsNondeter
         for(int i = 0; i < 16; i++) {
             updateHighestTile((int)(boardB >> (15-i)*4 & 0x0fL));
         }
-    }
-
-    private void newBoard() {
-        boardB = 0x0L;
-        score = 0;
-        winState = 0;
-        isNextActionDeterministic = true;
-
-        updateEmptyTiles(); // fixed Empty Tiles JK
-        cumulEmptyTiles = 0L;
-
-        for(int i = ConfigGame.STARTINGFIELDS; i > 0; i--) {
-            addRandomTile();
-        }
-
-        updateEmptyTiles();
-        updateAvailableMoves();
     }
 
     private StateObserver2048 rightAction() {

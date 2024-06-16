@@ -1,6 +1,7 @@
 package games;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 import TournamentSystem.TSTimeStorage;
 import controllers.PlayAgent;
@@ -68,7 +69,7 @@ abstract public class ObserverBase extends PartialPerfect implements StateObserv
 	/**
 	 * Given the current state, store some useful information for inspecting the  
 	 * action actBest and double[] vtable returned by a call to <br>
-	 * {@code ACTION_VT} {@link PlayAgent#getNextAction2(StateObservation, boolean, boolean)}. 
+	 * {@code ACTION_VT} {@link PlayAgent#getNextAction2(StateObservation, boolean, boolean, boolean)}.
 	 *  
 	 * @param actBest	the best action
 	 */
@@ -125,7 +126,7 @@ abstract public class ObserverBase extends PartialPerfect implements StateObserv
 	 * This is just to signal that derived classes will be either abstract or implement
 	 * advance(ACTIONS), as required by the interface {@link StateObservation}.
 	 */
-	abstract public void advance(Types.ACTIONS action);
+	abstract public void advance(ACTIONS action, Random cmpRand);
 	
 	/**
      * Advance the current state to a new afterstate (do the deterministic part of advance)
@@ -135,13 +136,14 @@ abstract public class ObserverBase extends PartialPerfect implements StateObserv
     public void advanceDeterministic(Types.ACTIONS action) {
     	// since ObserverBase is for a deterministic game, advanceDeterministic()
     	// is the same as advance():
-    	advance(action);
+    	advance(action, null);
     }
 
     /**
      * Advance the current afterstate to a new state (do the nondeterministic part of advance)
+     * @param cmpRand
      */
-    public ACTIONS advanceNondeterministic() {
+    public ACTIONS advanceNondeterministic(Random cmpRand) {
     	// nothing to do here, since ObserverBase is for a deterministic game
 		return null;
     }
@@ -149,7 +151,7 @@ abstract public class ObserverBase extends PartialPerfect implements StateObserv
 	/**
 	 * Advance the current afterstate to a new state (do the nondeterministic part of advance)
 	 */
-	public ACTIONS advanceNondeterministic(ACTIONS randAction) {
+	public ACTIONS advanceNondetSpecific(ACTIONS randAction) {
 		// nothing to do here, since ObserverBase is for a deterministic game
 		return null;
 	}
@@ -281,6 +283,10 @@ abstract public class ObserverBase extends PartialPerfect implements StateObserv
 	 */
 	abstract public double getGameScore(int player);
 
+	public double getGameScoreRaw(int player) {
+		return getGameScore(player);
+	}
+
 	/**
 	 * This implementation is valid for all classes implementing {@link StateObservation}, once
 	 * they have a valid implementation for {@link #getGameScore(int)}.
@@ -293,6 +299,14 @@ abstract public class ObserverBase extends PartialPerfect implements StateObserv
 		ScoreTuple sc = new ScoreTuple(N);
 		for (int i=0; i<N; i++)
 			sc.scTup[i] = this.getGameScore(i);
+		return sc;
+	}
+
+	public ScoreTuple getGameScoreTupleRaw() {
+		int N = this.getNumPlayers();
+		ScoreTuple sc = new ScoreTuple(N);
+		for (int i=0; i<N; i++)
+			sc.scTup[i] = this.getGameScoreRaw(i);
 		return sc;
 	}
 
@@ -417,7 +431,7 @@ abstract public class ObserverBase extends PartialPerfect implements StateObserv
     public boolean isRoundBasedGame(){return false;}
 
 	/**
-	 * Signals for {@link XArenaFuncs#competeNPlayer(PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], ArrayList) XArenaFuncs.competeNPlayer}
+	 * Signals for {@link XArenaFuncs#competeNPlayer(PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], ArrayList, Random, boolean) XArenaFuncs.competeNPlayer}
 	 * whether the start state needs randomization when doing such a competition.
 	 *
 	 * @return true or false
@@ -425,9 +439,10 @@ abstract public class ObserverBase extends PartialPerfect implements StateObserv
 	public boolean needsRandomization(){return false;}
 
 	/**
-	 *  Randomize the start state in {@link XArenaFuncs#competeNPlayer(PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], ArrayList) XArenaFuncs.competeNPlayer}
+	 *  Randomize the start state in {@link XArenaFuncs#competeNPlayer(PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], ArrayList, Random, boolean) XArenaFuncs.competeNPlayer}
 	 *  if {@link #needsRandomization()} returns true
-	 */
-	public void randomizeStartState() { }
+     * @param cmpRand
+     */
+	public void randomizeStartState(Random cmpRand) { }
 
 }

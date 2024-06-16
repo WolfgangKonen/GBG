@@ -1,19 +1,13 @@
 package games.Nim;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
-import controllers.PlayAgent;
-import games.ObserverBase;
 import games.StateObservation;
-import tools.Types;
 import tools.Types.ACTIONS;
 
 /**
  * Class StateObserverNim3P observes the current state of the game Nim <b>for 3 players</b>. It has utility functions for
  * <ul>
  * <li> returning the available actions ({@link #getAvailableActions()}), 
- * <li> advancing the state of the game with a specific action ({@link #advance(Types.ACTIONS)}),
+ * <li> advancing the state of the game with a specific action ({@link StateObservation#advance(ACTIONS, java.util.Random)}),
  * <li> copying the current state
  * <li> signaling end, score and winner of the game
  * </ul>

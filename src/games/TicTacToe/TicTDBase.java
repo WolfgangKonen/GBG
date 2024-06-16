@@ -404,7 +404,7 @@ abstract public class TicTDBase  extends AgentBase implements Serializable {
 		assert (depth<9) : "Oops, too many recursions";
 		for (int i=0; i<act.size(); i++) {
 			NewSO = so.copy();
-			NewSO.advance(act.get(i));
+			NewSO.advance(act.get(i), null);
 			stringRep = NewSO.stringDescr();
 			Integer in = hm2.get(stringRep); // was this state there before?
 			if (in==null) {		// no, then count it

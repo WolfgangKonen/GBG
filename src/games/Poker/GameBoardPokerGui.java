@@ -106,32 +106,32 @@ public class GameBoardPokerGui extends JFrame {
         waitCheck.setSelected(false);
 
         checkButton.addActionListener( e -> {
-            if (m_gb.m_Arena.taskState == Arena.Task.PLAY || m_gb.m_Arena.taskState == Arena.Task.INSPECTV)
+            if (m_gb.getArena().taskState == Arena.Task.PLAY || m_gb.getArena().taskState == Arena.Task.INSPECTV)
                 m_gb.HGameMove(1);
         });
         betButton.addActionListener(e -> {
-            if (m_gb.m_Arena.taskState == Arena.Task.PLAY || m_gb.m_Arena.taskState == Arena.Task.INSPECTV)
+            if (m_gb.getArena().taskState == Arena.Task.PLAY || m_gb.getArena().taskState == Arena.Task.INSPECTV)
                 m_gb.HGameMove(2);
         });
         callButton.addActionListener(e -> {
-            if (m_gb.m_Arena.taskState == Arena.Task.PLAY || m_gb.m_Arena.taskState == Arena.Task.INSPECTV)
+            if (m_gb.getArena().taskState == Arena.Task.PLAY || m_gb.getArena().taskState == Arena.Task.INSPECTV)
                 m_gb.HGameMove(3);
         });
         raiseButton.addActionListener(e -> {
-            if (m_gb.m_Arena.taskState == Arena.Task.PLAY || m_gb.m_Arena.taskState == Arena.Task.INSPECTV)
+            if (m_gb.getArena().taskState == Arena.Task.PLAY || m_gb.getArena().taskState == Arena.Task.INSPECTV)
                 m_gb.HGameMove(4);
         });
         foldButton.addActionListener(e -> {
-            if (m_gb.m_Arena.taskState == Arena.Task.PLAY || m_gb.m_Arena.taskState == Arena.Task.INSPECTV)
+            if (m_gb.getArena().taskState == Arena.Task.PLAY || m_gb.getArena().taskState == Arena.Task.INSPECTV)
                 m_gb.HGameMove(0);
         });
         allInButton.addActionListener(e -> {
-            if (m_gb.m_Arena.taskState == Arena.Task.PLAY || m_gb.m_Arena.taskState == Arena.Task.INSPECTV)
+            if (m_gb.getArena().taskState == Arena.Task.PLAY || m_gb.getArena().taskState == Arena.Task.INSPECTV)
                 m_gb.HGameMove(5);
         });
 
         continueButton.addActionListener(e -> {
-            if (m_gb.m_Arena.taskState == Arena.Task.PLAY || m_gb.m_Arena.taskState == Arena.Task.INSPECTV)
+            if (m_gb.getArena().taskState == Arena.Task.PLAY || m_gb.getArena().taskState == Arena.Task.INSPECTV)
                 continueWithTheGame();
         });
 

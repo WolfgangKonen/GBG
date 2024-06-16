@@ -3,6 +3,7 @@ package games.SimpleGame;
 import controllers.PlayAgent;
 import games.Arena;
 import games.GameBoard;
+import games.GameBoardBase;
 import games.StateObservation;
 import tools.Types;
 
@@ -21,29 +22,26 @@ import java.util.Random;
  * @author Wolfgang Konen, TH Koeln, 2016-2020
  *
  */
-public class GameBoardSG implements GameBoard {
+public class GameBoardSG extends GameBoardBase implements GameBoard {
 
-	protected Arena  m_Arena;		// a reference to the Arena object, needed to 
-									// infer the current taskState
 	protected Random rand;
 	private transient GameBoardSGGui m_gameGui = null;
 
 	protected StateObserverSG m_so;
-	private boolean arenaActReq=false;
-	
+
 	public GameBoardSG(Arena sgGame) {
-		initGameBoard(sgGame);
+		super(sgGame);
+		initGameBoard();
 	}
 	
     @Override
     public void initialize() {}
 
-    private void initGameBoard(Arena arGame) 
+    private void initGameBoard()
 	{
-		m_Arena		= arGame;
 		m_so		= new StateObserverSG();	// random start state
         rand 		= new Random(System.currentTimeMillis());	
-        if (m_Arena.hasGUI() && m_gameGui==null) {
+        if (getArena().hasGUI() && m_gameGui==null) {
         	m_gameGui = new GameBoardSGGui(this);
         }
 
@@ -56,13 +54,22 @@ public class GameBoardSG implements GameBoard {
 	public void updateParams() {}
 
 	@Override
-	public void clearBoard(boolean boardClear, boolean vClear) {
+	public void clearBoard(boolean boardClear, boolean vClear, Random cmpRand) {
 		if (boardClear) {
 			m_so = new StateObserverSG();		// random start state
 		}
 							// considerable speed-up during training (!)
-        if (m_gameGui!=null && m_Arena.taskState!=Arena.Task.TRAIN)
+        if (m_gameGui!=null && getArena().taskState!=Arena.Task.TRAIN)
 			m_gameGui.clearBoard(boardClear, vClear);
+	}
+
+	@Override
+	public void setStateObs(StateObservation so) {
+		if (so!=null) {
+			assert (so instanceof StateObserverSG)
+					: "StateObservation 'so' is not an instance of StateObserverSG";
+			m_so = (StateObserverSG) so;
+		} // if(so!=null)
 	}
 
 	/**
@@ -76,33 +83,10 @@ public class GameBoardSG implements GameBoard {
 	@Override
 	public void updateBoard(StateObservation so, 
 							boolean withReset, boolean showValueOnGameboard) {
-		if (so!=null) {
-	        assert (so instanceof StateObserverSG)
-			: "StateObservation 'so' is not an instance of StateObserverSG";
-			m_so = (StateObserverSG) so;
-		} // if(so!=null)
+		setStateObs(so);    	// asserts that so is StateObserverSG
 		
 		if (m_gameGui!=null)
-			m_gameGui.updateBoard(m_so, withReset, showValueOnGameboard);
-	}
-
-	/**
-	 * @return  true: if an action is requested from Arena or ArenaTrain
-	 * 			false: no action requested from Arena, next action has to come 
-	 * 			from GameBoard (e.g. user input / human move) 
-	 */
-	@Override
-	public boolean isActionReq() {
-		return arenaActReq;
-	}
-
-	/**
-	 * @param	actReq true : GameBoard requests an action from Arena 
-	 * 			(see {@link #isActionReq()})
-	 */
-	@Override
-	public void setActionReq(boolean actReq) {
-		arenaActReq=actReq;
+			m_gameGui.updateBoard((StateObserverSG) so, withReset, showValueOnGameboard);
 	}
 
 	protected void HGameMove(int x, int y)
@@ -110,10 +94,10 @@ public class GameBoardSG implements GameBoard {
 		int iAction = 3*x+y;
 		Types.ACTIONS act = Types.ACTIONS.fromInt(iAction);
 		assert m_so.isLegalAction(act) : "Desired action is not legal";
-		m_so.advance(act);			// perform action (optionally add random elements from game 
-									// environment - not necessary in TicTacToe)
-		(m_Arena.getLogManager()).addLogEntry(act, m_so, m_Arena.getLogSessionID());
-		arenaActReq = true;			// ask Arena for next action
+		m_so.advance(act, null);			// perform action (optionally add random elements from game
+													// environment - not necessary in TicTacToe)
+		(getArena().getLogManager()).addLogEntry(act, m_so, getArena().getLogSessionID());
+		setActionReq(true);			// ask Arena for next action
 	}
 	
 	protected void InspectMove(int x, int y)
@@ -122,14 +106,14 @@ public class GameBoardSG implements GameBoard {
 		Types.ACTIONS act = Types.ACTIONS.fromInt(iAction);
 		if (!m_so.isLegalAction(act)) {
 			System.out.println("Desired action is not legal!");
-			m_Arena.setStatusMessage("Desired action is not legal");
+			getArena().setStatusMessage("Desired action is not legal");
 			return;
 		} else {
-			m_Arena.setStatusMessage("Inspecting the value function ...");
+			getArena().setStatusMessage("Inspecting the value function ...");
 		}
-		m_so.advance(act);			// perform action (optionally add random elements from game 
-									// environment - not necessary in TicTacToe)
-		arenaActReq = true;
+		m_so.advance(act, null);			// perform action (optionally add random elements from game
+													// environment - not necessary in TicTacToe)
+		setActionReq(true);
 	}
 	
 	public StateObservation getStateObs() {
@@ -138,21 +122,21 @@ public class GameBoardSG implements GameBoard {
 
 	/**
 	 * @return the 'empty-board' start state
+     * @param cmpRand
 	 */
 	@Override
-	public StateObservation getDefaultStartState() {
-		clearBoard(true, true);
+	public StateObservation getDefaultStartState(Random cmpRand) {
+		clearBoard(true, true, null);
 		return m_so;
 	}
 
 	/**
 	 * @return a start state which is with probability 0.5 the default start state 
-	 * 		start state and with probability 0.5 one of the possible one-ply 
-	 * 		successors
+	 * 		and with probability 0.5 one of the possible one-ply successors
 	 */
 	@Override
 	public StateObservation chooseStartState() {
-		return getDefaultStartState();			// m_so is in default start state
+		return getDefaultStartState(null);			// m_so is in default start state
 	}
 
 	@Override
@@ -166,11 +150,6 @@ public class GameBoardSG implements GameBoard {
 		return null;
 	}
 	
-    @Override
-    public Arena getArena() {
-        return m_Arena;
-    }
-    
 	@Override
 	public void enableInteraction(boolean enable) {
 		if (m_gameGui!=null)

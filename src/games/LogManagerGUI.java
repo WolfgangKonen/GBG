@@ -214,7 +214,7 @@ public class LogManagerGUI {
                     }
                     currentLog = tempLog;
 
-                    gameBoard.clearBoard(true,true);
+                    gameBoard.clearBoard(true,true, null);
                     loadBoard(0);
 
                     fetch_paX();        // re-fetch agent X (in case it or its parameters have changed)
@@ -311,7 +311,7 @@ public class LogManagerGUI {
     		    currentState.setAvailableActions();
     		    if (currentState.getNumAvailableActions()>0) {
                     paX.resetAgent();
-                    Types.ACTIONS_VT paact = paX.getNextAction2(currentState,false,true);
+                    Types.ACTIONS_VT paact = paX.getNextAction2(currentState,false, false, true);
                     currentState.storeBestActionInfo(paact);
                 }
             }

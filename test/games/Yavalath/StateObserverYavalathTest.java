@@ -45,7 +45,7 @@ public class StateObserverYavalathTest {
                 69,68,67,66,76,77,78,79,80
         };
         for (int x:actions){
-            soYav2P.advance(new Types.ACTIONS(x));
+            soYav2P.advance(new Types.ACTIONS(x), null);
         }
         assert soYav2P.isTie();
     }
@@ -57,7 +57,7 @@ public class StateObserverYavalathTest {
                 0,9,1,11,3,13,2
         };
         for(int x:actions){
-            soYav2P.advance(new Types.ACTIONS(x));
+            soYav2P.advance(new Types.ACTIONS(x), null);
         }
         assert soYav2P.getWinner() == PLAYER_ZERO;
     }
@@ -68,7 +68,7 @@ public class StateObserverYavalathTest {
                 0,9,1,10,4,12,3,11
         };
         for(int x:actions){
-            soYav2P.advance(new Types.ACTIONS(x));
+            soYav2P.advance(new Types.ACTIONS(x), null);
         }
         assert soYav2P.getWinner() == PLAYER_ONE;
     }
@@ -80,7 +80,7 @@ public class StateObserverYavalathTest {
             0,9,18,1,10,19,3,12,21,2
         };
         for (int x : actions){
-            soYav3P.advance(new Types.ACTIONS(x));
+            soYav3P.advance(new Types.ACTIONS(x), null);
         }
         assert soYav3P.isGameOver();
         assert soYav3P.getWinner() == PLAYER_ZERO;
@@ -92,7 +92,7 @@ public class StateObserverYavalathTest {
                 0,9,1,10,2
         };
         for (int x:actions){
-            soYav2P.advance(new Types.ACTIONS(x));
+            soYav2P.advance(new Types.ACTIONS(x), null);
         }
         assert soYav2P.getLoser() == PLAYER_ZERO;
     }
@@ -103,7 +103,7 @@ public class StateObserverYavalathTest {
                 0,9,1,10,3,11
         };
         for (int x:actions){
-            soYav2P.advance(new Types.ACTIONS(x));
+            soYav2P.advance(new Types.ACTIONS(x), null);
         }
         assert soYav2P.getLoser() == PLAYER_ONE;
     }
@@ -116,12 +116,12 @@ public class StateObserverYavalathTest {
                 0,9,18,1,10,19,2
         };
         for (int x : actions){
-            soYav3P.advance(new Types.ACTIONS(x));
+            soYav3P.advance(new Types.ACTIONS(x), null);
         }
         assert soYav3P.getLoser() == PLAYER_ZERO;
 
         //Player 2 also loses, game should be over
-        soYav3P.advance(new Types.ACTIONS(11));
+        soYav3P.advance(new Types.ACTIONS(11), null);
         assert soYav3P.isGameOver();
         assert soYav3P.getWinner() == PLAYER_TWO;
 
@@ -133,8 +133,8 @@ public class StateObserverYavalathTest {
     @Test
     public void swapRule(){
         initSO2P();
-        soYav2P.advance(new Types.ACTIONS(1));
-        soYav2P.advance(new Types.ACTIONS(1));
+        soYav2P.advance(new Types.ACTIONS(1), null);
+        soYav2P.advance(new Types.ACTIONS(1), null);
 
         assert soYav2P.swapRuleUsed();
         assert soYav2P.getMoveCounter() == 2;
@@ -154,7 +154,7 @@ public class StateObserverYavalathTest {
                 56,57,58,59,60,61,62,66,67,68,69,70,71,76,77,78,79,80,47
         };
         for (int x:actions) {
-            soYav3P.advance(new Types.ACTIONS(x));
+            soYav3P.advance(new Types.ACTIONS(x), null);
         }
 
         assert soYav3P.getLoser() == PLAYER_ZERO;
@@ -173,11 +173,11 @@ public class StateObserverYavalathTest {
                 0,9,18,1,10,19,3,12
         };
         for(int x : actions){
-            soYav3P.advance(new Types.ACTIONS(x));
+            soYav3P.advance(new Types.ACTIONS(x), null);
         }
         assert soYav3P.getNumAvailableActions() == 1;
 
-        soYav3P.advance(new Types.ACTIONS(2));
+        soYav3P.advance(new Types.ACTIONS(2), null);
 
         assert soYav3P.getNumAvailableActions() == 1;
     }

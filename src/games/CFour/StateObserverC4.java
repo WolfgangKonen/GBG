@@ -3,6 +3,7 @@ package games.CFour;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Random;
 
 import games.ObserverBase;
 import games.StateObservation;
@@ -13,7 +14,7 @@ import tools.Types.ACTIONS;
  * Class StateObserverC4 observes the current state of the game, it has utility functions for
  * <ul>
  * <li> returning the available actions ({@link #getAvailableActions()}), 
- * <li> advancing the state of the game with a specific action ({@link #advance(Types.ACTIONS)}),
+ * <li> advancing the state of the game with a specific action ({@link StateObservation#advance(ACTIONS, Random)}),
  * <li> copying the current state
  * <li> signaling end, score and winner of the game
  * </ul>
@@ -54,7 +55,7 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
 
 	/**
 	 * Note that setting a state by this constructor may fail to detect that this state is already a win for either
-	 * player. Wins are only detected if they are reached via {@link #advance(ACTIONS)}.
+	 * player. Wins are only detected if they are reached via {@link StateObservation#advance(ACTIONS, Random)}.
 	 *
 	 * @param board array [COLCOUNT][ROWCOUNT], i.e. [7][6]
 	 */
@@ -204,9 +205,10 @@ public class StateObserverC4 extends ObserverBase implements StateObservation {
 
 	/**
 	 * Advance the current state with 'action' to a new state
-	 * @param action the action to take
-	 */
-	public void advance(ACTIONS action) {
+     * @param action the action to take
+     * @param cmpRand
+     */
+	public void advance(ACTIONS action, Random cmpRand) {
 		super.advanceBase(action);		//		includes addToLastMoves(action)
 		int iAction = action.toInt();
 

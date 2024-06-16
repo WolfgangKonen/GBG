@@ -164,7 +164,7 @@ public class GameBoard2048Gui extends JFrame {
                     new ActionHandler(i)  // constructor copies (i) to member 'move'
                     {
                         public void actionPerformed(ActionEvent e) {
-                            Arena.Task aTaskState = m_gb.m_Arena.taskState;
+                            Arena.Task aTaskState = m_gb.getArena().taskState;
                             if (aTaskState == Arena.Task.PLAY) {
                                 m_gb.HGameMove(move);        // i.e. make human move (i), if buttons[i] is clicked
                             }
@@ -372,7 +372,7 @@ public class GameBoard2048Gui extends JFrame {
 
     public void clearBoard(boolean boardClear, boolean vClear) {
         if (boardClear) {
-        	m_gb.m_so = new StateObserver2048();
+        	//m_gb.m_so = new StateObserver2048();      // DON'T! WK/05/2023
             for (int pos = 0; pos < ConfigGame.ROWS * ConfigGame.COLUMNS; pos++) {
                 updateBoardLabel(pos);
             }

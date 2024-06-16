@@ -1,9 +1,7 @@
 package games.SimpleGame;
 
 import games.ObsNondetBase;
-import games.ObserverBase;
 import games.StateObsNondeterministic;
-import games.StateObservation;
 import tools.Types.ACTIONS;
 
 import java.io.Serial;
@@ -14,7 +12,7 @@ import java.util.Random;
  * This class observes the current state of the game, it has utility functions for
  * <ul>
  * <li> returning the available actions ({@link #getAvailableActions()}), 
- * <li> advancing the state of the game with a specific action ({@link #advance(ACTIONS)}),
+ * <li> advancing the state of the game with a specific action ({@link games.StateObservation#advance(ACTIONS, Random)}),
  * <li> copying the current state
  * <li> signaling end, score and winner of the game
  * </ul>
@@ -117,11 +115,12 @@ public class StateObserverSG extends ObsNondetBase implements StateObsNondetermi
 
 	/**
 	 * Advance the current state with 'action' to a new state
-	 * @param action	0: HIT or 1: STAND
+	 * @param action    0: HIT or 1: STAND
+	 * @param cmpRand
 	 */
-	public void advance(ACTIONS action) {
+	public void advance(ACTIONS action, Random cmpRand) {
 		m_action = action;
-		advanceNondeterministic();
+		advanceNondeterministic(null);
 	}
 
 	@Override
@@ -130,7 +129,7 @@ public class StateObserverSG extends ObsNondetBase implements StateObsNondetermi
 	}
 
 	@Override
-	public ACTIONS advanceNondeterministic() {
+	public ACTIONS advanceNondeterministic(Random cmpRand) {
 		if (m_action.toInt()==0) {    // HIT
 			int iCard = (int)(rand.nextDouble() * UPPER)+1;		// a random number from 1,2,...,UPPER
 			m_sum += iCard;
@@ -142,8 +141,8 @@ public class StateObserverSG extends ObsNondetBase implements StateObsNondetermi
 	}
 
 	@Override
-	public ACTIONS advanceNondeterministic(ACTIONS randAction) {
-		advanceNondeterministic();
+	public ACTIONS advanceNondetSpecific(ACTIONS randAction) {
+		advanceNondeterministic(null);
 		return randAction;
 	}
 

@@ -191,7 +191,7 @@ public class TileGui extends JPanel{
             @Override
             public void mouseClicked(MouseEvent e) {
                 GameBoardEWN gb = m_bg.getM_gb();
-                Arena.Task aTaskState = gb.m_Arena.taskState;
+                Arena.Task aTaskState = gb.getArena().taskState;
                 int index = ((TileGui) e.getSource()).getToken().getIndex();
                 if(aTaskState == Arena.Task.PLAY) {
                     gb.hGameMove(index); // Human play

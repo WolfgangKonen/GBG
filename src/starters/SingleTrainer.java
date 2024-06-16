@@ -38,7 +38,7 @@ public class SingleTrainer {
         try {
             String sAgent = xab.getSelectedAgent(n);
             pa = arenaTrain.m_xfun.constructAgent(n, sAgent, xab);
-            pa = arenaTrain.m_xfun.wrapAgentTrain(pa, pa.getParOther(), pa.getParWrapper(), null, gb.getDefaultStartState());
+            pa = arenaTrain.m_xfun.wrapAgentTrain(pa, pa.getParOther(), pa.getParWrapper(), null, gb.getDefaultStartState(null));
             if (pa == null) throw new RuntimeException("Could not construct AgentX = " + sAgent);
         } catch (RuntimeException e) {
             e.printStackTrace(System.err);
@@ -66,7 +66,7 @@ public class SingleTrainer {
         gb.initialize();
         while (pa.getGameNum() < pa.getMaxGameNum()) {
             StateObservation so = (pa.getParOther().getChooseStart01())
-                    ? gb.chooseStartState(pa) : gb.getDefaultStartState();
+                    ? gb.chooseStartState(pa) : gb.getDefaultStartState(null);
 
             pa.trainAgent(so);
 

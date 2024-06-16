@@ -5,7 +5,6 @@ import game.Game;
 import games.Arena;
 import games.LogManager;
 import games.Nim.StateObserverNim;
-import ludiiInterface.games.Nim.SystemConversionNim;
 import ludiiInterface.general.GBGAsLudiiAI;
 import other.AI;
 import other.GameLoader;
@@ -13,17 +12,10 @@ import other.context.Context;
 import other.model.Model;
 import other.move.Move;
 import other.trial.Trial;
-import search.mcts.MCTS;
-import search.mcts.backpropagation.AlphaGoBackprop;
-import search.mcts.finalmoveselection.RobustChild;
-import search.mcts.playout.RandomPlayout;
-import search.mcts.selection.UCB1;
-import search.mcts.selection.UCB1Tuned;
 import starters.GBGBatch;
 import starters.SetupGBG;
 import tools.Types;
 import tools.Utils;
-import utils.AIFactory;
 import utils.LudiiAI;
 
 import java.io.FileOutputStream;
@@ -174,7 +166,7 @@ public class NimMatches extends GBGBatch {
 
             // applies move-turned-to-action to StateObserverNim and then adds LogEntry
             Types.ACTIONS action = Types.ACTIONS.fromInt(gbgActInt);
-            stateObserverNim.advance(action);
+            stateObserverNim.advance(action, null);
             logManager.addLogEntry(action,stateObserverNim,sessionID);
 
             // if move is a pass move, set next move as temp and reset the counter

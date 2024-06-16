@@ -75,7 +75,7 @@ public class Experiment {
         do {
             so = new StateObserverKuhnPoker();
         }while(so.getHoleCards(0)[0].getRank()!=9);
-        Types.ACTIONS actBest = mctsex.getNextAction2(so.partialState(), false, true);
+        Types.ACTIONS actBest = mctsex.getNextAction2(so.partialState(), false, false, true);
         System.out.println(actBest.toInt());
     }
 
@@ -84,7 +84,7 @@ public class Experiment {
         do {
             so = new StateObserverKuhnPoker();
         }while(so.getHoleCards(1)[0].getRank()!=10);
-        so.advance(Types.ACTIONS.fromInt(2));
+        so.advance(Types.ACTIONS.fromInt(2), null);
 
         ParMC mcpar = new ParMC();
         mcpar.setIterations(1000);
@@ -92,7 +92,7 @@ public class Experiment {
 
         MCAgentN mc = new MCAgentN(mcpar);
 
-        Types.ACTIONS act = mc.getNextAction2(so.partialState(), false, true);
+        Types.ACTIONS act = mc.getNextAction2(so.partialState(), false, false, true);
 
     }
 
@@ -105,7 +105,7 @@ public class Experiment {
             if(oPar.getChooseStart01()){
                 so = gb.chooseStartState();
             }else{
-                so = gb.getDefaultStartState();
+                so = gb.getDefaultStartState(null);
             }
             pa.trainAgent(so);
         }
@@ -200,7 +200,7 @@ public class Experiment {
         int[][] nTuples = ntupfac.makeNTupleSet(ntPar, xnf);
         // int numOutputs =
         // m_xab.m_game.gb.getDefaultStartState().getAllAvailableActions().size();
-        ArrayList<Types.ACTIONS> allAvailActions = gb.getDefaultStartState().getAllAvailableActions();
+        ArrayList<Types.ACTIONS> allAvailActions = gb.getDefaultStartState(null).getAllAvailableActions();
         PlayAgent pa = new SarsaAgt(agentName, tdPar, ntPar,
                 oPar, nTuples, xnf, allAvailActions, maxGameNum);
 
@@ -230,7 +230,7 @@ public class Experiment {
 
         NTuple4Factory ntupfac = new NTuple4Factory();
         int[][] nTuples = ntupfac.makeNTupleSet(ntPar, xnf);
-        ArrayList<Types.ACTIONS> allAvailActions = gb.getDefaultStartState().getAllAvailableActions();
+        ArrayList<Types.ACTIONS> allAvailActions = gb.getDefaultStartState(null).getAllAvailableActions();
         PlayAgent pa = new Sarsa4Agt(agentName, tdPar, ntPar,
                 oPar, nTuples, xnf, allAvailActions, maxGameNum);
 
@@ -261,7 +261,7 @@ public class Experiment {
 
         NTuple4Factory ntupfac = new NTuple4Factory();
         int[][] nTuples = ntupfac.makeNTupleSet(ntPar, xnf);
-        ArrayList<Types.ACTIONS> allAvailActions = gb.getDefaultStartState().getAllAvailableActions();
+        ArrayList<Types.ACTIONS> allAvailActions = gb.getDefaultStartState(null).getAllAvailableActions();
         PlayAgent pa = new QLearn4Agt(agentName, tdPar, ntPar,
                 oPar, nTuples, xnf, allAvailActions, maxGameNum);
 
@@ -505,9 +505,9 @@ public class Experiment {
 
                 while (true) {
                     long startTNano = System.nanoTime();
-                    actBest = qaVector.pavec[player].getNextAction2(so.partialState(), false, true);
+                    actBest = qaVector.pavec[player].getNextAction2(so.partialState(), false, false, true);
 
-                    so.advance(actBest);
+                    so.advance(actBest, null);
                     if (so.isRoundOver()) {
                         sc = so.getGameScoreTuple();
                         if (!StateObserverKuhnPoker.PLAY_ONE_ROUND_ONLY) {
@@ -800,9 +800,9 @@ public class Experiment {
 
                 while (true) {
                     long startTNano = System.nanoTime();
-                    actBest = qaVector.pavec[player].getNextAction2(so.partialState(), false, true);
+                    actBest = qaVector.pavec[player].getNextAction2(so.partialState(), false, false, true);
 
-                    so.advance(actBest);
+                    so.advance(actBest, null);
                     if (so.isGameOver()) {
                         sc = so.getGameScoreTuple();
                         // calculate "reward"
@@ -1391,8 +1391,8 @@ public class Experiment {
 
             while (true) {
                 long startTNano = System.nanoTime();
-                actBest = paVector.pavec[player].getNextAction2(so.partialState(), false, nextMoveSilent);
-                so.advance(actBest);
+                actBest = paVector.pavec[player].getNextAction2(so.partialState(), false, false, nextMoveSilent);
+                so.advance(actBest, null);
 
                 if (so.isGameOver()) {
                     sc = so.getGameScoreTuple();
@@ -1498,8 +1498,8 @@ public class Experiment {
 
             while (true) {
                 long startTNano = System.nanoTime();
-                actBest = paVector.pavec[player].getNextAction2(so.partialState(), false, nextMoveSilent);
-                so.advance(actBest);
+                actBest = paVector.pavec[player].getNextAction2(so.partialState(), false, false, nextMoveSilent);
+                so.advance(actBest, null);
 
                 if (so.isGameOver()) {
                     sc = so.getGameScoreTuple();
@@ -1573,8 +1573,8 @@ public class Experiment {
         so = startSO.copy();
 
         while (true) {
-            actBest = paVector.pavec[player].getNextAction2(so.partialState(), false, true);
-            so.advance(actBest);
+            actBest = paVector.pavec[player].getNextAction2(so.partialState(), false, false, true);
+            so.advance(actBest, null);
 
             if (so.isGameOver()) {
                 sc = so.getGameScoreTuple();

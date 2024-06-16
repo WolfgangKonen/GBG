@@ -2,10 +2,14 @@ package games.BlackJack;
 
 import controllers.PlayAgent;
 import games.Arena;
+import games.EWN.StateObserverEWN;
 import games.GameBoard;
+import games.GameBoardBase;
 import games.StateObservation;
 import games.TicTacToe.GameBoardTTTGui;
 import tools.Types;
+
+import java.util.Random;
 
 /**
  * This class implements the GameBoard interface for BlackJack.
@@ -18,7 +22,7 @@ import tools.Types;
  * action handlers
  *
  */
-public class GameBoardBlackJack implements GameBoard {
+public class GameBoardBlackJack extends GameBoardBase implements GameBoard {
 
     protected StateObserverBlackJack m_so;
     protected Arena m_Arena; // a reference to the Arena object, needed to
@@ -29,6 +33,7 @@ public class GameBoardBlackJack implements GameBoard {
     private boolean arenaActReq = false;
 
     public GameBoardBlackJack(Arena bjArena) {
+        super(bjArena);
         initGameBoard(bjArena);
     }
 
@@ -54,7 +59,7 @@ public class GameBoardBlackJack implements GameBoard {
     public void updateParams() {}
 
     @Override
-    public void clearBoard(boolean boardClear, boolean vClear) {
+    public void clearBoard(boolean boardClear, boolean vClear, Random cmpRand) {
         if (boardClear) {
             m_so = new StateObserverBlackJack();
         }
@@ -71,6 +76,16 @@ public class GameBoardBlackJack implements GameBoard {
 
     }
 
+    @Override
+    public void setStateObs(StateObservation so) {
+        StateObserverBlackJack soT;
+        if(so!=null){
+            assert( so instanceof StateObserverBlackJack):"StateObservation 'so' is not an instance of StateObserverBlackJack";
+            soT = (StateObserverBlackJack) so;
+            m_so = soT;
+        }
+    }
+
     /**
      * Update the play board and the associated values (labels).
      *
@@ -81,6 +96,7 @@ public class GameBoardBlackJack implements GameBoard {
      */
     @Override
     public void updateBoard(StateObservation so, boolean withReset, boolean showValueOnGameboard) {
+        setStateObs(so);        // asserts that so is StateObserverBlackJack
         StateObserverBlackJack soT = (StateObserverBlackJack) so;
         
 
@@ -160,10 +176,11 @@ public class GameBoardBlackJack implements GameBoard {
 
     /**
      * @return the 'empty-board' start state
+     * @param cmpRand
      */
     @Override
-    public StateObservation getDefaultStartState() {
-        clearBoard(true, true);
+    public StateObservation getDefaultStartState(Random cmpRand) {
+        clearBoard(true, true, null);
         return m_so;
     }
 
@@ -173,7 +190,7 @@ public class GameBoardBlackJack implements GameBoard {
      */
     @Override
     public StateObservation chooseStartState(PlayAgent pa) {
-        return getDefaultStartState();
+        return getDefaultStartState(null);
     }
 
     /**
@@ -182,20 +199,20 @@ public class GameBoardBlackJack implements GameBoard {
      */
     @Override
     public StateObservation chooseStartState() {
-        return getDefaultStartState();
+        return getDefaultStartState(null);
     }
 
 
     public void humanMove(int a) {
         Types.ACTIONS act = Types.ACTIONS.fromInt(a);
-        m_so.advance(act);
+        m_so.advance(act, null);
         arenaActReq = true;
     }
 
     public void inspectMove(int a) {
         Types.ACTIONS act = Types.ACTIONS.fromInt(a);
         m_Arena.setStatusMessage("Inspecting the value function ...");
-        m_so.advance(act);
+        m_so.advance(act, null);
         arenaActReq = true;
     }
 }

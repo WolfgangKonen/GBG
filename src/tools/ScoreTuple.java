@@ -5,6 +5,7 @@ import java.text.DecimalFormat;
 
 import controllers.ExpectimaxNAgent;
 import controllers.MaxNAgent;
+import controllers.PlayAgent;
 import games.LogManager;
 import games.StateObservation;
 import games.Nim.BoutonAgent;
@@ -118,9 +119,10 @@ public class ScoreTuple implements Serializable {
 		return(cs);
 	}
 
-	public String printEpisodeWinner(int k) {
+	public String printEpisodeWinner(int k, StateObservation so) {
 		String sMsg;
 		String[] player2Names = {"X","O"};
+		DecimalFormat frm = new DecimalFormat("###000");
 		
 		int winner = this.argmax();
 		if (this.max()==0.0) winner = -2;	// tie indicator
@@ -129,15 +131,12 @@ public class ScoreTuple implements Serializable {
 		case (-2):
 			sMsg = k+": Tie";
 			break;
-		default: 
-			switch(scTup.length) {
-			case (2):
-				sMsg = k+": "+player2Names[winner]+" wins";
-				break;
-			default: 
-				sMsg = k+": P"+winner+" wins";
-				break;
-			}
+		default:
+			sMsg = switch (scTup.length) {
+				case (1) -> k + ": score = " + frm.format(so.getGameScoreRaw(0));
+				case (2) -> k + ": " + player2Names[winner] + " wins";
+				default -> k + ": P" + winner + " wins";
+			};
 		} // switch(winner)
 		
 		return sMsg;

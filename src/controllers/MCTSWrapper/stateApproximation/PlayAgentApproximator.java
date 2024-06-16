@@ -1,6 +1,5 @@
 package controllers.MCTSWrapper.stateApproximation;
 
-import controllers.MCTSWrapper.ConfigWrapper;
 import controllers.MCTSWrapper.utils.Tuple;
 import controllers.PlayAgent;
 import games.StateObservation;
@@ -26,7 +25,7 @@ public final class PlayAgentApproximator implements Approximator, Serializable {
      */
     @Override
     public Tuple<Double, double[]> predict(final StateObservation stateObservation) {
-        final var actions_vt = agent.getNextAction2(stateObservation, false, true);
+        final var actions_vt = agent.getNextAction2(stateObservation, false, false, true);
         return new Tuple<>(
             actions_vt.getVBest(),
             moveProbabilitiesForVTable(actions_vt.getVTable(), stateObservation)

@@ -68,7 +68,7 @@ public class EvaluatorNim3P extends Evaluator {
 		PlayAgtVector paVector;
 		m_PlayAgent = playAgent;
 		if (m_mode==1 || m_mode==2) {
-			StateObserverNim so = (StateObserverNim) m_gb.getDefaultStartState();
+			StateObserverNim so = (StateObserverNim) m_gb.getDefaultStartState(null);
 			int heapsum = so.getHeapSum();
 			int depth = maxNAgent.getDepth();
 			if (depth<heapsum)
@@ -122,9 +122,9 @@ public class EvaluatorNim3P extends Evaluator {
 	 * @return			the evaluation result
 	 */
  	private EvalResult evaluateAgent0(PlayAgent pa, GameBoard gb, int competeNum, double thresh) {
- 		StateObservation so = gb.getDefaultStartState();
+ 		StateObservation so = gb.getDefaultStartState(null);
 //		lastResult = XArenaFuncs.competeBoth(pa, random_agent, so, 100, 0, gb);
-		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pa,randomAgent,randomAgent2), so, competeNum, 0, null);
+		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pa,randomAgent,randomAgent2), so, competeNum, 0, null, null, false);
 		lastResult = sc.scTup[0];
 		m_msg = pa.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>0) System.out.println(m_msg);
@@ -138,8 +138,8 @@ public class EvaluatorNim3P extends Evaluator {
 	 * @return			the evaluation result
 	 */
  	private EvalResult evaluateAgent1(PlayAgtVector paVector, GameBoard gb, int competeNum, double thresh) {
- 		StateObservation so = gb.getDefaultStartState();
-		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(paVector, so, competeNum, 0, null);
+ 		StateObservation so = gb.getDefaultStartState(null);
+		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(paVector, so, competeNum, 0, null, null, false);
 		lastResult = sc.scTup[0];
 		m_msg = paVector.pavec[0].getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>0) System.out.println(m_msg);
@@ -165,7 +165,7 @@ public class EvaluatorNim3P extends Evaluator {
 			// Choose randomly one of the possible 0-1-ply start states. Repeat 
 			// this numK times to sample a representative subset of possible configurations.
 			StateObservation startSO = gb.chooseStartState();
-			ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(paVector, startSO, competeNum, 0, null);
+			ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(paVector, startSO, competeNum, 0, null, null, false);
     		success = sc.scTup[0];
     		averageSuccess += success;
 		}

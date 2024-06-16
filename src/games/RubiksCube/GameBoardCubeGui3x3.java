@@ -58,7 +58,7 @@ public class GameBoardCubeGui3x3 extends GameBoardCubeGui {
 
         // ensure that ButtonBoard is already visible in the beginning,
         // if updateBoard() is configured in this way:
-        this.updateBoard((StateObserverCube)m_gb.getDefaultStartState(), true, true);
+        this.updateBoard((StateObserverCube)m_gb.getDefaultStartState(null), true, true);
     }
 
     protected JPanel InitBoard()

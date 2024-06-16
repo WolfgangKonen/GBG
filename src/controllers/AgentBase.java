@@ -82,7 +82,7 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	 * implement getNextAction2(), as required by the interface {@link PlayAgent} as
 	 * well. 
 	 */
-	 abstract public Types.ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean silent);
+	 abstract public Types.ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean deterministic, boolean silent);
 
 //	/**
 //	 * On the long run, {@link PlayAgent#getScore(StateObservation)} should become deprecated (in favor of
@@ -232,8 +232,8 @@ abstract public class AgentBase implements PlayAgent, Serializable {
 	        m_numTrnMoves++;		// number of train moves
 			moveCounter++;
 	        
-			a_t = acting_pa.getNextAction2(s_t.partialState(), true, true);	// choose action a_t (agent-specific behavior)
-			s_t.advance(a_t);		// advance the state (game-specific behavior)
+			a_t = acting_pa.getNextAction2(s_t.partialState(), true, false, true);	// choose action a_t (agent-specific behavior)
+			s_t.advance(a_t, null);		// advance the state (game-specific behavior)
 
 			if(s_t.isRoundOver()&&!s_t.isGameOver()&&s_t.isRoundBasedGame())
 				s_t.initRound();

@@ -3,30 +3,31 @@ package games.KuhnPoker;
 import controllers.PlayAgent;
 import games.Arena;
 import games.GameBoard;
+import games.GameBoardBase;
+import games.Hex.StateObserverHex;
 import games.StateObservation;
 import tools.Types;
 
 import java.util.ArrayList;
 import java.util.Random;
 
-public class GameBoardKuhnPoker implements GameBoard {
+public class GameBoardKuhnPoker extends GameBoardBase implements GameBoard {
 
-	protected Arena  m_Arena;		// a reference to the Arena object, needed to
-									// infer the current taskState
 	protected Random rand;
 	//private transient GameBoardPokerGui m_gameGui = null;
 	private transient GameBoardKuhnPokerGui m_gameGui = null;
 
 	protected StateObserverKuhnPoker m_so;
-	private boolean arenaActReq=false;
 
 	private boolean waitAtEndOfRound = true;
 
 	public GameBoardKuhnPoker(Arena pokerGame) {
+		super(pokerGame);
 		initGameBoard(pokerGame);
 	}
 
 	public GameBoardKuhnPoker() {
+		super(null);
 		initGameBoard(null);
 	}
 	
@@ -35,10 +36,9 @@ public class GameBoardKuhnPoker implements GameBoard {
 
     private void initGameBoard(Arena arGame) 
 	{
-		m_Arena		= arGame;
 		m_so		= new StateObserverKuhnPoker();
         rand 		= new Random(System.currentTimeMillis());	
-        if (m_Arena!=null&&m_Arena.hasGUI() && m_gameGui==null) {
+        if (getArena()!=null&& getArena().hasGUI() && m_gameGui==null) {
 			m_gameGui = new GameBoardKuhnPokerGui(this);
         }
 
@@ -51,12 +51,24 @@ public class GameBoardKuhnPoker implements GameBoard {
 	public void updateParams() {}
 
 	@Override
-	public void clearBoard(boolean boardClear, boolean vClear) {
+	public void clearBoard(boolean boardClear, boolean vClear, Random cmpRand) {
 		if (boardClear) {
 			m_so = new StateObserverKuhnPoker();
-			if (m_Arena!=null&&m_Arena.hasGUI() && m_gameGui!=null) {
+			if (getArena()!=null&&getArena().hasGUI() && m_gameGui!=null) {
 				m_gameGui.resetLog();
 			}
+		}
+	}
+
+	@Override
+	public void setStateObs(StateObservation so) {
+		StateObserverKuhnPoker soT;
+
+		if (so != null) {
+			assert (so instanceof StateObserverKuhnPoker)
+					: "StateObservation 'so' is not an instance of StateObserverHex";
+			soT = (StateObserverKuhnPoker) so;
+			m_so = soT; //.copy();
 		}
 	}
 
@@ -72,39 +84,20 @@ public class GameBoardKuhnPoker implements GameBoard {
 	public void updateBoard(StateObservation so, 
 							boolean withReset, boolean showValueOnGameboard) {
 		if(so!=null) {
+			setStateObs(so);		// asserts that so is StateObserverKuhnPoker
 			StateObserverKuhnPoker soT = (StateObserverKuhnPoker) so;
-			this.m_so = soT;
 			if (m_gameGui != null)
 				m_gameGui.updateBoard(soT, withReset, showValueOnGameboard);
 
 		}
 	}
 
-	/**
-	 * @return  true: if an action is requested from Arena or ArenaTrain
-	 * 			false: no action requested from Arena, next action has to come 
-	 * 			from GameBoard (e.g. user input / human move) 
-	 */
-	@Override
-	public boolean isActionReq() {
-		return arenaActReq;
-	}
-
-	/**
-	 * @param	actReq true : GameBoard requests an action from Arena 
-	 * 			(see {@link #isActionReq()})
-	 */
-	@Override
-	public void setActionReq(boolean actReq) {
-		arenaActReq=actReq;
-	}
-
 
 	protected void inspectMove(int x){
 		Types.ACTIONS act = Types.ACTIONS.fromInt(x);
 		assert m_so.isLegalAction(act) : "Desired action is not legal";
-		m_so.advance(act);
-		arenaActReq = true;
+		m_so.advance(act, null);
+		this.setActionReq(true);
 	}
 
 	// Human Game Move
@@ -112,15 +105,15 @@ public class GameBoardKuhnPoker implements GameBoard {
 	{
 		Types.ACTIONS act = Types.ACTIONS.fromInt(x);
 		assert m_so.isLegalAction(act) : "Desired action is not legal";
-		//m_Arena.roundOverWait = true;
-		m_so.advance(act);
-		//m_Arena.roundOverWait = m_so.isRoundOver();
+		//getArena().roundOverWait = true;
+		m_so.advance(act, null);
+		//getArena().roundOverWait = m_so.isRoundOver();
 
-		if(m_Arena!=null)
-			(m_Arena.getLogManager()).addLogEntry(act, m_so, m_Arena.getLogSessionID());
+		if(getArena()!=null)
+			(getArena().getLogManager()).addLogEntry(act, m_so, getArena().getLogSessionID());
 
-		//arenaActReq = !m_so.isRoundOver();
-		arenaActReq = true;
+		//	this.setActionReq(!m_so.isRoundOver());
+		this.setActionReq(true);
 		//if(m_so.isRoundOver()){
 		//	updateBoard(m_so,false,false);
 		//}
@@ -133,10 +126,11 @@ public class GameBoardKuhnPoker implements GameBoard {
 
 	/**
 	 * @return the 'empty-board' start state
+     * @param cmpRand
 	 */
 	@Override
-	public StateObservation getDefaultStartState() {
-		clearBoard(true, true);
+	public StateObservation getDefaultStartState(Random cmpRand) {
+		clearBoard(true, true, null);
 		return m_so;
 	}
 
@@ -147,13 +141,13 @@ public class GameBoardKuhnPoker implements GameBoard {
 	 */
 	@Override
 	public StateObservation chooseStartState() {
-		getDefaultStartState();			// m_so is in default start state 
+		getDefaultStartState(null);			// m_so is in default start state
 		if (rand.nextDouble()>0.5) {
 			// choose randomly one of the possible actions in default 
 			// start state and advance m_so by one ply
 			ArrayList<Types.ACTIONS> acts = m_so.getAvailableActions();
 			int i = rand.nextInt(acts.size());
-			m_so.advance(acts.get(i));
+			m_so.advance(acts.get(i), null);
 		}
 		return m_so;
 	}
@@ -168,11 +162,6 @@ public class GameBoardKuhnPoker implements GameBoard {
 		return null;
 	}
 	
-    @Override
-    public Arena getArena() {
-        return m_Arena;
-    }
-    
 	@Override
 	public void enableInteraction(boolean enable) {
 		if (m_gameGui!=null)

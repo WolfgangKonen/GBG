@@ -51,8 +51,8 @@ public class StateObserverEWNTest {
     public void testMirrorState(){
         XNTupleFuncsEWN xnf = new XNTupleFuncsEWN();
         initSO2P(3);
-        soEWN2P.advance(new Types.ACTIONS(102));    // two advances to generate a state which is
-        soEWN2P.advance((new Types.ACTIONS(704)));  // not mirror-symmetric
+        soEWN2P.advance(new Types.ACTIONS(102), null);    // two advances to generate a state which is
+        soEWN2P.advance((new Types.ACTIONS(704)), null);  // not mirror-symmetric
 
         BoardVector borig = xnf.getBoardVector(soEWN2P);
         BoardVector[] bvecs = xnf.symmetryVectors(borig, 2);

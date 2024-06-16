@@ -173,7 +173,7 @@ public class MCTSETreeNode {
         	dprob = 1.0;
 		} else {
         	// the normal case: the deterministic advance results in a next-action-NOT-deterministic state
-			Types.ACTIONS randAct = childSo.advanceNondeterministic();
+			Types.ACTIONS randAct = childSo.advanceNondeterministic(null);
 			dprob = childSo.getProbability(randAct);	// the probability that environment selects this random action
 		}
 

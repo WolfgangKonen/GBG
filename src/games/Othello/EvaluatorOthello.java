@@ -78,7 +78,7 @@ public class EvaluatorOthello extends Evaluator {
 	        List<ACTIONS> actions = s.getAvailableActions();
 	        for (ACTIONS a : actions) {
 	        	StateObserverOthello s_copy = s.copy();
-	        	s_copy.advance(a);
+	        	s_copy.advance(a, null);
 	        	if (k==NPLY_DS-1) diffStartList.add(s_copy);
 	        	addAllNPlyStates(diffStartList,s_copy,k+1);
 	        }
@@ -96,7 +96,7 @@ public class EvaluatorOthello extends Evaluator {
         // when evalAgent is called for the first time, construct diffStartList once for all 
         // EvaluatorOthello objects (will not change during runtime)
         if (diffStartList==null) {
-        	StateObserverOthello so = (StateObserverOthello) m_gb.getDefaultStartState();
+        	StateObserverOthello so = (StateObserverOthello) m_gb.getDefaultStartState(null);
         	diffStartList = new  ArrayList<>();
         	diffStartList = addAllNPlyStates(diffStartList,so,0);
         }
@@ -139,7 +139,7 @@ public class EvaluatorOthello extends Evaluator {
 	 */
 	private EvalResult evaluateAgainstOpponent(PlayAgent playAgent, PlayAgent opponent, boolean diffStarts,
 										   int numEpisodes, double thresh) {
-		StateObservation so = m_gb.getDefaultStartState();
+		StateObservation so = m_gb.getDefaultStartState(null);
 		int N = so.getNumPlayers();
 		ScoreTuple scMean = new ScoreTuple(N);
 		if (diffStarts) 	// start from all start states in diffStartList
@@ -149,7 +149,7 @@ public class EvaluatorOthello extends Evaluator {
 			ScoreTuple sc;
 			for (int c=0; c<numEpisodes; c++) {
 				for (StateObservation sd : diffStartList) {
-					sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent), sd, 1, 0, null);
+					sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent), sd, 1, 0, null, null, false);
 					scMean.combine(sc, ScoreTuple.CombineOP.AVG, 0, sWeight);
 					count++;
 				}
@@ -158,7 +158,7 @@ public class EvaluatorOthello extends Evaluator {
 		} 
 		else 		// always start from default start state
 		{
-			scMean = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent), so, numEpisodes, 0, null);
+			scMean = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(playAgent, opponent), so, numEpisodes, 0, null, null, false);
 		}
 		lastResult = scMean.scTup[0];
 		m_msg = playAgent.getName()+": "+getPrintString() + lastResult; 

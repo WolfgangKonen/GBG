@@ -6,8 +6,6 @@ import games.Othello.ArenaOthello;
 import games.StateObservation;
 import org.junit.Test;
 
-import java.io.IOException;
-
 /**
  *  Run tests to validate an Othello StateObservation. Perform the tests from {@link ValidateStateObsTest}
  *  that are generally admitted for any StateObservation in any game.
@@ -19,7 +17,7 @@ public class ValidateStateObsOthelloTest {
     private final static String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/Othello/";
     private final static String gbgAgentPath = strDir + "TCL3-100_7_250k-lam05_P4_nPly2-FAm.agt.zip";
     private static final Arena ar = new ArenaOthello("", false,true);
-    private static final StateObservation sob = ar.getGameBoard().getDefaultStartState();
+    private static final StateObservation sob = ar.getGameBoard().getDefaultStartState(null);
 
     //
     // choose an agent to validate - select one of the options in buildAgent for constructing pa:

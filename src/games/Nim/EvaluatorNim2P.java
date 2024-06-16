@@ -75,7 +75,7 @@ public class EvaluatorNim2P extends Evaluator {
 	public EvalResult evalAgent(PlayAgent playAgent) {
 		m_PlayAgent = playAgent;
 		if (m_mode==1 || m_mode==2) {
-			StateObserverNim so = (StateObserverNim) m_gb.getDefaultStartState();
+			StateObserverNim so = (StateObserverNim) m_gb.getDefaultStartState(null);
 			int heapsum = so.getHeapSum();
 			int depth = maxNAgent.getDepth();
 			if (depth<heapsum)
@@ -101,9 +101,9 @@ public class EvaluatorNim2P extends Evaluator {
  	 * @return		the evaluation result
 	 */
  	private EvalResult evaluateAgent0(PlayAgent pa, GameBoard gb, double thresh) {
- 		StateObservation so = gb.getDefaultStartState();
+ 		StateObservation so = gb.getDefaultStartState(null);
 //		lastResult = XArenaFuncs.competeBoth(pa, random_agent, so, 100, 0, gb);
-		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pa,random_agent), so, 100, 0, null);
+		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pa,random_agent), so, 100, 0, null, null, false);
 		lastResult = sc.scTup[0];
 		m_msg = pa.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>0) System.out.println(m_msg);
@@ -118,14 +118,14 @@ public class EvaluatorNim2P extends Evaluator {
 	 * @return			the evaluation result
 	 */
  	private EvalResult evaluateAgent1(PlayAgent pa, PlayAgent opponent, GameBoard gb, double thresh) {
- 		StateObservation so = gb.getDefaultStartState();
+ 		StateObservation so = gb.getDefaultStartState(null);
 		if (opponent == null) {
 			gb.getArena().showMessage("ERROR: no opponent","Load Error", JOptionPane.ERROR_MESSAGE);
 			lastResult = Double.NaN;
 			return new EvalResult(lastResult, false, m_msg, m_mode, thresh);
 		}
 //		lastResult = XArenaFuncs.competeBoth(pa, opponent, so, 1, 0, gb);
-		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pa,opponent), so, 10, 0, null);
+		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pa,opponent), so, 10, 0, null, null, false);
 		lastResult = sc.scTup[0];
 		m_msg = pa.getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>0) System.out.println(m_msg);
@@ -169,7 +169,7 @@ public class EvaluatorNim2P extends Evaluator {
 //											// resp. \in [-1,0], if opponent never looses.
 //											// +1 is best for pa, -1 worst for pa.
 //			lastResult += (resX+resO)/2.0;
-			ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pa,opponent), startSO, competeNum, 0, null);
+			ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(pa,opponent), startSO, competeNum, 0, null, null, false);
     		success = sc.scTup[0];
     		averageSuccess += success;
 		}

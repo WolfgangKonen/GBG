@@ -5,6 +5,7 @@ import java.util.Random;
 
 import controllers.PlayAgent;
 import games.GameBoard;
+import games.GameBoardBase;
 import games.StateObservation;
 import games.Arena;
 import tools.Types;
@@ -22,47 +23,49 @@ import tools.Types;
  * @author Wolfgang Konen, TH Koeln, 2016-2020
  *
  */
-public class GameBoardTTT implements GameBoard {
+public class GameBoardTTT extends GameBoardBase implements GameBoard {
 
-	protected Arena  m_Arena;		// a reference to the Arena object, needed to 
-									// infer the current taskState
+	// --- now in GameBoardBase
+//	protected Arena  m_Arena;		// a reference to the Arena object, needed to infer the current taskState
+//	private boolean arenaActReq=false;
+
 	protected Random rand;
 	private transient GameBoardTTTGui m_gameGui = null;
 
 	protected StateObserverTTT m_so;
-	private boolean arenaActReq=false;
-	
+
 	public GameBoardTTT(Arena ticGame) {
+		super(ticGame);			// sets m_Arena
 		initGameBoard(ticGame);
 	}
 	
-    @Override
-    public void initialize() {}
+//    @Override
+//    public void initialize() {}
 
     private void initGameBoard(Arena arGame) 
 	{
-		m_Arena		= arGame;
+		//m_Arena		= arGame;
 		m_so		= new StateObserverTTT();	// empty table
         rand 		= new Random(System.currentTimeMillis());	
-        if (m_Arena.hasGUI() && m_gameGui==null) {
+        if (getArena().hasGUI() && m_gameGui==null) {
         	m_gameGui = new GameBoardTTTGui(this);
         }
 
 	}
 
-	/**
-	 * update game-specific parameters from {@link Arena}'s param tabs
-	 */
-	@Override
-	public void updateParams() {}
+//	/**
+//	 * update game-specific parameters from {@link Arena}'s param tabs
+//	 */
+//	@Override
+//	public void updateParams() {}
 
 	@Override
-	public void clearBoard(boolean boardClear, boolean vClear) {
+	public void clearBoard(boolean boardClear, boolean vClear, Random cmpRand) {
 		if (boardClear) {
 			m_so = new StateObserverTTT();			// empty Table
 		}
 							// considerable speed-up during training (!)
-        if (m_gameGui!=null && m_Arena.taskState!=Arena.Task.TRAIN)
+        if (m_gameGui!=null && getArena().taskState!=Arena.Task.TRAIN)
 			m_gameGui.clearBoard(boardClear, vClear);
 	}
 
@@ -77,47 +80,53 @@ public class GameBoardTTT implements GameBoard {
 	@Override
 	public void updateBoard(StateObservation so, 
 							boolean withReset, boolean showValueOnGameboard) {
+		setStateObs(so);	// asserts that so is StateObserverTTT
+
+		if (m_gameGui!=null)
+			m_gameGui.updateBoard((StateObserverTTT) so, withReset, showValueOnGameboard);
+	}
+
+	public void setStateObs(StateObservation so) {
 		StateObserverTTT soT = null;
 		if (so!=null) {
-	        assert (so instanceof StateObserverTTT)
-			: "StateObservation 'so' is not an instance of StateObserverTTT";
-	        soT = (StateObserverTTT) so;
+			assert (so instanceof StateObserverTTT)
+					: "StateObservation 'so' is not an instance of StateObserverTTT";
+			soT = (StateObserverTTT) so;
 			m_so = soT;//.copy();
 		} // if(so!=null)
-		
-		if (m_gameGui!=null)
-			m_gameGui.updateBoard(soT, withReset, showValueOnGameboard);
 	}
 
-	/**
-	 * @return  true: if an action is requested from Arena or ArenaTrain
-	 * 			false: no action requested from Arena, next action has to come 
-	 * 			from GameBoard (e.g. user input / human move) 
-	 */
-	@Override
-	public boolean isActionReq() {
-		return arenaActReq;
-	}
-
-	/**
-	 * @param	actReq true : GameBoard requests an action from Arena 
-	 * 			(see {@link #isActionReq()})
-	 */
-	@Override
-	public void setActionReq(boolean actReq) {
-		arenaActReq=actReq;
-	}
+	// --- now in GameBoardBase ---
+//	/**
+//	 * @return  true: if an action is requested from Arena or ArenaTrain
+//	 * 			false: no action requested from Arena, next action has to come
+//	 * 			from GameBoard (e.g. user input / human move)
+//	 */
+//	@Override
+//	public boolean isActionReq() {
+//		return arenaActReq;
+//	}
+//
+//	/**
+//	 * @param	actReq true : GameBoard requests an action from Arena
+//	 * 			(see {@link #isActionReq()})
+//	 */
+//	@Override
+//	public void setActionReq(boolean actReq) {
+//		arenaActReq=actReq;
+//	}
 
 	protected void HGameMove(int x, int y)
 	{
 		int iAction = 3*x+y;
 		Types.ACTIONS act = Types.ACTIONS.fromInt(iAction);
 		assert m_so.isLegalAction(act) : "Desired action is not legal";
-		m_so.advance(act);			// perform action (optionally add random elements from game 
+		m_so.advance(act, null);			// perform action (optionally add random elements from game
 									// environment - not necessary in TicTacToe)
-		(m_Arena.getLogManager()).addLogEntry(act, m_so, m_Arena.getLogSessionID());
+		(getArena().getLogManager()).addLogEntry(act, m_so, getArena().getLogSessionID());
 //		updateBoard(null,false,false);
-		arenaActReq = true;			// ask Arena for next action
+		setActionReq(true);			// ask Arena for next action
+//		arenaActReq = true;
 	}
 	
 	protected void InspectMove(int x, int y)
@@ -126,15 +135,16 @@ public class GameBoardTTT implements GameBoard {
 		Types.ACTIONS act = Types.ACTIONS.fromInt(iAction);
 		if (!m_so.isLegalAction(act)) {
 			System.out.println("Desired action is not legal!");
-			m_Arena.setStatusMessage("Desired action is not legal");
+			getArena().setStatusMessage("Desired action is not legal");
 			return;
 		} else {
-			m_Arena.setStatusMessage("Inspecting the value function ...");
+			getArena().setStatusMessage("Inspecting the value function ...");
 		}
-		m_so.advance(act);			// perform action (optionally add random elements from game 
-									// environment - not necessary in TicTacToe)
+		m_so.advance(act, null);			// perform action (optionally add random elements from game
+													// environment - not necessary in TicTacToe)
 //		updateBoard(null,false,false);
-		arenaActReq = true;		
+		setActionReq(true);			// ask Arena for next action
+//		arenaActReq = true;
 	}
 	
 	public StateObservation getStateObs() {
@@ -143,10 +153,11 @@ public class GameBoardTTT implements GameBoard {
 
 	/**
 	 * @return the 'empty-board' start state
+     * @param cmpRand
 	 */
 	@Override
-	public StateObservation getDefaultStartState() {
-		clearBoard(true, true);
+	public StateObservation getDefaultStartState(Random cmpRand) {
+		clearBoard(true, true, null);
 		return m_so;
 	}
 
@@ -157,13 +168,13 @@ public class GameBoardTTT implements GameBoard {
 	 */
 	@Override
 	public StateObservation chooseStartState() {
-		getDefaultStartState();			// m_so is in default start state 
+		getDefaultStartState(null);			// m_so is in default start state
 		if (rand.nextDouble()>0.5) {
 			// choose randomly one of the possible actions in default 
 			// start state and advance m_so by one ply
 			ArrayList<Types.ACTIONS> acts = m_so.getAvailableActions();
 			int i = rand.nextInt(acts.size());
-			m_so.advance(acts.get(i));
+			m_so.advance(acts.get(i), null);
 		}
 		return m_so;
 	}
@@ -178,11 +189,12 @@ public class GameBoardTTT implements GameBoard {
 	public String getSubDir() {
 		return null;
 	}
-	
-    @Override
-    public Arena getArena() {
-        return m_Arena;
-    }
+
+	// --- now in GameBoardBase ---
+//    @Override
+//    public Arena getArena() {
+//        return m_Arena;
+//    }
     
 	@Override
 	public void enableInteraction(boolean enable) {

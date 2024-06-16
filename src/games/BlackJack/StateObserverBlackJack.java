@@ -2,6 +2,7 @@ package games.BlackJack;
 
 import java.io.Serial;
 import java.util.ArrayList;
+import java.util.Random;
 
 import controllers.MCTSWrapper.utils.Tuple;
 import games.ObsNondetBase;
@@ -426,7 +427,7 @@ public class StateObserverBlackJack extends ObsNondetBase implements StateObsNon
 //    public String getName() {return "BlackJack";}
 
     @Override
-    public void advance(ACTIONS action) {
+    public void advance(ACTIONS action, Random cmpRand) {
         // splittinig the advance into
         // Deterministic
         if (isNextActionDeterministic()) {
@@ -434,7 +435,7 @@ public class StateObserverBlackJack extends ObsNondetBase implements StateObsNon
         }
         // and NonDeterministic
         while (!isNextActionDeterministic() && !isRoundOver()) {
-            advanceNondeterministic();
+            advanceNondeterministic(null);
         }
     }
 
@@ -470,7 +471,7 @@ public class StateObserverBlackJack extends ObsNondetBase implements StateObsNon
                 availableActions.add(Types.ACTIONS.fromInt(BlackJackActionDet.BET10.getAction()));
             }
             else if(!isGameOver()){
-                advance(Types.ACTIONS.fromInt(BlackJackActionDet.STAND.getAction()));
+                advance(Types.ACTIONS.fromInt(BlackJackActionDet.STAND.getAction()), null);
                 return;
             }
 
@@ -480,14 +481,14 @@ public class StateObserverBlackJack extends ObsNondetBase implements StateObsNon
                 availableActions.add(Types.ACTIONS.fromInt(BlackJackActionDet.INSURANCE.getAction()));
                 availableActions.add(Types.ACTIONS.fromInt(BlackJackActionDet.NOINSURANCE.getAction()));
             }else{
-                advance(Types.ACTIONS.fromInt(BlackJackActionDet.NOINSURANCE.getAction()));
+                advance(Types.ACTIONS.fromInt(BlackJackActionDet.NOINSURANCE.getAction()), null);
                 return;
             }
 
         }else if (gPhase == gamePhase.PLAYERONACTION) {
             //Skips player who has 0 Chips but still sits at the "table"
             if(currentPlayer.getActiveHand() == null){
-                advance(Types.ACTIONS.fromInt(BlackJackActionDet.STAND.getAction()));
+                advance(Types.ACTIONS.fromInt(BlackJackActionDet.STAND.getAction()), null);
                 return;
             }
             if (!currentPlayer.getActiveHand().isHandFinished()) {
@@ -667,15 +668,15 @@ public class StateObserverBlackJack extends ObsNondetBase implements StateObsNon
 
 
     @Override
-    public ACTIONS advanceNondeterministic() {
+    public ACTIONS advanceNondeterministic(Random cmpRand) {
         ACTIONS act = getNextNondeterministicAction();
-        advanceNondeterministic(act);
+        this.advanceNondetSpecific(act);
 
         return act;
     }
 
     @Override
-    public ACTIONS advanceNondeterministic(ACTIONS randAction) {
+    public ACTIONS advanceNondetSpecific(ACTIONS randAction) {
         if (isNextActionDeterministic) {
             throw new RuntimeException("Next action should be deterministic");
         }

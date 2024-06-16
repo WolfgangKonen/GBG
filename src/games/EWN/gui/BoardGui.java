@@ -62,27 +62,33 @@ public class BoardGui extends JPanel {
     }
 
 
-
+    /**
+     * Given a state {@code so} with its stored action values, show the values of the possible actions
+     * @param so                    the state to show
+     * @param withReset             not used
+     * @param showValueOnGameboard  whether to show the action values (V table)
+     */
     public void updateBoard(StateObservation so, boolean withReset, boolean showValueOnGameboard){
-    if(so != null){
-        StateObserverEWN soT = (StateObserverEWN) so;
-        // Update legend
-        for(TileGui[] tRow: board)
-            for(TileGui t: tRow)
-                t.emptyValues();
-        if(showValueOnGameboard && soT.getStoredValues() != null){
-           for(int i = 0; i < soT.getStoredValues().length; i++){
-               Types.ACTIONS act = soT.getStoredAction(i);
-               int[] indices = Helper.getIntsFromAction(act);
-               int j = indices[0] % ConfigEWN.BOARD_SIZE;
-               int ii = (indices[0]-j) / ConfigEWN.BOARD_SIZE;
-               double x = soT.getStoredValues()[i];
-               board[ii][j].updateValue(indices[1],x,size);
-           }
+        boolean show_win_probabilities=true;
+        if(so != null){
+            StateObserverEWN soT = (StateObserverEWN) so;
+            // Update legend
+            for(TileGui[] tRow: board)
+                for(TileGui t: tRow)
+                    t.emptyValues();
+            if(showValueOnGameboard && soT.getStoredValues() != null){
+                for(int i = 0; i < soT.getStoredValues().length; i++){
+                    Types.ACTIONS act = soT.getStoredAction(i);
+                    int[] indices = Helper.getIntsFromAction(act);
+                    int j = indices[0] % ConfigEWN.BOARD_SIZE;
+                    int ii = (indices[0]-j) / ConfigEWN.BOARD_SIZE;
+                    double x = soT.getStoredValues()[i];
+                    if (show_win_probabilities) x = (x+1)/2;        // transform score in [-1,1] to probability in [0,1]
+                    board[ii][j].updateValue(indices[1],x,size);
+                }
+            }
+            updateComponents(soT, showValueOnGameboard);
         }
-        updateComponents(soT, showValueOnGameboard);
-    }
-
    }
 
 

@@ -2,10 +2,13 @@ package games.ZweiTausendAchtundVierzig;
 
 import games.Arena;
 import games.GameBoard;
+import games.GameBoardBase;
 import games.StateObservation;
 import tools.Types;
 
 import controllers.PlayAgent;
+
+import java.util.Random;
 
 /**
  * This class implements the GameBoard interface for 2048.
@@ -19,23 +22,21 @@ import controllers.PlayAgent;
  * 
  * @author Johannes Kutsch, Wolfgang Konen, TH Koeln, 2016-2020
  */
-public class GameBoard2048 implements GameBoard {
-    protected Arena m_Arena;
+public class GameBoard2048 extends GameBoardBase implements GameBoard {
     protected StateObserver2048 m_so;
-    private boolean arenaActReq = false;
 	private transient GameBoard2048Gui m_gameGui = null;
 
     public GameBoard2048(Arena ztavGame) {
-        initGameBoard(ztavGame);
+        super(ztavGame);
+        initGameBoard();
     }
 
     @Override
     public void initialize() {}
 
-    private void initGameBoard(Arena ztavGame) {
-        m_Arena = ztavGame;
+    private void initGameBoard() {
         m_so = new StateObserver2048();
-        if (m_Arena.hasGUI() && m_gameGui==null) {
+        if (getArena().hasGUI() && m_gameGui==null) {
         	m_gameGui = new GameBoard2048Gui(this);
         }
        
@@ -48,37 +49,33 @@ public class GameBoard2048 implements GameBoard {
     public void updateParams() {}
 
     @Override
-    public void clearBoard(boolean boardClear, boolean vClear) {
+    public void clearBoard(boolean boardClear, boolean vClear, Random cmpRand) {
         if (boardClear) {
-            m_so = new StateObserver2048();
+            m_so = m_so.reset(cmpRand);
+            //m_so = new StateObserver2048();
         }
         					// considerable speed-up during training (!)
-        if (m_gameGui!=null && m_Arena.taskState!=Arena.Task.TRAIN)
+        if (m_gameGui!=null && getArena().taskState!=Arena.Task.TRAIN)
 			m_gameGui.clearBoard(boardClear, vClear);
+    }
+
+    @Override
+    public void setStateObs(StateObservation so) {
+        if (so != null) {
+            assert (so instanceof StateObserver2048)
+                    : "StateObservation 'so' is not an instance of StateObserver2048";
+            StateObserver2048 soZTAV = (StateObserver2048) so;
+            m_so = soZTAV.copy();
+        }
     }
 
     @Override
     public void updateBoard(StateObservation so,  
     						boolean withReset, boolean showValueOnGameboard) {
-		StateObserver2048 soZTAV = null;
-        if (so != null) {
-	        assert (so instanceof StateObserver2048)
-			: "StateObservation 'so' is not an instance of StateObserver2048";
-            soZTAV = (StateObserver2048) so;
-            m_so = soZTAV.copy();
-        }
+        setStateObs(so);    	// asserts that so is StateObserver2048
+
 		if (m_gameGui!=null)
-			m_gameGui.updateBoard(soZTAV, withReset, showValueOnGameboard);
-    }
-
-    @Override
-    public boolean isActionReq() {
-        return arenaActReq;
-    }
-
-    @Override
-    public void setActionReq(boolean actionReq) {
-        arenaActReq = actionReq;
+			m_gameGui.updateBoard((StateObserver2048) so, withReset, showValueOnGameboard);
     }
 
     @Override
@@ -87,8 +84,8 @@ public class GameBoard2048 implements GameBoard {
     }
 
     @Override
-    public StateObservation getDefaultStartState() {
-        clearBoard(true, true);
+    public StateObservation getDefaultStartState(Random cmpRand) {
+        clearBoard(true, true, cmpRand);
 //        if (TDNTuple2Agt.DBG2_FIXEDSEQUENCE) 
 //        	return new StateObserver2048();
         return m_so;
@@ -96,7 +93,7 @@ public class GameBoard2048 implements GameBoard {
 
     @Override
     public StateObservation chooseStartState() {
-        return getDefaultStartState();
+        return getDefaultStartState(null);
     }
 
 	@Override
@@ -107,26 +104,21 @@ public class GameBoard2048 implements GameBoard {
     protected void HGameMove(int move) {
         Types.ACTIONS act = Types.ACTIONS.fromInt(move);
         assert m_so.isLegalAction(act) : "Desired action is not legal";
-        m_so.advance(act);
-		(m_Arena.getLogManager()).addLogEntry(act, m_so, m_Arena.getLogSessionID());
-        arenaActReq = true;            // ask Arena for next action
+        m_so.advance(act, null);
+		(getArena().getLogManager()).addLogEntry(act, m_so, getArena().getLogSessionID());
+        setActionReq(true);            // ask Arena for next action
     }
 
     protected void InspectMove(int move) {
         Types.ACTIONS act = Types.ACTIONS.fromInt(move);
         assert m_so.isLegalAction(act) : "Desired action is not legal";
-        m_so.advance(act);
-        arenaActReq = true;
+        m_so.advance(act, null);
+        setActionReq(true);            // ask Arena for next action
     }
 
     @Override
     public String getSubDir() {
         return null;
-    }
-    
-    @Override
-    public Arena getArena() {
-        return m_Arena;
     }
     
 	@Override

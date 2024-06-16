@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import controllers.PlayAgent;
+import games.EWN.StateObserverEWN;
 import games.GameBoard;
+import games.GameBoardBase;
 import games.StateObservation;
 import games.Arena;
 import tools.Types;
@@ -22,7 +24,7 @@ import tools.Types;
  * @author Wolfgang Konen, TH Koeln, May'18
  *
  */
-public class GameBoardC4 implements GameBoard {
+public class GameBoardC4 extends GameBoardBase implements GameBoard {
 
 	protected Arena  m_Arena;		// a reference to the Arena object, needed to 
 									// infer the current taskState
@@ -32,6 +34,7 @@ public class GameBoardC4 implements GameBoard {
 	private GameBoardC4Gui m_gameGui = null;
 	
 	public GameBoardC4(Arena arGame) {
+		super(arGame);
 		initGameBoard(arGame);
 	}
 	
@@ -67,13 +70,28 @@ public class GameBoardC4 implements GameBoard {
 	public void updateParams() {}
 
 	@Override
-	public void clearBoard(boolean boardClear, boolean vClear) {
+	public void clearBoard(boolean boardClear, boolean vClear, Random cmpRand) {
 		if (boardClear) {
 			m_so = new StateObserverC4();			// empty Table
 		}
 							// considerable speed-up during training (!)
         if (m_gameGui!=null && m_Arena.taskState!=Arena.Task.TRAIN)
 			m_gameGui.clearBoard(boardClear, vClear, m_so);
+	}
+
+	@Override
+	public void setStateObs(StateObservation so) {
+		StateObserverC4 soT = null;
+		if (so!=null) {
+			assert (so instanceof StateObserverC4)
+					: "StateObservation 'so' is not an instance of StateObserverC4";
+			soT = (StateObserverC4) so;
+			m_so = soT;//.copy();		// we do not need a copy here (!)
+			// unclear why, but it leads to wrong behavior if we code
+			//		m_so = (StateObserverC4) so;
+			// (the GameBoard stays empty!)
+
+		} // if(so!=null)
 	}
 
 	/**
@@ -87,18 +105,8 @@ public class GameBoardC4 implements GameBoard {
 	@Override
 	public void updateBoard(StateObservation so, 
 							boolean withReset, boolean showValueOnGameboard) {
-		StateObserverC4 soT = null;
-		
-		if (so!=null) {
-	        assert (so instanceof StateObserverC4)
-			: "StateObservation 'so' is not an instance of StateObserverC4";
-			soT = (StateObserverC4) so;
-			m_so = soT;//.copy();		// we do not need a copy here (!)
-			// unclear why, but it leads to wrong behavior if we code
-			//		m_so = (StateObserverC4) so;
-			// (the GameBoard stays empty!)
-			
-		} // if(so!=null)
+		setStateObs(so);	// asserts that so is StateObserverC4
+		StateObserverC4 soT = (StateObserverC4) so;
 		
 		if (m_gameGui!=null)
 			m_gameGui.guiUpdateBoard(soT, m_Arena.taskState, withReset,showValueOnGameboard);
@@ -128,7 +136,7 @@ public class GameBoardC4 implements GameBoard {
 		Types.ACTIONS act = Types.ACTIONS.fromInt(x);
 //		assert m_so.isLegalAction(act) : "Desired action is not legal";
 		if (m_so.isLegalAction(act)) {
-			m_so.advance(act);			// perform action (optionally add random elements from game 
+			m_so.advance(act, null);			// perform action (optionally add random elements from game
 										// environment - not necessary in ConnectFour)
 			System.out.println(m_so.stringDescr());
 			(m_Arena.getLogManager()).addLogEntry(act, m_so, m_Arena.getLogSessionID());
@@ -161,10 +169,11 @@ public class GameBoardC4 implements GameBoard {
 
 	/**
 	 * @return the 'empty-board' start state
+     * @param cmpRand
 	 */
 	@Override
-	public StateObservation getDefaultStartState() {
-		clearBoard(true, true);
+	public StateObservation getDefaultStartState(Random cmpRand) {
+		clearBoard(true, true, null);
 		return m_so;
 	}
 
@@ -175,13 +184,13 @@ public class GameBoardC4 implements GameBoard {
 	 */
 	@Override
 	public StateObservation chooseStartState() {
-		clearBoard(true, true);			// m_so is in default start state 
+		clearBoard(true, true, null);			// m_so is in default start state
 		if (rand.nextDouble()>0.5) {
 			// choose randomly one of the possible actions in default 
 			// start state and advance m_so by one ply
 			ArrayList<Types.ACTIONS> acts = m_so.getAvailableActions();
 			int i = rand.nextInt(acts.size());
-			m_so.advance(acts.get(i));
+			m_so.advance(acts.get(i), null);
 		}
 		return m_so;
 	}

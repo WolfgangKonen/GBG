@@ -1,20 +1,22 @@
 package games.Nim;
 
-import java.util.ArrayList;
+import java.util.Random;
 
 import controllers.PlayAgent;
 import games.Arena;
 import games.GameBoard;
+import games.GameBoardBase;
 import games.StateObservation;
-import tools.Types.ACTIONS;
 
 
 /**
  * We need this purely abstract class just to have a common ground for member {@code m_gb} in {@link GameBoardNimGui}.
  */
-public abstract class GameBoardNimBase implements GameBoard {
+public abstract class GameBoardNimBase extends GameBoardBase implements GameBoard {
 
-	public GameBoardNimBase() {	}
+	public GameBoardNimBase(Arena ar) {
+		super(ar);
+	}
 
 	abstract public int[] getHeaps();
 	abstract protected void HGameMove(int x, int y);
@@ -30,7 +32,7 @@ public abstract class GameBoardNimBase implements GameBoard {
 	public void updateParams() {}
 
 	@Override
-	abstract public void clearBoard(boolean boardClear, boolean vClear);
+	abstract public void clearBoard(boolean boardClear, boolean vClear, Random cmpRand);
 
 	@Override
 	abstract public void destroy();
@@ -45,12 +47,6 @@ public abstract class GameBoardNimBase implements GameBoard {
 	abstract public void toFront();
 
 	@Override
-	abstract public boolean isActionReq();
-
-	@Override
-	abstract public void setActionReq(boolean actionReq);
-	
-	@Override
 	abstract public void enableInteraction(boolean enable);
 
 	@Override
@@ -60,10 +56,7 @@ public abstract class GameBoardNimBase implements GameBoard {
 	abstract public String getSubDir();
 
 	@Override
-	abstract public Arena getArena();
-
-	@Override
-	abstract public StateObservation getDefaultStartState();
+	abstract public StateObservation getDefaultStartState(Random cmpRand);
 
 	@Override
 	abstract public StateObservation chooseStartState(PlayAgent pa);

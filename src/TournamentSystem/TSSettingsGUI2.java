@@ -115,7 +115,7 @@ public class TSSettingsGUI2 extends JFrame {
         mTSAgentManager.addAgent("Standard TDS", "TDS"/*Types.GUI_AGENT_LIST[9]*/, TDSCheckBox, false, null);
         TDSCheckBox.setVisible(false);
 
-        if (mArena.getGameBoard().getDefaultStartState().isDeterministicGame()) {
+        if (mArena.getGameBoard().getDefaultStartState(null).isDeterministicGame()) {
             //System.out.println(TAG+"game is deterministic");
             maxNCheckBox.addChangeListener(new ChangeListener() {
                 @Override

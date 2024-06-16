@@ -78,7 +78,7 @@ public class StateObserverC4Test {
         // but we can detect that sprev advanced by ACTIONS(1) - leading to sobC4 - is a win.
         // This is because advance with method C4Base.canWin detects whether the piece to set
         // closes a 4-in-a-row. It stores this in boolean member isWin.
-        sprev.advance(sprev.getAvailableActions().get(0));
+        sprev.advance(sprev.getAvailableActions().get(0), null);
         System.out.println(prefix+"sprev: "+sprev.stringDescr());
         System.out.println(prefix+"sprev isWin: "+sprev.win());
         System.out.println(prefix+"sprev sc: "+sprev.getGameScoreTuple());
@@ -91,7 +91,7 @@ public class StateObserverC4Test {
     private final static String strDir = Types.GUI_DEFAULT_DIR_AGENT+"/ConnectFour/";
     private final static String gbgAgentPath = strDir + "TCL-EXP-NT3-al37-lam000-6000k-epsfin0.agt.zip";
     private static final Arena ar = new ArenaC4("", false,true);
-    private static final StateObservation sob = ar.getGameBoard().getDefaultStartState();
+    private static final StateObservation sob = ar.getGameBoard().getDefaultStartState(null);
 
     //
     // choose an agent to validate - select one of the options in buildAgent for constructing pa:

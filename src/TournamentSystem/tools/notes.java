@@ -4,8 +4,6 @@ import controllers.AgentBase;
 import controllers.PlayAgent;
 import games.*;
 
-import javax.swing.*;
-
 /**
  * This class is used to store some dev notes of the GBG-TS.
  *
@@ -42,7 +40,7 @@ public class notes
          * @see games.XArenaFuncs#competeDispatcher(boolean, XArenaButtons, GameBoard)
          * @see games.XArenaFuncs#compete(PlayAgent, PlayAgent, StateObservation, int, int)  -> while()
          *
-         * @see PlayAgent#getNextAction2(StateObservation, boolean, boolean) // berechnung des nächsten zuges des agenten
+         * @see PlayAgent#getNextAction2(StateObservation, boolean, boolean, boolean) // berechnung des nächsten zuges des agenten
          *
          * ++++++++++++++++++
          *

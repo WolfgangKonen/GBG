@@ -1,5 +1,7 @@
 package games.EWN;
 
+import TournamentSystem.TSTimeStorage;
+import controllers.PlayAgtVector;
 import games.EWN.StateObserverHelper.Helper;
 import games.EWN.StateObserverHelper.Player;
 import games.EWN.StateObserverHelper.Token;
@@ -7,6 +9,8 @@ import games.EWN.config.ConfigEWN;
 import games.EWN.config.StartingPositions;
 import games.ObsNondetBase;
 import games.StateObsNondeterministic;
+import games.StateObservation;
+import games.XArenaFuncs;
 import tools.ScoreTuple;
 import tools.Types;
 import tools.Types.ACTIONS;
@@ -16,6 +20,7 @@ import java.io.Serial;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static tools.Types.WINNER.*;
@@ -25,7 +30,7 @@ import static tools.Types.WINNER.*;
  * It has utility functions for
  * <ul>
  * <li> returning the available actions ({@link #getAvailableActions()}),
- * <li> advancing the state of the game with a specific action ({@link #advance(Types.ACTIONS)}),
+ * <li> advancing the state of the game with a specific action ({@link games.StateObservation#advance(ACTIONS, Random)}),
  * <li> copying the current state
  * <li> signaling end, score and winner of the game
  * </ul>
@@ -33,29 +38,36 @@ import static tools.Types.WINNER.*;
 public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeterministic {
 
     private static final double REWARD_NEGATIVE = -1, REWARD_POSITIVE = 1;
-    private final int numPlayers; // /WK/ really needed? will be always =ConfigEWN.NUM_PLAYERS
+    private int numPlayers; // /WK/ really needed? will be always =ConfigEWN.NUM_PLAYERS
     private int player;
-    private final int size;                         // gets ConfigEWN.BOARD_SIZE
+    private int size;                         // gets ConfigEWN.BOARD_SIZE
     private boolean isNextActionDeterministic;
     private ACTIONS nextNondeterministicAction;     // the dice value minus 1
-    private final Token[][] gameState;
+    private Token[][] gameState;
     //private ACTIONS rolledDice;                   // /WK/ seems never used
     //private int turn = 0 ;                        // /WK/ seems never used
     //private int count;                            // /WK/ seems never used
-    private final ArrayList<Player> players;
+    private ArrayList<Player> players;
     private ArrayList<ACTIONS> availableActions;
-    private final ArrayList<ACTIONS> availableRandomActions;
+    private ArrayList<ACTIONS> availableRandomActions;
     private int playerWin;      // Representing the winning player for faster evaluation
     private int playerLoses;    // Representing the loosing player for faster evaluation
-    private final ScoreTuple m_scoreTuple;
+    private ScoreTuple m_scoreTuple;
 
     @Serial
     private static final long  serialVersionUID = 13L;
 
-    public StateObserverEWN(){
+    public StateObserverEWN() {
+        this((Random) null);
+    }
+
+    public StateObserverEWN(Random cmpRand) {
         super();
+        init(cmpRand);
+    }
+
+    private void init(Random cmpRand) {
         this.player =  0;
-        //this.rolledDice = null;
         this.numPlayers = ConfigEWN.NUM_PLAYERS;
         this.size = ConfigEWN.BOARD_SIZE;
         m_scoreTuple = new ScoreTuple(numPlayers);
@@ -75,12 +87,12 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
             players.add(new Player(i,size));
         }
         if(ConfigEWN.RANDOM_POSITION){
-            getRandomStartingPosition();
+            getRandomStartingPosition(cmpRand);
         }else {
             getFixedStartingPosition();
         }
         // Init empty board:
-        advanceNondeterministic(); // roll the dice and setAvailableActions when we start a new state
+        advanceNondeterministic(cmpRand); // roll the dice and setAvailableActions when we start a new state
     }
 
 
@@ -137,7 +149,7 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
         }
     }
 
-    public void getRandomStartingPosition(){
+    public void getRandomStartingPosition(Random cmpRand){
         // Init empty field
         for(int x = 0; x < ConfigEWN.BOARD_SIZE; x++)
             for(int y = 0; y < ConfigEWN.BOARD_SIZE; y++)
@@ -145,7 +157,7 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
 
         //init player tokens and mirror for the opponent
         int[] values = getValues();
-        int[] randomPositionIndex = getRandomPositionindices();
+        int[] randomPositionIndex = getRandomPositionindices(cmpRand);
         for(int player = 0; player < ConfigEWN.NUM_PLAYERS; player++){
             for(int index = 0; index < values.length;index++){
                 int position = rotate(randomPositionIndex[index],player);
@@ -172,25 +184,29 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
         int n = ConfigEWN.BOARD_SIZE;
         int j = index % n;
         int i = (index-j) / n ;
-        switch(player){
-            case 0: return index;
-            case 1: return (n*n-1) - ((i * n)+j);
-            case 2: return (n-1-j)*n +i; // 0 => 30, 1 => 31
-            case 3: return j*n+(n-1-i);
-            default:throw new RuntimeException("Swap not implemented");
-        }
+        return switch (player) {
+            case 0 -> index;
+            case 1 -> (n * n - 1) - ((i * n) + j);
+            case 2 -> (n - 1 - j) * n + i; // 0 => 30, 1 => 31
+            case 3 -> j * n + (n - 1 - i);
+            default -> throw new RuntimeException("Swap not implemented");
+        };
     }
 
 
-    private int[] getRandomPositionindices(){
+    private int[] getRandomPositionindices(Random cmpRand){
         int[] randomIndices = getNormalPositionIndices();
-        return shuffle(randomIndices);
+        return shuffle(randomIndices, cmpRand);
     }
 
-    private int[] shuffle(int[] array){
+    private int[] shuffle(int[] array, Random cmpRand){
         int index;
         for(int i = array.length-1; i > 0; i--){
-            index = ThreadLocalRandom.current().nextInt(i+1);
+            if (cmpRand==null) {
+                index = ThreadLocalRandom.current().nextInt(i+1);
+            } else {
+                index = cmpRand.nextInt(i+1);
+            }
             if(index != i){
                 array[index] ^= array[i];
                 array[i] ^= array[index];
@@ -204,13 +220,13 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
      * @return the indices - in ascending order - that player 0's pieces occupy in the starting position
      */
     private int[] getNormalPositionIndices(){
-        switch (ConfigEWN.BOARD_SIZE){
-            case 3:return new int[]{0,1,3};
-            case 4:return new int[]{0,1,4};
-            case 5:return new int[]{0,1,2,5,6,10};
-            case 6:return new int[]{0,1,2,6,7,12};
-            default: throw new RuntimeException("Illegal board size");
-        }
+        return switch (ConfigEWN.BOARD_SIZE) {
+            case 3 -> new int[]{0, 1, 3};
+            case 4 -> new int[]{0, 1, 4};
+            case 5 -> new int[]{0, 1, 2, 5, 6, 10};
+            case 6 -> new int[]{0, 1, 2, 6, 7, 12};
+            default -> throw new RuntimeException("Illegal board size");
+        };
     }
 
     private int[] getValues(){
@@ -219,11 +235,12 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
     }
 
     /**
-     * Splitting the advancing step to deterministic and non-deterministic
-     * @param action the action
+     * Do a deterministic and a non-deterministic advance step
+     * @param action    the (deterministic) action
+     * @param cmpRand   if non-null, use this (reproducible) RNG instead of StateObservation's RNG
      */
     @Override
-    public void advance(ACTIONS action) {
+    public void advance(ACTIONS action, Random cmpRand) {
         super.advanceBase(action);		//		includes addToLastMoves(action)
         if(isNextActionDeterministic) {
             if(action != null) {
@@ -232,7 +249,7 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
             }
             else isNextActionDeterministic = false;
         }
-        if(!isNextActionDeterministic) advanceNondeterministic();
+        if(!isNextActionDeterministic) advanceNondeterministic(cmpRand);
         super.incrementMoveCounter();   // increment m_counter
     }
 
@@ -250,6 +267,7 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
 
      * @param action    the action
      */
+    @Override
     public void advanceDeterministic(ACTIONS action){
         if(!(action.toInt() == -1)){
             int[] convertedAction = Helper.getIntsFromAction(action); // [from, to] int array
@@ -277,12 +295,17 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
     }
 
     @Override
-    public ACTIONS advanceNondeterministic(){
+    public ACTIONS advanceNondeterministic(Random cmpRand){
         if(isNextActionDeterministic){
             throw new RuntimeException("ACTION IS DETERMINISTIC must be NON");
         }
-        int actIndex = ThreadLocalRandom.current().nextInt(availableRandomActions.size());
-        advanceNondeterministic(availableRandomActions.get(actIndex));  // this sets also isNextActionDeterministic
+        int actIndex;
+        if (cmpRand==null) {
+            actIndex = ThreadLocalRandom.current().nextInt(availableRandomActions.size());
+        } else {
+            actIndex = cmpRand.nextInt(availableRandomActions.size());
+        }
+        advanceNondetSpecific(availableRandomActions.get(actIndex));  // sets isNextActionDeterministic, nextNondeterministicAction
         if(this.availableActions.size() == 0){
             this.availableActions.add(new ACTIONS(-1)); // Add empty action
         }
@@ -292,13 +315,12 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
 
 
     @Override
-    public ACTIONS advanceNondeterministic(ACTIONS action) {
+    public ACTIONS advanceNondetSpecific(ACTIONS action) {
         nextNondeterministicAction = action;
         this.setAvailableActions();
         this.isNextActionDeterministic = true;
 
         return action;
-
     }
 
     private int getRandomActionSize(int size, int numPlayers){
@@ -333,12 +355,30 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
 
 
     /**
-     * Returns a new default {@link StateObserverEWN}
-     * @return a new default object
+     * Reset {@link StateObserverEWN} object {@code this}
+     * @param cmpRand       if non-null, use this (reproducible) RNG instead of StateObservation's RNG
+     * @return {@code this} (with new random dice value and potential new token config)
      */
-    public StateObserverEWN reset(){
-        return new StateObserverEWN();
+    public StateObserverEWN reset(Random cmpRand){
+        init(cmpRand);
+        return this;
     }
+
+    @Override
+    public boolean needsRandomization() { return true; }
+
+    /**
+     * Randomize the start state (roll the dice). Used in
+     * {@link XArenaFuncs#competeNPlayer(PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], ArrayList, Random, boolean)
+     * competeNPlayer(..)} if {@link #needsRandomization()} returns true
+     *
+     * @param cmpRand	if non-null, use this (reproducible) RNG instead of StateObservation's RNG
+     */
+    @Override
+    public void randomizeStartState(Random cmpRand){
+        reset(cmpRand); // roll the dice and setAvailableActions when we start a new episode
+    }
+
 
 
     /**
@@ -475,12 +515,12 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
      * Should be only called, if game is over.
      */
     private Types.WINNER getWinner(int player){
-        switch (ConfigEWN.NUM_PLAYERS){
-            case 2: return getWinner2(player);
-            case 3: return getWinner3(player);
-            case 4: return getWinner4(player);
-            default: throw new RuntimeException("Number of players: "+player + " no allowed");
-        }
+        return switch (ConfigEWN.NUM_PLAYERS) {
+            case 2 -> getWinner2(player);
+            case 3 -> getWinner3(player);
+            case 4 -> getWinner4(player);
+            default -> throw new RuntimeException("Number of players: " + player + " no allowed");
+        };
     }
 
 
@@ -529,29 +569,29 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
 
     @Override
     public String stringDescr() {
-        String str = "\n";
+        StringBuilder str = new StringBuilder("\n");
         for(int i = 0; i < gameState.length; i++){
             for(int k = 0; k < gameState[i].length; k++){
                 Token t = gameState[i][k];
                 int p = t.getPlayer();
-                str += p== 0 ? "[X": p== 1 ? "[O":p==2 ? "[*" : p==3 ? "[#": "[ ";
+                str.append(p == 0 ? "[X" : p == 1 ? "[O" : p == 2 ? "[*" : p == 3 ? "[#" : "[ ");
                 // note that the t.getValue() of non-empty fields is one smaller than the piece value displayed in GameBoard
                 String val = String.valueOf(t.getValue());
-                str += (t.getValue()>-1  ? val +"]" : " ]") + " ";
+                str.append(t.getValue() > -1 ? val + "]" : " ]").append(" ");
             }
             if (i==0) {
                 // note that diceVal is one smaller than the "Dice: " displayed in GameBoard
                 DecimalFormat frmAct = new DecimalFormat("0000");
-                str += "    (diceVal:"+this.getNextNondeterministicAction().toInt()+",   ";
-                str += "availActions:  ";
+                str.append("    (diceVal:").append(this.getNextNondeterministicAction().toInt()).append(",   ");
+                str.append("availActions:  ");
                 for (ACTIONS act : this.getAvailableActions())
-                    str += frmAct.format(act.toInt()) + " ";
-                str += ")";
+                    str.append(frmAct.format(act.toInt())).append(" ");
+                str.append(")");
             }
-            str += "\n";
+            str.append("\n");
         }
-        str += "\n";
-        return str;
+        str.append("\n");
+        return str.toString();
     }
 
     /**
@@ -565,27 +605,26 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
      */
     @Override
     public String uniqueStringDescr() {
-        String str = "\n";
+        StringBuilder str = new StringBuilder("\n");
         for(int i = 0; i < gameState.length; i++){
             for(int k = 0; k < gameState[i].length; k++){
                 Token t = gameState[i][k];
                 int p = t.getPlayer();
-                str += p== 0 ? "[X": p== 1 ? "[O":p==2 ? "[*" : p==3 ? "[#": "[ ";
+                str.append(p == 0 ? "[X" : p == 1 ? "[O" : p == 2 ? "[*" : p == 3 ? "[#" : "[ ");
                 // note that the t.getValue() of non-empty fields is one smaller than the piece value displayed in GameBoard
                 String val = String.valueOf(t.getValue());
-                str += (t.getValue()>-1  ? val +"]" : " ]") + " ";
+                str.append(t.getValue() > -1 ? val + "]" : " ]").append(" ");
             }
             if (i==0) {
                 // note that diceVal is one smaller than the "Dice: " displayed in GameBoard
-                DecimalFormat frmAct = new DecimalFormat("0000");
-                str += "    (diceVal:"+this.getNextNondeterministicAction().toInt()+",   ";
-                str += "player:  " +this.getPlayer();
-                str += ")";
+                str.append("    (diceVal:").append(this.getNextNondeterministicAction().toInt()).append(",   ");
+                str.append("player:  ").append(this.getPlayer());
+                str.append(")");
             }
-            str += "\n";
+            str.append("\n");
         }
-        str += "\n";
-        return str;
+        str.append("\n");
+        return str.toString();
     }
 
 
@@ -638,16 +677,16 @@ public class StateObserverEWN extends ObsNondetBase implements  StateObsNondeter
      *  The 2-player team needs to capture all tokens of the single-team player
      *
      *
-     * @return
+     * @return true if game is over, false otherwise
      */
     @Override
     public boolean isGameOver() {
-       switch(numPlayers){
-           case 2: return gameOverTwoPlayer();
-           case 3: return gameOverThreePlayer();
-           case 4: return gameOverFourPlayer();
-           default: throw new RuntimeException("numPlayer "+ numPlayers+ " is not not implemented yet");
-       }
+        return switch (numPlayers) {
+            case 2 -> gameOverTwoPlayer();
+            case 3 -> gameOverThreePlayer();
+            case 4 -> gameOverFourPlayer();
+            default -> throw new RuntimeException("numPlayer " + numPlayers + " is not not implemented yet");
+        };
     }
 
 

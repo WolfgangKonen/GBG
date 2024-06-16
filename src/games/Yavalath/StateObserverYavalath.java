@@ -7,6 +7,7 @@ import tools.Types;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Random;
 
 import static games.Yavalath.ConfigYavalath.*;
 /*
@@ -160,7 +161,7 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
      * Advances the current state given 'action' to a new state and updates the game information accordingly.
      */
     @Override
-    public void advance(Types.ACTIONS action) {
+    public void advance(Types.ACTIONS action, Random cmpRand) {
         this.advanceBase(action);
         int actionInt = getTileValueFromAction(action);
 
@@ -199,7 +200,7 @@ public class StateObserverYavalath extends ObserverBase implements StateObservat
 
     private void advance(TileYavalath tile){
         Types.ACTIONS action = new Types.ACTIONS(tile.getX()* getMaxRowLength() +tile.getY());
-        advance(action);
+        advance(action, null);
     }
 
     @Override

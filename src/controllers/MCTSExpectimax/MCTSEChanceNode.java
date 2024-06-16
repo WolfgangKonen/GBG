@@ -435,7 +435,7 @@ public class MCTSEChanceNode
                                                         // especially for Othello (factor 3-4).
                 if (rollerState.getNumAvailableActions() > 0) {
                     int action = ThreadLocalRandom.current().nextInt(rollerState.getNumAvailableActions());
-                    rollerState.advance(rollerState.getAction(action));
+                    rollerState.advance(rollerState.getAction(action), null);
                 }
                 else {
                     // If the current player has no available action: we have a pass situation
@@ -487,7 +487,7 @@ public class MCTSEChanceNode
                                                         // especially for Othello (factor 3-4).
                 if (rollerState.getNumAvailableActions() > 0) {
                     int action = ThreadLocalRandom.current().nextInt(rollerState.getNumAvailableActions());
-                    rollerState.advance(rollerState.getAction(action));
+                    rollerState.advance(rollerState.getAction(action), null);
                 }
                 else {
                     // If the current player has no available action: we have a pass situation

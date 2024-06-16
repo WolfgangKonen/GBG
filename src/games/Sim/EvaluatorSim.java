@@ -80,8 +80,8 @@ public class EvaluatorSim extends Evaluator {
 	}
 	
 	private EvalResult evaluateAgainstOpponents(PlayAgtVector paVector, int competeNum, GameBoard gb, double thresh) {
- 		StateObservation so = gb.getDefaultStartState();
-		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(paVector, so, competeNum, 0, null);
+ 		StateObservation so = gb.getDefaultStartState(null);
+		ScoreTuple sc = XArenaFuncs.competeNPlayerAllRoles(paVector, so, competeNum, 0, null, null, false);
 		lastResult = sc.scTup[0];
 		m_msg = paVector.pavec[0].getName()+": "+getPrintString() + lastResult;
 		if (this.verbose>0) System.out.println(m_msg);
