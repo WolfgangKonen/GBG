@@ -20,7 +20,7 @@ agents/temp/*
 agents/P078*
 /experiments/
 
-#Files not for the public GitHub version:
+#Files not for the public GitHub version :
 myDocs/*
 
 # all JAR files (GBGBatch.jar,...) now moved to jartools/, but excluded from GitHub:
