@@ -413,7 +413,7 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
     		StateObsWithBoardVector curSOWB = new StateObsWithBoardVector(sLast[nextPlayer], m_Net.xnf);
         	qLast = m_Net.getQFunc(curSOWB,nextPlayer,aLast[nextPlayer]);
         	
-        	// if last action of nextPlayer was a random move: 
+        	// if last action of nextPlayer was a random move:
     		if (randLast[nextPlayer] && !learnFromRM && !s_next.isGameOver()) {
     			// no training, go to next move.
     			if (m_DEBG) System.out.println("random move");
@@ -439,7 +439,7 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 	            	System.out.println(s1+" "+s2+","+qLast+"->"+qLastNew+" target="+target
 	            			+" player="+(nextPlayer==0 ? "X" : "o")+" aLast="+actionKey);
 	            	if (++acount % 50 ==0) {
-	            		int dummy=1;
+	            		int dummyF;
 	            	}
 	    		}
 	    		if (s_next.stringDescr().equals("XooX-o-XX")) {

@@ -11,6 +11,8 @@ import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.MCTSWrapper.MCTSWrapperAgent;
 import controllers.MCTSWrapper.stateApproximation.PlayAgentApproximator;
 import controllers.RHEA.RheaAgentSI;
+import controllers.SB3.HttpServer.SimpleHttpServer;
+import controllers.SB3.SB3Agent;
 import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.NTupleBase;
 import controllers.TD.ntuple2.NTupleFactory;
@@ -37,6 +39,7 @@ import tools.*;
 import tools.Types.ACTIONS;
 
 import javax.swing.*;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -252,6 +255,13 @@ public class XArenaFuncs {
 						pa = new BasicStrategyBlackJackAgent();
 				case "KuhnOptimal" ->  // KuhnPoker only, see gui_agent_list in XArenaButtonsGui
 						pa = new KuhnPokerAgent("KuhnOptimal");
+				case "SB3" -> {
+					XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
+					List<String> enemyAgentsFilePaths = new ArrayList<>();
+					enemyAgentsFilePaths.add("C:\\Users\\Leon Püschel\\IdeaProjects\\GBG\\agents\\TicTacToe\\qlearn4.agt.zip");
+					SimpleHttpServer simpleHttpServer = SimpleHttpServer.getInstance();
+					pa = new SB3Agent(xnf, enemyAgentsFilePaths, m_xab.m_arena, simpleHttpServer);
+				}
 				default -> throw new RuntimeException("Unknown agent name " + sAgent);
 			}
 		} catch (Exception e) {
@@ -504,6 +514,13 @@ public class XArenaFuncs {
 					pa = new DAVI4Agent(sAgent, m_xab.tdPar[n], m_xab.ntPar[n],
 							m_xab.oPar[n], nTuples, xnf, maxGameNum, m_Arena);
 				}
+				case "SB3" -> {
+					XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
+					List<String> enemyAgentsFilePaths = new ArrayList<>();
+					enemyAgentsFilePaths.add("sarsaNT.agt.zip");
+					SimpleHttpServer simpleHttpServer = SimpleHttpServer.getInstance();
+					pa = new SB3Agent(xnf, enemyAgentsFilePaths, m_xab.m_arena, simpleHttpServer);
+				}
 				default ->
 						throw new RuntimeException("Could not construct trainable agent: Unknown agent name " + sAgent);
 			}
@@ -735,6 +752,10 @@ public class XArenaFuncs {
 
 		long startTime = System.currentTimeMillis();
 		gb.initialize();
+		if(pa instanceof SB3Agent sb3Agent) {
+			sb3Agent.learn(1000);
+			return sb3Agent;
+		}
 		while (pa.getGameNum() < pa.getMaxGameNum()) {
 			StateObservation so = soSelectStartState(gb, xab.oPar[n].getChooseStart01(), pa);
 

@@ -1,4 +1,4 @@
-package controllers.SB3;
+package controllers.SB3.HttpServer;
 
 import org.json.JSONObject;
 
@@ -23,7 +23,7 @@ public abstract class EnvironmentHttpHandler {
 
     protected static final int NO_RESPONSE_LENGTH = -1;
 
-    protected static final String METHOD_GET = "GET";
+    protected static final String METHOD_GET = "GET"; // TODO: create enum
     protected static final String METHOD_POST = "POST";
     protected static final String METHOD_OPTIONS = "OPTIONS";
 

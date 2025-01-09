@@ -1,44 +1,54 @@
-package controllers.SB3;
+package controllers.SB3.HttpServer;
 
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-import environment.domain.FirstObservation;
-import environment.domain.RLEnvironment;
-import environment.domain.Transition;
+import controllers.SB3.FirstObservation;
+import controllers.SB3.RLEnvironment;
+import controllers.SB3.Transition;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 
 
-// Driver Class
+// Singelton
 public class SimpleHttpServer
 {
+    private static final SimpleHttpServer SIMPLE_HTTP_SERVER;
+
+    static {
+        try {
+            SIMPLE_HTTP_SERVER = new SimpleHttpServer();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private HttpServer server;
-    private HttpTest httpTest;
     private RLEnvironment rlEnvironment;
 
-    public SimpleHttpServer(HttpTest httpTest, RLEnvironment rlEnvironment) throws IOException {
-        this.httpTest = httpTest;
-        this.rlEnvironment = rlEnvironment;
+    private StepHttpHandler stepHttpHandler;
+    private  ResetHttpHandler resetHttpHandler;
+    private TrainingFinishedHandler trainingFinishedHandler;
+
+    private SimpleHttpServer() throws IOException {
         // Create an HttpServer instance
         this.server = HttpServer.create(new InetSocketAddress(8094), 0);
+        this.stepHttpHandler = new StepHttpHandler();
+        this.resetHttpHandler = new ResetHttpHandler();
+        this.trainingFinishedHandler = new TrainingFinishedHandler();
 
-        // Create step context
-        server.createContext("/step", new stepHttpHandler(rlEnvironment));
-        // Creat reset context
-        server.createContext("/reset", new resetHttpHandler(rlEnvironment));
+        // Create context
+        server.createContext("/step", stepHttpHandler);
+        server.createContext("/reset", resetHttpHandler);
+        server.createContext("/trainingFinished", trainingFinishedHandler);
 
-        server.createContext("/testComplete", new testCompleteHttpHandler(httpTest));
+        //server.createContext("/testComplete", new testCompleteHttpHandler(httpTest));
 
         // Start the server
         server.setExecutor(null); // Use the default executor
@@ -46,29 +56,30 @@ public class SimpleHttpServer
         System.out.println("Server is running on port 8094");
     }
 
-    private static void startTest() throws URISyntaxException, IOException, InterruptedException {
-        URI uri = new URI("http://127.0.0.1:8095/start");
-        HttpRequest request  = HttpRequest.newBuilder().uri(uri).version(HttpClient.Version.HTTP_1_1).POST(HttpRequest.BodyPublishers.noBody()).build();
-
-        HttpResponse<String> response = HttpClient.newBuilder()
-                .build()
-                .send(request, HttpResponse.BodyHandlers.ofString());
-        System.out.println(response.body());
-
+    public static SimpleHttpServer getInstance() {
+        return SIMPLE_HTTP_SERVER;
     }
 
+    public void setRlEnvironment(RLEnvironment rlEnvironment) {
+        this.rlEnvironment = rlEnvironment;
+        stepHttpHandler.setRlEnvironment(rlEnvironment);
+        resetHttpHandler.setRlEnvironment(rlEnvironment);
+        trainingFinishedHandler.setRlEnvironment(rlEnvironment);
+    }
     public void stopServer() {
         server.stop(2);
     }
 
     // step http handler POST request
-    static class stepHttpHandler extends EnvironmentHttpHandler implements HttpHandler {
+    static class StepHttpHandler extends EnvironmentHttpHandler implements HttpHandler {
 
-        RLEnvironment rlEnvironment;
+        private RLEnvironment rlEnvironment;
 
-        public stepHttpHandler(RLEnvironment rlEnvironment) {
+        public StepHttpHandler() {
             super();
+        }
 
+        public void setRlEnvironment(RLEnvironment rlEnvironment) {
             this.rlEnvironment = rlEnvironment;
         }
 
@@ -102,15 +113,17 @@ public class SimpleHttpServer
                             // step in environment
                             Transition transition = this.rlEnvironment.step(action);
 
-                            // creat responds
+                            // create responds
                             response = transition.toJson().toString();
                         }
                         catch (JSONException exception) {
+                            exception.printStackTrace();
                             response = invalidFieldsResponse();
                             responseCode = BAD_REQUEST;
                         }
                     }
                     catch (Exception e) {
+                        e.printStackTrace();
                         responseCode = BAD_REQUEST;
                         response = invalidJson();
                     }
@@ -133,14 +146,18 @@ public class SimpleHttpServer
     }
 
     // reset http handler
-    static class resetHttpHandler extends EnvironmentHttpHandler implements HttpHandler {
+    static class ResetHttpHandler extends EnvironmentHttpHandler implements HttpHandler {
 
-        RLEnvironment rlEnvironment;
+        private RLEnvironment rlEnvironment;
 
-        public resetHttpHandler(RLEnvironment rlEnvironment) {
+        public ResetHttpHandler() {
             super();
+        }
+
+        public void setRlEnvironment(RLEnvironment rlEnvironment) {
             this.rlEnvironment = rlEnvironment;
         }
+
         @Override
         public void handle(HttpExchange exchange) throws IOException
         {
@@ -171,12 +188,17 @@ public class SimpleHttpServer
         }
     }
 
-    static class testCompleteHttpHandler extends EnvironmentHttpHandler implements HttpHandler {
-            HttpTest httpTest;
-        public testCompleteHttpHandler(HttpTest httpTest) {
+    static class TrainingFinishedHandler extends EnvironmentHttpHandler implements HttpHandler {
+        private RLEnvironment rlEnvironment;
+
+        public TrainingFinishedHandler() {
             super();
-            this.httpTest = httpTest;
         }
+
+        public void setRlEnvironment(RLEnvironment rlEnvironment) {
+            this.rlEnvironment = rlEnvironment;
+        }
+
         @Override
         public void handle(HttpExchange exchange) throws IOException
         {
@@ -188,7 +210,7 @@ public class SimpleHttpServer
                         // get request body
                         String requestBody = inputStreamToString(exchange.getRequestBody());
                         exchange.sendResponseHeaders(NO_CONTENT, NO_RESPONSE_LENGTH);
-                        this.httpTest.testFinished(requestBody);
+                        this.rlEnvironment.trainingFinished();
                     }
                     catch (IOException exception) {
                         final byte[] rawResponseBody = invalidJson().getBytes(CHARSET);
