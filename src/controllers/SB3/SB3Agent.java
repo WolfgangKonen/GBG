@@ -33,14 +33,16 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
     private SimpleHttpServer simpleHttpServer;
     private XNTupleFuncs xnTupleFuncs;
     private List<PlayAgent> enemyAgents;
+    private boolean oneHot;
 
     private GameBoard gameBoard;
 
-    public SB3Agent(XNTupleFuncs xnTupleFuncs, List<String> enemyAgentsFilePaths, Arena arena, SimpleHttpServer simpleHttpServer) {
+    public SB3Agent(XNTupleFuncs xnTupleFuncs, List<String> enemyAgentsFilePaths, Arena arena, SimpleHttpServer simpleHttpServer, boolean oneHot) {
         this.xnTupleFuncs = xnTupleFuncs;
+        this.oneHot = oneHot;
         enemyAgents = loadAgents(enemyAgentsFilePaths, arena);
 
-        rlEnvironment = new RLEnvironmentConnector(this.xnTupleFuncs, enemyAgents, this);
+        rlEnvironment = new RLEnvironmentConnector(this.xnTupleFuncs, enemyAgents, this, oneHot);
         this.gameBoard = arena.getGameBoard();
 
         //start server
@@ -52,7 +54,7 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
         this.simpleHttpServer = simpleHttpServer;
         simpleHttpServer.setRlEnvironment(rlEnvironment); // TODO: who owns the rl environment?
         // creat SB3 env and Agent
-        createEnv();
+        createEnv(oneHot);
     }
 
     private static List<PlayAgent> loadAgents(List<String> enemyAgentsFilePaths, Arena arena) {
@@ -243,9 +245,13 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
         }
     }
 
-    private void createEnv() {
-        int observationVectorSize = xnTupleFuncs.getBoardVector(getStartSate()).bvec.length;
+    private void createEnv(boolean oneHot) {
+        int observationVectorSize;
         int actionSpaceSize = getStartSate().getNumAvailableActions();
+
+        if (oneHot) observationVectorSize = xnTupleFuncs.getOneHotSize();
+        else observationVectorSize = xnTupleFuncs.getNumCells();
+
         createEnvHttpRequest(observationVectorSize, actionSpaceSize);
     }
 
@@ -301,7 +307,8 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
 
     @Override
     public Types.ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean deterministic, boolean silent) {
-        int[] boardVector = xnTupleFuncs.getBoardVector(sob).bvec;
+        int[] boardVector = oneHot ? xnTupleFuncs.getOneHotBoardVector(xnTupleFuncs.getStandardPerspectivesBoardVector(sob)).bvec :
+                xnTupleFuncs.getBoardVector(sob).bvec;
         List<Double> observation= new ArrayList<>();
         for(int i : boardVector) {
             observation.add((double) i);

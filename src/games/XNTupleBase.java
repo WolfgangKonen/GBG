@@ -92,6 +92,30 @@ abstract public class XNTupleBase implements Serializable, XNTupleFuncs {
 	@Override
 	abstract public BoardVector getBoardVector(StateObservation so);
 
+	/* If it's a more then 1 player game this methode, should return a BoardVector as if it's seen from the perspective of the first player, so so.getPlayer() = 0 */
+	@Override
+	public BoardVector getStandardPerspectivesBoardVector(StateObservation so) {
+		return getBoardVector(so);
+	}
+
+	/* this Method works for all games where the PositionValues are continues whith no gabs. Like in TicTacToe the PositionValues are 0,1,2.
+	* For Example 0,2,10 would not work. */
+	@Override
+	public BoardVector getOneHotBoardVector(BoardVector boardVector) {
+		int[] oneHotBoardVector = new int[getOneHotSize()];
+		int[] bvec = boardVector.bvec;
+		for(int i = 0; i < bvec.length; i++) {
+			int oneHotI = i * getNumPositionValues() + bvec[i];
+			oneHotBoardVector[oneHotI] = 1;
+		}
+		return new BoardVector(oneHotBoardVector);
+	}
+
+	@Override
+	public int getOneHotSize() {
+		return getNumCells() * getNumPositionValues();
+	}
+
 	@Override
 	public BoardVector[] symmetryVectors(StateObsWithBoardVector curSOWB, int n) {
 		return symmetryVectors(curSOWB.getBoardVector(),n);

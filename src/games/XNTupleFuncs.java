@@ -76,6 +76,12 @@ public interface XNTupleFuncs {
 	 */
 	BoardVector getBoardVector(StateObservation so);
 
+	BoardVector getStandardPerspectivesBoardVector(StateObservation so);
+
+	BoardVector getOneHotBoardVector(BoardVector boardVector);
+
+	int getOneHotSize();
+
 	/**
 	 * @return a board vector where each cell has a different {@code int} 
 	 */

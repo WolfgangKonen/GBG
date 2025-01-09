@@ -258,9 +258,9 @@ public class XArenaFuncs {
 				case "SB3" -> {
 					XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
 					List<String> enemyAgentsFilePaths = new ArrayList<>();
-					enemyAgentsFilePaths.add("C:\\Users\\Leon Püschel\\IdeaProjects\\GBG\\agents\\TicTacToe\\qlearn4.agt.zip");
+					enemyAgentsFilePaths.add("C:\\Users\\leonp\\IdeaProjects\\GBG\\agents\\TicTacToe\\qlearn4.agt.zip");
 					SimpleHttpServer simpleHttpServer = SimpleHttpServer.getInstance();
-					pa = new SB3Agent(xnf, enemyAgentsFilePaths, m_xab.m_arena, simpleHttpServer);
+					pa = new SB3Agent(xnf, enemyAgentsFilePaths, m_xab.m_arena, simpleHttpServer, true);
 				}
 				default -> throw new RuntimeException("Unknown agent name " + sAgent);
 			}
@@ -519,7 +519,7 @@ public class XArenaFuncs {
 					List<String> enemyAgentsFilePaths = new ArrayList<>();
 					enemyAgentsFilePaths.add("sarsaNT.agt.zip");
 					SimpleHttpServer simpleHttpServer = SimpleHttpServer.getInstance();
-					pa = new SB3Agent(xnf, enemyAgentsFilePaths, m_xab.m_arena, simpleHttpServer);
+					pa = new SB3Agent(xnf, enemyAgentsFilePaths, m_xab.m_arena, simpleHttpServer, true);
 				}
 				default ->
 						throw new RuntimeException("Could not construct trainable agent: Unknown agent name " + sAgent);
@@ -753,7 +753,7 @@ public class XArenaFuncs {
 		long startTime = System.currentTimeMillis();
 		gb.initialize();
 		if(pa instanceof SB3Agent sb3Agent) {
-			sb3Agent.learn(1000);
+			sb3Agent.learn(10000);
 			return sb3Agent;
 		}
 		while (pa.getGameNum() < pa.getMaxGameNum()) {
