@@ -24,8 +24,7 @@ public class RLEnvironmentConnector implements RLEnvironment {
         this.oneHot = oneHot;
     }
 
-    @Override
-    public List<Double> getObservation() {
+    public List<Double> getPlainObservation() {
         int[] boardVector = xnTupleFuncs.getBoardVector(this.stateObservation).bvec;
         List<Double> observation= new ArrayList<>();
         for(int i : boardVector) {
@@ -52,6 +51,11 @@ public class RLEnvironmentConnector implements RLEnvironment {
             observation.add((double) i);
         }
         return observation;
+    }
+
+    @Override
+    public List<Double> getObservation() {
+        return oneHot ? getOneHotStandardObservation() : getStandardPerspectiveObservation();
     }
 
     public void initiateNewGame(StateObservation stateObservation) {
@@ -85,8 +89,7 @@ public class RLEnvironmentConnector implements RLEnvironment {
     public FirstObservation reset() {
         this.stateObservation = sb3Agent.getStartSate();
 
-        List<Double> observationVector = oneHot ? getOneHotStandardObservation() : getStandardPerspectiveObservation();
-        return new FirstObservation(observationVector, getInfo());
+        return new FirstObservation(getObservation(), getInfo());
     }
 
     @Override
@@ -96,8 +99,7 @@ public class RLEnvironmentConnector implements RLEnvironment {
 
         // When caught cheating return same observation and min game score. StateObservation gets reset afterward when sb3 calls reset.
         if(!availableActions.contains(chosenAction)) {
-            List<Double> observationVector = oneHot ? getOneHotStandardObservation() : getStandardPerspectiveObservation(); //TODO: method for onehot or noraml
-            return new Transition(observationVector, stateObservation.getMinGameScore(), true, truncated(), getInfo());
+            return new Transition(getObservation(), stateObservation.getMinGameScore(), true, truncated(), getInfo());
         }
 
         try {
@@ -110,7 +112,7 @@ public class RLEnvironmentConnector implements RLEnvironment {
         int enemyPlayer = 0;
         while (stateObservation.getPlayer() != this.trainedPlayer && !terminated() && !truncated()) {
             // Types.ACTIONS actions = enemyAgents.get(enemyPlayer).getNextAction2(stateObservation, false, true, true);
-            System.out.println("enemy" + getObservation());
+            System.out.println("enemy" + getPlainObservation());
             availableActions = stateObservation.getAvailableActions();
             Random random = new Random();
             stateObservation.advance(availableActions.get(random.nextInt(availableActions.size())), null);
@@ -118,11 +120,9 @@ public class RLEnvironmentConnector implements RLEnvironment {
             enemyPlayer++;
         }
 
-        List<Double> observationVector = oneHot ? getOneHotStandardObservation() : getStandardPerspectiveObservation();
+        System.out.println("me   " + getObservation() + terminated());
 
-        System.out.println("me   " + observationVector + terminated());
-
-        return new Transition(observationVector, getReward(), terminated(), truncated(), getInfo());
+        return new Transition(getObservation(), getReward(), terminated(), truncated(), getInfo());
     }
 
     @Override

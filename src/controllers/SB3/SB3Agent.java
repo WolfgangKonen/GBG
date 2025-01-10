@@ -6,10 +6,7 @@ import controllers.AgentBase;
 import controllers.PlayAgent;
 import controllers.SB3.HttpServer.SimpleHttpServer;
 import game.rules.play.moves.nonDecision.effect.requirement.Do;
-import games.Arena;
-import games.GameBoard;
-import games.StateObservation;
-import games.XNTupleFuncs;
+import games.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import tools.Types;
@@ -246,11 +243,8 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
     }
 
     private void createEnv(boolean oneHot) {
-        int observationVectorSize;
+        int observationVectorSize = getObservationVectorSize();
         int actionSpaceSize = getStartSate().getNumAvailableActions();
-
-        if (oneHot) observationVectorSize = xnTupleFuncs.getOneHotSize();
-        else observationVectorSize = xnTupleFuncs.getNumCells();
 
         createEnvHttpRequest(observationVectorSize, actionSpaceSize);
     }
@@ -304,16 +298,24 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
         return stateObservation;
     }
 
+    private BoardVector getBoardVector(StateObservation stateObservation) {
+        return oneHot ? xnTupleFuncs.getOneHotBoardVector(xnTupleFuncs.getStandardPerspectivesBoardVector(stateObservation)) :
+                xnTupleFuncs.getBoardVector(stateObservation);
+    }
+
+    private int getObservationVectorSize() {
+        return oneHot ? xnTupleFuncs.getOneHotSize() : xnTupleFuncs.getNumCells();
+    }
+
 
     @Override
     public Types.ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean deterministic, boolean silent) {
-        int[] boardVector = oneHot ? xnTupleFuncs.getOneHotBoardVector(xnTupleFuncs.getStandardPerspectivesBoardVector(sob)).bvec :
-                xnTupleFuncs.getBoardVector(sob).bvec;
+        int[] boardVector = getBoardVector(sob).bvec;
         List<Double> observation= new ArrayList<>();
         for(int i : boardVector) {
             observation.add((double) i);
         }
-
+        System.out.println(xnTupleFuncs.getBoardVector(sob));
         double action = 0;
         try {
             action = predictHttpRequest(observation);
