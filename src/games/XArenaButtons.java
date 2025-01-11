@@ -46,6 +46,7 @@ public class XArenaButtons //extends JPanel
 	public ParEdax[] edPar;
 	public ParRB[] rbPar;
 	public ParWrapper[] wrPar;
+	public ParSB3[] sb3Par;
 	public String[] selectedAgents;
 
 	// tournament system remote data input
@@ -77,6 +78,7 @@ public class XArenaButtons //extends JPanel
 		edPar = new ParEdax[numPlayers];
 		rbPar = new ParRB[numPlayers];
 		wrPar = new ParWrapper[numPlayers];
+		sb3Par = new ParSB3[numPlayers];
 		selectedAgents = new String[numPlayers];
 
 		// for-loop over *decrementing* n so that we set on the last pass (n=0) with the call 
@@ -94,6 +96,7 @@ public class XArenaButtons //extends JPanel
 			edPar[n] = new ParEdax(m_arena.hasGUI());
 			rbPar[n] = new ParRB(m_arena.hasGUI());
 			wrPar[n] = new ParWrapper(m_arena.hasGUI());
+			sb3Par[n] = new ParSB3(m_arena.hasGUI());
 			this.setParamDefaults(n, Types.GUI_AGENT_INITIAL[n], m_arena.getGameName());
 			
 			try {

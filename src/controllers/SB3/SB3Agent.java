@@ -9,9 +9,13 @@ import game.rules.play.moves.nonDecision.effect.requirement.Do;
 import games.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import params.ParMCTS;
+import params.ParOther;
+import params.ParSB3;
 import tools.Types;
 
 import java.io.*;
+import java.lang.reflect.Array;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpClient;
@@ -19,10 +23,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.zip.GZIPInputStream;
 
 public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
@@ -31,16 +32,30 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
     private XNTupleFuncs xnTupleFuncs;
     private List<PlayAgent> enemyAgents;
     private boolean oneHot;
+    private ParSB3 parSB3;
+    private ParOther parOther;
+    private XArenaFuncs xArenaFuncs;
+    private XArenaButtons xArenaButtons;
+    private int playerNumber;
 
     private GameBoard gameBoard;
 
-    public SB3Agent(XNTupleFuncs xnTupleFuncs, List<String> enemyAgentsFilePaths, Arena arena, SimpleHttpServer simpleHttpServer, boolean oneHot) {
+    public SB3Agent(String name, ParSB3 parSB3, ParOther oPar, XNTupleFuncs xnTupleFuncs, XArenaButtons m_xab, SimpleHttpServer simpleHttpServer, boolean oneHot, XArenaFuncs xArenaFuncs, int playerNumber) {
+        super(name);
+        this.parSB3 = parSB3;
+        this.parOther = oPar;
         this.xnTupleFuncs = xnTupleFuncs;
         this.oneHot = oneHot;
-        enemyAgents = loadAgents(enemyAgentsFilePaths, arena);
+        this.xArenaButtons = m_xab;
+        this.xArenaFuncs = xArenaFuncs;
+        this.playerNumber = playerNumber; //TODO: Initialize after loading
 
-        rlEnvironment = new RLEnvironmentConnector(this.xnTupleFuncs, enemyAgents, this, oneHot);
-        this.gameBoard = arena.getGameBoard();
+        enemyAgents = loadAgents();
+
+        System.out.println("ERstelt!!!!!!!!");
+
+        rlEnvironment = new RLEnvironmentConnector(this.xnTupleFuncs, enemyAgents, this, oneHot, playerNumber);
+        this.gameBoard = m_xab.m_arena.getGameBoard();
 
         //start server
         /*try {
@@ -54,13 +69,15 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
         createEnv(oneHot);
     }
 
-    private static List<PlayAgent> loadAgents(List<String> enemyAgentsFilePaths, Arena arena) {
+    private List<PlayAgent> loadAgents() {
         /*
         List<PlayAgent> playAgents = new ArrayList<>();
         for(String path: enemyAgentsFilePaths) {
             playAgents.add(arena.loadAgent(path));
         }
         return playAgents; */
+
+        /*
         List<PlayAgent> playAgents = new ArrayList<>();
         for(String path: enemyAgentsFilePaths) {
             try {
@@ -71,6 +88,18 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
             }
         }
         return playAgents;
+         */
+        // TODO: public PlayAgent fetchAgent in XAreanFuncs
+        List<PlayAgent> enemies = new ArrayList<PlayAgent>();
+        for(int n = 0; n < xnTupleFuncs.getNumPlayers(); n++) {
+            if (n != playerNumber) enemies.add(this.xArenaFuncs.fetchAgent(n, xArenaButtons.getSelectedAgent(n), xArenaButtons));
+        }
+        System.out.println("Enemies loaded: ");
+        for (PlayAgent enemy: enemies) {
+            System.out.println(enemy.getName());
+        }
+        System.out.println();
+        return enemies;
     }
 
     private static PlayAgent loadAgent(String enemyAgentsFilePaths) throws IOException {
@@ -321,6 +350,14 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
             action = predictHttpRequest(observation);
         } catch (Exception e) {
             e.printStackTrace();
+        }
+
+        // TODO: get next best action instead of random
+        List<Types.ACTIONS> validActions = sob.getAvailableActions();
+        if (!validActions.contains(new Types.ACTIONS((int) action))) {
+            System.out.println("Already occupied.");
+            System.out.println("Tried action " + (int) action);
+            return new Types.ACTIONS_VT(validActions.get(0).toInt());
         }
 
         return new Types.ACTIONS_VT((int) action);

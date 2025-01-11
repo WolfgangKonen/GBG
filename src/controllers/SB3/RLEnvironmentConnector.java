@@ -14,14 +14,14 @@ public class RLEnvironmentConnector implements RLEnvironment {
     private SB3Agent sb3Agent;
     private boolean oneHot;
 
-    private int trainedPlayer = 0;
+    private int playerNumber;
 
-    public RLEnvironmentConnector(XNTupleFuncs xnTupleFuncs, List<PlayAgent> enemyAgents, SB3Agent sb3Agent, boolean oneHot) {
-        this.stateObservation = stateObservation;
+    public RLEnvironmentConnector(XNTupleFuncs xnTupleFuncs, List<PlayAgent> enemyAgents, SB3Agent sb3Agent, boolean oneHot, int playerNumber) {
         this.xnTupleFuncs = xnTupleFuncs;
         this.enemyAgents = enemyAgents;
         this.sb3Agent = sb3Agent;
         this.oneHot = oneHot;
+        this.playerNumber = playerNumber;
     }
 
     public List<Double> getPlainObservation() {
@@ -65,7 +65,7 @@ public class RLEnvironmentConnector implements RLEnvironment {
     @Override
     public double getReward() {
         // return stateObservation.getReward(this.trainedPlayer, false);
-        return stateObservation.getGameScore(trainedPlayer);
+        return stateObservation.getGameScore(playerNumber);
     }
 
     @Override
@@ -94,6 +94,21 @@ public class RLEnvironmentConnector implements RLEnvironment {
 
     @Override
     public Transition step(int action) {
+        int enemyPlayer = 0;
+        while (stateObservation.getPlayer() != this.playerNumber && !terminated() && !truncated()) {
+
+            System.out.println("enemy" + getPlainObservation());
+
+            // availableActions = stateObservation.getAvailableActions();
+            // Random random = new Random();
+            // Types.ACTIONS enemyAction = availableActions.get(random.nextInt(availableActions.size()))
+            Types.ACTIONS enemyAction = enemyAgents.get(enemyPlayer).getNextAction2(stateObservation, false, true, true);
+
+            stateObservation.advance(enemyAction, null);
+
+            enemyPlayer++;
+        }
+
         List<Types.ACTIONS> availableActions = stateObservation.getAvailableActions();
         Types.ACTIONS chosenAction = new Types.ACTIONS(action);
 
@@ -107,17 +122,6 @@ public class RLEnvironmentConnector implements RLEnvironment {
         } catch (AssertionError e) {
             e.printStackTrace();
             sb3Agent.notify();
-        }
-
-        int enemyPlayer = 0;
-        while (stateObservation.getPlayer() != this.trainedPlayer && !terminated() && !truncated()) {
-            // Types.ACTIONS actions = enemyAgents.get(enemyPlayer).getNextAction2(stateObservation, false, true, true);
-            System.out.println("enemy" + getPlainObservation());
-            availableActions = stateObservation.getAvailableActions();
-            Random random = new Random();
-            stateObservation.advance(availableActions.get(random.nextInt(availableActions.size())), null);
-
-            enemyPlayer++;
         }
 
         System.out.println("me   " + getObservation() + terminated());
