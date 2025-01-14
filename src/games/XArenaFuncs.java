@@ -257,8 +257,6 @@ public class XArenaFuncs {
 						pa = new KuhnPokerAgent("KuhnOptimal");
 				case "SB3" -> {
 					XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
-					List<String> enemyAgentsFilePaths = new ArrayList<>();
-					enemyAgentsFilePaths.add("C:\\Users\\leonp\\IdeaProjects\\GBG\\agents\\TicTacToe\\qlearn4.agt.zip");
 					SimpleHttpServer simpleHttpServer = SimpleHttpServer.getInstance();
 					pa = new SB3Agent(sAgent, m_xab.sb3Par[n], m_xab.oPar[n], xnf, m_xab, simpleHttpServer, true, this, n);
 				}
@@ -516,8 +514,6 @@ public class XArenaFuncs {
 				}
 				case "SB3" -> {
 					XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
-					List<String> enemyAgentsFilePaths = new ArrayList<>();
-					enemyAgentsFilePaths.add("sarsaNT.agt.zip");
 					SimpleHttpServer simpleHttpServer = SimpleHttpServer.getInstance();
 					pa = new SB3Agent(sAgent, m_xab.sb3Par[n], m_xab.oPar[n], xnf, m_xab, simpleHttpServer, true, this, n);
 				}
@@ -753,7 +749,7 @@ public class XArenaFuncs {
 		long startTime = System.currentTimeMillis();
 		gb.initialize();
 		if(pa instanceof SB3Agent sb3Agent) {
-			sb3Agent.learn(60000);
+			sb3Agent.learn(160000);
 			return sb3Agent;
 		}
 		while (pa.getGameNum() < pa.getMaxGameNum()) {

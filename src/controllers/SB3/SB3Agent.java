@@ -52,7 +52,6 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
 
         enemyAgents = loadAgents();
 
-        System.out.println("ERstelt!!!!!!!!");
 
         rlEnvironment = new RLEnvironmentConnector(this.xnTupleFuncs, enemyAgents, this, oneHot, playerNumber);
         this.gameBoard = m_xab.m_arena.getGameBoard();
@@ -89,7 +88,6 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
         }
         return playAgents;
          */
-        // TODO: public PlayAgent fetchAgent in XAreanFuncs
         List<PlayAgent> enemies = new ArrayList<PlayAgent>();
         for(int n = 0; n < xnTupleFuncs.getNumPlayers(); n++) {
             if (n != playerNumber) enemies.add(this.xArenaFuncs.fetchAgent(n, xArenaButtons.getSelectedAgent(n), xArenaButtons));
