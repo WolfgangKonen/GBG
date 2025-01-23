@@ -47,9 +47,12 @@ public class GBGLaunch extends SetupGBG {
 	private final JLabel scaPar0_L;
 	private final JLabel scaPar1_L;
 	private final JLabel scaPar2_L;
+	private final JLabel scaPar3_L;
 	private final JComboBox<String> choiceScaPar0;
 	private final JComboBox<String> choiceScaPar1;
 	private final JComboBox<String> choiceScaPar2;
+	private final JComboBox<String> choiceScaPar3;
+
 
 	/**
 	 * Starts the  general launcher for GBG. The user may select via launcher UI or predefine  
@@ -139,15 +142,15 @@ public class GBGLaunch extends SetupGBG {
 	 */
 	private static void startGBGame(String selectedGame, GBGLaunch t_Launch, boolean withTrainRights) {
 		String x, title = "General Board Game Playing";
-		String[] scaPar = new String[3];
-		for (int i=0; i<3; i++) scaPar[i]="";
+		String[] scaPar = new String[4];  // Change to 4 elements
+		for (int i=0; i<4; i++) scaPar[i]="";  // Initialize all 4
 		if (t_Launch==null) {
 			scaPar = setDefaultScaPars(selectedGame);
 		} else {
-			// replace scaPar[i] only, if the selected item is not null (to avoid NullPointerException when later using scaPar[i])
 			x = (String) t_Launch.choiceScaPar0.getSelectedItem(); if (x!=null) scaPar[0]=x;
 			x = (String) t_Launch.choiceScaPar1.getSelectedItem(); if (x!=null) scaPar[1]=x;
 			x = (String) t_Launch.choiceScaPar2.getSelectedItem(); if (x!=null) scaPar[2]=x;
+			x = (String) t_Launch.choiceScaPar3.getSelectedItem(); if (x!=null) scaPar[3]=x;  // Add this
 		}
 
 		// SetupGBG.setupSelectedGame has the switch statement over all games:
@@ -186,6 +189,8 @@ public class GBGLaunch extends SetupGBG {
 		choiceScaPar1 = new JComboBox<>();
 		scaPar2_L = new JLabel("");
 		choiceScaPar2 = new JComboBox<>();
+		scaPar3_L = new JLabel("");
+		choiceScaPar3 = new JComboBox<>();
 		JPanel scaPar0Panel = new JPanel();
 		scaPar0Panel.setLayout(new GridLayout(1,0,2,2));		// rows,columns,hgap,vgap
 		scaPar0Panel.add(scaPar0_L);
@@ -198,6 +203,10 @@ public class GBGLaunch extends SetupGBG {
 		scaPar2Panel.setLayout(new GridLayout(1,0,2,2));		// rows,columns,hgap,vgap
 		scaPar2Panel.add(scaPar2_L);
 		scaPar2Panel.add(choiceScaPar2);
+		JPanel scaPar3Panel = new JPanel();
+		scaPar3Panel.setLayout(new GridLayout(1, 0, 2, 2));
+		scaPar3Panel.add(scaPar3_L);
+		scaPar3Panel.add(choiceScaPar3);
 
 		JButton StartG=new JButton("Start Game");
 		StartG.setBorder(bord);
@@ -218,6 +227,7 @@ public class GBGLaunch extends SetupGBG {
 		launcherUI.add(scaPar0Panel);
 		launcherUI.add(scaPar1Panel);
 		launcherUI.add(scaPar2Panel);
+		launcherUI.add(scaPar3Panel);  // Add this before the StartG button
 		launcherUI.add(StartG);
 		launcherUI.add(Exit);
 		launcherUI.addWindowListener(new WindowClosingAdapter());
@@ -382,23 +392,27 @@ public class GBGLaunch extends SetupGBG {
 			choiceScaPar1.setSelectedItem("6");		// the initial (recommended) values 
 			choiceScaPar2.setSelectedItem("None");	// 
 			break;
-		case "RubiksCube": 
+		case "RubiksCube":
+			// Menu option descriptor
 			scaPar0_L.setText("Cube Type");
 			scaPar1_L.setText("Board Vec");
 			scaPar2_L.setText("Twist Type");
+			scaPar3_L.setText("Visualization");
+			// Tooltips
 			scaPar0_L.setToolTipText("Pocket Cube or Rubik's Cube");
 			scaPar1_L.setToolTipText("Type of board vectors (only n-tuple agents)");
 			scaPar2_L.setToolTipText("Type of twists (all or only quarter)");
-			//setScaPar0List(new int[]{});
-			//setScaPar1List(new int[]{});
-			//setScaPar2List(new int[]{});
+			scaPar3_L.setToolTipText("Type of visual representation");
+			// Menu options
 			setScaPar0List(new String[]{"2x2x2","3x3x3"});
 			setScaPar1List(new String[]{"CSTATE","CPLUS","STICKER","STICKER2"});
 			setScaPar2List(new String[]{"HTM","QTM"});
-			//choiceScaPar0.addItem("3x3x3");
+			setScaPar3List(new String[]{"2D", "3D"});
+			// Default Selections
 			choiceScaPar0.setSelectedItem("3x3x3");			//
 			choiceScaPar1.setSelectedItem("STICKER2");		// the initial (recommended) values
 			choiceScaPar2.setSelectedItem("QTM");			//
+			choiceScaPar3.setSelectedItem("2D");
 			break;
 		case "EWN":
 			scaPar0_L.setText("Settings:");
@@ -486,6 +500,12 @@ public class GBGLaunch extends SetupGBG {
 		choiceScaPar2.removeAllItems();
 		for (String s : modeList)
 			choiceScaPar2.addItem(s);
+	}
+
+	public void setScaPar3List(String[] modeList) {
+		choiceScaPar3.removeAllItems();
+		for (String s : modeList)
+			choiceScaPar3.addItem(s);
 	}
 
 	//

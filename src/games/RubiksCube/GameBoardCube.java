@@ -6,13 +6,17 @@ import controllers.PlayAgent;
 import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.GameBoard;
 import games.GameBoardBase;
+import games.RubiksCube.GUI.GameBoardCubeGui;
+import games.RubiksCube.GUI.GameBoardCubeGui2x2;
+import games.RubiksCube.GUI.GameBoardCubeGui3x3;
+import games.RubiksCube.GUI.GameBoardCubeGui3x3x3;
 import games.StateObservation;
 import games.Arena;
 import tools.Types;
 
 /**
  * This class implements the GameBoard interface for RubiksCube.
- * Its member {@link GameBoardCubeGui} {@code m_gameGui} has the game board GUI. 
+ * Its member {@link GameBoardCubeGui} {@code m_gameGui} has the game board GUI.
  * {@code m_gameGui} may be {@code null} in batch runs. 
  * <p>
  * It implements the interface functions and has the user interaction methods HGameMove and 
@@ -32,7 +36,7 @@ public class GameBoardCube extends GameBoardBase implements GameBoard {
 	 * The representation of the state corresponding to the current 
 	 * board position.
 	 */
-	protected StateObserverCube m_so;
+        public StateObserverCube stateObserverCube;
 	private final StateObserverCube def = new StateObserverCube();
 
 	public GameBoardCube(Arena arena) {
@@ -44,25 +48,25 @@ public class GameBoardCube extends GameBoardBase implements GameBoard {
 	/**
 	 * called by constructor and prior to each training run
 	 */
+	@Override
 	public void initialize() {
-//		long seed = 999;
-//		rand 		= new Random(seed);
-        rand 		= new Random(System.currentTimeMillis());	
-        rand2 		= new Random(2*System.currentTimeMillis());	
-		m_so		= new StateObserverCube();	// solved cube
-		
-        if (getArena().hasGUI() && m_gameGui==null) {
-			switch (CubeConfig.cubeSize) {
-				case POCKET -> m_gameGui = new GameBoardCubeGui2x2(this);
-				case RUBIKS -> m_gameGui = new GameBoardCubeGui3x3(this);
+		//		long seed = 999;
+		// 		rand 		= new Random(seed);
+		rand 		= new Random(System.currentTimeMillis());
+		rand2 		= new Random(2*System.currentTimeMillis());
+		stateObserverCube = new StateObserverCube();	// solved cube
+
+		if (getArena().hasGUI() && m_gameGui==null) {
+			if (CubeConfig.visualizationType == CubeConfig.VisualizationType.TWOD) {
+				switch (CubeConfig.cubeSize) {
+					case POCKET -> m_gameGui = new GameBoardCubeGui2x2(this);
+					case RUBIKS -> m_gameGui = new GameBoardCubeGui3x3(this);
+				}
+			} else {
+				// Create 3D visualization here
+				m_gameGui = new GameBoardCubeGui3x3x3(this);  // You would need to create this class
 			}
-
-        }
-        updateParams();		// update 5 params in CubeConfig from agent settings
-
-        //getPMax();		// actualize CubeConfig.pMin and CubeConfig.pMax, if GUI present
-		//CubeConfig.setStepReward();	// actualize CubeConfig.stepReward according to current CubeConfig.cubeSize (from scalable params)
-
+		}
 	}
 
 	/**
@@ -109,7 +113,7 @@ public class GameBoardCube extends GameBoardBase implements GameBoard {
 	@Override
 	public void clearBoard(boolean boardClear, boolean vClear, Random cmpRand) {
 		if (boardClear) {
-			m_so = new StateObserverCube();			// solved cube
+			stateObserverCube = new StateObserverCube();			// solved cube
 		}
 							// considerable speed-up during training (!)
         if (m_gameGui!=null && getArena().taskState!=Arena.Task.TRAIN)
@@ -122,7 +126,7 @@ public class GameBoardCube extends GameBoardBase implements GameBoard {
 			assert (so instanceof StateObserverCube)
 					: "StateObservation 'so' is not an instance of StateObserverCube";
 			StateObserverCube soN = (StateObserverCube) so;
-			m_so = soN;//.copy();
+			stateObserverCube = soN;//.copy();
 		}
 	}
 
@@ -150,37 +154,37 @@ public class GameBoardCube extends GameBoardBase implements GameBoard {
 		
 	}
 
-	protected void HGameMove(int x, int y)
+	public void HGameMove(int x, int y)
 	{
 		String[] twiStr = {"U","L","F","D","R","B"};
 		System.out.println(twiStr[x]+(y+1));
 		int iAction = 3*x+y;
 		Types.ACTIONS act = Types.ACTIONS.fromInt(iAction);
-		assert m_so.isLegalAction(act) : "Desired action is not legal";
-		m_so.advance(act, null);			// perform action (optionally add random elements)
-		System.out.println(m_so.stringDescr());
-		(getArena().getLogManager()).addLogEntry(act, m_so, getArena().getLogSessionID());
+		assert stateObserverCube.isLegalAction(act) : "Desired action is not legal";
+		stateObserverCube.advance(act, null);			// perform action (optionally add random elements)
+		System.out.println(stateObserverCube.stringDescr());
+		(getArena().getLogManager()).addLogEntry(act, stateObserverCube, getArena().getLogSessionID());
 		updateBoard(null,false,false);
 		setActionReq(true);			// ask Arena for next action
 	}
 	
-	protected void InspectMove(int x, int y)
+	public void InspectMove(int x, int y)
 	{
 		String[] twiStr = {"U","L","F","D","R","B"};
 		System.out.println(twiStr[x]+(y+1));
 		int iAction = 3*x+y;
 		Types.ACTIONS act = Types.ACTIONS.fromInt(iAction);
-		if (!m_so.isLegalAction(act)) {
+		if (!stateObserverCube.isLegalAction(act)) {
 			System.out.println("Desired action is not legal!");
 			getArena().setStatusMessage("Desired action is not legal");
 			return;
 		} else {
 			getArena().setStatusMessage("Inspecting the value function ...");
 		}
-		m_so.advance(act, null);			// perform action (optionally add random elements from game
+		stateObserverCube.advance(act, null);			// perform action (optionally add random elements from game
 									// environment - not necessary in RubiksCube)
-		m_so.getCubeState().clearLast();		// clear lastTwist and lastTimes of the CubeState,
-		m_so.setAvailableActions();				// then set the available actions which causes all
+		stateObserverCube.getCubeState().clearLast();		// clear lastTwist and lastTimes of the CubeState,
+		stateObserverCube.setAvailableActions();				// then set the available actions which causes all
 												// numAllActions actions to be added to m_so.acts. We need this
 												// to see the values for all numAllActions actions.
 												// (If lastTwist were set, 3 actions would be excluded
@@ -190,7 +194,7 @@ public class GameBoardCube extends GameBoardBase implements GameBoard {
 	}
 	
 	public StateObservation getStateObs() {
-		return m_so;
+		return stateObserverCube;
 	}
 
 	/**
@@ -200,7 +204,7 @@ public class GameBoardCube extends GameBoardBase implements GameBoard {
 	@Override
 	public StateObservation getDefaultStartState(Random cmpRand) {
 		clearBoard(true, true, null);
-		return m_so;
+		return stateObserverCube;
 	}
 
 	/**
@@ -230,15 +234,15 @@ public class GameBoardCube extends GameBoardBase implements GameBoard {
 	 */
 	public StateObservation chooseStartState(int p) {		
 		clearBoard(true, true, null);			// m_so is in default start state
-		m_so = selectByTwists1(p);
+		stateObserverCube = selectByTwists1(p);
 
 		// StateObserverCubeCleared is important, so that no actions are 'forgotten' when 
 		// trying to solve m_so (!!). It also resets moveCounter
 		//m_so = new StateObserverCubeCleared(m_so,p);
-		m_so = (StateObserverCube) m_so.clearedCopy();
+		stateObserverCube = (StateObserverCube) stateObserverCube.clearedCopy();
 		
 		//System.out.println("p = "+p+",  "+m_so.getCubeState().twistSeq);
-		return m_so;
+		return stateObserverCube;
 	}
 
 
@@ -264,13 +268,13 @@ public class GameBoardCube extends GameBoardBase implements GameBoard {
 		clearBoard(true, true, null);			// m_so is in default start state
 		p = 1+rand.nextInt(CubeConfig.pMax);
 		// since rand.nextInt(K) selects from {0,...,K-1}, we have p from {1,...,pMax}
-		m_so = selectByTwists1(p);
+		stateObserverCube = selectByTwists1(p);
 
 		// StateObserverCubeCleared is important, so that no actions are 'forgotten' when 
 		// trying to solve m_so (!!)
 		//m_so = new StateObserverCubeCleared(m_so,p);
-		m_so = (StateObserverCube) m_so.clearedCopy();
-		return m_so;
+		stateObserverCube = (StateObserverCube) stateObserverCube.clearedCopy();
+		return stateObserverCube;
 	}
 	
 	/** 

@@ -1,9 +1,20 @@
 package games.RubiksCube;
 
+import games.RubiksCube.GUI.GameBoardCubeGui;
 import games.StateObservation;
 import params.ParOther;
 
 public class CubeConfig {
+
+	/**
+	 * What is the visual representation?
+	 * <ul>
+	 *     <li> <b>TWOD</b>: 2D Representation</li>
+	 *     <li> <b>THREED</b>: 3D Representation</li>
+	 * </ul>
+	 */
+	public enum VisualizationType {TWOD, THREED}
+	public static VisualizationType visualizationType = VisualizationType.TWOD;
 
 	/**
 	 * What is the cube size?
@@ -61,7 +72,7 @@ public class CubeConfig {
 	 * <li> Maximum number of scrambling twists in {@link EvaluatorCube}
 	 * <li> (Deprecated) Up to which p the distance set arrays D[p] and T[p] in {@link GameBoardCube} are filled.
 	 * </ul>
-	 * In case that {@link GameBoardCubeGui} is present, the value of  <b>{@code pMax}</b> will be updated from 
+	 * In case that {@link GameBoardCubeGui} is present, the value of  <b>{@code pMax}</b> will be updated from
 	 * {@link ParOther}'s {@code pMax} each time a train, play or evaluation process is started. This allows to
 	 * switch <b>{@code pMax}</b> at runtime.
 	 */

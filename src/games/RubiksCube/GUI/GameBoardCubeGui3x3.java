@@ -1,6 +1,9 @@
-package games.RubiksCube;
+package games.RubiksCube.GUI;
 
 import games.Arena;
+import games.RubiksCube.CubeState;
+import games.RubiksCube.GameBoardCube;
+import games.RubiksCube.StateObserverCube;
 import tools.Types;
 
 import javax.swing.*;
@@ -9,7 +12,7 @@ import java.awt.*;
 /**
  * GUI of the 3x3x3 Rubik's Cube in the 'flattened cube' representation.
  * <p>
- * The numbering in {@link CubeState#fcol} runs around the cube faces in the following order: U, L, F, D, R, B.
+ * The numbering in {@link CubeState#getFcol()} runs around the cube faces in the following order: U, L, F, D, R, B.
  * Within the first three faces, we start at the wbo-cubie; within the last three faces we start
  * at the ygr-cubie. Within each face we march around in counter-clockwise
  * orientation. This gives for the 3x3x3 Rubik's Cube the following numbering:
@@ -58,7 +61,7 @@ public class GameBoardCubeGui3x3 extends GameBoardCubeGui {
 
         // ensure that ButtonBoard is already visible in the beginning,
         // if updateBoard() is configured in this way:
-        this.updateBoard((StateObserverCube)m_gb.getDefaultStartState(null), true, true);
+        this.updateBoard((StateObserverCube) gameBoardCube.getDefaultStartState(null), true, true);
     }
 
     protected JPanel InitBoard()
@@ -98,12 +101,12 @@ public class GameBoardCubeGui3x3 extends GameBoardCubeGui {
      */
     protected void guiUpdateBoard(boolean enable, boolean showValueOnGameboard) {
         int i, fcol_i;
-        int fcol_length = m_gb.m_so.getCubeState().get_fcol_length();
+        int fcol_length = gameBoardCube.stateObserverCube.getCubeState().get_fcol_length();
         //                      U         L        F         D          R         B
         Color[] colors = {Color.white, colBlue, colOrang, colYellow, colGreen, colRed};        //{w,b,o,y,g,r}
         // iarr and jarr are set in constructors GameBoardCubeGui2x2 or GameBoardCubeGui3x3
         for (i = 0; i < fcol_length; i++) {
-            fcol_i = m_gb.m_so.getCubeState().get_fcol(i);
+            fcol_i = gameBoardCube.stateObserverCube.getCubeState().get_fcol(i);
             Board[iarr[i]][jarr[i]].setEnabled(enable);
             Board[iarr[i]][jarr[i]].setBackground(colors[fcol_i]);
             Board[iarr[i]][jarr[i]].setForeground(Color.white);

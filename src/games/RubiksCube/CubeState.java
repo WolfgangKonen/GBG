@@ -8,6 +8,8 @@ import java.util.Hashtable;
 import java.util.Map;
 
 import games.BoardVector;
+import games.RubiksCube.GUI.GameBoardCubeGui2x2;
+import games.RubiksCube.GUI.GameBoardCubeGui3x3;
 
 /**
  * Class CubeState represents a certain cube state. It comes in four different types (member {@code type}), two
@@ -117,6 +119,10 @@ abstract public class CubeState implements Serializable {
 	 * The color is one out of {0,1,2,3,4,5} for colors {w,b,o,y,g,r}.
 	 */
 	protected int[] fcol;
+	// Getter for fcol
+	public int[] getFcol() {
+		return fcol;
+	}
 	
 	/**
 	 * {@code sloc} is the sticker location, an array with 24 (<b>COLOR_P</b>) or 48 (<b>COLOR_R</b>) elements. <br>
@@ -133,7 +139,7 @@ abstract public class CubeState implements Serializable {
 	String twistSeq = "";   // e.g. "L2U1" means that 
 							//		(CubeState.makeCubeState()).LTw(2).UTw(1) 
 							// produces this. ("": not known).
-	int minTwists = -1;		// minimum number of twists needed to solve this state (-1: not known)
+                                                        public int minTwists = -1;		// minimum number of twists needed to solve this state (-1: not known)
 	
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 

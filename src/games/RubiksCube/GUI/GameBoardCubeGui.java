@@ -1,4 +1,4 @@
-package games.RubiksCube;
+package games.RubiksCube.GUI;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -19,6 +19,9 @@ import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
 
 import games.Arena;
+import games.RubiksCube.CubeConfig;
+import games.RubiksCube.GameBoardCube;
+import games.RubiksCube.StateObserverCube;
 import tools.Types;
 
 /**
@@ -63,7 +66,7 @@ abstract public class GameBoardCubeGui extends JFrame {
 	/**
 	 * a reference to the 'parent' {@link GameBoardCube} object
 	 */
-	protected final GameBoardCube m_gb;
+	protected final GameBoardCube gameBoardCube;
 	
 	/**
 	 * A table for the stored values of each action
@@ -85,15 +88,23 @@ abstract public class GameBoardCubeGui extends JFrame {
 
 	GameBoardCubeGui(GameBoardCube gb) {
 		super("Rubiks Cube");
-		m_gb = gb;
+		gameBoardCube = gb;
 	}
 	
 	protected void initGameBoard()
 	{
-		Board       = new JPanel[boardY][boardX];
-		BoardPanel	= InitBoard();
-		Button		= new JButton[buttonY][buttonX];
-		ButtonPanel = InitButton();
+		Board = new JPanel[boardY][boardX];
+		BoardPanel = InitBoard();
+
+		// Only create buttons if buttonX and buttonY > 0
+		// makes button panel optional for 2D - since its redundant for 3D
+		if (buttonX > 0 && buttonY > 0) {
+			Button = new JButton[buttonY][buttonX];
+			ButtonPanel = InitButton();
+		} else {
+			ButtonPanel = new JPanel(); // Empty panel
+		}
+
 		VTable		= new double[buttonY][buttonX];
 		pMinLabel 	= new JLabel("[Other pars] pMin:");
 		pMinValue 	= new JLabel("");
@@ -186,14 +197,14 @@ abstract public class GameBoardCubeGui extends JFrame {
 						{
 							public void actionPerformed(ActionEvent e)
 							{
-								Arena.Task aTaskState = m_gb.getArena().taskState;
+								Arena.Task aTaskState = gameBoardCube.getArena().taskState;
 								if (aTaskState == Arena.Task.PLAY)
 								{
-									m_gb.HGameMove(x,y);		// i.e. make human move (i,j), if Button[i][j] is clicked
+									gameBoardCube.HGameMove(x,y);		// i.e. make human move (i,j), if Button[i][j] is clicked
 								}
 								if (aTaskState == Arena.Task.INSPECTV)
 								{
-									m_gb.InspectMove(x,y);	// i.e. update inspection, if Button[i][j] is clicked
+									gameBoardCube.InspectMove(x,y);	// i.e. update inspection, if Button[i][j] is clicked
 								}
 							}
 						}
@@ -245,14 +256,14 @@ abstract public class GameBoardCubeGui extends JFrame {
 	 * @param showValueOnGameboard	if true, show the game values for the available actions
 	 * 				(only if they are stored in state {@code so}).
 	 */
-	public void updateBoard(StateObserverCube soN, 
-							boolean withReset, boolean showValueOnGameboard) {
+	public void updateBoard(StateObserverCube soN,
+				boolean withReset, boolean showValueOnGameboard) {
 		int i,j;
 		
 		// show ButtonPanel only if it is needed (for showing action values or for entering actions) 
-		switch (m_gb.getArena().taskState) {
+		switch (gameBoardCube.getArena().taskState) {
 			case INSPECTV -> ButtonPanel.setVisible(true);
-			case PLAY -> ButtonPanel.setVisible(m_gb.getArena().hasHumanAgent() || showValueOnGameboard);
+			case PLAY -> ButtonPanel.setVisible(gameBoardCube.getArena().hasHumanAgent() || showValueOnGameboard);
 			default -> ButtonPanel.setVisible(false);
 		}
 		
@@ -264,8 +275,8 @@ abstract public class GameBoardCubeGui extends JFrame {
 				leftInfo.setText("Solved in "+soN.getMoveCounter() +" twists! (p=" 
 						+soN.getCubeState().minTwists+")"); 				
 			} else {
-				if (m_gb.getArena().m_xab!=null) {
-					if (soN.getMoveCounter() > m_gb.getArena().m_xab.getEpisodeLength(0)) {
+				if (gameBoardCube.getArena().m_xab!=null) {
+					if (soN.getMoveCounter() > gameBoardCube.getArena().m_xab.getEpisodeLength(0)) {
 						leftInfo.setText("NOT solved in "+soN.getMoveCounter() +" twists! (p="
 								+soN.getCubeState().minTwists+")");
 

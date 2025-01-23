@@ -69,7 +69,6 @@ public class ArenaCube extends Arena   {
 			csfactory.makeCubeState().show_invF_invL_invU();
 			// once to print out the arrays needed for invL and invU (see CubeState2x2, CubeState3x3)
 		}
-
 		return gb;
 	}
 
@@ -135,4 +134,11 @@ public class ArenaCube extends Arena   {
 		}
     }
 
+	public static void setVisualizationType(String visType) {
+		switch (visType) {
+			case "2D" -> CubeConfig.visualizationType = CubeConfig.VisualizationType.TWOD;
+			case "3D" -> CubeConfig.visualizationType = CubeConfig.VisualizationType.THREED;
+			default -> throw new RuntimeException("Visualization type " + visType + " is not known.");
+		}
+	}
 }

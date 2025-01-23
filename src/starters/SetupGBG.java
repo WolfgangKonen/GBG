@@ -27,7 +27,7 @@ public class SetupGBG {
      * w/o launcher UI" or for the case where {@link GBGBatch} is started without {@code args[6], args[7], args[8]}.
      */
     public static String[] setDefaultScaPars(String selectedGame) {
-        String[] scaPar = new String[3];
+        String[] scaPar = new String[4];
         switch(selectedGame) {
             case "Hex":
                 scaPar[0]="6";		// the initial (recommended) value
@@ -51,6 +51,7 @@ public class SetupGBG {
                 scaPar[0]="2x2x2";
                 scaPar[1]="STICKER2";
                 scaPar[2]="HTM";
+                scaPar[3]="2D";
                 break;
             case "EWN":
                 scaPar[0] = "3x3 2-Player";
@@ -133,6 +134,7 @@ public class SetupGBG {
                 ArenaCube.setCubeSize(scaPar[0]);
                 ArenaCube.setBoardVecType(scaPar[1]);
                 ArenaCube.setTwistType(scaPar[2]);
+                ArenaCube.setVisualizationType(scaPar[3]);
                 return new ArenaCube(title, withUI,withTrainRights);
             case "Sim":
                 ArenaSim.setNumPlayers(Integer.parseInt(scaPar[0]));

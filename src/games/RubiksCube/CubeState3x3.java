@@ -1,6 +1,7 @@
 package games.RubiksCube;
 
 import games.BoardVector;
+import games.RubiksCube.GUI.GameBoardCubeGui3x3;
 
 import java.io.Serial;
 
