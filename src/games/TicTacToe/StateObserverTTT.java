@@ -5,8 +5,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Random;
 
+import games.BoardVector;
 import games.ObserverBase;
 import games.StateObservation;
+import games.StateObservationVectorFuncs;
 import tools.Types;
 import tools.Types.ACTIONS;
 
@@ -36,6 +38,8 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
 	 */
 	@Serial
 	private static final long serialVersionUID = 12L;
+
+	public StateObservationVectorFuncs stateObservationVectorFuncs = new StateObservationVectorFuncsTTT();
 
 	public StateObserverTTT() {
 		super();
@@ -248,6 +252,7 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
 	public int[][] getTable() {
 		return m_Table;
 	}
+
 
 	/**
 	 * @return 	{0,1} for the player to move in this state 

@@ -7,13 +7,13 @@ import java.util.List;
 import java.util.Map;
 
 public class Transition implements Serializable {
-    private final List<Double> observationVector;
+    private final int[] observationVector;
     private final double reward;
     private final boolean terminated;
     private final boolean truncated;
     private final Map<String, String> info;
 
-    public List<Double> getObservationVector() {
+    public int[] getObservationVector() {
         return observationVector;
     }
 
@@ -33,7 +33,7 @@ public class Transition implements Serializable {
         return info;
     }
 
-    public Transition(List<Double> observationVector, double reward, boolean terminated, boolean truncated, Map<String, String> info) {
+    public Transition(int[] observationVector, double reward, boolean terminated, boolean truncated, Map<String, String> info) {
         this.observationVector = observationVector;
         this.reward = reward;
         this.terminated = terminated;

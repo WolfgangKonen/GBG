@@ -5,7 +5,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import controllers.SB3.FirstObservation;
-import controllers.SB3.RLEnvironment;
+import controllers.SB3.RLEnvironmentConnector;
 import controllers.SB3.Transition;
 
 import org.json.JSONException;
@@ -30,7 +30,7 @@ public class SimpleHttpServer
     }
 
     private HttpServer server;
-    private RLEnvironment rlEnvironment;
+    private RLEnvironmentConnector rlEnvironment;
 
     private StepHttpHandler stepHttpHandler;
     private  ResetHttpHandler resetHttpHandler;
@@ -60,7 +60,7 @@ public class SimpleHttpServer
         return SIMPLE_HTTP_SERVER;
     }
 
-    public void setRlEnvironment(RLEnvironment rlEnvironment) {
+    public void setRlEnvironment(RLEnvironmentConnector rlEnvironment) {
         this.rlEnvironment = rlEnvironment;
         stepHttpHandler.setRlEnvironment(rlEnvironment);
         resetHttpHandler.setRlEnvironment(rlEnvironment);
@@ -73,13 +73,13 @@ public class SimpleHttpServer
     // step http handler POST request
     static class StepHttpHandler extends EnvironmentHttpHandler implements HttpHandler {
 
-        private RLEnvironment rlEnvironment;
+        private RLEnvironmentConnector rlEnvironment;
 
         public StepHttpHandler() {
             super();
         }
 
-        public void setRlEnvironment(RLEnvironment rlEnvironment) {
+        public void setRlEnvironment(RLEnvironmentConnector rlEnvironment) {
             this.rlEnvironment = rlEnvironment;
         }
 
@@ -148,13 +148,13 @@ public class SimpleHttpServer
     // reset http handler
     static class ResetHttpHandler extends EnvironmentHttpHandler implements HttpHandler {
 
-        private RLEnvironment rlEnvironment;
+        private RLEnvironmentConnector rlEnvironment;
 
         public ResetHttpHandler() {
             super();
         }
 
-        public void setRlEnvironment(RLEnvironment rlEnvironment) {
+        public void setRlEnvironment(RLEnvironmentConnector rlEnvironment) {
             this.rlEnvironment = rlEnvironment;
         }
 
@@ -189,13 +189,13 @@ public class SimpleHttpServer
     }
 
     static class TrainingFinishedHandler extends EnvironmentHttpHandler implements HttpHandler {
-        private RLEnvironment rlEnvironment;
+        private RLEnvironmentConnector rlEnvironment;
 
         public TrainingFinishedHandler() {
             super();
         }
 
-        public void setRlEnvironment(RLEnvironment rlEnvironment) {
+        public void setRlEnvironment(RLEnvironmentConnector rlEnvironment) {
             this.rlEnvironment = rlEnvironment;
         }
 

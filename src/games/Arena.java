@@ -1431,6 +1431,11 @@ abstract public class Arena implements Runnable {
 				"No XNTupleFuncs class available for game " + this.getGameName() + " (needed for TD-Ntuple)");
 	}
 
+	public StateObservationVectorFuncs makeStateObservationVectorFuncs() {
+		throw new RuntimeException(
+				"No StateObservationVectorFuncs class available for game " + this.getGameName() + " (needed for TD-Ntuple)");
+	}
+
 	public void showMessage(String message, String title, int msgCode) {
 		if (withUI) {
 			MessageBox.show(this.m_ArenaFrame,message,title,msgCode);

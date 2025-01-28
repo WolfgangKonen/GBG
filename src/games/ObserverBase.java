@@ -47,6 +47,8 @@ abstract public class ObserverBase extends PartialPerfect implements StateObserv
 	public ObserverBase() {
 		lastMoves = new ArrayList<>();
 	}
+
+	public StateObservationVectorFuncs stateObservationVectorFuncs = null;
     
     public ObserverBase(ObserverBase other) {
 		this.m_counter = other.m_counter;
@@ -445,4 +447,21 @@ abstract public class ObserverBase extends PartialPerfect implements StateObserv
      */
 	public void randomizeStartState(Random cmpRand) { }
 
+	/**
+	 * //Place holder
+	 * @return A flattened vector with discrete values representing the current stateObservation for SB3 Agent normally just the game table if no other features are added.
+	 * the contained valuse have to be of a distingt set of Integer from getObservationStartValue to getObservationStartValue + getObseravtion
+	 */
+	public int[] getStateObservationVector(){
+		throw new RuntimeException("getStateObservationVector not implemented");
+	}
+
+	@Override
+	public boolean hasStateObservationVector() {
+		return stateObservationVectorFuncs != null;
+	}
+
+	public StateObservationVectorFuncs getStateObservationVectorFuncs() {
+		return stateObservationVectorFuncs;
+	}
 }

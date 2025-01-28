@@ -98,7 +98,7 @@ abstract public class XNTupleBase implements Serializable, XNTupleFuncs {
 		return getBoardVector(so);
 	}
 
-	/* this Method works for all games where the PositionValues are continues whith no gabs. Like in TicTacToe the PositionValues are 0,1,2.
+	/* this Method works for all games where the PositionValues are continues with no gabs. Like in TicTacToe the PositionValues are 0,1,2.
 	* For Example 0,2,10 would not work. */
 	@Override
 	public BoardVector getOneHotBoardVector(BoardVector boardVector) {

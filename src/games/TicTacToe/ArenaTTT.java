@@ -3,11 +3,7 @@ package games.TicTacToe;
 import java.io.IOException;
 
 import controllers.PlayAgent;
-import games.Arena;
-import games.Evaluator;
-import games.Feature;
-import games.GameBoard;
-import games.XNTupleFuncs;
+import games.*;
 
 /**
  * {@link Arena} for TicTacToe. It borrows all functionality
@@ -74,6 +70,10 @@ public class ArenaTTT extends Arena   {
 	
 	public XNTupleFuncs makeXNTupleFuncs() {
 		return new XNTupleFuncsTTT();
+	}
+
+	public StateObservationVectorFuncs makeStateObservationVectorFuncs() {
+		return new StateObservationVectorFuncsTTT();
 	}
 
 //    public void performArenaDerivedTasks() {}

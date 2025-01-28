@@ -355,4 +355,7 @@ public interface StateObservation extends PartialState, Serializable{
 	 */
 	void randomizeStartState(Random cmpRand);
 
+	boolean hasStateObservationVector();
+
+	StateObservationVectorFuncs getStateObservationVectorFuncs();
 }

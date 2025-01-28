@@ -118,6 +118,7 @@ public class XArenaFuncs {
 		m_xab.edPar[n].pushFromEdaxParams();
 		m_xab.rbPar[n].pushFromRBParams();
 		m_xab.wrPar[n].pushFromWrParams();
+		m_xab.sb3Par[n].pushFromSB3Params();
 
 		m_xab.m_arena.getGameBoard().updateParams();		// for RubiksCube: update 5 params in CubeConfig from agent settings
 
@@ -257,8 +258,8 @@ public class XArenaFuncs {
 						pa = new KuhnPokerAgent("KuhnOptimal");
 				case "SB3" -> {
 					XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
-					SimpleHttpServer simpleHttpServer = SimpleHttpServer.getInstance();
-					pa = new SB3Agent(sAgent, m_xab.sb3Par[n], m_xab.oPar[n], xnf, m_xab, simpleHttpServer, true, this, n);
+					StateObservationVectorFuncs stateObservationVectorFuncs = m_xab.m_arena.makeStateObservationVectorFuncs();
+					pa = new SB3Agent(sAgent, m_xab.sb3Par[n], m_xab.oPar[n], xnf, stateObservationVectorFuncs, m_xab, m_Arena, this, n);
 				}
 				default -> throw new RuntimeException("Unknown agent name " + sAgent);
 			}
@@ -514,8 +515,8 @@ public class XArenaFuncs {
 				}
 				case "SB3" -> {
 					XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
-					SimpleHttpServer simpleHttpServer = SimpleHttpServer.getInstance();
-					pa = new SB3Agent(sAgent, m_xab.sb3Par[n], m_xab.oPar[n], xnf, m_xab, simpleHttpServer, true, this, n);
+					StateObservationVectorFuncs stateObservationVectorFuncs = m_xab.m_arena.makeStateObservationVectorFuncs();
+					pa = new SB3Agent(sAgent, m_xab.sb3Par[n], m_xab.oPar[n], xnf, stateObservationVectorFuncs, m_xab, m_Arena,this, n);
 				}
 				default ->
 						throw new RuntimeException("Could not construct trainable agent: Unknown agent name " + sAgent);
@@ -749,7 +750,8 @@ public class XArenaFuncs {
 		long startTime = System.currentTimeMillis();
 		gb.initialize();
 		if(pa instanceof SB3Agent sb3Agent) {
-			sb3Agent.learn(160000);
+			StateObservation so = soSelectStartState(gb, xab.oPar[n].getChooseStart01(), pa);
+			sb3Agent.learn();
 			return sb3Agent;
 		}
 		while (pa.getGameNum() < pa.getMaxGameNum()) {
