@@ -96,7 +96,7 @@ abstract public class XNTupleBase implements Serializable, XNTupleFuncs {
 	@Override
 	public BoardVector getStandardPerspectivesBoardVector(StateObservation so) {
 		return getBoardVector(so);
-	}
+	} //TODO: remove deprecated methods
 
 	/* this Method works for all games where the PositionValues are continues with no gabs. Like in TicTacToe the PositionValues are 0,1,2.
 	* For Example 0,2,10 would not work. */

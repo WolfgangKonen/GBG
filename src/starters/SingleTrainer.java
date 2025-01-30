@@ -66,7 +66,8 @@ public class SingleTrainer {
         long startTime = System.currentTimeMillis();
         gb.initialize();
         if(pa instanceof SB3Agent sb3Agent) {
-            sb3Agent.learn();
+
+            //sb3Agent.learn(); // TODO: complete
             return sb3Agent;
         }
         while (pa.getGameNum() < pa.getMaxGameNum()) {

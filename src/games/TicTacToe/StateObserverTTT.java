@@ -39,8 +39,6 @@ public class StateObserverTTT extends ObserverBase implements StateObservation {
 	@Serial
 	private static final long serialVersionUID = 12L;
 
-	public StateObservationVectorFuncs stateObservationVectorFuncs = new StateObservationVectorFuncsTTT();
-
 	public StateObserverTTT() {
 		super();
 		m_Table = new int[3][3]; 

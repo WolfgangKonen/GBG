@@ -7,10 +7,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 public abstract class EnvironmentHttpHandler {
-    protected static final String HOSTNAME = "localhost";
-    protected static final int PORT = 8080;
-    protected static final int BACKLOG = 1;
-
     protected static final String HEADER_ALLOW = "Allow";
     protected static final String HEADER_CONTENT_TYPE = "Content-Type";
 

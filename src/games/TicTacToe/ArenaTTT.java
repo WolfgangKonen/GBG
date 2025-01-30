@@ -72,10 +72,6 @@ public class ArenaTTT extends Arena   {
 		return new XNTupleFuncsTTT();
 	}
 
-	public StateObservationVectorFuncs makeStateObservationVectorFuncs() {
-		return new StateObservationVectorFuncsTTT();
-	}
-
 //    public void performArenaDerivedTasks() {}
 
 	

@@ -2,6 +2,7 @@ package controllers.SB3;
 
 import controllers.AgentBase;
 import controllers.PlayAgent;
+import controllers.SB3.HttpServer.ServerConfig;
 import controllers.SB3.HttpServer.SimpleHttpServer;
 import games.*;
 import org.json.JSONArray;
@@ -12,7 +13,9 @@ import tools.Types;
 
 import javax.swing.*;
 import java.io.*;
+import java.net.ConnectException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -35,7 +38,8 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
 
     private int playerNumber;
     private UUID id;
-    private int numberPlayers;
+    transient private XArenaFuncs.GameProgressor gameProgressor;
+    transient private int moveCounter  = 0;
 
 
     transient private GameBoard gameBoard;
@@ -54,29 +58,13 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
         this.playerNumber = playerNumber; //TODO: Initialize after loading
         this.agentType = parSB3.agentType;
 
-        this.numberPlayers = arena.makeXNTupleFuncs().getNumPlayers(); //TODO in stateObservationVectorFuncs?
-
-         // only when start training
-
-
-        rlEnvironment = new RLEnvironmentConnector(this.xnTupleFuncs, this.stateObservationVectorFuncs, enemyAgents, this, selfPlay, playerNumber);
         this.gameBoard = m_xab.m_arena.getGameBoard();
 
-        //start server
-        /*try {
-            simpleHttpServer = new SimpleHttpServer();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }*/
-        simpleHttpServer.setRlEnvironment(rlEnvironment); // TODO: who owns the rl environment?
-        // creat SB3 env and Agent
-
+        setAgentState(AgentState.INIT);
     }
 
     private void initialize() {
-        enemyAgents = loadAgents();
-        setAgentState(AgentState.INIT);
-        createSB3Agent(parSB3);
+
     }
 
     @Override
@@ -94,7 +82,7 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
         xArenaButtons = m_arena.m_xab;
         xArenaFuncs = m_arena.m_xfun;
         enemyAgents = loadAgents();
-        rlEnvironment = new RLEnvironmentConnector(this.xnTupleFuncs, this.stateObservationVectorFuncs, enemyAgents, this, selfPlay, playerNumber);
+        rlEnvironment = new RLEnvironmentConnector(this.stateObservationVectorFuncs, enemyAgents, this, playerNumber);
         try {
             loadSB3AgentHttpRequest();
         } catch (Exception exception) {
@@ -103,33 +91,16 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
     }
 
     private List<PlayAgent> loadAgents() {
-        /*
-        List<PlayAgent> playAgents = new ArrayList<>();
-        for(String path: enemyAgentsFilePaths) {
-            playAgents.add(arena.loadAgent(path));
-        }
-        return playAgents; */
-
-        /*
-        List<PlayAgent> playAgents = new ArrayList<>();
-        for(String path: enemyAgentsFilePaths) {
-            try {
-                playAgents.add(loadAgent(path));
-            } catch (IOException e) {
-                e.printStackTrace();
-                throw new RuntimeException(e);
-            }
-        }
-        return playAgents;
-         */
         List<PlayAgent> enemies = new ArrayList<PlayAgent>();
-        for(int n = 0; n < xnTupleFuncs.getNumPlayers(); n++) {
+        for(int n = 0; n < stateObservationVectorFuncs.getNumPlayers(); n++) {
             try {
-                if (n != playerNumber)
+                if (n != playerNumber && !selfPlay)
                     enemies.add(this.xArenaFuncs.fetchAgent(n, xArenaButtons.getSelectedAgent(n), xArenaButtons));
+                else if (n != playerNumber) {
+                    enemies.add(this);
+                }
             } catch (Exception exception) {
-                selfPlay = true;
-                rlEnvironment.setSelfPlayTrue();
+                enemies.add(this);
                 System.out.println("Enemy Agent not Inizilaized. SB3 agent uses self play now.");
                 arena.showMessage("Enemy Agent not Inizilaized. SB3 agent uses self play now.", "Enemy Agent not Initialized", JOptionPane.WARNING_MESSAGE);
             }
@@ -144,15 +115,21 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
 
     @Override
     public boolean trainAgent(StateObservation stateObservation) {
-       rlEnvironment.initiateNewGame(stateObservation);
-        // http requst start training
-
-        return true;
+      throw new RuntimeException("SB3 Agent only supports learn method for training.");
     }
 
     // Trains Agent for total number of time steps
-    public void learn() {
-        initialize();
+    public void learn(XArenaFuncs.GameProgressor gameProgressor) {
+        // initialize
+        enemyAgents = loadAgents();
+        this.gameProgressor = gameProgressor;
+
+        rlEnvironment = new RLEnvironmentConnector(this.stateObservationVectorFuncs, enemyAgents, this, playerNumber);
+        simpleHttpServer.setRlEnvironment(rlEnvironment);
+
+        createSB3Agent(parSB3);
+
+        //start learning
         int totalTimeSteps = parSB3.trainTimeSteps;
         synchronized (this) {
             learnHttpRequest(totalTimeSteps);
@@ -171,7 +148,7 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
         String path = "agents/" + id.toString() + "/learn";
 
         try {
-            String response = postRequest("http://127.0.0.1:8095", path, requestBody);
+            String response = postRequest(path, requestBody);
             System.out.println(response);
         } catch (Exception e) {
             e.printStackTrace();
@@ -179,12 +156,11 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
     }
 
     private void createSB3Agent(ParSB3 parSB3) {
-        int actionSpaceSize = getStartSate().getAllAvailableActions().size();
 
-        createSB3AgentHttpRequest(actionSpaceSize, parSB3.agentType, parSB3.parSB3Base, parSB3.parSB3Police, parSB3.parSB3Network);
+        createSB3AgentHttpRequest(parSB3.agentType, parSB3.parSB3Base, parSB3.parSB3Police, parSB3.parSB3Network);
     }
 
-    private void createSB3AgentHttpRequest(int actionSpaceSize, String agentType, Map<String, Object> baseParameters, Map<String, Object> policyParameters, Map<String, Object> networkParameters) {
+    private void createSB3AgentHttpRequest(String agentType, Map<String, Object> baseParameters, Map<String, Object> policyParameters, Map<String, Object> networkParameters) {
         JSONObject requestBody = new JSONObject();
         JSONObject environmentParameters = new JSONObject();
         requestBody.put("agent_id", id);
@@ -193,7 +169,7 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
         requestBody.put("policyParameters", policyParameters);
         requestBody.put("networkParameters", networkParameters);
 
-        environmentParameters.put("actionSpaceSize", actionSpaceSize);
+        environmentParameters.put("actionSpaceSize", getStartSate().getAllAvailableActions().size()); // TODO not with get start state
         environmentParameters.put("observationRangeStarts", stateObservationVectorFuncs.getStateObservationVectorStarts());
         environmentParameters.put("observationRangeSizes", stateObservationVectorFuncs.getObservationVectorRanges());
 
@@ -201,12 +177,8 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
         requestBody.put("environmentParameters", environmentParameters);
         System.out.println(requestBody.toString());
 
-        try {
-            String response = postRequest("http://127.0.0.1:8095", "agents", requestBody);
-            System.out.println(response);
-        } catch (Exception e) {
-            e.printStackTrace(); // TODO: better
-        }
+
+        postRequest("agents", requestBody);
 
     }
 
@@ -216,7 +188,7 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
         String path = "agents/"+ id.toString() + "/predict";
 
         System.out.println(requestBody.toString());
-        response = postRequest("http://127.0.0.1:8095", path, requestBody);
+        response = postRequest(path, requestBody);
         System.out.println(response);
         return Double.parseDouble(response);
     }
@@ -225,7 +197,7 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
         String response;
         String path = "agents/"+ id.toString() + "/save";
 
-        response = postRequest("http://127.0.0.1:8095", path, new JSONObject());
+        response = postRequest(path, new JSONObject());
         System.out.println(response);
     }
 
@@ -236,14 +208,20 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
         String path = "agents/"+ id.toString() + "/load";
 
         System.out.println(requestBody.toString());
-        response = postRequest("http://127.0.0.1:8095", path, requestBody);
+        response = postRequest(path, requestBody);
         System.out.println(response);
     }
 
-    private String postRequest(String host, String path, Object requestBody) throws Exception {
-        URI uri = new URI(host + "/" + path);
+    private String postRequest(String path, Object requestBody) {
+        String host = ServerConfig.HOST;
+        URI uri;
+        try {
+             uri = new URI(host + "/" + path);
+        } catch (URISyntaxException uriSyntaxException) {
+            throw new RuntimeException(uriSyntaxException.getMessage());
+        }
         if(!(requestBody instanceof JSONObject || requestBody instanceof JSONArray)) {
-            throw new Exception("requestBody must be of type JSONObject or JSONArray");
+            throw new RuntimeException("requestBody must be of type JSONObject or JSONArray");
         }
         HttpRequest request  = HttpRequest.newBuilder()
                 .uri(uri)
@@ -252,9 +230,19 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
                 .POST(HttpRequest.BodyPublishers.ofString(requestBody.toString()))
                 .build();
 
-        HttpResponse<String> response = HttpClient.newBuilder()
-                .build()
-                .send(request, HttpResponse.BodyHandlers.ofString());
+        HttpResponse<String> response;
+
+        try {
+            response = HttpClient.newBuilder()
+                    .build()
+                    .send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() < 200 || response.statusCode() >= 300)
+                throw new RuntimeException(response.body());
+            System.out.println(response);
+        } catch (IOException | InterruptedException connectException) {
+            System.out.println("Could not reach server under: " + ServerConfig.HOST);
+            throw new RuntimeException("Could not reach server under: " + ServerConfig.HOST);
+        }
 
         return response.body();
     }
@@ -264,28 +252,7 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
         return stateObservation;
     }
 
-    public int[] getPlayerVector(StateObservation stateObservation) {
-        int[] vector = new int[stateObservation.getNumPlayers()];
-        vector[stateObservation.getPlayer()] = 1;
-        return vector;
-    }
-
     private int[] getObservationVector(StateObservation stateObservation) {
-        /*List<Double> observationVector = new ArrayList<>();
-        BoardVector boardVector = useStandardPerspective ? xnTupleFuncs.getStandardPerspectivesBoardVector(stateObservation) :
-                xnTupleFuncs.getBoardVector(stateObservation);
-        if (oneHot) boardVector = xnTupleFuncs.getOneHotBoardVector(boardVector);
-
-        for(int i: boardVector.bvec) {
-            observationVector.add((double) i);
-        }
-        if (!useStandardPerspective) {
-            for (int i: getPlayerVector(stateObservation)) {
-                observationVector.add((double) i);
-            }
-        }
-
-        return observationVector;*/
         return stateObservationVectorFuncs.getStateObservationVector(stateObservation);
     }
 
@@ -322,5 +289,29 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
             exception.printStackTrace();
         }
         oos.defaultWriteObject();
+    }
+
+    public StateObservation afterGame() {
+
+        StateObservation stateObservation;
+        if (gameProgressor != null) {
+            stateObservation = gameProgressor.afterGame(this);
+            incrementGameNum();
+        } else {
+            stateObservation = getStartSate();
+        }
+
+        moveCounter = 0;
+        return stateObservation;
+    }
+
+    public void incrementMoves() {
+        m_numTrnMoves++;
+        moveCounter++;
+    }
+
+    @Override
+    public int getMoveCounter() {
+        return moveCounter;
     }
 }

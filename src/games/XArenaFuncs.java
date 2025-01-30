@@ -749,62 +749,65 @@ public class XArenaFuncs {
 
 		long startTime = System.currentTimeMillis();
 		gb.initialize();
-		if(pa instanceof SB3Agent sb3Agent) {
-			StateObservation so = soSelectStartState(gb, xab.oPar[n].getChooseStart01(), pa);
-			sb3Agent.learn();
-			return sb3Agent;
-		}
-		while (pa.getGameNum() < pa.getMaxGameNum()) {
-			StateObservation so = soSelectStartState(gb, xab.oPar[n].getChooseStart01(), pa);
+		if (pa instanceof SB3Agent sb3Agent) {
+			GameProgressor gameProgressor = new GameProgressor(numEval, startTime, xab, qa, eresQ, eresT, doTrainStatistics, doTrainEvaluation, gb, tsList, n);
+			sb3Agent.learn(gameProgressor);
+			eresQ = gameProgressor.eresQ;
+			eresT = gameProgressor.eresT;
+		} else {
+			while (pa.getGameNum() < pa.getMaxGameNum()) {
+				StateObservation so = soSelectStartState(gb, xab.oPar[n].getChooseStart01(), pa);
 
-			pa.trainAgent(so);
+				pa.trainAgent(so);
 
-			if (doTrainStatistics)
-				collectTrainStats(tsList, pa, so);
 
-			gameNum = pa.getGameNum();
-			int liveSignal = (so instanceof StateObserverCube) ? 10000 :
-					         (!pa.isWrapper()) ? 500 : 50;
-			if (gameNum % liveSignal == 0) {
-				int exploMode = pa.getParWrapper().getWrapperMCTS_ExplorationMode();	// just as sanity check
-				System.out.println("gameNum: "+gameNum+"   EX"+exploMode);
-			}
-			if (gameNum % numEval == 0) {
-				elapsedMs = (System.currentTimeMillis() - startTime);
-				pa.incrementDurationTrainingMs(elapsedMs);
-				double elapsedTime = (double) elapsedMs / 1000.0;
-				System.out.println(pa.printTrainStatus() + ", " + elapsedTime + " sec");
-				startTime = System.currentTimeMillis();
+				if (doTrainStatistics)
+					collectTrainStats(tsList, pa, so);
 
-				xab.setGameNumber(gameNum);
-
-				qa = pa;
-				// --- OLD, no longer needed, since pa is already wrapped, if wrapping is activated: ---
-				// construct 'qa' anew (possibly wrapped agent for eval)
-				//qa = wrapAgent(pa, xab.oPar[n], xab.wrPar[n], xab.maxnPar[n], gb.getStateObs());
-
-				eresQ = m_evaluatorQ.eval(qa);		// throws RuntimeException, if TDReferee.agt.zip is not found
-				if (doTrainEvaluation) {
-					eresT = m_evaluatorT.eval(qa);	// throws RuntimeException, if TDReferee.agt.zip is not found
+				gameNum = pa.getGameNum();
+				int liveSignal = (so instanceof StateObserverCube) ? 10000 :
+						(!pa.isWrapper()) ? 500 : 50;
+				if (gameNum % liveSignal == 0) {
+					int exploMode = pa.getParWrapper().getWrapperMCTS_ExplorationMode();    // just as sanity check
+					System.out.println("gameNum: " + gameNum + "   EX" + exploMode);
 				}
+				if (gameNum % numEval == 0) {
+					elapsedMs = (System.currentTimeMillis() - startTime);
+					pa.incrementDurationTrainingMs(elapsedMs);
+					double elapsedTime = (double) elapsedMs / 1000.0;
+					System.out.println(pa.printTrainStatus() + ", " + elapsedTime + " sec");
+					startTime = System.currentTimeMillis();
 
-				// update line chart plot:
-				if (lChart != null) 
-					lChart.updateChartPlot(gameNum, eresQ, eresT, doTrainEvaluation, false);
+					xab.setGameNumber(gameNum);
 
-				// update weight / TC factor distribution plot:
-				if (wChart != null)	wChart.updateChartPlot(gameNum, pa, per);
+					qa = pa;
+					// --- OLD, no longer needed, since pa is already wrapped, if wrapping is activated: ---
+					// construct 'qa' anew (possibly wrapped agent for eval)
+					//qa = wrapAgent(pa, xab.oPar[n], xab.wrPar[n], xab.maxnPar[n], gb.getStateObs());
 
-				elapsedMs = (System.currentTimeMillis() - startTime);
-				pa.incrementDurationEvaluationMs(elapsedMs);
+					eresQ = m_evaluatorQ.eval(qa);        // throws RuntimeException, if TDReferee.agt.zip is not found
+					if (doTrainEvaluation) {
+						eresT = m_evaluatorT.eval(qa);    // throws RuntimeException, if TDReferee.agt.zip is not found
+					}
 
-				// enable premature exit if TRAIN button is pressed again:
-				if (xab.m_arena.taskState != Arena.Task.TRAIN) {
-					m_Arena.showMessage("Training stopped prematurely", "Warning", JOptionPane.WARNING_MESSAGE);
-					break; // out of while
+					// update line chart plot:
+					if (lChart != null)
+						lChart.updateChartPlot(gameNum, eresQ, eresT, doTrainEvaluation, false);
+
+					// update weight / TC factor distribution plot:
+					if (wChart != null) wChart.updateChartPlot(gameNum, pa, per);
+
+					elapsedMs = (System.currentTimeMillis() - startTime);
+					pa.incrementDurationEvaluationMs(elapsedMs);
+
+					// enable premature exit if TRAIN button is pressed again:
+					if (xab.m_arena.taskState != Arena.Task.TRAIN) {
+						m_Arena.showMessage("Training stopped prematurely", "Warning", JOptionPane.WARNING_MESSAGE);
+						break; // out of while
+					}
+
+					startTime = System.currentTimeMillis();
 				}
-
-				startTime = System.currentTimeMillis();
 			}
 
 			// --- obsolete, we strip off stopTest ---
@@ -881,6 +884,10 @@ public class XArenaFuncs {
 
 		return pa;
 	} // train
+
+	public void afterGameRound() {
+
+	}
 
 	private StateObservation soSelectStartState(GameBoard gb, boolean chooseStart01, PlayAgent pa) {
 		StateObservation so;
@@ -1536,6 +1543,95 @@ public class XArenaFuncs {
 
 	public String getLastMsg() {
 		return lastMsg;
+	}
+
+	public class GameProgressor {
+		int gameNum;
+		int numEval;
+		long elapsedMs;
+		long startTime;
+		XArenaButtons xab;
+		PlayAgent qa;
+		EvalResult eresQ;
+		EvalResult eresT;
+		boolean doTrainStatistics;
+		boolean doTrainEvaluation;
+		GameBoard gb;
+		ArrayList<TStats> tsList;
+		int n;
+
+		StateObservation lastStateObservation;
+
+		public GameProgressor(int numEval, long startTime, XArenaButtons xab, PlayAgent qa, EvalResult eresQ, EvalResult eresT, boolean doTrainStatistics, boolean doTrainEvaluation, GameBoard gb, ArrayList<TStats> tsList, int n) {
+			gameNum = 0;
+			this.numEval = numEval;
+			this.startTime = startTime;
+			this.xab = xab;
+			this.qa = qa;
+			this.eresQ = eresQ;
+			this.eresT = eresT;
+			this.doTrainStatistics = doTrainStatistics;
+			this.doTrainEvaluation = doTrainEvaluation;
+			this.gb = gb;
+			this.tsList = tsList;
+			this.n = n;
+		}
+
+		public StateObservation afterGame(PlayAgent pa) {
+
+			if (doTrainStatistics)
+				collectTrainStats(tsList, pa, lastStateObservation);
+
+			gameNum = pa.getGameNum();
+			int liveSignal = (lastStateObservation instanceof StateObserverCube) ? 10000 :
+					(!pa.isWrapper()) ? 500 : 50;
+			if (gameNum % liveSignal == 0) {
+				int exploMode = pa.getParWrapper().getWrapperMCTS_ExplorationMode();    // just as sanity check
+				System.out.println("gameNum: " + gameNum + "   EX" + exploMode);
+			}
+			if (gameNum % numEval == 0) {
+				elapsedMs = (System.currentTimeMillis() - startTime);
+				pa.incrementDurationTrainingMs(elapsedMs);
+				double elapsedTime = (double) elapsedMs / 1000.0;
+				System.out.println(pa.printTrainStatus() + ", " + elapsedTime + " sec");
+				startTime = System.currentTimeMillis();
+
+				xab.setGameNumber(gameNum);
+
+				qa = pa;
+				// --- OLD, no longer needed, since pa is already wrapped, if wrapping is activated: ---
+				// construct 'qa' anew (possibly wrapped agent for eval)
+				//qa = wrapAgent(pa, xab.oPar[n], xab.wrPar[n], xab.maxnPar[n], gb.getStateObs());
+
+				eresQ = m_evaluatorQ.eval(qa);        // throws RuntimeException, if TDReferee.agt.zip is not found
+				if (doTrainEvaluation) {
+					eresT = m_evaluatorT.eval(qa);    // throws RuntimeException, if TDReferee.agt.zip is not found
+				}
+
+				// update line chart plot:
+				if (lChart != null)
+					lChart.updateChartPlot(gameNum, eresQ, eresT, doTrainEvaluation, false);
+
+				// update weight / TC factor distribution plot:
+				if (wChart != null) wChart.updateChartPlot(gameNum, pa, per);
+
+				elapsedMs = (System.currentTimeMillis() - startTime);
+				pa.incrementDurationEvaluationMs(elapsedMs);
+
+
+
+				// enable premature exit if TRAIN button is pressed again:
+				if (xab.m_arena.taskState != Arena.Task.TRAIN) {
+					m_Arena.showMessage("Training stopped prematurely", "Warning", JOptionPane.WARNING_MESSAGE);
+					lastStateObservation = soSelectStartState(gb, xab.oPar[n].getChooseStart01(), pa);
+					return lastStateObservation;
+				}
+
+				startTime = System.currentTimeMillis();
+			}
+			lastStateObservation = soSelectStartState(gb, xab.oPar[n].getChooseStart01(), pa);
+			return lastStateObservation;
+		}
 	}
 
 }
