@@ -238,7 +238,6 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
                     .send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() < 200 || response.statusCode() >= 300)
                 throw new RuntimeException(response.body());
-            System.out.println(response);
         } catch (IOException | InterruptedException connectException) {
             System.out.println("Could not reach server under: " + ServerConfig.HOST);
             throw new RuntimeException("Could not reach server under: " + ServerConfig.HOST);

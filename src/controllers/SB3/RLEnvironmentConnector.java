@@ -78,7 +78,7 @@ public class RLEnvironmentConnector {
         System.out.println(stateObservation.getPlayer() + " Player: " + Arrays.toString(getObservation()) + " " + getObservation().length + " after");
 
         Transition transition = new Transition(getObservation(), getReward(), terminated(), truncated(), getInfo());
-        // Game over
+        // if Game over
         if (switchPlayerPostions && (terminated() || truncated())) {
             System.out.println("Game Over! Starting new one...");
             switchPlayerPostions();
