@@ -96,7 +96,7 @@ public class XArenaButtons //extends JPanel
 			edPar[n] = new ParEdax(m_arena.hasGUI());
 			rbPar[n] = new ParRB(m_arena.hasGUI());
 			wrPar[n] = new ParWrapper(m_arena.hasGUI());
-			sb3Par[n] = new ParSB3(m_arena.hasGUI());
+			sb3Par[n] = new ParSB3(m_arena.hasGUI(), m_arena.getGameName());
 			this.setParamDefaults(n, Types.GUI_AGENT_INITIAL[n], m_arena.getGameName());
 			
 			try {

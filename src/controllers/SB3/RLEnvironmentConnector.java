@@ -90,7 +90,7 @@ public class RLEnvironmentConnector {
         int enemyPlayer = 0;
         while (stateObservation.getPlayer() != this.playerNumber && !terminated() && !truncated()) {
 
-            System.out.println(stateObservation.getPlayer() + " Player: " + Arrays.toString(getObservation()) + "enemy");
+            System.out.println(stateObservation.getPlayer() + " Player: " + Arrays.toString(getObservation()) + "enemy: " + enemyAgents.get(enemyPlayer).getName());
 
             // availableActions = stateObservation.getAvailableActions();
             // Random random = new Random();
@@ -106,12 +106,12 @@ public class RLEnvironmentConnector {
     public void switchPlayerPostions() {
         playerNumber = (playerNumber + 1) % stateObservationVectorFuncs.getNumPlayers();
         if (enemyAgents.size() <= 1) return;
-        List<PlayAgent> enemys = new ArrayList<>();
-        enemys.add(enemyAgents.get(enemyAgents.size() - 1));
-        for (int i = 1; i < enemyAgents.size() - 1; i++) {
-            enemys.add(enemyAgents.get(i));
+        List<PlayAgent> enemies = new ArrayList<>();
+        enemies.add(enemyAgents.get(enemyAgents.size() - 1));
+        for (int i = 0; i < enemyAgents.size() - 1; i++) {
+            enemies.add(enemyAgents.get(i));
         }
-        enemyAgents = enemys;
+        enemyAgents = enemies;
     }
 
     public void trainingFinished() {

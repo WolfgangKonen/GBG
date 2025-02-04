@@ -259,7 +259,7 @@ public class XArenaFuncs {
 				case "SB3" -> {
 					XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
 					StateObservationVectorFuncs stateObservationVectorFuncs = m_xab.m_arena.makeStateObservationVectorFuncs();
-					pa = new SB3Agent(sAgent, m_xab.sb3Par[n], m_xab.oPar[n], xnf, stateObservationVectorFuncs, m_xab, m_Arena, this, n);
+					pa = new SB3Agent(sAgent, m_xab.sb3Par[n], m_xab.oPar[n], stateObservationVectorFuncs, m_xab, m_Arena, this, n);
 				}
 				default -> throw new RuntimeException("Unknown agent name " + sAgent);
 			}
@@ -516,7 +516,7 @@ public class XArenaFuncs {
 				case "SB3" -> {
 					XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
 					StateObservationVectorFuncs stateObservationVectorFuncs = m_xab.m_arena.makeStateObservationVectorFuncs();
-					pa = new SB3Agent(sAgent, m_xab.sb3Par[n], m_xab.oPar[n], xnf, stateObservationVectorFuncs, m_xab, m_Arena,this, n);
+					pa = new SB3Agent(sAgent, m_xab.sb3Par[n], m_xab.oPar[n], stateObservationVectorFuncs, m_xab, m_Arena,this, n);
 				}
 				default ->
 						throw new RuntimeException("Could not construct trainable agent: Unknown agent name " + sAgent);

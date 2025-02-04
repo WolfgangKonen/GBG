@@ -2,6 +2,7 @@ package params;
 
 import controllers.SB3.SB3AgentConfig;
 import gui.MessageBox;
+import tools.Types;
 
 import javax.swing.*;
 import java.awt.*;
@@ -10,17 +11,13 @@ import java.util.*;
 import java.util.List;
 
 public class SB3Params extends Frame implements Serializable {
-    private static final String TIP_ONE_HOT = "Should the ObservationVector be one hot encoded?";
-
-
-
-
     public JPanel mPanel;
     public BaseParameters baseParameters;
     public SB3Parameters agentParameters;
     public NetworkParameters networkParameters;
+    public EnemyAgentsParameters enemyAgentsParameters;
 
-    public SB3Params() {
+    public SB3Params(String gameName) {
         super("SB3 Parameter");
 
         this.mPanel = new JPanel();
@@ -35,10 +32,19 @@ public class SB3Params extends Frame implements Serializable {
         this.agentParameters = (SB3Parameters) policyParameters;
         mPanel.add(policyParameters);
 
+        JPanel agentAndNetworkPanel = new JPanel();
+        agentAndNetworkPanel.setLayout(new GridLayout(0,1,10,10));
+
+        mPanel.add(agentAndNetworkPanel);
+
+        enemyAgentsParameters = new EnemyAgentsParameters(gameName);
+        agentAndNetworkPanel.add(enemyAgentsParameters);
+
         networkParameters = new NetworkParameters();
-        mPanel.add(networkParameters);
+        agentAndNetworkPanel.add(networkParameters);
 
         setUseOwnParametersForBaseAndAgent(!SB3AgentConfig.DEFAULT_USE_STANDARD_SB3_PARMAS);
+        setUseEnemies(SB3AgentConfig.DEFAULT_USE_ENEMIES);
         networkParameters.setUseOwnParameters(!SB3AgentConfig.DEFAULT_USE_STANDARD_SB3_PARMAS);
 
         pack();
@@ -70,6 +76,14 @@ public class SB3Params extends Frame implements Serializable {
     public void setUseOwnParametersForBaseAndAgent(boolean enabled) {
         baseParameters.setUseOwnParameters(enabled);
         agentParameters.setUseOwnParameters(enabled);
+    }
+
+    public void setUseEnemies(boolean useEnemies) {
+        enemyAgentsParameters.setUseEnemies(useEnemies);
+    }
+
+    public JPanel getPanel() {
+        return mPanel;
     }
 
     public interface SB3Parameters {
@@ -125,6 +139,7 @@ public class SB3Params extends Frame implements Serializable {
             selfPlayLabel = new JLabel("activate self play? ");
             selfPlayCheckBox = new JCheckBox();
             selfPlayCheckBox.setSelected(SB3AgentConfig.DEFAULT_SELF_PLAY);
+            selfPlayCheckBox.addItemListener(e -> setUseEnemies(!selfPlayCheckBox.isSelected()));
 
             trainTimeStepsLabel = new JLabel("Train time steps: ");
             trainTimeStepsText = new JTextField(Integer.toString(SB3AgentConfig.DEFAULT_TRAIN_TIME_STEPS));
@@ -286,7 +301,106 @@ public class SB3Params extends Frame implements Serializable {
         }
     }
 
+    public class EnemyAgentsParameters extends JPanel {
+        private JLabel titel;
 
+        private JLabel enemiesLabel;
+        private DefaultListModel<String> listModel;
+        private JList enemies;
+
+        private JLabel addEnemyLabel;
+        private JComboBox addEnemyComboBox;
+
+        private JButton addEnemyButton;
+        private JButton removeEnemyButton;
+
+        private JButton loadEnemyButton;
+
+        private String gameName;
+
+        private boolean useEnemies;
+
+        public EnemyAgentsParameters(String gameName) {
+            this.gameName = gameName;
+
+            titel = new JLabel("Enemy Agents");
+            Font font = titel.getFont();
+            titel.setFont(new Font(font.getName(), Font.BOLD, font.getSize()));
+
+            enemiesLabel = new JLabel("Enemies:");
+            listModel = new DefaultListModel<>();
+            enemies = new JList(listModel);
+
+            addEnemyLabel = new JLabel("Choose an enemy then add or load an enemy: ");
+            addEnemyComboBox = new JComboBox(SB3AgentConfig.EnemyAgentsDefaultValues.DEFAULT_ENEMIES);
+
+            addEnemyButton = new JButton("Add Enemy");
+            addEnemyButton.addActionListener(e -> addEnemy());
+
+            removeEnemyButton = new JButton("Remove");
+            removeEnemyButton.addActionListener(e -> removeEnemy());
+
+            loadEnemyButton = new JButton("Load Enemy");
+            loadEnemyButton.addActionListener(e -> loadEnemy());
+
+            this.setLayout(new GridLayout(0, 2, 10, 10));
+
+            this.add(titel);
+            this.add(new JLabel());
+
+            this.add(enemiesLabel);
+            this.add(new JScrollPane(enemies));
+
+            this.add(addEnemyLabel);
+            this.add(addEnemyComboBox);
+
+            this.add(addEnemyButton);
+            this.add(removeEnemyButton);
+
+            this.add(loadEnemyButton);
+        }
+
+        private void setUseEnemies(boolean useEnemies) {
+            this.useEnemies = useEnemies;
+
+            enemiesLabel.setEnabled(useEnemies);
+            enemies.setEnabled(useEnemies);
+            addEnemyLabel.setEnabled(useEnemies);
+            addEnemyComboBox.setEnabled(useEnemies);
+            addEnemyButton.setEnabled(useEnemies);
+            removeEnemyButton.setEnabled(useEnemies);
+            loadEnemyButton.setEnabled(useEnemies);
+
+        }
+
+        private void addEnemy() {
+            listModel.addElement((String) addEnemyComboBox.getSelectedItem());
+        }
+
+        private void removeEnemy() {
+            int index = enemies.getSelectedIndex();
+            if (index >= 0) {
+                listModel.remove(index);
+            } else {
+                MessageBox.show(this, "Please select an enemy.", "select an enemy", JOptionPane.WARNING_MESSAGE);
+            }
+        }
+
+        private void loadEnemy() {
+            JFileChooser fileChooser = new JFileChooser(Types.GUI_DEFAULT_DIR_AGENT+"/"+gameName);
+            int returnVal = fileChooser.showOpenDialog(this);
+            String filePath = null;
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                filePath = fileChooser.getSelectedFile().getName();
+            }
+            listModel.addElement(filePath);
+        }
+
+        public String[] getEnemyAgents() {
+            if (!useEnemies) return new String[0];
+            return Arrays.copyOf(listModel.toArray(), listModel.size(), String[].class);
+        }
+    }
 
     public class DQN extends JPanel implements SB3Parameters {
         private JLabel titel;
@@ -821,11 +935,6 @@ public class SB3Params extends Frame implements Serializable {
             chooseActivationFunctionLabel = new JLabel("Choose activation function:");
             chooseActivationFunction = new JComboBox(SB3AgentConfig.DEFAULT_ACTIVATION_FUNCTIONS);
 
-
-
-
-
-
             this.setLayout(new GridLayout(0,2,10,10));
 
             this.add(titel);
@@ -904,9 +1013,5 @@ public class SB3Params extends Frame implements Serializable {
             chooseActivationFunctionLabel.setEnabled(enabled);
             chooseActivationFunction.setEnabled(enabled);
         }
-    }
-
-    public JPanel getPanel() {
-        return mPanel;
     }
 }

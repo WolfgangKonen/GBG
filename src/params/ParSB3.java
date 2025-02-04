@@ -12,20 +12,21 @@ public class ParSB3 implements Serializable {
 
     public String agentType = SB3AgentConfig.DEFAULT_AGENT;
     public boolean selfPlay = SB3AgentConfig.DEFAULT_SELF_PLAY;
+    public String[] enemyAgents = new String[0];
     public int trainTimeSteps = SB3AgentConfig.DEFAULT_TRAIN_TIME_STEPS;
 
     public Map<String, Object> parSB3Base;
     public Map<String, Object> parSB3Police;
     public Map<String, Object> parSB3Network;
     /**
-     * This member is only constructed when the constructor {@link #ParSB3(boolean)} (boolean) ParMCTS(boolean withUI)}
+     * This member is only constructed when the constructor {@link #ParSB3(boolean, String)} (boolean) ParMCTS(boolean withUI)}
      * called with {@code withUI=true}. It holds the GUI for {@link ParSB3}.
      */
     private transient SB3Params sb3Params = null;
 
-    public ParSB3(boolean withUI) {
+    public ParSB3(boolean withUI, String gameName) {
         if (withUI)
-            sb3Params = new SB3Params();
+            sb3Params = new SB3Params(gameName);
     }
 
     public JPanel getPanel() {
@@ -43,6 +44,7 @@ public class ParSB3 implements Serializable {
         agentType = sb3Params.baseParameters.getAgent();
         selfPlay = sb3Params.baseParameters.getSelfPlay();
         trainTimeSteps = sb3Params.baseParameters.getTrainTimeSteps();
+        enemyAgents = sb3Params.enemyAgentsParameters.getEnemyAgents();
 
         parSB3Base = sb3Params.baseParameters.getParams();
         parSB3Police = sb3Params.agentParameters.getParams();

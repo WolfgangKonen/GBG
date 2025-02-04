@@ -7,16 +7,15 @@ public class SB3AgentConfig {
     // Default params for BaseParameters
     public static final String DEFAULT_AGENT = "DQN";
     public static final String[] DEFAULT_AGENT_OPTIONS = {"DQN", "PPO"};
-    public static final boolean DEFAULT_USE_STANDARD_PERSPECTIVE = false;
-    public static final boolean DEFAULT_ONE_HOT = true;
     public static final boolean DEFAULT_SELF_PLAY = true;
     public static final int DEFAULT_TRAIN_TIME_STEPS = 10000;
     public static final boolean DEFAULT_USE_STANDARD_SB3_PARMAS = true;
     public static final boolean DEFAULT_USE_STANDARD_NETWORK_PARAMS = true;
+    public static final boolean DEFAULT_USE_ENEMIES = false;
 
     public static final double DEFAULT_LEARNING_RATE = 0.0001;
     public static final int DEFAULT_STATS_WINDOW_SIZE = 100;
-    public static final String DEFAULT_TENSORBOARD_LOG = null;
+    public static final String DEFAULT_TENSORBOARD_LOG = "logs";
     public static final int DEFAULT_VERBOSE = 0;
     public static final Integer DEFAULT_SEED = null;
     public static final String DEFAULT_DEVICE = "auto";
@@ -34,6 +33,16 @@ public class SB3AgentConfig {
     public static final String TIP_SEED = "Seed for pseudo-random number generators to ensure reproducibility.";
     public static final String TIP_DEVICE = "The computing device to use (e.g., CPU or GPU).";
 
+    public static class EnemyAgentsDefaultValues {
+        public static final String[] DEFAULT_ENEMIES = {
+                "Self Play",
+                "Max-N",
+                "RHEA-SI",
+                "Random",
+                "MCTS",
+                "MC-N"
+        };
+    }
 
     // Default params for DQN
     public static class DQNDefaultValues {
@@ -104,13 +113,10 @@ public class SB3AgentConfig {
 
 
 
-
+    //TODO put in class
     // Default params for NetworkParameters
     public static final int DEFAULT_NUM_NEURONS = 64;
-    public static final List<Integer> DEFAULT_LAYERS = new LinkedList<Integer>() {{
-        add(64);
-        add(64);
-    }};
+    public static final List<Integer> DEFAULT_LAYERS = new LinkedList<Integer>();
     public static final String[] DEFAULT_ACTIVATION_FUNCTIONS= {"ReLU", "Linear", "LeakyReLU", "Sigmoid", "Tanh"};
     public static final String DEFAULT_ACTIVATION_FUNCTION= "ReLU";
 }

@@ -1,5 +1,6 @@
 package controllers.SB3;
 
+import agentIO.AgentLoader;
 import controllers.AgentBase;
 import controllers.PlayAgent;
 import controllers.SB3.HttpServer.ServerConfig;
@@ -19,14 +20,14 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
     transient private RLEnvironmentConnector rlEnvironment;
     transient private SimpleHttpServer simpleHttpServer = SimpleHttpServer.getInstance();
-    transient private XNTupleFuncs xnTupleFuncs;
     transient private StateObservationVectorFuncs stateObservationVectorFuncs;
-    transient private List<PlayAgent> enemyAgents;
     transient private XArenaFuncs xArenaFuncs;
     transient private XArenaButtons xArenaButtons;
     transient private Arena arena;
@@ -34,6 +35,12 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
     private ParSB3 parSB3;
     transient private ParOther parOther; // TODO: remove?
     private String agentType;
+    private String[] enemyAgents;
+    private final Set<String> trainable = new HashSet<>( Arrays.asList(
+            new String[] {
+
+            }
+    ));
 
 
     private int playerNumber;
@@ -44,12 +51,11 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
 
     transient private GameBoard gameBoard;
 
-    public SB3Agent(String name, ParSB3 parSB3, ParOther oPar, XNTupleFuncs xnTupleFuncs, StateObservationVectorFuncs stateObservationVectorFuncs, XArenaButtons m_xab, Arena arena, XArenaFuncs xArenaFuncs, int playerNumber) {
+    public SB3Agent(String name,  ParSB3 parSB3, ParOther oPar, StateObservationVectorFuncs stateObservationVectorFuncs, XArenaButtons m_xab, Arena arena, XArenaFuncs xArenaFuncs, int playerNumber) {
         super(name);
         this.id = UUID.randomUUID();
         this.parSB3 = parSB3;
         this.parOther = oPar;
-        this.xnTupleFuncs = xnTupleFuncs;
         this.stateObservationVectorFuncs = stateObservationVectorFuncs;
         this.selfPlay = parSB3.selfPlay;
         this.xArenaButtons = m_xab;
@@ -57,6 +63,7 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
         this.xArenaFuncs = xArenaFuncs;
         this.playerNumber = playerNumber; //TODO: Initialize after loading
         this.agentType = parSB3.agentType;
+        this.enemyAgents = parSB3.enemyAgents;
 
         this.gameBoard = m_xab.m_arena.getGameBoard();
 
@@ -76,12 +83,11 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
     public void fillParamTabsAfterLoading(int n, Arena m_arena) {
         this.arena = m_arena;
         playerNumber = n;
-        xnTupleFuncs = m_arena.makeXNTupleFuncs();
         stateObservationVectorFuncs = m_arena.makeStateObservationVectorFuncs();
         gameBoard = m_arena.getGameBoard();
         xArenaButtons = m_arena.m_xab;
         xArenaFuncs = m_arena.m_xfun;
-        enemyAgents = loadAgents();
+        List<PlayAgent> enemyAgents = loadAgents();
         rlEnvironment = new RLEnvironmentConnector(this.stateObservationVectorFuncs, enemyAgents, this, playerNumber);
         try {
             loadSB3AgentHttpRequest();
@@ -90,20 +96,33 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
         }
     }
 
+    private boolean isValidPath(String path) {
+        try {
+            path = Types.GUI_DEFAULT_DIR_AGENT+"/"+ arena.getGameName() + "/" + path;
+            return Files.exists(Paths.get(path));
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     private List<PlayAgent> loadAgents() {
         List<PlayAgent> enemies = new ArrayList<PlayAgent>();
-        for(int n = 0; n < stateObservationVectorFuncs.getNumPlayers(); n++) {
-            try {
-                if (n != playerNumber && !selfPlay)
-                    enemies.add(this.xArenaFuncs.fetchAgent(n, xArenaButtons.getSelectedAgent(n), xArenaButtons));
-                else if (n != playerNumber) {
-                    enemies.add(this);
-                }
-            } catch (Exception exception) {
+
+        for (String enemy: enemyAgents) {
+            if (enemy.equals("Self Play")) {
                 enemies.add(this);
-                System.out.println("Enemy Agent not Inizilaized. SB3 agent uses self play now.");
-                arena.showMessage("Enemy Agent not Inizilaized. SB3 agent uses self play now.", "Enemy Agent not Initialized", JOptionPane.WARNING_MESSAGE);
+                continue;
             }
+            if (isValidPath(enemy)) {
+                AgentLoader agentLoader = new AgentLoader(arena, enemy);
+                enemies.add(agentLoader.getAgent());
+                continue;
+            }
+            enemies.add(this.xArenaFuncs.fetchAgent(playerNumber, enemy, xArenaButtons));
+        }
+        while (enemies.size() < stateObservationVectorFuncs.getNumPlayers()) {
+            // fill with self play
+            enemies.add(this);
         }
         System.out.println("Enemies loaded: ");
         for (PlayAgent enemy: enemies) {
@@ -113,6 +132,7 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
         return enemies;
     }
 
+
     @Override
     public boolean trainAgent(StateObservation stateObservation) {
       throw new RuntimeException("SB3 Agent only supports learn method for training.");
@@ -121,7 +141,7 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
     // Trains Agent for total number of time steps
     public void learn(XArenaFuncs.GameProgressor gameProgressor) {
         // initialize
-        enemyAgents = loadAgents();
+        List<PlayAgent> enemyAgents = loadAgents();
         this.gameProgressor = gameProgressor;
 
         rlEnvironment = new RLEnvironmentConnector(this.stateObservationVectorFuncs, enemyAgents, this, playerNumber);
