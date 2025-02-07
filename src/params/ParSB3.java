@@ -16,8 +16,9 @@ public class ParSB3 implements Serializable {
     public int trainTimeSteps = SB3AgentConfig.DEFAULT_TRAIN_TIME_STEPS;
 
     public Map<String, Object> parSB3Base;
-    public Map<String, Object> parSB3Police;
+    public Map<String, Object> parSB3Agent;
     public Map<String, Object> parSB3Network;
+    public SelfPlayParameters parSB3SelfPlay = new SelfPlayParameters();
     /**
      * This member is only constructed when the constructor {@link #ParSB3(boolean, String)} (boolean) ParMCTS(boolean withUI)}
      * called with {@code withUI=true}. It holds the GUI for {@link ParSB3}.
@@ -47,8 +48,35 @@ public class ParSB3 implements Serializable {
         enemyAgents = sb3Params.enemyAgentsParameters.getEnemyAgents();
 
         parSB3Base = sb3Params.baseParameters.getParams();
-        parSB3Police = sb3Params.agentParameters.getParams();
+        parSB3Agent = sb3Params.agentParameters.getParams();
         parSB3Network = sb3Params.networkParameters.getParams();
+        parSB3SelfPlay = sb3Params.baseParameters.getSelfPlayParameters();
+    }
+
+    public static class SelfPlayParameters {
+        private int policyWindowSize = SB3AgentConfig.SelfPlayDefaultParameters.DEFAULT_POLICY_WINDOW_SIZE;
+        private int addPolicyEveryXSteps = SB3AgentConfig.SelfPlayDefaultParameters.DEFAULT_ADD_POLICY_EVERY_X_STEPS;
+        private double useLatestPolicy= SB3AgentConfig.SelfPlayDefaultParameters.DEFAULT_USE_LATEST_POLICY;
+
+        public SelfPlayParameters() {}
+
+        public SelfPlayParameters(int policyWindowSize, int addPolicyEveryXSteps, double useLatestPolicy) {
+            this.policyWindowSize = policyWindowSize;
+            this.addPolicyEveryXSteps = addPolicyEveryXSteps;
+            this.useLatestPolicy = useLatestPolicy;
+        }
+
+        public int getPolicyWindowSize() {
+            return policyWindowSize;
+        }
+
+        public int getAddPolicyEveryXSteps() {
+            return addPolicyEveryXSteps;
+        }
+
+        public double getUseLatestPolicy() {
+            return useLatestPolicy;
+        }
     }
 
 }

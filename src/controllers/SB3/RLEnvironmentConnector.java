@@ -11,7 +11,6 @@ public class RLEnvironmentConnector {
     private StateObservationVectorFuncs stateObservationVectorFuncs;
     private List<PlayAgent> enemyAgents;
     private final SB3Agent sb3Agent;
-    private final boolean switchPlayerPostions = true;
 
     private int playerNumber;
 
@@ -62,7 +61,7 @@ public class RLEnvironmentConnector {
         // When caught cheating return same observation and min game score. StateObservation gets reset afterward when sb3 calls reset.
         if(!availableActions.contains(chosenAction)) {
             Transition transition = new Transition(getObservation(), stateObservation.getMinGameScore(), true, truncated(), getInfo());
-            if (switchPlayerPostions) switchPlayerPostions();
+            switchPlayerPostions(); // imported to call after new Transition because playerNumber gets changed and getReward depends on it.
             System.out.println("Game Over, because cheating! Starting new one...");
             return transition;
         }
@@ -79,9 +78,10 @@ public class RLEnvironmentConnector {
 
         Transition transition = new Transition(getObservation(), getReward(), terminated(), truncated(), getInfo());
         // if Game over
-        if (switchPlayerPostions && (terminated() || truncated())) {
+        if (terminated() || truncated()) {
             System.out.println("Game Over! Starting new one...");
-            switchPlayerPostions();
+            System.out.println("Reward: " + transition.getReward());
+            switchPlayerPostions(); // imported to call after new Transition because playerNumber gets changed and getReward depends on it.
         }
         return transition;
     }
@@ -95,7 +95,13 @@ public class RLEnvironmentConnector {
             // availableActions = stateObservation.getAvailableActions();
             // Random random = new Random();
             // Types.ACTIONS enemyAction = availableActions.get(random.nextInt(availableActions.size()))
-            Types.ACTIONS enemyAction = enemyAgents.get(enemyPlayer).getNextAction2(stateObservation, false, true, true);
+            Types.ACTIONS enemyAction = null;
+            PlayAgent opponent = enemyAgents.get(enemyPlayer);
+            if (opponent instanceof SB3Agent sb3Agent) {
+                enemyAction = sb3Agent.selfPlay(stateObservation);
+            } else {
+                enemyAction = opponent.getNextAction2(stateObservation, false, true, true);
+            }
 
             stateObservation.advance(enemyAction, null);
 
@@ -103,6 +109,9 @@ public class RLEnvironmentConnector {
         }
     }
 
+    /**
+        imported to call after new Transition because playerNumber gets changed and getReward depends on it.
+     */
     public void switchPlayerPostions() {
         playerNumber = (playerNumber + 1) % stateObservationVectorFuncs.getNumPlayers();
         if (enemyAgents.size() <= 1) return;

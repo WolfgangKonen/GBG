@@ -119,4 +119,10 @@ public class SB3AgentConfig {
     public static final List<Integer> DEFAULT_LAYERS = new LinkedList<Integer>();
     public static final String[] DEFAULT_ACTIVATION_FUNCTIONS= {"ReLU", "Linear", "LeakyReLU", "Sigmoid", "Tanh"};
     public static final String DEFAULT_ACTIVATION_FUNCTION= "ReLU";
+
+    public class SelfPlayDefaultParameters {
+        public static final int DEFAULT_POLICY_WINDOW_SIZE = 5;
+        public static final int DEFAULT_ADD_POLICY_EVERY_X_STEPS = 10000;
+        public static final double DEFAULT_USE_LATEST_POLICY = 0.35;
+    }
 }

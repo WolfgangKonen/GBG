@@ -12,9 +12,7 @@ import params.ParOther;
 import params.ParSB3;
 import tools.Types;
 
-import javax.swing.*;
 import java.io.*;
-import java.net.ConnectException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpClient;
@@ -177,24 +175,27 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
 
     private void createSB3Agent(ParSB3 parSB3) {
 
-        createSB3AgentHttpRequest(parSB3.agentType, parSB3.parSB3Base, parSB3.parSB3Police, parSB3.parSB3Network);
+        createSB3AgentHttpRequest(parSB3.agentType, parSB3.parSB3Base, parSB3.parSB3Agent, parSB3.parSB3Network, parSB3.parSB3SelfPlay);
     }
 
-    private void createSB3AgentHttpRequest(String agentType, Map<String, Object> baseParameters, Map<String, Object> policyParameters, Map<String, Object> networkParameters) {
+    private void createSB3AgentHttpRequest(String agentType, Map<String, Object> baseParameters, Map<String, Object> agentParameters, Map<String, Object> networkParameters, ParSB3.SelfPlayParameters selfPlayParams) {
         JSONObject requestBody = new JSONObject();
         JSONObject environmentParameters = new JSONObject();
+        JSONObject selfPlayParameters = new JSONObject(selfPlayParams);
+
         requestBody.put("agent_id", id);
         requestBody.put("agentType", agentType);
         requestBody.put("baseParameters", baseParameters);
-        requestBody.put("policyParameters", policyParameters);
+        requestBody.put("agentParameters", agentParameters);
         requestBody.put("networkParameters", networkParameters);
 
         environmentParameters.put("actionSpaceSize", getStartSate().getAllAvailableActions().size()); // TODO not with get start state
         environmentParameters.put("observationRangeStarts", stateObservationVectorFuncs.getStateObservationVectorStarts());
         environmentParameters.put("observationRangeSizes", stateObservationVectorFuncs.getObservationVectorRanges());
 
-
         requestBody.put("environmentParameters", environmentParameters);
+        requestBody.put("selfPlayParameters", selfPlayParameters);
+
         System.out.println(requestBody.toString());
 
 
@@ -206,6 +207,17 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
         String response;
         JSONArray requestBody = new JSONArray(observation);
         String path = "agents/"+ id.toString() + "/predict";
+
+        System.out.println(requestBody.toString());
+        response = postRequest(path, requestBody);
+        System.out.println(response);
+        return Double.parseDouble(response);
+    }
+
+    private double selfPlayHttpRequest(int[] observation) throws Exception {
+        String response;
+        JSONArray requestBody = new JSONArray(observation);
+        String path = "agents/"+ id.toString() + "/selfPlay";
 
         System.out.println(requestBody.toString());
         response = postRequest(path, requestBody);
@@ -327,6 +339,28 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
     public void incrementMoves() {
         m_numTrnMoves++;
         moveCounter++;
+    }
+
+    public Types.ACTIONS_VT selfPlay(StateObservation stateObservation) {
+        int[] observation= getObservationVector(stateObservation);
+
+        System.out.println(Arrays.toString(observation));
+        double action = 0;
+        try {
+            action = selfPlayHttpRequest(observation);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // TODO: get next best action instead of random
+        List<Types.ACTIONS> validActions = stateObservation.getAvailableActions();
+        if (!validActions.contains(new Types.ACTIONS((int) action))) {
+            System.out.println("Already occupied.");
+            System.out.println("Tried action " + (int) action);
+            return new Types.ACTIONS_VT(validActions.get(0).toInt());
+        }
+
+        return new Types.ACTIONS_VT((int) action);
     }
 
     @Override

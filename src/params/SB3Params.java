@@ -99,6 +99,12 @@ public class SB3Params extends Frame implements Serializable {
 
         private JLabel selfPlayLabel;
         private JCheckBox selfPlayCheckBox;
+        private JLabel selfPlayPolicyWindowSizeLabel;
+        private JTextField selfPlayPolicyWindowSizeText;
+        private JLabel addSelfPlayPolicyEveryXStepsLabel;
+        private JTextField addSelfPlayPolicyEveryXStepsText;
+        private JLabel useLatestSelfPLayPolicyLabel;
+        private JTextField useLatestSelfPLayPolicyText;
         private JLabel trainTimeStepsLabel;
         private JTextField trainTimeStepsText;
 
@@ -140,6 +146,15 @@ public class SB3Params extends Frame implements Serializable {
             selfPlayCheckBox = new JCheckBox();
             selfPlayCheckBox.setSelected(SB3AgentConfig.DEFAULT_SELF_PLAY);
             selfPlayCheckBox.addItemListener(e -> setUseEnemies(!selfPlayCheckBox.isSelected()));
+
+            selfPlayPolicyWindowSizeLabel = new JLabel("Window size of past policies for self play:");
+            selfPlayPolicyWindowSizeText = new JTextField(Integer.toString(SB3AgentConfig.SelfPlayDefaultParameters.DEFAULT_POLICY_WINDOW_SIZE));
+
+            addSelfPlayPolicyEveryXStepsLabel = new JLabel("add policy for self play ervery:");
+            addSelfPlayPolicyEveryXStepsText = new JTextField(Integer.toString(SB3AgentConfig.SelfPlayDefaultParameters.DEFAULT_ADD_POLICY_EVERY_X_STEPS));
+
+            useLatestSelfPLayPolicyLabel = new JLabel("Use latest policy ration:");
+            useLatestSelfPLayPolicyText = new JTextField(Double.toString(SB3AgentConfig.SelfPlayDefaultParameters.DEFAULT_USE_LATEST_POLICY));
 
             trainTimeStepsLabel = new JLabel("Train time steps: ");
             trainTimeStepsText = new JTextField(Integer.toString(SB3AgentConfig.DEFAULT_TRAIN_TIME_STEPS));
@@ -202,6 +217,13 @@ public class SB3Params extends Frame implements Serializable {
 
             this.add(selfPlayLabel);
             this.add(selfPlayCheckBox);
+            this.add(selfPlayPolicyWindowSizeLabel);
+            this.add(selfPlayPolicyWindowSizeText);
+            this.add(addSelfPlayPolicyEveryXStepsLabel);
+            this.add(addSelfPlayPolicyEveryXStepsText);
+            this.add(useLatestSelfPLayPolicyLabel);
+            this.add(useLatestSelfPLayPolicyText);
+
             this.add(trainTimeStepsLabel);
             this.add(trainTimeStepsText);
 
@@ -268,6 +290,14 @@ public class SB3Params extends Frame implements Serializable {
 
         public boolean getSelfPlay() {
             return selfPlayCheckBox.isSelected();
+        }
+
+        public ParSB3.SelfPlayParameters getSelfPlayParameters() {
+            return new ParSB3.SelfPlayParameters(
+                    Integer.parseInt(selfPlayPolicyWindowSizeText.getText()),
+                    Integer.parseInt(addSelfPlayPolicyEveryXStepsText.getText()),
+                    Double.parseDouble(useLatestSelfPLayPolicyText.getText())
+            );
         }
 
         public int getTrainTimeSteps() {
