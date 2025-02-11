@@ -47,8 +47,14 @@ public class RLEnvironmentConnector {
 
     public FirstObservation reset() {
         this.stateObservation = sb3Agent.afterGame();
+        System.out.println("1");
         advanceEnemies();
+        System.out.println("2");
         return new FirstObservation(getObservation(), getInfo());
+    }
+
+    public int[] getAvailableActions() {
+        return stateObservationVectorFuncs.getAvailableActions(stateObservation);
     }
 
     public Transition step(int action) {

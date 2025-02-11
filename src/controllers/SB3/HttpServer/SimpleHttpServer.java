@@ -8,6 +8,7 @@ import controllers.SB3.FirstObservation;
 import controllers.SB3.RLEnvironmentConnector;
 import controllers.SB3.Transition;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -35,6 +36,7 @@ public class SimpleHttpServer
     private StepHttpHandler stepHttpHandler;
     private  ResetHttpHandler resetHttpHandler;
     private TrainingFinishedHandler trainingFinishedHandler;
+    private ActionMaskHandler actionMaskHandler;
 
     private SimpleHttpServer() throws IOException {
         // Create an HttpServer instance
@@ -42,29 +44,33 @@ public class SimpleHttpServer
         this.stepHttpHandler = new StepHttpHandler();
         this.resetHttpHandler = new ResetHttpHandler();
         this.trainingFinishedHandler = new TrainingFinishedHandler();
+        this.actionMaskHandler = new ActionMaskHandler();
 
         // Create context
         server.createContext("/step", stepHttpHandler);
         server.createContext("/reset", resetHttpHandler);
         server.createContext("/trainingFinished", trainingFinishedHandler);
+        server.createContext("/actionMask", actionMaskHandler);
 
         //server.createContext("/testComplete", new testCompleteHttpHandler(httpTest));
 
         // Start the server
         server.setExecutor(null); // Use the default executor
         server.start();
-        System.out.println("Server is running on port 8094");
+        System.out.println("Server is running on port " + ServerConfig.PORT);
     }
 
     public static SimpleHttpServer getInstance() {
         return SIMPLE_HTTP_SERVER;
     }
 
+    // set REnvironment current before use
     public void setRlEnvironment(RLEnvironmentConnector rlEnvironment) {
         this.rlEnvironment = rlEnvironment;
         stepHttpHandler.setRlEnvironment(rlEnvironment);
         resetHttpHandler.setRlEnvironment(rlEnvironment);
         trainingFinishedHandler.setRlEnvironment(rlEnvironment);
+        actionMaskHandler.setRlEnvironment(rlEnvironment);
     }
     public void stopServer() {
         server.stop(2);
@@ -73,14 +79,8 @@ public class SimpleHttpServer
     // step http handler POST request
     static class StepHttpHandler extends EnvironmentHttpHandler implements HttpHandler {
 
-        private RLEnvironmentConnector rlEnvironment;
-
         public StepHttpHandler() {
             super();
-        }
-
-        public void setRlEnvironment(RLEnvironmentConnector rlEnvironment) {
-            this.rlEnvironment = rlEnvironment;
         }
 
         private String invalidFieldsResponse() {
@@ -145,17 +145,44 @@ public class SimpleHttpServer
         }
     }
 
-    // reset http handler
-    static class ResetHttpHandler extends EnvironmentHttpHandler implements HttpHandler {
-
-        private RLEnvironmentConnector rlEnvironment;
-
-        public ResetHttpHandler() {
+    static class ActionMaskHandler extends EnvironmentHttpHandler implements HttpHandler {
+        public ActionMaskHandler() {
             super();
         }
 
-        public void setRlEnvironment(RLEnvironmentConnector rlEnvironment) {
-            this.rlEnvironment = rlEnvironment;
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            final Headers headers = exchange.getResponseHeaders();
+            final String requestMethod = exchange.getRequestMethod().toUpperCase();
+            switch (requestMethod) {
+                case METHOD_GET:
+                    int[] availableActions = this.rlEnvironment.getAvailableActions();
+
+                    // creat responds
+                    String response = new JSONArray(availableActions).toString();
+
+                    headers.set(HEADER_CONTENT_TYPE, String.format("application/json; charset=%s", CHARSET));
+                    final byte[] rawResponseBody = response.getBytes(CHARSET);
+                    exchange.sendResponseHeaders(STATUS_OK, rawResponseBody.length);
+                    OutputStream outputStream = exchange.getResponseBody();
+                    outputStream.write(rawResponseBody);
+                    outputStream.close();
+                case METHOD_OPTIONS:
+                    headers.set(HEADER_ALLOW, METHOD_GET);
+                    exchange.sendResponseHeaders(STATUS_OK, NO_RESPONSE_LENGTH);
+                default:
+                    headers.set(HEADER_ALLOW, METHOD_GET);
+                    exchange.sendResponseHeaders(STATUS_METHOD_NOT_ALLOWED, NO_RESPONSE_LENGTH);
+                    break;
+            }
+        }
+    }
+
+    // reset http handler
+    static class ResetHttpHandler extends EnvironmentHttpHandler implements HttpHandler {
+
+        public ResetHttpHandler() {
+            super();
         }
 
         @Override
@@ -166,6 +193,7 @@ public class SimpleHttpServer
             switch (requestMethod) {
                 case METHOD_POST:
                     // reset environment
+                    System.out.println("hellohjgukj");
                     FirstObservation firstObservation = this.rlEnvironment.reset();
 
                     // creat responds
@@ -189,14 +217,10 @@ public class SimpleHttpServer
     }
 
     static class TrainingFinishedHandler extends EnvironmentHttpHandler implements HttpHandler {
-        private RLEnvironmentConnector rlEnvironment;
+
 
         public TrainingFinishedHandler() {
             super();
-        }
-
-        public void setRlEnvironment(RLEnvironmentConnector rlEnvironment) {
-            this.rlEnvironment = rlEnvironment;
         }
 
         @Override

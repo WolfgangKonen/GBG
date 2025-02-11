@@ -10,6 +10,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import params.ParOther;
 import params.ParSB3;
+import tools.ScoreTuple;
 import tools.Types;
 
 import java.io.*;
@@ -203,15 +204,43 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
 
     }
 
-    private double predictHttpRequest(int[] observation) throws Exception {
-        String response;
-        JSONArray requestBody = new JSONArray(observation);
+    private ActionWithValues predictHttpRequest(int[] observation, int[] availableActions) throws Exception {
+        JSONObject response;
+        JSONArray observationJson = new JSONArray(observation);
+        JSONArray availableActionsJson = new JSONArray(availableActions);
+        JSONObject requestBody = new JSONObject();
+        requestBody.put("observation", observationJson);
+        requestBody.put("availableActions", availableActionsJson);
         String path = "agents/"+ id.toString() + "/predict";
 
         System.out.println(requestBody.toString());
-        response = postRequest(path, requestBody);
+        response = new JSONObject(postRequest(path, requestBody));
         System.out.println(response);
-        return Double.parseDouble(response);
+
+        JSONArray actionValuesJson = response.getJSONArray("actionValues");
+        double[] actionValues = new double[actionValuesJson.length()];
+        for(int i = 0; i < actionValuesJson.length(); i++) {
+            actionValues[i] = actionValuesJson.getDouble(i);
+        }
+
+
+        int action = (int) response.get("action");
+
+        return new ActionWithValues(action, actionValues);
+    }
+
+    private static class ActionWithValues {
+        public int action;
+        public double[] values;
+
+        public ActionWithValues(int action, double[] values) {
+            this.action = action;
+            this.values = values;
+        }
+
+        public double getBestValue() {
+            return Arrays.stream(values).max().getAsDouble();
+        }
     }
 
     private double selfPlayHttpRequest(int[] observation) throws Exception {
@@ -287,28 +316,34 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
         return stateObservationVectorFuncs.getStateObservationVector(stateObservation);
     }
 
+    public int[] getAvailableActions(StateObservation stateObservation) {
+        return stateObservationVectorFuncs.getAvailableActions(stateObservation);
+    }
+
 
     @Override
     public Types.ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean deterministic, boolean silent) {
+        sob = sob.copy();
         int[] observation= getObservationVector(sob);
+        int[] availableActions = getAvailableActions(sob);
 
         System.out.println(Arrays.toString(observation));
-        double action = 0;
+        ActionWithValues actionsWithValues = null;
         try {
-            action = predictHttpRequest(observation);
+            actionsWithValues = predictHttpRequest(observation, availableActions);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        // TODO: get next best action instead of random
         List<Types.ACTIONS> validActions = sob.getAvailableActions();
-        if (!validActions.contains(new Types.ACTIONS((int) action))) {
+        if (!validActions.contains(new Types.ACTIONS(actionsWithValues.action))) {
             System.out.println("Already occupied.");
-            System.out.println("Tried action " + (int) action);
+            System.out.println("Tried action " + (int) actionsWithValues.action);
             return new Types.ACTIONS_VT(validActions.get(0).toInt());
         }
 
-        return new Types.ACTIONS_VT((int) action);
+        ScoreTuple scoreTuple = new ScoreTuple(sob, actionsWithValues.getBestValue());
+        return new Types.ACTIONS_VT(actionsWithValues.action, false, actionsWithValues.values, actionsWithValues.getBestValue(), scoreTuple);
     }
 
     @Serial

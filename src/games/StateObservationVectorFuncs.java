@@ -1,6 +1,9 @@
 package games;
 
+import tools.Types;
+
 import java.util.Arrays;
+import java.util.List;
 
 public class StateObservationVectorFuncs {
     private final XNTupleFuncs xnTupleFuncs;
@@ -31,6 +34,15 @@ public class StateObservationVectorFuncs {
         Arrays.fill(ranges, xnTupleFuncs.getNumPositionValues());
         ranges[stateObservationVectorSize - 1] = xnTupleFuncs.getNumPlayers();
         return ranges;
+    }
+
+    public int[] getAvailableActions(StateObservation stateObservation) {
+        List<Types.ACTIONS> availableActions = stateObservation.getAvailableActions();
+        int[] availableActionsArray = new int[availableActions.size()];
+        for (int i = 0; i < availableActions.size(); i++) {
+            availableActionsArray[i] = availableActions.get(i).toInt();
+        }
+        return availableActionsArray;
     }
 
     public int[] getStateObservationVectorStarts() {

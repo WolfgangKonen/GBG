@@ -1,5 +1,6 @@
 package controllers.SB3.HttpServer;
 
+import controllers.SB3.RLEnvironmentConnector;
 import org.json.JSONObject;
 
 import java.io.*;
@@ -23,6 +24,10 @@ public abstract class EnvironmentHttpHandler {
     protected static final String METHOD_POST = "POST";
     protected static final String METHOD_OPTIONS = "OPTIONS";
 
+
+    protected RLEnvironmentConnector rlEnvironment;
+
+
     public EnvironmentHttpHandler() {
     }
 
@@ -41,6 +46,10 @@ public abstract class EnvironmentHttpHandler {
             responseStrBuilder.append(inputStr);
 
         return responseStrBuilder.toString();
+    }
+
+    public void setRlEnvironment(RLEnvironmentConnector rlEnvironment) {
+        this.rlEnvironment = rlEnvironment;
     }
 
     protected static JSONObject inputStreamToJson(InputStream inputStream) throws UnsupportedEncodingException, IOException {
