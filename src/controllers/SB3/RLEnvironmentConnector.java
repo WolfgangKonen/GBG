@@ -129,6 +129,10 @@ public class RLEnvironmentConnector {
         enemyAgents = enemies;
     }
 
+    public double eval(String opponentName, int numberOfGames) {
+        return sb3Agent.eval(opponentName, numberOfGames);
+    }
+
     public void trainingFinished() {
         System.out.println("Training finished");
         synchronized (sb3Agent) {

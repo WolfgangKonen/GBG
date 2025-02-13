@@ -19,6 +19,7 @@ public class ParSB3 implements Serializable {
     public Map<String, Object> parSB3Agent;
     public Map<String, Object> parSB3Network;
     public SelfPlayParameters parSB3SelfPlay = new SelfPlayParameters();
+    public EvaluationOptions evaluationOptions;
     /**
      * This member is only constructed when the constructor {@link #ParSB3(boolean, String)} (boolean) ParMCTS(boolean withUI)}
      * called with {@code withUI=true}. It holds the GUI for {@link ParSB3}.
@@ -51,6 +52,7 @@ public class ParSB3 implements Serializable {
         parSB3Agent = sb3Params.agentParameters.getParams();
         parSB3Network = sb3Params.networkParameters.getParams();
         parSB3SelfPlay = sb3Params.baseParameters.getSelfPlayParameters();
+        evaluationOptions = sb3Params.baseParameters.getEvaluationOptions();
     }
 
     public static class SelfPlayParameters {
@@ -76,6 +78,36 @@ public class ParSB3 implements Serializable {
 
         public double getUseLatestPolicy() {
             return useLatestPolicy;
+        }
+    }
+
+    public static class EvaluationOptions {
+        private int evaluateEveryEpisodes;
+        private int numberOfGames;
+        private String opponent;
+        private boolean safeBest;
+
+        public EvaluationOptions(int evaluateEveryEpisodes, int numberOfGames, String opponent, boolean safeBest) {
+            this.evaluateEveryEpisodes = evaluateEveryEpisodes;
+            this.numberOfGames = numberOfGames;
+            this.opponent = opponent;
+            this.safeBest = safeBest;
+        }
+
+        public int getEvaluateEveryEpisodes() {
+            return evaluateEveryEpisodes;
+        }
+
+        public int getNumberOfGames() {
+            return numberOfGames;
+        }
+
+        public String getOpponent() {
+            return opponent;
+        }
+
+        public boolean isSafeBest() {
+            return safeBest;
         }
     }
 

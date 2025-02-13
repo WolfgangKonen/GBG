@@ -16,11 +16,14 @@ public class SB3Params extends Frame implements Serializable {
     public SB3Parameters agentParameters;
     public NetworkParameters networkParameters;
     public EnemyAgentsParameters enemyAgentsParameters;
+    public String gameName;
 
     public SB3Params(String gameName) {
         super("SB3 Parameter");
 
         this.mPanel = new JPanel();
+
+        this.gameName = gameName;
 
         setLayout(new BorderLayout(10,0));				// rows,columns,hgap,vgap
         mPanel.setLayout(new GridLayout(0,3,10,10));
@@ -48,6 +51,7 @@ public class SB3Params extends Frame implements Serializable {
         networkParameters.setUseOwnParameters(!SB3AgentConfig.DEFAULT_USE_STANDARD_SB3_PARMAS);
 
         pack();
+        // setSize(1000, 1000);
         setVisible(false);
     }
 
@@ -97,8 +101,12 @@ public class SB3Params extends Frame implements Serializable {
         private JLabel agentLabel;
         private JComboBox agentComboBox;
 
+        private JLabel evaluationOptionsLabel;
+        private JButton evaluationOptionsButton;
+
         private JLabel selfPlayLabel;
         private JCheckBox selfPlayCheckBox;
+
         private JLabel selfPlayPolicyWindowSizeLabel;
         private JTextField selfPlayPolicyWindowSizeText;
         private JLabel addSelfPlayPolicyEveryXStepsLabel;
@@ -128,6 +136,7 @@ public class SB3Params extends Frame implements Serializable {
         private JTextField deviceText;
 
         private boolean useOwnSB3Params;
+        private EvaluationOptionsPanel evaluationOptionsPanel;
 
         public BaseParameters() {
             titel = new JLabel("Base Parameters", JLabel.CENTER);
@@ -141,6 +150,11 @@ public class SB3Params extends Frame implements Serializable {
                     changeAgentPane(newAgent);
                 }
             });
+
+            evaluationOptionsPanel = new EvaluationOptionsPanel();
+            evaluationOptionsLabel = new JLabel("Evaluation Options: ");
+            evaluationOptionsButton = new JButton("Evaluation Options");
+            evaluationOptionsButton.addActionListener(e -> openEvaluationOptions());
 
             selfPlayLabel = new JLabel("activate self play? ");
             selfPlayCheckBox = new JCheckBox();
@@ -214,6 +228,9 @@ public class SB3Params extends Frame implements Serializable {
 
             this.add(agentLabel);
             this.add(agentComboBox);
+
+            this.add(evaluationOptionsLabel);
+            this.add(evaluationOptionsButton);
 
             this.add(selfPlayLabel);
             this.add(selfPlayCheckBox);
@@ -328,6 +345,17 @@ public class SB3Params extends Frame implements Serializable {
 
         public String getDevice() {
             return deviceText.getText();
+        }
+
+        public ParSB3.EvaluationOptions getEvaluationOptions() {
+            return evaluationOptionsPanel.getEvaluationOptions();
+        }
+
+        private void openEvaluationOptions() {
+            JFrame opponentSettings = new JFrame("Evaluation Options for SB3 agent");
+            opponentSettings.add(evaluationOptionsPanel);
+            opponentSettings.setSize(500, 300);
+            opponentSettings.setVisible(true);
         }
     }
 
@@ -1042,6 +1070,58 @@ public class SB3Params extends Frame implements Serializable {
             removeLayerButton.setEnabled(enabled);
             chooseActivationFunctionLabel.setEnabled(enabled);
             chooseActivationFunction.setEnabled(enabled);
+        }
+    }
+
+    private class EvaluationOptionsPanel extends JPanel {
+        private JLabel evaluateEveryEpisodesLabel;
+        private JTextField evaluateEveryEpisodesText;
+
+        private JLabel numberOfGamesLabel;
+        private JTextField numberOfGamesText;
+
+        private JLabel opponentLabel;
+        private JComboBox opponentComboBox;
+
+        private JLabel safeBestLabel;
+        private JCheckBox safeBestCheckBox;
+
+        public EvaluationOptionsPanel() {
+            evaluateEveryEpisodesLabel = new JLabel("Evaluate every X Episodes: ");
+            evaluateEveryEpisodesText = new JTextField(Integer.toString(SB3AgentConfig.DefaultEvaluationOptions.DEFAULT_EVALUATE_EVERY_EPISODES));
+
+            numberOfGamesLabel = new JLabel("Games per Evaluation: ");
+            numberOfGamesText = new JTextField(Integer.toString(SB3AgentConfig.DefaultEvaluationOptions.DEFAULT_NUMBER_GAMES));
+
+            opponentLabel = new JLabel("Choose opponent for evaluation: ");
+            opponentComboBox = new JComboBox(SB3AgentConfig.DefaultEvaluationOptions.DEFAULT_OPPONENTS);
+
+            safeBestLabel = new JLabel("Safe model after evaluation if better?");
+            safeBestCheckBox = new JCheckBox();
+            safeBestCheckBox.setSelected(SB3AgentConfig.DefaultEvaluationOptions.DEFAULT_SAFE_BEST_MODEL);
+
+            this.setLayout(new GridLayout(0,2,10,10));
+
+            this.add(evaluateEveryEpisodesLabel);
+            this.add(evaluateEveryEpisodesText);
+
+            this.add(numberOfGamesLabel);
+            this.add(numberOfGamesText);
+
+            this.add(opponentLabel);
+            this.add(opponentComboBox);
+
+            this.add(safeBestLabel);
+            this.add(safeBestCheckBox);
+        }
+
+        public ParSB3.EvaluationOptions getEvaluationOptions() {
+            return new ParSB3.EvaluationOptions(
+                    Integer.parseInt(evaluateEveryEpisodesText.getText()),
+                    Integer.parseInt(numberOfGamesText.getText()),
+                    (String) opponentComboBox.getSelectedItem(),
+                    safeBestCheckBox.isSelected()
+            );
         }
     }
 }

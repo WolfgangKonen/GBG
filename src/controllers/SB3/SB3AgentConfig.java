@@ -8,7 +8,7 @@ public class SB3AgentConfig {
     public static final String DEFAULT_AGENT = "DQN";
     public static final String[] DEFAULT_AGENT_OPTIONS = {"DQN", "PPO"};
     public static final boolean DEFAULT_SELF_PLAY = true;
-    public static final int DEFAULT_TRAIN_TIME_STEPS = 10000;
+    public static final int DEFAULT_TRAIN_TIME_STEPS = 100; // 10000;
     public static final boolean DEFAULT_USE_STANDARD_SB3_PARMAS = true;
     public static final boolean DEFAULT_USE_STANDARD_NETWORK_PARAMS = true;
     public static final boolean DEFAULT_USE_ENEMIES = false;
@@ -109,6 +109,20 @@ public class SB3AgentConfig {
         public static final String TIP_USE_SDE  = "Whether to use generalized State Dependent Exploration (gSDE) instead of action noise exploration";
         public static final String TIP_SDE_SAMPLE_FREQ = "Sample a new noise matrix every n steps when using gSDE Default: -1 (only sample at the beginning of the rollout)";
         public static final String TIP_TARGET_KL = "The target KL divergence between the old and new policies. Early stopping occurs if the value is exceeded.";
+    }
+
+    public static class DefaultEvaluationOptions {
+        public static final int DEFAULT_EVALUATE_EVERY_EPISODES = 5000;
+        public static final int DEFAULT_NUMBER_GAMES = 300;
+        public static final String[] DEFAULT_OPPONENTS = {
+                "Random",
+                "Max-N",
+                "RHEA-SI",
+                "MCTS",
+                "MC-N"
+        };
+
+        public static final boolean DEFAULT_SAFE_BEST_MODEL = false;
     }
 
 
