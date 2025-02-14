@@ -1,5 +1,6 @@
 package params;
 
+import controllers.SB3.SB3Agent;
 import controllers.SB3.SB3AgentConfig;
 import gui.MessageBox;
 import tools.Types;
@@ -7,6 +8,8 @@ import tools.Types;
 import javax.swing.*;
 import java.awt.*;
 import java.io.Serializable;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.List;
 
@@ -17,6 +20,8 @@ public class SB3Params extends Frame implements Serializable {
     public NetworkParameters networkParameters;
     public EnemyAgentsParameters enemyAgentsParameters;
     public String gameName;
+
+    transient private SB3Agent sb3Agent = null;
 
     public SB3Params(String gameName) {
         super("SB3 Parameter");
@@ -82,6 +87,10 @@ public class SB3Params extends Frame implements Serializable {
         agentParameters.setUseOwnParameters(enabled);
     }
 
+    public void setFrom(ParSB3 parSB3) {
+
+    }
+
     public void setUseEnemies(boolean useEnemies) {
         enemyAgentsParameters.setUseEnemies(useEnemies);
     }
@@ -95,6 +104,10 @@ public class SB3Params extends Frame implements Serializable {
         void setUseOwnParameters(boolean enabled);
     }
 
+    public void setSb3Agent(SB3Agent sb3Agent) {
+        this.sb3Agent = sb3Agent;
+    }
+
     public class BaseParameters extends JPanel implements SB3Parameters{
         private JLabel titel;
 
@@ -103,6 +116,8 @@ public class SB3Params extends Frame implements Serializable {
 
         private JLabel evaluationOptionsLabel;
         private JButton evaluationOptionsButton;
+        private JLabel loadPolicyLabel;
+        private JButton loadPolicyButton;
 
         private JLabel selfPlayLabel;
         private JCheckBox selfPlayCheckBox;
@@ -155,6 +170,10 @@ public class SB3Params extends Frame implements Serializable {
             evaluationOptionsLabel = new JLabel("Evaluation Options: ");
             evaluationOptionsButton = new JButton("Evaluation Options");
             evaluationOptionsButton.addActionListener(e -> openEvaluationOptions());
+
+            loadPolicyLabel = new JLabel("Load a specific policy: ");
+            loadPolicyButton = new JButton("Load policy");
+            loadPolicyButton.addActionListener(e -> loadPolicy());
 
             selfPlayLabel = new JLabel("activate self play? ");
             selfPlayCheckBox = new JCheckBox();
@@ -231,6 +250,8 @@ public class SB3Params extends Frame implements Serializable {
 
             this.add(evaluationOptionsLabel);
             this.add(evaluationOptionsButton);
+            this.add(loadPolicyLabel);
+            this.add(loadPolicyButton);
 
             this.add(selfPlayLabel);
             this.add(selfPlayCheckBox);
@@ -310,6 +331,7 @@ public class SB3Params extends Frame implements Serializable {
         }
 
         public ParSB3.SelfPlayParameters getSelfPlayParameters() {
+            // TODO: NOne
             return new ParSB3.SelfPlayParameters(
                     Integer.parseInt(selfPlayPolicyWindowSizeText.getText()),
                     Integer.parseInt(addSelfPlayPolicyEveryXStepsText.getText()),
@@ -356,6 +378,35 @@ public class SB3Params extends Frame implements Serializable {
             opponentSettings.add(evaluationOptionsPanel);
             opponentSettings.setSize(500, 300);
             opponentSettings.setVisible(true);
+        }
+
+        private void loadPolicy() {
+            if (sb3Agent == null) {
+                System.out.println("No SB3Agent set.");
+                //TODO popo up no sccess
+                return;
+            }
+
+            String path = Types.GUI_DEFAULT_DIR_AGENT+"/"+gameName + "/" + "SB3Agent" +"/" + sb3Agent.getAgentType() + "/" + sb3Agent.getId();
+            if (!Files.exists(Paths.get(path))) {
+                System.out.println(path);
+                System.out.println("For this agent no SB3 policy have been saved.");
+                //TODO pop up no success
+                return;
+            }
+
+            JFileChooser fileChooser = new JFileChooser(Types.GUI_DEFAULT_DIR_AGENT+"/"+gameName + "/" + "SB3Agent" +"/" + sb3Agent.getAgentType() + "/" + sb3Agent.getId());
+            int returnVal = fileChooser.showOpenDialog(this);
+            String filePath = null;
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                filePath = fileChooser.getSelectedFile().getPath();
+            }
+            sb3Agent.loadSB3PolicyFromPath(filePath);
+            // TODO: pop up success
+        }
+
+        public void setFrom(BaseParameters baseParameters) {
+
         }
     }
 
@@ -1070,6 +1121,46 @@ public class SB3Params extends Frame implements Serializable {
             removeLayerButton.setEnabled(enabled);
             chooseActivationFunctionLabel.setEnabled(enabled);
             chooseActivationFunction.setEnabled(enabled);
+        }
+    }
+
+    private class LoadOptions extends JPanel {
+        private JLabel chosenAgentLabel;
+        private JTextField  chosenAgentText;
+
+        private JButton chooseAgent;
+        private JButton loadAgent;
+
+        public LoadOptions() {
+            chosenAgentLabel = new JLabel("Chosen Agent: ");
+            chosenAgentText = new JTextField("No agent selected");
+
+            chooseAgent = new JButton("Choose Agent");
+            chooseAgent.addActionListener(e -> chooseAgent());
+            loadAgent = new JButton("Load Agent");
+            loadAgent.addActionListener(e -> loadAgent());
+
+            this.setLayout(new GridLayout(0,2,10,10));
+
+            this.add(chosenAgentLabel);
+            this.add(chosenAgentText);
+
+            this.add(chooseAgent);
+            this.add(loadAgent);
+        }
+
+        private void chooseAgent() {
+            JFileChooser fileChooser = new JFileChooser();
+            int returnVal = fileChooser.showOpenDialog(this);
+            String filePath = null;
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                filePath = fileChooser.getSelectedFile().getName();
+            }
+            chosenAgentText.setText(filePath);
+        }
+
+        private void loadAgent() {
+
         }
     }
 

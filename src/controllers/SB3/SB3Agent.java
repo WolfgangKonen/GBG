@@ -11,6 +11,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import params.ParOther;
 import params.ParSB3;
+import params.SB3Params;
 import tools.ScoreTuple;
 import tools.Types;
 
@@ -36,18 +37,11 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
     transient private ParOther parOther; // TODO: remove?
     private String agentType;
     private String[] enemyAgents;
-    private final Set<String> trainable = new HashSet<>( Arrays.asList(
-            new String[] {
-
-            }
-    ));
-
 
     private int playerNumber;
     private UUID id;
     transient private XArenaFuncs.GameProgressor gameProgressor;
     transient private int moveCounter  = 0;
-
 
     transient private GameBoard gameBoard;
 
@@ -67,6 +61,7 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
 
         this.gameBoard = m_xab.m_arena.getGameBoard();
 
+        parSB3.setSB3Agent(this);
         setAgentState(AgentState.INIT);
     }
 
@@ -86,11 +81,22 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
         stateObservationVectorFuncs = m_arena.makeStateObservationVectorFuncs();
         gameBoard = m_arena.getGameBoard();
         xArenaButtons = m_arena.m_xab;
+        super.fillParamTabsAfterLoading(n, m_arena);
+        xArenaButtons.setSb3ParFrom(n, parSB3);
         xArenaFuncs = m_arena.m_xfun;
         List<PlayAgent> enemyAgents = loadAgents(this.enemyAgents);
         rlEnvironment = new RLEnvironmentConnector(this.stateObservationVectorFuncs, enemyAgents, this, playerNumber);
+        parSB3.setSB3Agent(this);
         try {
             loadSB3AgentHttpRequest(id, agentType, arena.getGameName(), null);
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+    }
+
+    public void loadSB3PolicyFromPath(String path) {
+        try {
+            loadSB3AgentHttpRequest(id, agentType, arena.getGameName(), path);
         } catch (Exception exception) {
             exception.printStackTrace();
         }
@@ -183,15 +189,16 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
     }
 
     private void createSB3Agent(ParSB3 parSB3) {
-        createSB3AgentHttpRequest(parSB3.agentType, parSB3.parSB3Base, parSB3.parSB3Agent, parSB3.parSB3Network);
+        createSB3AgentHttpRequest(parSB3.agentType, arena.getGameName(), parSB3.parSB3Base, parSB3.parSB3Agent, parSB3.parSB3Network);
     }
 
-    private void createSB3AgentHttpRequest(String agentType, Map<String, Object> baseParameters, Map<String, Object> agentParameters, Map<String, Object> networkParameters) {
+    private void createSB3AgentHttpRequest(String agentType, String gameName, Map<String, Object> baseParameters, Map<String, Object> agentParameters, Map<String, Object> networkParameters) {
         JSONObject requestBody = new JSONObject();
         JSONObject environmentParameters = new JSONObject();
 
         requestBody.put("agent_id", id);
         requestBody.put("agentType", agentType);
+        requestBody.put("gameName", gameName);
         requestBody.put("baseParameters", baseParameters);
         requestBody.put("agentParameters", agentParameters);
         requestBody.put("networkParameters", networkParameters);
@@ -268,8 +275,6 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
     private void saveSB3AgentHttpRequest(UUID id, String gameName, String agentType) throws Exception {
         String response;
         JSONObject requestBody = new JSONObject();
-        requestBody.put("agentType", agentType);
-        requestBody.put("gameName", gameName);
         String path = "agents/"+ id.toString() + "/save";
 
         response = postRequest(path, requestBody);
@@ -425,5 +430,13 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
     @Override
     public int getMoveCounter() {
         return moveCounter;
+    }
+
+    public String getAgentType() {
+        return agentType;
+    }
+
+    public UUID getId() {
+        return id;
     }
 }

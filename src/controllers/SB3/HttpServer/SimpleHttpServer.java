@@ -67,7 +67,7 @@ public class SimpleHttpServer
         return SIMPLE_HTTP_SERVER;
     }
 
-    // set REnvironment current before use
+    // set current RLEnvironment before use
     public void setRlEnvironment(RLEnvironmentConnector rlEnvironment) {
         this.rlEnvironment = rlEnvironment;
         stepHttpHandler.setRlEnvironment(rlEnvironment);

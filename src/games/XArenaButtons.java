@@ -405,4 +405,7 @@ public class XArenaButtons //extends JPanel
 	}
 	public void setRBParFrom(int n, ParRB parRB){ rbPar[n].setFrom(parRB); }
 	public void setWrapperParFrom(int n, ParWrapper parWR){ wrPar[n].setFrom(parWR); }
+	public void setSb3ParFrom(int n, ParSB3 parSB3) {
+		sb3Par[n].setFrom(parSB3);
+	}
 } // class XArenaButtons

@@ -1,5 +1,6 @@
 package params;
 
+import controllers.SB3.SB3Agent;
 import controllers.SB3.SB3AgentConfig;
 
 import javax.swing.*;
@@ -18,7 +19,7 @@ public class ParSB3 implements Serializable {
     public Map<String, Object> parSB3Base;
     public Map<String, Object> parSB3Agent;
     public Map<String, Object> parSB3Network;
-    public SelfPlayParameters parSB3SelfPlay = new SelfPlayParameters();
+    public SelfPlayParameters parSB3SelfPlay;
     public EvaluationOptions evaluationOptions;
     /**
      * This member is only constructed when the constructor {@link #ParSB3(boolean, String)} (boolean) ParMCTS(boolean withUI)}
@@ -55,12 +56,15 @@ public class ParSB3 implements Serializable {
         evaluationOptions = sb3Params.baseParameters.getEvaluationOptions();
     }
 
-    public static class SelfPlayParameters {
+    public void setFrom(ParSB3 parSB3) {
+        // TODO
+    }
+
+    public static class SelfPlayParameters implements Serializable {
         private int policyWindowSize = SB3AgentConfig.SelfPlayDefaultParameters.DEFAULT_POLICY_WINDOW_SIZE;
         private int addPolicyEveryXSteps = SB3AgentConfig.SelfPlayDefaultParameters.DEFAULT_ADD_POLICY_EVERY_X_STEPS;
         private double useLatestPolicy= SB3AgentConfig.SelfPlayDefaultParameters.DEFAULT_USE_LATEST_POLICY;
 
-        public SelfPlayParameters() {}
 
         public SelfPlayParameters(int policyWindowSize, int addPolicyEveryXSteps, double useLatestPolicy) {
             this.policyWindowSize = policyWindowSize;
@@ -81,17 +85,17 @@ public class ParSB3 implements Serializable {
         }
     }
 
-    public static class EvaluationOptions {
+    public static class EvaluationOptions implements Serializable {
         private int evaluateEveryEpisodes;
         private int numberOfGames;
         private String opponent;
-        private boolean safeBest;
+        private boolean saveBest;
 
-        public EvaluationOptions(int evaluateEveryEpisodes, int numberOfGames, String opponent, boolean safeBest) {
+        public EvaluationOptions(int evaluateEveryEpisodes, int numberOfGames, String opponent, boolean saveBest) {
             this.evaluateEveryEpisodes = evaluateEveryEpisodes;
             this.numberOfGames = numberOfGames;
             this.opponent = opponent;
-            this.safeBest = safeBest;
+            this.saveBest = saveBest;
         }
 
         public int getEvaluateEveryEpisodes() {
@@ -106,9 +110,12 @@ public class ParSB3 implements Serializable {
             return opponent;
         }
 
-        public boolean isSafeBest() {
-            return safeBest;
+        public boolean isSaveBest() {
+            return saveBest;
         }
     }
 
+    public void setSB3Agent(SB3Agent sb3Agent) {
+        sb3Params.setSb3Agent(sb3Agent);
+    }
 }
