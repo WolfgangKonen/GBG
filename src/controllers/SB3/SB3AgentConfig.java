@@ -131,7 +131,7 @@ public class SB3AgentConfig {
     // Default params for NetworkParameters
     public static final int DEFAULT_NUM_NEURONS = 64;
     public static final List<Integer> DEFAULT_LAYERS = new LinkedList<Integer>();
-    public static final String[] DEFAULT_ACTIVATION_FUNCTIONS= {"ReLU", "Linear", "LeakyReLU", "Sigmoid", "Tanh"};
+    public static final String[] DEFAULT_ACTIVATION_FUNCTIONS= {"ReLU", "LeakyReLU", "Sigmoid", "Tanh"};
     public static final String DEFAULT_ACTIVATION_FUNCTION= "ReLU";
 
     public class SelfPlayDefaultParameters {

@@ -19,6 +19,8 @@ public class SB3Params extends Frame implements Serializable {
     public SB3Parameters agentParameters;
     public NetworkParameters networkParameters;
     public EnemyAgentsParameters enemyAgentsParameters;
+    public EvaluationOptionsPanel evaluationOptionsPanel;
+
     public String gameName;
 
     transient private SB3Agent sb3Agent = null;
@@ -31,7 +33,7 @@ public class SB3Params extends Frame implements Serializable {
         this.gameName = gameName;
 
         setLayout(new BorderLayout(10,0));				// rows,columns,hgap,vgap
-        mPanel.setLayout(new GridLayout(0,3,10,10));
+        mPanel.setLayout(new GridLayout(0,2,10,10));
 
         baseParameters = new BaseParameters();
         mPanel.add(baseParameters);
@@ -40,19 +42,10 @@ public class SB3Params extends Frame implements Serializable {
         this.agentParameters = (SB3Parameters) policyParameters;
         mPanel.add(policyParameters);
 
-        JPanel agentAndNetworkPanel = new JPanel();
-        agentAndNetworkPanel.setLayout(new GridLayout(0,1,10,10));
-
-        mPanel.add(agentAndNetworkPanel);
-
         enemyAgentsParameters = new EnemyAgentsParameters(gameName);
-        agentAndNetworkPanel.add(enemyAgentsParameters);
-
         networkParameters = new NetworkParameters();
-        agentAndNetworkPanel.add(networkParameters);
 
         setUseOwnParametersForBaseAndAgent(!SB3AgentConfig.DEFAULT_USE_STANDARD_SB3_PARMAS);
-        setUseEnemies(SB3AgentConfig.DEFAULT_USE_ENEMIES);
         networkParameters.setUseOwnParameters(!SB3AgentConfig.DEFAULT_USE_STANDARD_SB3_PARMAS);
 
         pack();
@@ -87,12 +80,17 @@ public class SB3Params extends Frame implements Serializable {
         agentParameters.setUseOwnParameters(enabled);
     }
 
-    public void setFrom(ParSB3 parSB3) {
+    public void setFrom(ParSB3 parSB3, SB3Agent sb3Agent) {
+        this.sb3Agent = sb3Agent;
+        baseParameters.agentComboBox.setSelectedItem(parSB3.agentType);
+        baseParameters.trainTimeStepsText.setText(String.valueOf(parSB3.trainTimeSteps));
 
-    }
+        baseParameters.setFrom(parSB3.parSB3Base);
+        enemyAgentsParameters.setFrom(parSB3.parSB3SelfPlay, parSB3.enemyAgents);
+        agentParameters.setFrom(parSB3.parSB3Agent);
+        networkParameters.setFrom(parSB3.parSB3Network);
+        evaluationOptionsPanel.setFrom(parSB3.evaluationOptions);
 
-    public void setUseEnemies(boolean useEnemies) {
-        enemyAgentsParameters.setUseEnemies(useEnemies);
     }
 
     public JPanel getPanel() {
@@ -101,6 +99,7 @@ public class SB3Params extends Frame implements Serializable {
 
     public interface SB3Parameters {
         Map<String, Object> getParams();
+        void setFrom(Map<String, Object> parameters);
         void setUseOwnParameters(boolean enabled);
     }
 
@@ -114,27 +113,22 @@ public class SB3Params extends Frame implements Serializable {
         private JLabel agentLabel;
         private JComboBox agentComboBox;
 
+        // Further Options / Params
         private JLabel evaluationOptionsLabel;
         private JButton evaluationOptionsButton;
         private JLabel loadPolicyLabel;
         private JButton loadPolicyButton;
-
-        private JLabel selfPlayLabel;
-        private JCheckBox selfPlayCheckBox;
-
-        private JLabel selfPlayPolicyWindowSizeLabel;
-        private JTextField selfPlayPolicyWindowSizeText;
-        private JLabel addSelfPlayPolicyEveryXStepsLabel;
-        private JTextField addSelfPlayPolicyEveryXStepsText;
-        private JLabel useLatestSelfPLayPolicyLabel;
-        private JTextField useLatestSelfPLayPolicyText;
+        private JLabel opponentOptionsLabel;
+        private JButton opponentOptionsButton;
+        private JLabel networkParametersLabel;
+        private JButton networkParametersButton;
+        // Further Options / Params
         private JLabel trainTimeStepsLabel;
         private JTextField trainTimeStepsText;
 
         private JLabel standardSB3ParamsLabel;
         private JCheckBox standardSB3ParamsCheckBox;
-        private JLabel standardNetworkParamsLabel;
-        private JCheckBox standardNetworkParamsCheckBox;
+
 
         // Params Specific for SB3 (will be stored in Map)
         private JLabel learningRateLabel;
@@ -151,7 +145,6 @@ public class SB3Params extends Frame implements Serializable {
         private JTextField deviceText;
 
         private boolean useOwnSB3Params;
-        private EvaluationOptionsPanel evaluationOptionsPanel;
 
         public BaseParameters() {
             titel = new JLabel("Base Parameters", JLabel.CENTER);
@@ -166,6 +159,7 @@ public class SB3Params extends Frame implements Serializable {
                 }
             });
 
+            // Further Options / Params
             evaluationOptionsPanel = new EvaluationOptionsPanel();
             evaluationOptionsLabel = new JLabel("Evaluation Options: ");
             evaluationOptionsButton = new JButton("Evaluation Options");
@@ -175,19 +169,14 @@ public class SB3Params extends Frame implements Serializable {
             loadPolicyButton = new JButton("Load policy");
             loadPolicyButton.addActionListener(e -> loadPolicy());
 
-            selfPlayLabel = new JLabel("activate self play? ");
-            selfPlayCheckBox = new JCheckBox();
-            selfPlayCheckBox.setSelected(SB3AgentConfig.DEFAULT_SELF_PLAY);
-            selfPlayCheckBox.addItemListener(e -> setUseEnemies(!selfPlayCheckBox.isSelected()));
+            opponentOptionsLabel = new JLabel("Manage opponents/ Self Play: ");
+            opponentOptionsButton = new JButton("Opponent Options");
+            opponentOptionsButton.addActionListener(e -> openOpponentOptions());
 
-            selfPlayPolicyWindowSizeLabel = new JLabel("Window size of past policies for self play:");
-            selfPlayPolicyWindowSizeText = new JTextField(Integer.toString(SB3AgentConfig.SelfPlayDefaultParameters.DEFAULT_POLICY_WINDOW_SIZE));
-
-            addSelfPlayPolicyEveryXStepsLabel = new JLabel("add policy for self play ervery:");
-            addSelfPlayPolicyEveryXStepsText = new JTextField(Integer.toString(SB3AgentConfig.SelfPlayDefaultParameters.DEFAULT_ADD_POLICY_EVERY_X_STEPS));
-
-            useLatestSelfPLayPolicyLabel = new JLabel("Use latest policy ration:");
-            useLatestSelfPLayPolicyText = new JTextField(Double.toString(SB3AgentConfig.SelfPlayDefaultParameters.DEFAULT_USE_LATEST_POLICY));
+            networkParametersLabel = new JLabel("Network parameters: ");
+            networkParametersButton = new JButton("Network parameters");
+            networkParametersButton.addActionListener(e -> openNetworkParameters() );
+            // Further Options / Params
 
             trainTimeStepsLabel = new JLabel("Train time steps: ");
             trainTimeStepsText = new JTextField(Integer.toString(SB3AgentConfig.DEFAULT_TRAIN_TIME_STEPS));
@@ -200,12 +189,7 @@ public class SB3Params extends Frame implements Serializable {
                     !standardSB3ParamsCheckBox.isSelected())
             );
 
-            standardNetworkParamsLabel = new JLabel("Use Standard Network Parameters by SB3?");
-            standardNetworkParamsCheckBox = new JCheckBox();
-            standardNetworkParamsCheckBox.setSelected(SB3AgentConfig.DEFAULT_USE_STANDARD_NETWORK_PARAMS);
-            standardNetworkParamsCheckBox.addItemListener(e -> networkParameters.setUseOwnParameters(
-                    !standardNetworkParamsCheckBox.isSelected()
-            ));
+
 
             // Params Specific for SB3 (will be stored in Map)
             learningRateLabel = new JLabel("Learning rate: ");
@@ -229,10 +213,8 @@ public class SB3Params extends Frame implements Serializable {
 
             // Set tool tips
             agentLabel.setToolTipText(SB3AgentConfig.TIP_AGENT);
-            selfPlayLabel.setToolTipText(SB3AgentConfig.TIP_SELF_PLAY);
             trainTimeStepsLabel.setToolTipText(SB3AgentConfig.TIP_TRAIN_TIMESTEPS);
             standardSB3ParamsLabel.setToolTipText(SB3AgentConfig.TIP_STANDARD_SB3_PARAMS);
-            standardNetworkParamsLabel.setToolTipText(SB3AgentConfig.TIP_STANDARD_NETWORK_PARAMS);
             learningRateLabel.setToolTipText(SB3AgentConfig.TIP_LEARNING_RATE);
             statsWindowSizeLabel.setToolTipText(SB3AgentConfig.TIP_STATS_WINDOW_SIZE);
             tensorboardLogLabel.setToolTipText(SB3AgentConfig.TIP_TENSORBOARD_LOG);
@@ -248,27 +230,22 @@ public class SB3Params extends Frame implements Serializable {
             this.add(agentLabel);
             this.add(agentComboBox);
 
+            // Further Options / Params
             this.add(evaluationOptionsLabel);
             this.add(evaluationOptionsButton);
             this.add(loadPolicyLabel);
             this.add(loadPolicyButton);
-
-            this.add(selfPlayLabel);
-            this.add(selfPlayCheckBox);
-            this.add(selfPlayPolicyWindowSizeLabel);
-            this.add(selfPlayPolicyWindowSizeText);
-            this.add(addSelfPlayPolicyEveryXStepsLabel);
-            this.add(addSelfPlayPolicyEveryXStepsText);
-            this.add(useLatestSelfPLayPolicyLabel);
-            this.add(useLatestSelfPLayPolicyText);
+            this.add(opponentOptionsLabel);
+            this.add(opponentOptionsButton);
+            this.add(networkParametersLabel);
+            this.add(networkParametersButton);
+            // Further Options / Params
 
             this.add(trainTimeStepsLabel);
             this.add(trainTimeStepsText);
 
             this.add(standardSB3ParamsLabel);
             this.add(standardSB3ParamsCheckBox);
-            this.add(standardNetworkParamsLabel);
-            this.add(standardNetworkParamsCheckBox);
 
             // Params Specific for SB3 (will be stored in Map)
             this.add(learningRateLabel);
@@ -303,6 +280,14 @@ public class SB3Params extends Frame implements Serializable {
             deviceLabel.setEnabled(enabled); // TODO: DO we need device?
         }
 
+        public void setFrom(Map<String, Object> baseParameters) {
+            learningRateText.setText(String.valueOf(baseParameters.get("learning_rate")));
+            statsWindowSizeText.setText(String.valueOf(baseParameters.get("stats_window_size")));
+            tensorboardLogText.setText(String.valueOf(baseParameters.get("tensorboard_log")));
+            verboseText.setText(String.valueOf(baseParameters.get("verbose")));
+            seedText.setText(String.valueOf(baseParameters.get("seed")));
+        }
+
         @Override
         public Map<String, Object> getParams() {
             Map<String, Object> params = new HashMap<>();
@@ -323,20 +308,6 @@ public class SB3Params extends Frame implements Serializable {
                 return policy;
             }
             return SB3AgentConfig.DEFAULT_AGENT;
-        }
-
-
-        public boolean getSelfPlay() {
-            return selfPlayCheckBox.isSelected();
-        }
-
-        public ParSB3.SelfPlayParameters getSelfPlayParameters() {
-            // TODO: NOne
-            return new ParSB3.SelfPlayParameters(
-                    Integer.parseInt(selfPlayPolicyWindowSizeText.getText()),
-                    Integer.parseInt(addSelfPlayPolicyEveryXStepsText.getText()),
-                    Double.parseDouble(useLatestSelfPLayPolicyText.getText())
-            );
         }
 
         public int getTrainTimeSteps() {
@@ -380,6 +351,22 @@ public class SB3Params extends Frame implements Serializable {
             opponentSettings.setVisible(true);
         }
 
+        private void openOpponentOptions() {
+            JFrame opponentOptionsFrame = new JFrame("Opponent options");
+            opponentOptionsFrame.add(enemyAgentsParameters);
+            opponentOptionsFrame.setSize(500, 500);
+            opponentOptionsFrame.setVisible(true);
+        }
+
+        private void openNetworkParameters() {
+            JFrame networkParametersFrame = new JFrame("Network Parameters");
+            networkParametersFrame.add(networkParameters);
+            networkParametersFrame.setSize(500, 400);
+            networkParametersFrame.setVisible(true);
+        }
+
+
+
         private void loadPolicy() {
             if (sb3Agent == null) {
                 System.out.println("No SB3Agent set.");
@@ -404,15 +391,9 @@ public class SB3Params extends Frame implements Serializable {
             sb3Agent.loadSB3PolicyFromPath(filePath);
             // TODO: pop up success
         }
-
-        public void setFrom(BaseParameters baseParameters) {
-
-        }
     }
 
     public class EnemyAgentsParameters extends JPanel {
-        private JLabel titel;
-
         private JLabel enemiesLabel;
         private DefaultListModel<String> listModel;
         private JList enemies;
@@ -425,37 +406,53 @@ public class SB3Params extends Frame implements Serializable {
 
         private JButton loadEnemyButton;
 
-        private String gameName;
+        // Self Play parameters
+        private JLabel selfPLayLabel;
+        private JLabel selfPlayPolicyWindowSizeLabel;
+        private JTextField selfPlayPolicyWindowSizeText;
+        private JLabel addSelfPlayPolicyEveryXStepsLabel;
+        private JTextField addSelfPlayPolicyEveryXStepsText;
+        private JLabel useLatestSelfPLayPolicyLabel;
+        private JTextField useLatestSelfPLayPolicyText;
 
-        private boolean useEnemies;
+
+        private String gameName;
 
         public EnemyAgentsParameters(String gameName) {
             this.gameName = gameName;
 
-            titel = new JLabel("Enemy Agents");
-            Font font = titel.getFont();
-            titel.setFont(new Font(font.getName(), Font.BOLD, font.getSize()));
-
-            enemiesLabel = new JLabel("Enemies:");
+            enemiesLabel = new JLabel("Opponents:");
             listModel = new DefaultListModel<>();
             enemies = new JList(listModel);
 
-            addEnemyLabel = new JLabel("Choose an enemy then add or load an enemy: ");
+            addEnemyLabel = new JLabel("Choose an opponent then add or load an opponent: ");
             addEnemyComboBox = new JComboBox(SB3AgentConfig.EnemyAgentsDefaultValues.DEFAULT_ENEMIES);
 
-            addEnemyButton = new JButton("Add Enemy");
+            addEnemyButton = new JButton("Add opponent");
             addEnemyButton.addActionListener(e -> addEnemy());
 
             removeEnemyButton = new JButton("Remove");
             removeEnemyButton.addActionListener(e -> removeEnemy());
 
-            loadEnemyButton = new JButton("Load Enemy");
+            loadEnemyButton = new JButton("Load opponent");
             loadEnemyButton.addActionListener(e -> loadEnemy());
 
-            this.setLayout(new GridLayout(0, 2, 10, 10));
+            // Self Play
+            selfPLayLabel = new JLabel("Parameters for self play");
+            Font font = selfPLayLabel.getFont();
+            selfPLayLabel.setFont(new Font(font.getName(), Font.BOLD, font.getSize()));
 
-            this.add(titel);
-            this.add(new JLabel());
+            selfPlayPolicyWindowSizeLabel = new JLabel("Window size of past policies for self play:");
+            selfPlayPolicyWindowSizeText = new JTextField(Integer.toString(SB3AgentConfig.SelfPlayDefaultParameters.DEFAULT_POLICY_WINDOW_SIZE));
+
+            addSelfPlayPolicyEveryXStepsLabel = new JLabel("add policy for self play ervery:");
+            addSelfPlayPolicyEveryXStepsText = new JTextField(Integer.toString(SB3AgentConfig.SelfPlayDefaultParameters.DEFAULT_ADD_POLICY_EVERY_X_STEPS));
+
+            useLatestSelfPLayPolicyLabel = new JLabel("Use latest policy ration:");
+            useLatestSelfPLayPolicyText = new JTextField(Double.toString(SB3AgentConfig.SelfPlayDefaultParameters.DEFAULT_USE_LATEST_POLICY));
+            // Self Play
+
+            this.setLayout(new GridLayout(0, 2, 10, 10));
 
             this.add(enemiesLabel);
             this.add(new JScrollPane(enemies));
@@ -467,18 +464,19 @@ public class SB3Params extends Frame implements Serializable {
             this.add(removeEnemyButton);
 
             this.add(loadEnemyButton);
-        }
+            this.add(new JLabel());
 
-        private void setUseEnemies(boolean useEnemies) {
-            this.useEnemies = useEnemies;
+            // Self Play
+            this.add(selfPLayLabel);
+            this.add(new JLabel());
 
-            enemiesLabel.setEnabled(useEnemies);
-            enemies.setEnabled(useEnemies);
-            addEnemyLabel.setEnabled(useEnemies);
-            addEnemyComboBox.setEnabled(useEnemies);
-            addEnemyButton.setEnabled(useEnemies);
-            removeEnemyButton.setEnabled(useEnemies);
-            loadEnemyButton.setEnabled(useEnemies);
+            this.add(selfPlayPolicyWindowSizeLabel);
+            this.add(selfPlayPolicyWindowSizeText);
+            this.add(addSelfPlayPolicyEveryXStepsLabel);
+            this.add(addSelfPlayPolicyEveryXStepsText);
+            this.add(useLatestSelfPLayPolicyLabel);
+            this.add(useLatestSelfPLayPolicyText);
+            // Self Play
 
         }
 
@@ -506,8 +504,27 @@ public class SB3Params extends Frame implements Serializable {
         }
 
         public String[] getEnemyAgents() {
-            if (!useEnemies) return new String[0];
+            if (listModel.isEmpty()) return new String[0];
             return Arrays.copyOf(listModel.toArray(), listModel.size(), String[].class);
+        }
+
+        public void setFrom(ParSB3.SelfPlayParameters selfPlayParameters, String[] enemyAgents) {
+            listModel.clear();
+            for (String opponent: enemyAgents) {
+                listModel.addElement(opponent);
+            }
+
+            selfPlayPolicyWindowSizeText.setText(Integer.toString(selfPlayParameters.getPolicyWindowSize()));
+            addSelfPlayPolicyEveryXStepsText.setText(Integer.toString(selfPlayParameters.getAddPolicyEveryXSteps()));
+            useLatestSelfPLayPolicyText.setText(Double.toString(selfPlayParameters.getUseLatestPolicy()));
+        }
+
+        public ParSB3.SelfPlayParameters getSelfPlayParameters() {
+            return new ParSB3.SelfPlayParameters(
+                    Integer.parseInt(selfPlayPolicyWindowSizeText.getText()),
+                    Integer.parseInt(addSelfPlayPolicyEveryXStepsText.getText()),
+                    Double.parseDouble(useLatestSelfPLayPolicyText.getText())
+            );
         }
     }
 
@@ -668,6 +685,22 @@ public class SB3Params extends Frame implements Serializable {
             explorationInitialEpsLabel.setEnabled(enabled);
             explorationFinalEpsLabel.setEnabled(enabled);
             maxGradNormLabel.setEnabled(enabled);
+        }
+
+        public void setFrom(Map<String, Object> dqnParameters) {
+            bufferSizeText.setText(String.valueOf(dqnParameters.get("buffer_size")));
+            learningStartsText.setText(String.valueOf(dqnParameters.get("learning_starts")));
+            batchSizeText.setText(String.valueOf(dqnParameters.get("batch_size")));
+            tauText.setText(String.valueOf(dqnParameters.get("tau")));
+            gammaText.setText(String.valueOf(dqnParameters.get("gamma")));
+            trainFreqText.setText(String.valueOf(dqnParameters.get("train_freq")));
+            gradientStepsText.setText(String.valueOf(dqnParameters.get("gradient_steps")));
+            optimizeMemoryUsageCheckBox.setSelected(Boolean.parseBoolean(String.valueOf(dqnParameters.get("optimize_memory_usage"))));
+            targetUpdateIntervalText.setText(String.valueOf(dqnParameters.get("target_update_interval")));
+            explorationFractionText.setText(String.valueOf(dqnParameters.get("exploration_fraction")));
+            explorationInitialEpsText.setText(String.valueOf(dqnParameters.get("exploration_initial_eps")));
+            explorationFinalEpsText.setText(String.valueOf(dqnParameters.get("exploration_final_eps")));
+            maxGradNormText.setText(String.valueOf(dqnParameters.get("max_grad_norm")));
         }
 
         @Override
@@ -918,6 +951,23 @@ public class SB3Params extends Frame implements Serializable {
             targetKlLabel.setEnabled(enabled);
         }
 
+        public void setFrom(Map<String, Object> ppoParameters) {
+            nStepsText.setText((String) ppoParameters.get("n_steps"));
+            batchSizeText.setText((String) ppoParameters.get("batch_size"));
+            nEpochsText.setText((String) ppoParameters.get("n_epochs"));
+            gammaText.setText((String) ppoParameters.get("gamma"));
+            gaeLambdaText.setText((String) ppoParameters.get("gae_lambda"));
+            clipRangeText.setText((String) ppoParameters.get("clip_range"));
+            clipRangeVfText.setText((String) ppoParameters.get("clip_range_vf"));
+            normalizeAdvantageCheckBox.setSelected((boolean) ppoParameters.get("normalize_advantage"));
+            entCoefText.setText((String) ppoParameters.get("ent_coef"));
+            vfCoefText.setText((String) ppoParameters.get("vf_coef"));
+            maxGradNormText.setText((String) ppoParameters.get("max_grad_norm"));
+            useSdeCheckBox.setSelected((boolean) ppoParameters.get("use_sde"));
+            sdeSampleFreqText.setText((String) ppoParameters.get("sde_sample_freq"));
+            targetKlText.setText((String) ppoParameters.get("target_kl"));
+        }
+
         @Override
         public Map<String, Object> getParams() {
             Map<String, Object> params = new HashMap<>();
@@ -1002,7 +1052,8 @@ public class SB3Params extends Frame implements Serializable {
     }
 
     public class NetworkParameters extends JPanel implements SB3Parameters {
-        private JLabel titel;
+        private JLabel standardNetworkParamsLabel;
+        private JCheckBox standardNetworkParamsCheckBox;
 
         private JLabel layersLabel;
         private DefaultListModel<String> listModel;
@@ -1020,9 +1071,12 @@ public class SB3Params extends Frame implements Serializable {
         private boolean useOwnNetworkParameters;
 
         public NetworkParameters() {
-            titel = new JLabel("Network Parameters");
-            Font font = titel.getFont();
-            titel.setFont(new Font(font.getName(), Font.BOLD, font.getSize()));
+            standardNetworkParamsLabel = new JLabel("Use Standard Network Parameters by SB3?");
+            standardNetworkParamsCheckBox = new JCheckBox();
+            standardNetworkParamsCheckBox.setSelected(SB3AgentConfig.DEFAULT_USE_STANDARD_NETWORK_PARAMS);
+            standardNetworkParamsCheckBox.addItemListener(e -> SB3Params.this.networkParameters.setUseOwnParameters(
+                    !standardNetworkParamsCheckBox.isSelected()
+            ));
 
             layersLabel = new JLabel("Current Layers:");
             listModel = new DefaultListModel<>();
@@ -1046,8 +1100,8 @@ public class SB3Params extends Frame implements Serializable {
 
             this.setLayout(new GridLayout(0,2,10,10));
 
-            this.add(titel);
-            this.add(new JLabel());
+            this.add(standardNetworkParamsLabel);
+            this.add(standardNetworkParamsCheckBox);
 
             this.add(layersLabel);
             this.add(new JScrollPane(layers));
@@ -1097,6 +1151,14 @@ public class SB3Params extends Frame implements Serializable {
             return SB3AgentConfig.DEFAULT_ACTIVATION_FUNCTION;
         }
 
+        public void setFrom(Map<String, Object> networkParameters) {
+            chooseActivationFunction.setSelectedItem(networkParameters.get("activation_fn"));
+            listModel.clear();
+            for (int layer: (List<Integer>) networkParameters.get("net_arch")) {
+                listModel.addElement(Integer.toString(layer));
+            }
+        }
+
         @Override
         public Map<String, Object> getParams() {
             Map<String, Object> networkParmas = new HashMap<>();
@@ -1124,7 +1186,7 @@ public class SB3Params extends Frame implements Serializable {
         }
     }
 
-    private class LoadOptions extends JPanel {
+    private class LoadOptions extends JPanel { // TODO remove
         private JLabel chosenAgentLabel;
         private JTextField  chosenAgentText;
 
@@ -1174,8 +1236,8 @@ public class SB3Params extends Frame implements Serializable {
         private JLabel opponentLabel;
         private JComboBox opponentComboBox;
 
-        private JLabel safeBestLabel;
-        private JCheckBox safeBestCheckBox;
+        private JLabel saveBestLabel;
+        private JCheckBox saveBestCheckBox;
 
         public EvaluationOptionsPanel() {
             evaluateEveryEpisodesLabel = new JLabel("Evaluate every X Episodes: ");
@@ -1187,9 +1249,9 @@ public class SB3Params extends Frame implements Serializable {
             opponentLabel = new JLabel("Choose opponent for evaluation: ");
             opponentComboBox = new JComboBox(SB3AgentConfig.DefaultEvaluationOptions.DEFAULT_OPPONENTS);
 
-            safeBestLabel = new JLabel("Safe model after evaluation if better?");
-            safeBestCheckBox = new JCheckBox();
-            safeBestCheckBox.setSelected(SB3AgentConfig.DefaultEvaluationOptions.DEFAULT_SAFE_BEST_MODEL);
+            saveBestLabel = new JLabel("Safe model after evaluation if better?");
+            saveBestCheckBox = new JCheckBox();
+            saveBestCheckBox.setSelected(SB3AgentConfig.DefaultEvaluationOptions.DEFAULT_SAFE_BEST_MODEL);
 
             this.setLayout(new GridLayout(0,2,10,10));
 
@@ -1202,8 +1264,15 @@ public class SB3Params extends Frame implements Serializable {
             this.add(opponentLabel);
             this.add(opponentComboBox);
 
-            this.add(safeBestLabel);
-            this.add(safeBestCheckBox);
+            this.add(saveBestLabel);
+            this.add(saveBestCheckBox);
+        }
+
+        public void setFrom(ParSB3.EvaluationOptions evaluationOptions) {
+            evaluateEveryEpisodesText.setText(Integer.toString(evaluationOptions.getEvaluateEveryEpisodes()));
+            numberOfGamesText.setText(Integer.toString(evaluationOptions.getNumberOfGames()));
+            opponentComboBox.setSelectedItem(evaluationOptions.getOpponent());
+            saveBestCheckBox.setSelected(evaluationOptions.isSaveBest());
         }
 
         public ParSB3.EvaluationOptions getEvaluationOptions() {
@@ -1211,7 +1280,7 @@ public class SB3Params extends Frame implements Serializable {
                     Integer.parseInt(evaluateEveryEpisodesText.getText()),
                     Integer.parseInt(numberOfGamesText.getText()),
                     (String) opponentComboBox.getSelectedItem(),
-                    safeBestCheckBox.isSelected()
+                    saveBestCheckBox.isSelected()
             );
         }
     }

@@ -16,6 +16,7 @@ import tools.ScoreTuple;
 import tools.Types;
 
 import java.io.*;
+import java.net.ConnectException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpClient;
@@ -51,7 +52,6 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
         this.parSB3 = parSB3;
         this.parOther = oPar;
         this.stateObservationVectorFuncs = stateObservationVectorFuncs;
-        this.selfPlay = parSB3.selfPlay;
         this.xArenaButtons = m_xab;
         this.arena = arena;
         this.xArenaFuncs = xArenaFuncs;
@@ -82,11 +82,11 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
         gameBoard = m_arena.getGameBoard();
         xArenaButtons = m_arena.m_xab;
         super.fillParamTabsAfterLoading(n, m_arena);
-        xArenaButtons.setSb3ParFrom(n, parSB3);
+        xArenaButtons.setSb3ParFrom(n, parSB3, this);
         xArenaFuncs = m_arena.m_xfun;
         List<PlayAgent> enemyAgents = loadAgents(this.enemyAgents);
         rlEnvironment = new RLEnvironmentConnector(this.stateObservationVectorFuncs, enemyAgents, this, playerNumber);
-        parSB3.setSB3Agent(this);
+        // parSB3.setSB3Agent(this);
         try {
             loadSB3AgentHttpRequest(id, agentType, arena.getGameName(), null);
         } catch (Exception exception) {
@@ -323,7 +323,18 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
             if (response.statusCode() < 200 || response.statusCode() >= 300)
                 throw new RuntimeException(response.body());
         } catch (IOException | InterruptedException connectException) {
-            System.out.println("Could not reach server under: " + ServerConfig.HOST);
+            if (connectException instanceof ConnectException && Objects.equals(((ConnectException) connectException).getMessage(), "Address already in use: no further information")) {
+                System.out.println("Could not reach server under: " + ServerConfig.HOST);
+                System.out.println(connectException);
+                System.out.println("Trying again..");
+                try {
+                    Thread.sleep(300);
+                } catch (Exception exception) {
+                    exception.printStackTrace();
+                }
+                return postRequest(path, requestBody);
+            }
+            connectException.printStackTrace();
             throw new RuntimeException("Could not reach server under: " + ServerConfig.HOST);
         }
 

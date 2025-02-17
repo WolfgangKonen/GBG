@@ -2,6 +2,7 @@ package games;
 
 import java.awt.*;
 import TournamentSystem.TSAgent;
+import controllers.SB3.SB3Agent;
 import gui.XArenaButtonsGui;
 import params.*;
 import tools.Types;
@@ -405,7 +406,7 @@ public class XArenaButtons //extends JPanel
 	}
 	public void setRBParFrom(int n, ParRB parRB){ rbPar[n].setFrom(parRB); }
 	public void setWrapperParFrom(int n, ParWrapper parWR){ wrPar[n].setFrom(parWR); }
-	public void setSb3ParFrom(int n, ParSB3 parSB3) {
-		sb3Par[n].setFrom(parSB3);
+	public void setSb3ParFrom(int n, ParSB3 parSB3, SB3Agent sb3Agent) {
+		sb3Par[n].setFrom(parSB3, sb3Agent);
 	}
 } // class XArenaButtons

@@ -12,10 +12,9 @@ public class ParSB3 implements Serializable {
 
 
     public String agentType = SB3AgentConfig.DEFAULT_AGENT;
-    public boolean selfPlay = SB3AgentConfig.DEFAULT_SELF_PLAY;
-    public String[] enemyAgents = new String[0];
     public int trainTimeSteps = SB3AgentConfig.DEFAULT_TRAIN_TIME_STEPS;
 
+    public String[] enemyAgents = new String[0];
     public Map<String, Object> parSB3Base;
     public Map<String, Object> parSB3Agent;
     public Map<String, Object> parSB3Network;
@@ -45,19 +44,28 @@ public class ParSB3 implements Serializable {
 
     public void setFrom(SB3Params sb3Params) {
         agentType = sb3Params.baseParameters.getAgent();
-        selfPlay = sb3Params.baseParameters.getSelfPlay();
         trainTimeSteps = sb3Params.baseParameters.getTrainTimeSteps();
         enemyAgents = sb3Params.enemyAgentsParameters.getEnemyAgents();
 
         parSB3Base = sb3Params.baseParameters.getParams();
         parSB3Agent = sb3Params.agentParameters.getParams();
         parSB3Network = sb3Params.networkParameters.getParams();
-        parSB3SelfPlay = sb3Params.baseParameters.getSelfPlayParameters();
+        parSB3SelfPlay = sb3Params.enemyAgentsParameters.getSelfPlayParameters();
         evaluationOptions = sb3Params.baseParameters.getEvaluationOptions();
     }
 
-    public void setFrom(ParSB3 parSB3) {
-        // TODO
+    public void setFrom(ParSB3 parSB3, SB3Agent sb3Agent) {
+        agentType = parSB3.agentType;
+        trainTimeSteps = parSB3.trainTimeSteps;
+
+        enemyAgents = parSB3.enemyAgents;
+        parSB3Base = parSB3.parSB3Base;
+        parSB3Agent = parSB3.parSB3Agent;
+        parSB3Network = parSB3.parSB3Network;
+        parSB3SelfPlay = parSB3.parSB3SelfPlay;
+        evaluationOptions = parSB3.evaluationOptions;
+
+        sb3Params.setFrom(parSB3, sb3Agent);
     }
 
     public static class SelfPlayParameters implements Serializable {
