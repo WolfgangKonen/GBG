@@ -257,7 +257,7 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
     }
 
     private int selfPlayHttpRequest(int[] observation, int[] availableActions, boolean deterministic) throws Exception {
-        String response;
+        JSONObject response;
         JSONArray observationJson = new JSONArray(observation);
         JSONArray availableActionsJson = new JSONArray(availableActions);
         JSONObject requestBody = new JSONObject();
@@ -267,9 +267,9 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
         String path = "agents/"+ id.toString() + "/selfPlay";
 
         System.out.println(requestBody.toString());
-        response = postRequest(path, requestBody);
-        System.out.println(response);
-        return Integer.parseInt(response);
+        response = new JSONObject(postRequest(path, requestBody));
+        System.out.println(response.get("action"));
+        return (int) response.get("action");
     }
 
     private void saveSB3AgentHttpRequest(UUID id, String gameName, String agentType) throws Exception {
