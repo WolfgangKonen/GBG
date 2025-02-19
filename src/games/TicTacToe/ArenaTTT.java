@@ -3,7 +3,11 @@ package games.TicTacToe;
 import java.io.IOException;
 
 import controllers.PlayAgent;
-import games.*;
+import games.Arena;
+import games.Evaluator;
+import games.Feature;
+import games.GameBoard;
+import games.XNTupleFuncs;
 
 /**
  * {@link Arena} for TicTacToe. It borrows all functionality

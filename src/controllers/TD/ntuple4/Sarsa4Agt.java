@@ -439,7 +439,7 @@ public class Sarsa4Agt extends NTuple4Base implements PlayAgent, NTuple4Agt,Seri
 	            	System.out.println(s1+" "+s2+","+qLast+"->"+qLastNew+" target="+target
 	            			+" player="+(nextPlayer==0 ? "X" : "o")+" aLast="+actionKey);
 	            	if (++acount % 50 ==0) {
-	            		int dummyF;
+	            		int dummy=1;
 	            	}
 	    		}
 	    		if (s_next.stringDescr().equals("XooX-o-XX")) {

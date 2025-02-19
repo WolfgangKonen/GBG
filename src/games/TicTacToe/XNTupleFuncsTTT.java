@@ -2,7 +2,6 @@ package games.TicTacToe;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.HashSet;
 
 import org.apache.commons.math3.exception.OutOfRangeException;
@@ -108,6 +107,7 @@ public class XNTupleFuncsTTT extends XNTupleBase implements XNTupleFuncs, Serial
 		return new BoardVector(bvec);   
 	}
 
+	// TODO: remove
 	@Override
 	public BoardVector getStandardPerspectivesBoardVector(StateObservation so) {
 		if(so.getPlayer() != 0) {
