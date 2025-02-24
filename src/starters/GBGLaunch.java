@@ -155,7 +155,6 @@ public class GBGLaunch extends SetupGBG {
 
 		// SetupGBG.setupSelectedGame has the switch statement over all games:
 		t_Game = setupSelectedGame(selectedGame, scaPar, title,true,withTrainRights);
-
 		t_Game.setLauncherObj(t_Launch);
 		t_Game.init();
 	}

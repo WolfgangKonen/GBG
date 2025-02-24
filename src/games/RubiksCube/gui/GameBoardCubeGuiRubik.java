@@ -1,4 +1,4 @@
-package games.RubiksCube.GUI;
+package games.RubiksCube.gui;
 
 import games.Arena;
 import games.RubiksCube.CubeState;
@@ -28,7 +28,7 @@ import java.awt.*;
  *             30 31 24
  * </pre>
  */
-public class GameBoardCubeGui3x3 extends GameBoardCubeGui {
+public class GameBoardCubeGuiRubik extends GameBoardCubeGui {
     /**
      * For guiUpdateBoard: Which is the row index iarr and the column index jarr in the boardY * boardX JPanel[][] Board
      * for each of the cubie faces in CubeState.fcol[i], i=0,...,fcol.length-1.<br>
@@ -45,7 +45,7 @@ public class GameBoardCubeGui3x3 extends GameBoardCubeGui {
     protected final int TICGAMEHEIGHT=400;
     protected final int TICGAMEWIDTH=600;
 
-    public GameBoardCubeGui3x3(GameBoardCube gb) {
+    public GameBoardCubeGuiRubik(GameBoardCube gb) {
         super(gb);
         boardX=12;
         boardY=9;

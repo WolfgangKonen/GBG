@@ -1,7 +1,7 @@
 package games.RubiksCube;
 
 import games.BoardVector;
-import games.RubiksCube.GUI.GameBoardCubeGui3x3;
+import games.RubiksCube.gui.GameBoardCubeGuiRubik;
 
 import java.io.Serial;
 
@@ -14,7 +14,7 @@ public class CubeState3x3 extends CubeState {
      * We number the edges in the top layer with {E0,E1,E2,E3} in the order of the U face locations {1,3,5,7}
      * and those in the middle layer with {E4,E5,E6,E7} in the order of the locations {17,21,43,47} on F and B cube face
      * and those in the bottom layer with {E8,E9,Ea,Eb} in the order of the D face locations {25,27,29,31}.
-     * @see GameBoardCubeGui3x3
+     * @see GameBoardCubeGuiRubik
      */
     public enum Edg {E0,E1,E2,E3,E4,E5,E6,E7,E8,E9,Ea,Eb}
     // alternative:  A  B  C  D  E  F  G  H  I  J  K  L

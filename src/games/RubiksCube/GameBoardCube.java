@@ -6,10 +6,7 @@ import controllers.PlayAgent;
 import controllers.TD.ntuple2.TDNTuple3Agt;
 import games.GameBoard;
 import games.GameBoardBase;
-import games.RubiksCube.GUI.GameBoardCubeGui;
-import games.RubiksCube.GUI.GameBoardCubeGui2x2;
-import games.RubiksCube.GUI.GameBoardCubeGui3x3;
-import games.RubiksCube.GUI.GameBoardCubeGui3x3x3;
+import games.RubiksCube.gui.*;
 import games.StateObservation;
 import games.Arena;
 import tools.Types;
@@ -59,12 +56,14 @@ public class GameBoardCube extends GameBoardBase implements GameBoard {
 		if (getArena().hasGUI() && m_gameGui==null) {
 			if (CubeConfig.visualizationType == CubeConfig.VisualizationType.TWOD) {
 				switch (CubeConfig.cubeSize) {
-					case POCKET -> m_gameGui = new GameBoardCubeGui2x2(this);
-					case RUBIKS -> m_gameGui = new GameBoardCubeGui3x3(this);
+					case POCKET -> m_gameGui = new GameBoardCubeGuiPocket(this);
+					case RUBIKS -> m_gameGui = new GameBoardCubeGuiRubik(this);
 				}
 			} else {
-				// Create 3D visualization here
-				m_gameGui = new GameBoardCubeGui3x3x3(this);  // You would need to create this class
+				switch (CubeConfig.cubeSize) {
+					case POCKET -> m_gameGui = new GameBoardCubeGuiPocket3D(this);
+					case RUBIKS -> m_gameGui = new GameBoardCubeGuiRubik3D(this);
+				}
 			}
 		}
 	}

@@ -1,6 +1,6 @@
 package games.RubiksCube;
 
-import games.RubiksCube.GUI.GameBoardCubeGui;
+import games.RubiksCube.gui.GameBoardCubeGui;
 import games.StateObservation;
 import params.ParOther;
 

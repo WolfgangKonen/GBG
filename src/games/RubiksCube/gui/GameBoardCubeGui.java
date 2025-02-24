@@ -1,4 +1,4 @@
-package games.RubiksCube.GUI;
+package games.RubiksCube.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -26,7 +26,7 @@ import tools.Types;
 
 /**
  * This abstract class  implements interface {@link games.GameBoard GameBoard} for RubiksCube.
- * The concrete derived classes {@link GameBoardCubeGui2x2} and {@link GameBoardCubeGui3x3} have the settings for
+ * The concrete derived classes {@link GameBoardCubeGuiPocket} and {@link GameBoardCubeGuiRubik} have the settings for
  * buttonX, buttonY and other cube-specific settings.
  * <p>
  * GameBoardCube has the board game GUI.
@@ -39,8 +39,8 @@ import tools.Types;
  *
  * @author Wolfgang Konen, TH Koeln, 2018-2020
  *
- * @see GameBoardCubeGui2x2
- * @see GameBoardCubeGui3x3
+ * @see GameBoardCubeGuiPocket
+ * @see GameBoardCubeGuiRubik
  */
 abstract public class GameBoardCubeGui extends JFrame {
 

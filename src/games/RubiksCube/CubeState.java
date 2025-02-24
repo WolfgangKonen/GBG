@@ -8,8 +8,8 @@ import java.util.Hashtable;
 import java.util.Map;
 
 import games.BoardVector;
-import games.RubiksCube.GUI.GameBoardCubeGui2x2;
-import games.RubiksCube.GUI.GameBoardCubeGui3x3;
+import games.RubiksCube.gui.GameBoardCubeGuiPocket;
+import games.RubiksCube.gui.GameBoardCubeGuiRubik;
 
 /**
  * Class CubeState represents a certain cube state. It comes in four different types (member {@code type}), two
@@ -107,8 +107,8 @@ abstract public class CubeState implements Serializable {
 	 * ({0,1,2,3} for 2x2x2 and {0,2,4,6} for 3x3x3 cube)
 	 * and those connected to the D (down) face with {e,f,g,h} in the order of the D face locations
 	 * ({12,13,14,15} for 2x2x2 and {24,26,28,30} for 3x3x3 cube).
-	 * @see GameBoardCubeGui2x2
-	 * @see GameBoardCubeGui3x3
+	 * @see GameBoardCubeGuiPocket
+	 * @see GameBoardCubeGuiRubik
 	 */
 	public enum Cor {a,b,c,d,e,f,g,h}
 
