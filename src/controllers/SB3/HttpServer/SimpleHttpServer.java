@@ -36,7 +36,7 @@ public class SimpleHttpServer
     private StepHttpHandler stepHttpHandler;
     private  ResetHttpHandler resetHttpHandler;
     private TrainingFinishedHandler trainingFinishedHandler;
-    private ActionMaskHandler actionMaskHandler;
+    private AvailableActionsHandler availableActionsHandler;
     private EvalHandler evalHandler;
 
     private SimpleHttpServer() throws IOException {
@@ -45,15 +45,15 @@ public class SimpleHttpServer
         this.stepHttpHandler = new StepHttpHandler();
         this.resetHttpHandler = new ResetHttpHandler();
         this.trainingFinishedHandler = new TrainingFinishedHandler();
-        this.actionMaskHandler = new ActionMaskHandler();
+        this.availableActionsHandler = new AvailableActionsHandler();
         this.evalHandler = new EvalHandler();
 
         // Create context
         server.createContext("/step", stepHttpHandler);
         server.createContext("/reset", resetHttpHandler);
         server.createContext("/trainingFinished", trainingFinishedHandler);
-        server.createContext("/actionMask", actionMaskHandler);
-        server.createContext("/eval", evalHandler); // TODO: two domains SB3Agnet and Envrinament;
+        server.createContext("/availableActions", availableActionsHandler);
+        server.createContext("/eval", evalHandler);
 
         //server.createContext("/testComplete", new testCompleteHttpHandler(httpTest));
 
@@ -73,7 +73,7 @@ public class SimpleHttpServer
         stepHttpHandler.setRlEnvironment(rlEnvironment);
         resetHttpHandler.setRlEnvironment(rlEnvironment);
         trainingFinishedHandler.setRlEnvironment(rlEnvironment);
-        actionMaskHandler.setRlEnvironment(rlEnvironment);
+        availableActionsHandler.setRlEnvironment(rlEnvironment);
         evalHandler.setRlEnvironment(rlEnvironment); // TODO: Eigentlich unnötig wenn nicht static einafch rlEnvironmant von SimpleHttpServer nehmen
     }
     public void stopServer() {
@@ -149,8 +149,8 @@ public class SimpleHttpServer
         }
     }
 
-    static class ActionMaskHandler extends EnvironmentHttpHandler implements HttpHandler {
-        public ActionMaskHandler() {
+    static class AvailableActionsHandler extends EnvironmentHttpHandler implements HttpHandler {
+        public AvailableActionsHandler() {
             super();
         }
 

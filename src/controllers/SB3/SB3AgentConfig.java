@@ -6,7 +6,7 @@ import java.util.List;
 public class SB3AgentConfig {
     // Default params for BaseParameters
     public static final String DEFAULT_AGENT = "DQN";
-    public static final String[] DEFAULT_AGENT_OPTIONS = {"DQN", "PPO"};
+    public static final String[] DEFAULT_AGENT_OPTIONS = {"DQN", "PPO", "MPPO"};
     public static final boolean DEFAULT_SELF_PLAY = true;
     public static final int DEFAULT_TRAIN_TIME_STEPS = 100; // 10000;
     public static final boolean DEFAULT_USE_STANDARD_SB3_PARMAS = true;
@@ -21,7 +21,7 @@ public class SB3AgentConfig {
     public static final String DEFAULT_DEVICE = "auto";
 
     // tool tips for base parameters
-    public static final String TIP_AGENT = "Select the agent type (e.g., DQN, PPO).";
+    public static final String TIP_AGENT = "Select the agent type (e.g., DQN, PPO, MPPO).";
     public static final String TIP_SELF_PLAY = "Enable self-play for training.";
     public static final String TIP_TRAIN_TIMESTEPS = "The total number of timesteps for training.";
     public static final String TIP_STANDARD_SB3_PARAMS = "Enable standard Stable-Baselines3 parameters for training.";

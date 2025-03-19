@@ -71,6 +71,7 @@ public class SB3Params extends Frame implements Serializable {
         return switch (agent) {
             case "DQN" -> new DQN();
             case "PPO" -> new PPO();
+            case "MPPO" -> new MaskablePPO();
             default -> new DQN();
         };
     }
@@ -779,8 +780,21 @@ public class SB3Params extends Frame implements Serializable {
         }
     }
 
-    public class PPO extends JPanel implements SB3Parameters {
-        private JLabel titel;
+    public class PPO extends DefaultPPO {
+        public PPO() {
+            super();
+        }
+    }
+
+    public class MaskablePPO extends DefaultPPO {
+        public MaskablePPO() {
+            super();
+            title.setText("MaskablePPO Parameters");
+        }
+    }
+
+    public class DefaultPPO extends JPanel implements SB3Parameters {
+        protected JLabel title;
 
         private JLabel nStepsLabel;
         private JTextField nStepsText;
@@ -813,10 +827,10 @@ public class SB3Params extends Frame implements Serializable {
 
         private boolean useOwnSB3Params;
 
-        public PPO() {
-            titel = new JLabel("PPO Parameters");
-            Font font = titel.getFont();
-            titel.setFont(new Font(font.getName(), Font.BOLD, font.getSize()));
+        public DefaultPPO() {
+            title = new JLabel("PPO Parameters");
+            Font font = title.getFont();
+            title.setFont(new Font(font.getName(), Font.BOLD, font.getSize()));
 
             nStepsLabel = new JLabel("n_steps: ");
             nStepsText = new JTextField(Integer.toString(SB3AgentConfig.PPODefaultValues.DEFAULT_N_STEPS));
@@ -884,7 +898,7 @@ public class SB3Params extends Frame implements Serializable {
 
             this.setLayout(new GridLayout(0, 2, 10, 10));
 
-            this.add(titel);
+            this.add(title);
             this.add(new JLabel());
 
             this.add(nStepsLabel);
@@ -1051,6 +1065,7 @@ public class SB3Params extends Frame implements Serializable {
         }
     }
 
+
     public class NetworkParameters extends JPanel implements SB3Parameters {
         private JLabel standardNetworkParamsLabel;
         private JCheckBox standardNetworkParamsCheckBox;
@@ -1154,8 +1169,10 @@ public class SB3Params extends Frame implements Serializable {
         public void setFrom(Map<String, Object> networkParameters) {
             chooseActivationFunction.setSelectedItem(networkParameters.get("activation_fn"));
             listModel.clear();
-            for (int layer: (List<Integer>) networkParameters.get("net_arch")) {
-                listModel.addElement(Integer.toString(layer));
+            if (networkParameters.containsKey("net_arch")) {
+                for (int layer : (List<Integer>) networkParameters.get("net_arch")) {
+                    listModel.addElement(Integer.toString(layer));
+                }
             }
         }
 

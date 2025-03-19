@@ -216,14 +216,13 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
 
     }
 
-    private ActionWithValues predictHttpRequest(int[] observation, int[] availableActions, boolean deterministic) throws Exception {
+    private ActionWithValues predictHttpRequest(int[] observation, int[] availableActions) throws Exception {
         JSONObject response;
         JSONArray observationJson = new JSONArray(observation);
         JSONArray availableActionsJson = new JSONArray(availableActions);
         JSONObject requestBody = new JSONObject();
         requestBody.put("observation", observationJson);
         requestBody.put("availableActions", availableActionsJson);
-        requestBody.put("deterministic", deterministic);
         String path = "agents/"+ id.toString() + "/predict";
 
         System.out.println(requestBody.toString());
@@ -363,11 +362,12 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
         System.out.println(Arrays.toString(observation));
         ActionWithValues actionsWithValues = null;
         try {
-            actionsWithValues = predictHttpRequest(observation, availableActions, deterministic);
+            actionsWithValues = predictHttpRequest(observation, availableActions);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
+        // action from predictHttpRequest() should always be available, just for safety.
         List<Types.ACTIONS> validActions = sob.getAvailableActions();
         if (!validActions.contains(new Types.ACTIONS(actionsWithValues.action))) {
             System.out.println("Already occupied.");
@@ -409,6 +409,12 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
         moveCounter++;
     }
 
+
+    /**
+     * Action gets chosen by the probability of the
+     * @param stateObservation
+     * @return
+     */
     public Types.ACTIONS_VT selfPlay(StateObservation stateObservation) {
         int[] observation= getObservationVector(stateObservation);
         int[] availableActions = getAvailableActions(stateObservation);
@@ -421,7 +427,7 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
             e.printStackTrace();
         }
 
-        // TODO: get next best action instead of random
+        // action from selfPlayHttpRequest() should always be available, just for safety.
         List<Types.ACTIONS> validActions = stateObservation.getAvailableActions();
         if (!validActions.contains(new Types.ACTIONS((int) action))) {
             System.out.println("Already occupied.");
