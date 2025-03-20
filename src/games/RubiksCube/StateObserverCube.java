@@ -75,7 +75,7 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 
 	// deprecated, we have now negative cost-to-go (stepReward)
 	@Deprecated
-    public static final double REWARD_NEGATIVE = -1.0;
+    	public static final double REWARD_NEGATIVE = -1.0;
 
 	/**
 	 * change the version ID for serialization only if a newer version is no longer 
@@ -84,6 +84,11 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 	 */
 	@Serial
 	private static final long serialVersionUID = 12L;
+
+	// Sequence of twists done by a player
+	private String moveSequence = "";
+	// Sequence of twists to scrambled state
+	private String scrambleSequence = "";
 
 	public StateObserverCube() {
 		super();
@@ -113,6 +118,34 @@ public class StateObserverCube extends ObserverBase implements StateObservation 
 		m_state = csFactory.makeCubeState(other.m_state);
 		m_action = new ACTIONS(iActUnknown);		// iActUnknown (9 or 18) codes 'unknown' (for the generating last action)
 		setAvailableActions();
+	}
+
+	public String getMoveSequence() {
+		return moveSequence;
+	}
+
+	public void setMoveSequence(String sequence) {
+		this.moveSequence = sequence;
+	}
+
+	public void setScrambleSequence(String sequence) {
+		this.scrambleSequence = sequence;
+	}
+
+	public String getScrambleSequence() {
+		return this.scrambleSequence;
+	}
+
+	public void recordMove(ACTIONS action) {
+		// Convert action to twist sequence notation
+		int iAction = action.toInt();
+		int j = iAction % 3;
+		int i = (iAction - j) / 3;
+		String[] faces = {"U", "L", "F", "D", "R", "B"};
+		String[] modifiers = {"", "2", "'"};  // Empty string for single turn, 2 for double, ' for counter-clockwise
+
+		// Add this move to a recorded sequence
+		this.moveSequence = this.moveSequence + faces[i] + modifiers[j] + " ";
 	}
 
 	public StateObserverCube copy() {

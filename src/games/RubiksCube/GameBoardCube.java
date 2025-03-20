@@ -36,6 +36,9 @@ public class GameBoardCube extends GameBoardBase implements GameBoard {
         public StateObserverCube stateObserverCube;
 	private final StateObserverCube def = new StateObserverCube();
 
+	private String lastScrambleSequence = "";
+	private String lastSolutionSequence = "";
+
 	public GameBoardCube(Arena arena) {
 		super(arena);
 		this.initialize();
@@ -82,6 +85,26 @@ public class GameBoardCube extends GameBoardBase implements GameBoard {
 
 			CubeConfig.stepReward = getArena().m_xab.tdPar[0].getStepReward();
 			CubeConfig.REWARD_POSITIVE = getArena().m_xab.tdPar[0].getRewardPositive();
+		}
+	}
+
+	public String getLastScrambleSequence() {
+		return lastScrambleSequence;
+	}
+
+	public String getLastSolutionSequence() {
+		return lastSolutionSequence;
+	}
+
+	public void setLastSequences(String scramble, String solution) {
+		this.lastScrambleSequence = scramble;
+		this.lastSolutionSequence = solution;
+	}
+
+	public void updateLastSequences(StateObserverCube so) {
+		if (so != null) {
+			this.lastScrambleSequence = so.getScrambleSequence();
+			this.lastSolutionSequence = so.getMoveSequence();
 		}
 	}
 
@@ -139,7 +162,7 @@ public class GameBoardCube extends GameBoardBase implements GameBoard {
 	 */
 	@Override
 	public void updateBoard(StateObservation so, 
-							boolean withReset, boolean showValueOnGameboard) {
+							boolean withReset, boolean showValueOnGameboard)  {
 		setStateObs(so);    // asserts that so is StateObserverCube
 
 		updateParams();
@@ -285,56 +308,71 @@ public class GameBoardCube extends GameBoardBase implements GameBoard {
 	 * Due to twins etc. the resulting state may be actually in D[p-1], D[p-2] and below.
 	 * However, it works quickly for arbitrary p.
 	 */
-	//protected StateObserverCubeCleared selectByTwists1(int p) {
+	// Modify in GameBoardCube.java, selectByTwists1 method
 	protected StateObserverCube selectByTwists1(int p) {
-		//StateObserverCubeCleared d_so;
 		int index;
 		boolean cond;
-		//System.out.println("selectByTwists1: p="+p);
-		StateObserverCube so = new StateObserverCube(); // default cube
-		int attempts=0;
-		while (so.isEqual(def)) {		// do another round, if so is after twisting still default state
+		StateObserverCube so = new StateObserverCube();
+		StringBuilder scrambleSequence = new StringBuilder();
+		int attempts = 0;
+
+		while (so.isEqual(def)) {
 			attempts++;
-			if (attempts % 1000==0) {
-				System.err.println("[selectByTwists1] no cube different from default found -- may be p=0?? p="+p);
+			if (attempts % 1000 == 0) {
+				System.err.println("[selectByTwists1] no cube different from default found -- may be p=0?? p=" + p);
 			}
-			// make p twists and hope that we land in
-			// distance set D[p] (which is often not true for p>5)
+
+			// Clear the previous scramble attempt
+			scrambleSequence.setLength(0);
+
 			switch (CubeConfig.twistType) {
 				case HTM:
-					for (int k=0; k<p; k++)  {
+					for (int k = 0; k < p; k++) {
 						do {
 							index = rand.nextInt(so.getAvailableActions().size());
-							cond = (CubeConfig.TWIST_DOUBLETS) ? false : (index/3 == so.getCubeState().lastTwist.ordinal()-1);
-							// If doublets are forbidden (i.e. TWIST_DOUBLETS==false), then boolean cond stays true as long as
-							// the drawn action (index) has the same twist type (e.g. U) as lastTwist. We need this because
-							// doublet U1U1 can be reached redundantly by single twist U2, but we want to make non-redundant twists.
+							cond = !CubeConfig.TWIST_DOUBLETS && (index / 3 == so.getCubeState().lastTwist.ordinal() - 1);
 						} while (cond);
-						so.advance(so.getAction(index), null);
+
+						// Record the move in the scramble sequence
+						Types.ACTIONS action = so.getAction(index);
+						int iAction = action.toInt();
+						int j = iAction % 3;
+						int i = (iAction - j) / 3;
+						String[] faces = {"U", "L", "F", "D", "R", "B"};
+						String[] modifiers = {"", "2", "'"};  // Empty string for single turn, 2 for double, ' for counter-clockwise
+						scrambleSequence.append(faces[i]).append(modifiers[j]).append(" ");
+
+						so.advance(action, null);
 					}
 					break;
 				case QTM:
-					for (int k=0; k<p; k++)  {
+					for (int k = 0; k < p; k++) {
 						do {
 							index = rand.nextInt(so.getAvailableActions().size());
-							cond = (CubeConfig.TWIST_DOUBLETS) ? false : (index/3 == so.getCubeState().lastTwist.ordinal()-1 &&
-									(index%3+1) != so.getCubeState().lastTimes);
-							// if doublets are forbidden, boolean cond stays true as long as the drawn action (index) has
-							// the same twist type (e.g. U) as lastTwist, but the opposite 'times' as lastTimes (only 1 and 3
-							// are possible here). This is because doublet U1U3 would leave the cube unchanged
+							cond = !CubeConfig.TWIST_DOUBLETS && (index / 3 == so.getCubeState().lastTwist.ordinal() - 1 &&
+                                                                (index % 3 + 1) != so.getCubeState().lastTimes);
 						} while (cond);
-						so.advance(so.getAction(index), null);
+
+						// Record the move in the scramble sequence
+						Types.ACTIONS action = so.getAction(index);
+						int iAction = action.toInt();
+						int j = iAction % 3;
+						int i = (iAction - j) / 3;
+						String[] faces = {"U", "L", "F", "D", "R", "B"};
+						String[] modifiers = {"", "2", "'"};
+						scrambleSequence.append(faces[i]).append(modifiers[j]).append(" ");
+
+						so.advance(action, null);
 					}
 					break;
 			}
 		}
-		so.getCubeState().minTwists=p;
+		so.getCubeState().minTwists = p;
 
-		//so = new StateObserverCubeCleared(so,p);
+		// Store the scramble sequence
+		so.setScrambleSequence(scrambleSequence.toString());
+
 		so = (StateObserverCube) so.clearedCopy();
-		//System.out.println(d_so.getCubeState().twistSeq);
-		
-
 		return so;
 	}
 	

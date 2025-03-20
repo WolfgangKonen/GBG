@@ -4,6 +4,7 @@ import controllers.PlayAgent;
 import games.RubiksCube.CubeConfig;
 import games.RubiksCube.GameBoardCube;
 
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Random;
 

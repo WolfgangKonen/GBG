@@ -9,6 +9,8 @@ import controllers.PlayAgent;
 import games.EWN.StateObserverEWN;
 import games.Hex.HexTile;
 import games.Hex.StateObserverHex;
+import games.RubiksCube.GameBoardCube;
+import games.RubiksCube.StateObserverCube;
 import games.Sim.StateObserverSim;
 import games.SimpleGame.StateObserverSG;
 import games.ZweiTausendAchtundVierzig.StateObserver2048;
@@ -192,8 +194,8 @@ abstract public class Arena implements Runnable {
 				}
 				System.out.println(str);
 				setStatusMessage(str);
-				updateBoard();
-				taskState = Task.IDLE;
+                                updateBoard();
+                            taskState = Task.IDLE;
 				break;
 			case SWAPCMP:
 				enableButtons(false);
@@ -207,8 +209,8 @@ abstract public class Arena implements Runnable {
 				str = "Swap Compete finished. Win rate for "+firstPlayer+": "+frm.format((firstScore+1)/2)+" (best is 1.0).";
 				System.out.println(str);
 				setStatusMessage(str);
-				updateBoard();
-				taskState = Task.IDLE;
+                                updateBoard();
+                            taskState = Task.IDLE;
 				break;
 			case ALLCMP:
 				enableButtons(false);
@@ -222,8 +224,8 @@ abstract public class Arena implements Runnable {
 				str = "Compete All Roles finished. Win rate for "+firstPlayer+": "+frm.format((firstScore+1)/2)+" (best is 1.0).";
 				System.out.println(str);
 				setStatusMessage(str);
-				updateBoard();
-				taskState = Task.IDLE;
+                                updateBoard();
+                            taskState = Task.IDLE;
 				break;
 			case TRNEMNT:    // Tournament Code
 				tournamentAgentManager.lockToCompete(getGameBoard());
@@ -255,7 +257,7 @@ abstract public class Arena implements Runnable {
 				gb.showGameBoard(this, false);
 				gb.clearBoard(false, true, null);
 				gb.setActionReq(true);
-				
+
 				InspectGame();
 				
 				gb.enableInteraction(false);
@@ -573,7 +575,15 @@ abstract public class Arena implements Runnable {
 
 						so.storeBestActionInfo(actBest);
 						so.advance(actBest, null);
+						if (so instanceof StateObserverCube) {
+							((StateObserverCube) so).recordMove(actBest);
+						}
 						logManager.addLogEntry(actBest, so, logSessionid);
+
+						if (gb instanceof GameBoardCube && so instanceof StateObserverCube) {
+							((GameBoardCube) gb).updateLastSequences((StateObserverCube) so);
+						}
+
 						if (m_spDT==null) {		// the normal play (non-TS, i.e. no tournament)
 							try {
 								Thread.sleep(currentSleepDuration);
@@ -638,7 +648,6 @@ abstract public class Arena implements Runnable {
 				if (so.isGameOver()) {
 					String gostr = this.gameOverString(so,agentList);
 					this.gameOverMessages(so,numPlayers,gostr,showValue);
-
 					break; // this is the 1st condition to break out of while loop
 				} // if isGameOver
 
@@ -647,6 +656,11 @@ abstract public class Arena implements Runnable {
 					double gScore = so.getGameScore(so.getPlayer());
 					if (so instanceof StateObserver2048)
 						gScore *= StateObserver2048.MAXSCORE;
+
+					// Call gameOverString here to trigger sequence saving for RubiksCube
+					// (The ArenaCube override will handle the sequence saving)
+					this.gameOverString(so, agentList);
+
 					showMessage("Game stopped (epiLength) with score " + gScore, "Game Over",
 							JOptionPane.INFORMATION_MESSAGE);
 
@@ -719,9 +733,15 @@ abstract public class Arena implements Runnable {
 				}
 			}
 
-			if (so.isGameOver()) {
+			if (so.isGameOver() && so instanceof StateObserverCube soCube) {
+				// If the game board is a cube board, store the sequences
+				if (gb instanceof GameBoardCube gameBoardCube) {
+					gameBoardCube.setLastSequences(
+							soCube.getScrambleSequence(),
+			 				soCube.getMoveSequence()
+					);
+				}
 				gostr = this.gameOverString(so,strList);
-
 				break; // out of while loop
 			}
 
