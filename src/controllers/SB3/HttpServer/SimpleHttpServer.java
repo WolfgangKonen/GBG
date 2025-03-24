@@ -74,7 +74,7 @@ public class SimpleHttpServer
         resetHttpHandler.setRlEnvironment(rlEnvironment);
         trainingFinishedHandler.setRlEnvironment(rlEnvironment);
         availableActionsHandler.setRlEnvironment(rlEnvironment);
-        evalHandler.setRlEnvironment(rlEnvironment); // TODO: Eigentlich unnötig wenn nicht static einafch rlEnvironmant von SimpleHttpServer nehmen
+        evalHandler.setRlEnvironment(rlEnvironment);
     }
     public void stopServer() {
         server.stop(2);
@@ -173,7 +173,7 @@ public class SimpleHttpServer
                         outputStream.write(rawResponseBody);
                         outputStream.close();
                     }
-                    catch (Exception exception) { // TODO Exeption handeling
+                    catch (Exception exception) {
                         exception.printStackTrace();
                     }
                 case METHOD_OPTIONS:

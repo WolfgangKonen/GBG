@@ -781,8 +781,61 @@ public class SB3Params extends Frame implements Serializable {
     }
 
     public class PPO extends DefaultPPO {
+
+        private JLabel useSdeLabel;
+        private JCheckBox useSdeCheckBox;
+        private JLabel sdeSampleFreqLabel;
+        private JTextField sdeSampleFreqText;
         public PPO() {
             super();
+
+            useSdeLabel = new JLabel("Use SDE: ");
+            useSdeCheckBox = new JCheckBox();
+            useSdeCheckBox.setSelected(SB3AgentConfig.PPODefaultValues.DEFAULT_USE_SDE);
+
+            sdeSampleFreqLabel = new JLabel("SDE sample frequency: ");
+            sdeSampleFreqText = new JTextField(Integer.toString(SB3AgentConfig.PPODefaultValues.DEFAULT_SDE_SAMPLE_FREQ));
+
+            useSdeLabel.setToolTipText(SB3AgentConfig.PPODefaultValues.TIP_USE_SDE);
+            sdeSampleFreqLabel.setToolTipText(SB3AgentConfig.PPODefaultValues.TIP_SDE_SAMPLE_FREQ);
+            this.add(useSdeLabel);
+            this.add(useSdeCheckBox);
+            this.add(sdeSampleFreqLabel);
+            this.add(sdeSampleFreqText);
+
+        }
+
+        @Override
+        public void setUseOwnParameters(boolean enabled) {
+            super.setUseOwnParameters(enabled);
+            useSdeCheckBox.setEnabled(enabled);
+            sdeSampleFreqText.setEnabled(enabled);
+
+            useSdeLabel.setEnabled(enabled);
+            sdeSampleFreqLabel.setEnabled(enabled);
+        }
+
+        @Override
+        public void setFrom(Map<String, Object> ppoParameters) {
+            super.setFrom(ppoParameters);
+            useSdeCheckBox.setSelected(Boolean.parseBoolean(String.valueOf(ppoParameters.get("use_sde"))));
+            sdeSampleFreqText.setText(String.valueOf(ppoParameters.get("sde_sample_freq")));
+        }
+
+        @Override
+        public Map<String, Object> getParams() {
+            Map<String, Object> params = super.getParams();
+            params.put("use_sde", getUseSde());
+            params.put("sde_sample_freq", getSdeSampleFreq());
+            return params;
+        }
+
+        public boolean getUseSde() {
+            return useSdeCheckBox.isSelected();
+        }
+
+        public int getSdeSampleFreq() {
+            return Integer.parseInt(sdeSampleFreqText.getText());
         }
     }
 
@@ -790,6 +843,7 @@ public class SB3Params extends Frame implements Serializable {
         public MaskablePPO() {
             super();
             title.setText("MaskablePPO Parameters");
+
         }
     }
 
@@ -818,10 +872,6 @@ public class SB3Params extends Frame implements Serializable {
         private JTextField vfCoefText;
         private JLabel maxGradNormLabel;
         private JTextField maxGradNormText;
-        private JLabel useSdeLabel;
-        private JCheckBox useSdeCheckBox;
-        private JLabel sdeSampleFreqLabel;
-        private JTextField sdeSampleFreqText;
         private JLabel targetKlLabel;
         private JTextField targetKlText;
 
@@ -867,13 +917,6 @@ public class SB3Params extends Frame implements Serializable {
             maxGradNormLabel = new JLabel("Max gradient norm: ");
             maxGradNormText = new JTextField(Double.toString(SB3AgentConfig.PPODefaultValues.DEFAULT_MAX_GRAD_NORM));
 
-            useSdeLabel = new JLabel("Use SDE: ");
-            useSdeCheckBox = new JCheckBox();
-            useSdeCheckBox.setSelected(SB3AgentConfig.PPODefaultValues.DEFAULT_USE_SDE);
-
-            sdeSampleFreqLabel = new JLabel("SDE sample frequency: ");
-            sdeSampleFreqText = new JTextField(Integer.toString(SB3AgentConfig.PPODefaultValues.DEFAULT_SDE_SAMPLE_FREQ));
-
             targetKlLabel = new JLabel("Target KL: ");
             targetKlText = (SB3AgentConfig.PPODefaultValues.DEFAULT_TARGET_KL == null) ? new JTextField():
                 new JTextField(Double.toString(SB3AgentConfig.PPODefaultValues.DEFAULT_TARGET_KL));
@@ -892,8 +935,6 @@ public class SB3Params extends Frame implements Serializable {
             entCoefLabel.setToolTipText(SB3AgentConfig.PPODefaultValues.TIP_ENT_COEF);
             vfCoefLabel.setToolTipText(SB3AgentConfig.PPODefaultValues.TIP_VF_COEF);
             maxGradNormLabel.setToolTipText(SB3AgentConfig.PPODefaultValues.TIP_MAX_GRAD_NORM);
-            useSdeLabel.setToolTipText(SB3AgentConfig.PPODefaultValues.TIP_USE_SDE);
-            sdeSampleFreqLabel.setToolTipText(SB3AgentConfig.PPODefaultValues.TIP_SDE_SAMPLE_FREQ);
             targetKlLabel.setToolTipText(SB3AgentConfig.PPODefaultValues.TIP_TARGET_KL);
 
             this.setLayout(new GridLayout(0, 2, 10, 10));
@@ -923,10 +964,6 @@ public class SB3Params extends Frame implements Serializable {
             this.add(vfCoefText);
             this.add(maxGradNormLabel);
             this.add(maxGradNormText);
-            this.add(useSdeLabel);
-            this.add(useSdeCheckBox);
-            this.add(sdeSampleFreqLabel);
-            this.add(sdeSampleFreqText);
             this.add(targetKlLabel);
             this.add(targetKlText);
         }
@@ -945,8 +982,6 @@ public class SB3Params extends Frame implements Serializable {
             entCoefText.setEnabled(enabled);
             vfCoefText.setEnabled(enabled);
             maxGradNormText.setEnabled(enabled);
-            useSdeCheckBox.setEnabled(enabled);
-            sdeSampleFreqText.setEnabled(enabled);
             targetKlText.setEnabled(enabled);
 
             nStepsLabel.setEnabled(enabled);
@@ -960,26 +995,22 @@ public class SB3Params extends Frame implements Serializable {
             entCoefLabel.setEnabled(enabled);
             vfCoefLabel.setEnabled(enabled);
             maxGradNormLabel.setEnabled(enabled);
-            useSdeLabel.setEnabled(enabled);
-            sdeSampleFreqLabel.setEnabled(enabled);
             targetKlLabel.setEnabled(enabled);
         }
 
         public void setFrom(Map<String, Object> ppoParameters) {
-            nStepsText.setText((String) ppoParameters.get("n_steps"));
-            batchSizeText.setText((String) ppoParameters.get("batch_size"));
-            nEpochsText.setText((String) ppoParameters.get("n_epochs"));
-            gammaText.setText((String) ppoParameters.get("gamma"));
-            gaeLambdaText.setText((String) ppoParameters.get("gae_lambda"));
-            clipRangeText.setText((String) ppoParameters.get("clip_range"));
-            clipRangeVfText.setText((String) ppoParameters.get("clip_range_vf"));
-            normalizeAdvantageCheckBox.setSelected((boolean) ppoParameters.get("normalize_advantage"));
-            entCoefText.setText((String) ppoParameters.get("ent_coef"));
-            vfCoefText.setText((String) ppoParameters.get("vf_coef"));
-            maxGradNormText.setText((String) ppoParameters.get("max_grad_norm"));
-            useSdeCheckBox.setSelected((boolean) ppoParameters.get("use_sde"));
-            sdeSampleFreqText.setText((String) ppoParameters.get("sde_sample_freq"));
-            targetKlText.setText((String) ppoParameters.get("target_kl"));
+            nStepsText.setText(String.valueOf(ppoParameters.get("n_steps")));
+            batchSizeText.setText(String.valueOf(ppoParameters.get("batch_size")));
+            nEpochsText.setText(String.valueOf(ppoParameters.get("n_epochs")));
+            gammaText.setText(String.valueOf(ppoParameters.get("gamma")));
+            gaeLambdaText.setText(String.valueOf(ppoParameters.get("gae_lambda")));
+            clipRangeText.setText(String.valueOf(ppoParameters.get("clip_range")));
+            clipRangeVfText.setText(String.valueOf(ppoParameters.get("clip_range_vf")));
+            normalizeAdvantageCheckBox.setSelected(Boolean.parseBoolean(String.valueOf(ppoParameters.get("normalize_advantage"))));
+            entCoefText.setText(String.valueOf( ppoParameters.get("ent_coef")));
+            vfCoefText.setText(String.valueOf(ppoParameters.get("vf_coef")));
+            maxGradNormText.setText(String.valueOf(ppoParameters.get("max_grad_norm")));
+            targetKlText.setText(String.valueOf(ppoParameters.get("target_kl")));
         }
 
         @Override
@@ -999,8 +1030,6 @@ public class SB3Params extends Frame implements Serializable {
             params.put("ent_coef", getEntCoef());
             params.put("vf_coef", getVfCoef());
             params.put("max_grad_norm", getMaxGradNorm());
-            params.put("use_sde", getUseSde());
-            params.put("sde_sample_freq", getSdeSampleFreq());
             params.put("target_kl", getTargetKl());
 
             return params;
@@ -1049,14 +1078,6 @@ public class SB3Params extends Frame implements Serializable {
 
         public double getMaxGradNorm() {
             return Double.parseDouble(maxGradNormText.getText());
-        }
-
-        public boolean getUseSde() {
-            return useSdeCheckBox.isSelected();
-        }
-
-        public int getSdeSampleFreq() {
-            return Integer.parseInt(sdeSampleFreqText.getText());
         }
 
         public Double getTargetKl() {

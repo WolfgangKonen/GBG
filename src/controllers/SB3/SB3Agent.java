@@ -427,7 +427,7 @@ public class SB3Agent extends AgentBase implements PlayAgent, Serializable {
             e.printStackTrace();
         }
 
-        // action from selfPlayHttpRequest() should always be available, just for safety.
+        // actions from selfPlayHttpRequest() should always be available, just for safety.
         List<Types.ACTIONS> validActions = stateObservation.getAvailableActions();
         if (!validActions.contains(new Types.ACTIONS((int) action))) {
             System.out.println("Already occupied.");
