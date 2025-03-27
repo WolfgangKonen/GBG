@@ -76,13 +76,6 @@ public interface XNTupleFuncs {
 	 */
 	BoardVector getBoardVector(StateObservation so);
 
-	// TODO: remove all newgetStandardPerspectivesBoardVector and one hot methods
-	BoardVector getStandardPerspectivesBoardVector(StateObservation so);
-
-	BoardVector getOneHotBoardVector(BoardVector boardVector);
-
-	int getOneHotSize();
-
 	/**
 	 * @return a board vector where each cell has a different {@code int} 
 	 */

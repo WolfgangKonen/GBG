@@ -1,17 +1,13 @@
 package controllers.SB3;
 
-import agentIO.AgentLoader;
 import controllers.AgentBase;
 import controllers.PlayAgent;
-import controllers.PlayAgtVector;
 import controllers.SB3.HttpServer.ServerConfig;
-import controllers.SB3.HttpServer.SimpleHttpServer;
 import games.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import params.ParOther;
 import params.ParSB3;
-import params.SB3Params;
 import tools.ScoreTuple;
 import tools.Types;
 
@@ -22,8 +18,6 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
 
 public class SB3Agent extends AgentBase implements PlayAgent, Serializable {

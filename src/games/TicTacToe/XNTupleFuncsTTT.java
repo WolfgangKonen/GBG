@@ -107,21 +107,6 @@ public class XNTupleFuncsTTT extends XNTupleBase implements XNTupleFuncs, Serial
 		return new BoardVector(bvec);   
 	}
 
-	// TODO: remove
-	@Override
-	public BoardVector getStandardPerspectivesBoardVector(StateObservation so) {
-		if(so.getPlayer() != 0) {
-			BoardVector b = getBoardVector(so);
-			int[] boardVector = b.bvec.clone();
-			for (int i = 0; i < boardVector.length; i++) {
-				if (boardVector[i] == 0) boardVector[i] = 2;
-				else if (boardVector[i] == 2) boardVector[i] = 0;
-			}
-			return new BoardVector(boardVector);
-		}
-		return getBoardVector(so);
-	}
-
 	/**
 	 * Given a board vector from {@link #getBoardVector(StateObservation)} and given that the 
 	 * game has s symmetries, return an array which holds at most s symmetric board vectors: <ul>
