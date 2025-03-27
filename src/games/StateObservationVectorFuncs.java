@@ -8,7 +8,7 @@ import java.util.List;
 public class StateObservationVectorFuncs {
     private final XNTupleFuncs xnTupleFuncs;
     private final int stateObservationVectorSize;
-    public final int actionSpaceSize;
+    private final int actionSpaceSize;
 
     public StateObservationVectorFuncs(XNTupleFuncs xnTupleFuncs, int actionSpaceSize) {
         this.xnTupleFuncs = xnTupleFuncs;
@@ -55,6 +55,9 @@ public class StateObservationVectorFuncs {
         return true;
     }
 
+    public int getActionSpaceSize() {
+        return actionSpaceSize;
+    }
     public int getStateObservationVectorSize() {
         return stateObservationVectorSize;
     }

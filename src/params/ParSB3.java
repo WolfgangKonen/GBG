@@ -1,6 +1,6 @@
 package params;
 
-import controllers.SB3.SB3Agent;
+import controllers.SB3.SB3AgentProxy;
 import controllers.SB3.SB3AgentConfig;
 
 import javax.swing.*;
@@ -54,7 +54,7 @@ public class ParSB3 implements Serializable {
         evaluationOptions = sb3Params.baseParameters.getEvaluationOptions();
     }
 
-    public void setFrom(ParSB3 parSB3, SB3Agent sb3Agent) {
+    public void setFrom(ParSB3 parSB3, SB3AgentProxy sb3AgentProxy) {
         agentType = parSB3.agentType;
         trainTimeSteps = parSB3.trainTimeSteps;
 
@@ -65,7 +65,7 @@ public class ParSB3 implements Serializable {
         parSB3SelfPlay = parSB3.parSB3SelfPlay;
         evaluationOptions = parSB3.evaluationOptions;
 
-        sb3Params.setFrom(parSB3, sb3Agent);
+        sb3Params.setFrom(parSB3, sb3AgentProxy);
     }
 
     public static class SelfPlayParameters implements Serializable {
@@ -123,7 +123,7 @@ public class ParSB3 implements Serializable {
         }
     }
 
-    public void setSB3Agent(SB3Agent sb3Agent) {
-        sb3Params.setSb3Agent(sb3Agent);
+    public void setSB3Agent(SB3AgentProxy sb3AgentProxy) {
+        sb3Params.setSb3Agent(sb3AgentProxy);
     }
 }

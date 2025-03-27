@@ -1,7 +1,7 @@
 package starters;
 
 import controllers.PlayAgent;
-import controllers.SB3.SB3Agent;
+import controllers.SB3.SB3AgentProxy;
 import games.*;
 import games.RubiksCube.StateObserverCube;
 import tools.Measure;
@@ -65,10 +65,10 @@ public class SingleTrainer {
         pa.setGameNum(0);
         long startTime = System.currentTimeMillis();
         gb.initialize();
-        if(pa instanceof SB3Agent sb3Agent) {
+        if(pa instanceof SB3AgentProxy sb3AgentProxy) {
 
             //sb3Agent.learn(); // TODO: complete
-            return sb3Agent;
+            return sb3AgentProxy;
         }
         while (pa.getGameNum() < pa.getMaxGameNum()) {
             StateObservation so = (pa.getParOther().getChooseStart01())

@@ -1,6 +1,6 @@
 package params;
 
-import controllers.SB3.SB3Agent;
+import controllers.SB3.SB3AgentProxy;
 import controllers.SB3.SB3AgentConfig;
 import gui.MessageBox;
 import tools.Types;
@@ -23,7 +23,7 @@ public class SB3Params extends Frame implements Serializable {
 
     public String gameName;
 
-    transient private SB3Agent sb3Agent = null;
+    transient private SB3AgentProxy sb3AgentProxy = null;
 
     public SB3Params(String gameName) {
         super("SB3 Parameter");
@@ -81,8 +81,8 @@ public class SB3Params extends Frame implements Serializable {
         agentParameters.setUseOwnParameters(enabled);
     }
 
-    public void setFrom(ParSB3 parSB3, SB3Agent sb3Agent) {
-        this.sb3Agent = sb3Agent;
+    public void setFrom(ParSB3 parSB3, SB3AgentProxy sb3AgentProxy) {
+        this.sb3AgentProxy = sb3AgentProxy;
         baseParameters.agentComboBox.setSelectedItem(parSB3.agentType);
         baseParameters.trainTimeStepsText.setText(String.valueOf(parSB3.trainTimeSteps));
 
@@ -104,8 +104,8 @@ public class SB3Params extends Frame implements Serializable {
         void setUseOwnParameters(boolean enabled);
     }
 
-    public void setSb3Agent(SB3Agent sb3Agent) {
-        this.sb3Agent = sb3Agent;
+    public void setSb3Agent(SB3AgentProxy sb3AgentProxy) {
+        this.sb3AgentProxy = sb3AgentProxy;
     }
 
     public class BaseParameters extends JPanel implements SB3Parameters{
@@ -369,13 +369,13 @@ public class SB3Params extends Frame implements Serializable {
 
 
         private void loadPolicy() {
-            if (sb3Agent == null) {
+            if (sb3AgentProxy == null) {
                 System.out.println("No SB3Agent set.");
                 //TODO popo up no sccess
                 return;
             }
 
-            String path = Types.GUI_DEFAULT_DIR_AGENT+"/"+gameName + "/" + "SB3Agent" +"/" + sb3Agent.getAgentType() + "/" + sb3Agent.getId();
+            String path = Types.GUI_DEFAULT_DIR_AGENT+"/"+gameName + "/" + "SB3Agent" +"/" + sb3AgentProxy.getAgentType() + "/" + sb3AgentProxy.getId();
             if (!Files.exists(Paths.get(path))) {
                 System.out.println(path);
                 System.out.println("For this agent no SB3 policy have been saved.");
@@ -383,13 +383,13 @@ public class SB3Params extends Frame implements Serializable {
                 return;
             }
 
-            JFileChooser fileChooser = new JFileChooser(Types.GUI_DEFAULT_DIR_AGENT+"/"+gameName + "/" + "SB3Agent" +"/" + sb3Agent.getAgentType() + "/" + sb3Agent.getId());
+            JFileChooser fileChooser = new JFileChooser(Types.GUI_DEFAULT_DIR_AGENT+"/"+gameName + "/" + "SB3Agent" +"/" + sb3AgentProxy.getAgentType() + "/" + sb3AgentProxy.getId());
             int returnVal = fileChooser.showOpenDialog(this);
             String filePath = null;
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 filePath = fileChooser.getSelectedFile().getPath();
             }
-            sb3Agent.loadSB3PolicyFromPath(filePath);
+            sb3AgentProxy.loadSB3PolicyFromPath(filePath);
             // TODO: pop up success
         }
     }

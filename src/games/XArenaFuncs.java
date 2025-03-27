@@ -2,7 +2,6 @@ package games;
 
 import TournamentSystem.TSTimeStorage;
 import TournamentSystem.tools.TSGameDataTransfer;
-import agentIO.AgentLoader;
 import controllers.*;
 import controllers.MC.MCAgentN;
 import controllers.MCTS.MCTSAgentT;
@@ -14,7 +13,7 @@ import controllers.MCTSWrapper.stateApproximation.PlayAgentApproximator;
 import controllers.RHEA.RheaAgentSI;
 import controllers.SB3.HttpServer.SimpleHttpServer;
 import controllers.SB3.RLEnvironmentConnector;
-import controllers.SB3.SB3Agent;
+import controllers.SB3.SB3AgentProxy;
 import controllers.SB3.SB3HelperFunctions;
 import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.NTupleBase;
@@ -42,9 +41,6 @@ import tools.*;
 import tools.Types.ACTIONS;
 
 import javax.swing.*;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -265,14 +261,14 @@ public class XArenaFuncs {
 
 					StateObservationVectorFuncs stateObservationVectorFuncs = m_xab.m_arena.makeStateObservationVectorFuncs();
 
-					SB3Agent sb3Agent = new SB3Agent(sAgent, m_xab.sb3Par[n], m_xab.oPar[n], stateObservationVectorFuncs, m_Arena.getGameName());
-					pa = sb3Agent;
+					SB3AgentProxy sb3AgentProxy = new SB3AgentProxy(sAgent, m_xab.sb3Par[n], m_xab.oPar[n], stateObservationVectorFuncs, m_Arena.getGameName());
+					pa = sb3AgentProxy;
 
 					// Get opponent Agents
 					List<PlayAgent> opponentAgents = SB3HelperFunctions.loadAgents(m_xab.sb3Par[n].enemyAgents, n, m_Arena, this, m_xab, pa, stateObservationVectorFuncs.getNumPlayers());
 					PlayAgent defaultEvalOpponent =  SB3HelperFunctions.loadAgents(new String[]{m_xab.sb3Par[n].evaluationOptions.getOpponent()}, n, m_Arena, this, m_xab, pa, stateObservationVectorFuncs.getNumPlayers()).get(0);
 
-					RLEnvironmentConnector rlEnvironmentConnector = new RLEnvironmentConnector(stateObservationVectorFuncs, opponentAgents, sb3Agent, n, defaultEvalOpponent);
+					RLEnvironmentConnector rlEnvironmentConnector = new RLEnvironmentConnector(stateObservationVectorFuncs, opponentAgents, sb3AgentProxy, n, defaultEvalOpponent);
 					SimpleHttpServer simpleHttpServer = SimpleHttpServer.getInstance();
 					simpleHttpServer.setRlEnvironment(rlEnvironmentConnector);
 
@@ -532,14 +528,14 @@ public class XArenaFuncs {
 				case "SB3" -> {
 					StateObservationVectorFuncs stateObservationVectorFuncs = m_xab.m_arena.makeStateObservationVectorFuncs();
 
-					SB3Agent sb3Agent = new SB3Agent(sAgent, m_xab.sb3Par[n], m_xab.oPar[n], stateObservationVectorFuncs, m_Arena.getGameName());
-					pa = sb3Agent;
+					SB3AgentProxy sb3AgentProxy = new SB3AgentProxy(sAgent, m_xab.sb3Par[n], m_xab.oPar[n], stateObservationVectorFuncs, m_Arena.getGameName());
+					pa = sb3AgentProxy;
 
 					// Get opponent Agents
 					List<PlayAgent> opponentAgents = SB3HelperFunctions.loadAgents(m_xab.sb3Par[n].enemyAgents, n, m_Arena, this, m_xab, pa, stateObservationVectorFuncs.getNumPlayers());
 					PlayAgent defaultEvalOpponent =  SB3HelperFunctions.loadAgents(new String[]{m_xab.sb3Par[n].evaluationOptions.getOpponent()}, n, m_Arena, this, m_xab, pa, stateObservationVectorFuncs.getNumPlayers()).get(0);
 
-					RLEnvironmentConnector rlEnvironmentConnector = new RLEnvironmentConnector(stateObservationVectorFuncs, opponentAgents, sb3Agent, n, defaultEvalOpponent);
+					RLEnvironmentConnector rlEnvironmentConnector = new RLEnvironmentConnector(stateObservationVectorFuncs, opponentAgents, sb3AgentProxy, n, defaultEvalOpponent);
 					SimpleHttpServer simpleHttpServer = SimpleHttpServer.getInstance();
 					simpleHttpServer.setRlEnvironment(rlEnvironmentConnector);
 				}
@@ -774,9 +770,9 @@ public class XArenaFuncs {
 
 		long startTime = System.currentTimeMillis();
 		gb.initialize();
-		if (pa instanceof SB3Agent sb3Agent) {
+		if (pa instanceof SB3AgentProxy sb3AgentProxy) {
 			GameProgressor gameProgressor = new GameProgressor(numEval, startTime, xab, qa, eresQ, eresT, doTrainStatistics, doTrainEvaluation, gb, tsList, n);
-			sb3Agent.learn(gameProgressor);
+			sb3AgentProxy.learn(gameProgressor);
 			eresQ = gameProgressor.eresQ;
 			eresT = gameProgressor.eresT;
 		} else {

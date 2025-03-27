@@ -1,14 +1,11 @@
 package controllers.SB3;
 
-import agentIO.AgentLoader;
 import controllers.PlayAgent;
 import controllers.PlayAgtVector;
 import games.*;
 import tools.ScoreTuple;
 import tools.Types;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
 
 public class RLEnvironmentConnector {
@@ -16,14 +13,14 @@ public class RLEnvironmentConnector {
     private StateObservation firstStateObservation = null;
     private StateObservationVectorFuncs stateObservationVectorFuncs;
     private List<PlayAgent> opponentAgents;
-    private final SB3Agent sb3Agent;
+    private final SB3AgentProxy sb3AgentProxy;
     private PlayAgent evalOpponent;
 
     private int playerNumber;
 
-    public RLEnvironmentConnector(StateObservationVectorFuncs stateObservationVectorFuncs, List<PlayAgent> opponentAgents, SB3Agent sb3Agent, int playerNumber, PlayAgent evalOpponent) {
+    public RLEnvironmentConnector(StateObservationVectorFuncs stateObservationVectorFuncs, List<PlayAgent> opponentAgents, SB3AgentProxy sb3AgentProxy, int playerNumber, PlayAgent evalOpponent) {
         this.stateObservationVectorFuncs = stateObservationVectorFuncs;
-        this.sb3Agent = sb3Agent;
+        this.sb3AgentProxy = sb3AgentProxy;
         this.playerNumber = playerNumber;
         this.opponentAgents = opponentAgents;
         this.evalOpponent = evalOpponent;
@@ -54,7 +51,7 @@ public class RLEnvironmentConnector {
     }
 
     public FirstObservation reset() {
-        this.stateObservation = sb3Agent.afterGame();
+        this.stateObservation = sb3AgentProxy.afterGame();
         if (firstStateObservation == null) {
             this.firstStateObservation = stateObservation.copy();
         }
@@ -74,7 +71,7 @@ public class RLEnvironmentConnector {
         Types.ACTIONS chosenAction = new Types.ACTIONS(action);
 
         System.out.println(stateObservation.getPlayer() + " Player: " + Arrays.toString(getObservation()) + " " + getObservation().length + " before");
-        sb3Agent.incrementMoves();
+        sb3AgentProxy.incrementMoves();
         // When caught cheating return same observation and min game score. StateObservation gets reset afterward when sb3 calls reset.
         if (!availableActions.contains(chosenAction)) {
             Transition transition = new Transition(getObservation(), stateObservation.getMinGameScore(), true, truncated(), getInfo());
@@ -87,7 +84,7 @@ public class RLEnvironmentConnector {
             stateObservation.advance(chosenAction, null);
         } catch (AssertionError e) {
             e.printStackTrace();
-            sb3Agent.notify();
+            sb3AgentProxy.notify();
         }
 
         advanceEnemies();
@@ -114,8 +111,8 @@ public class RLEnvironmentConnector {
             // Types.ACTIONS enemyAction = availableActions.get(random.nextInt(availableActions.size()))
             Types.ACTIONS enemyAction = null;
             PlayAgent opponent = opponentAgents.get(enemyPlayer);
-            if (opponent instanceof SB3Agent sb3Agent) {
-                enemyAction = sb3Agent.selfPlay(stateObservation);
+            if (opponent instanceof SB3AgentProxy sb3AgentProxy) {
+                enemyAction = sb3AgentProxy.selfPlay(stateObservation);
             } else {
                 enemyAction = opponent.getNextAction2(stateObservation, false, true, true);
             }
@@ -145,14 +142,14 @@ public class RLEnvironmentConnector {
     }
 
     public double eval(PlayAgent opponent, int numberOfGames) {
-        ScoreTuple scoreTuple = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(sb3Agent, opponent), getStartSate(), numberOfGames, 0, null, null, true);
+        ScoreTuple scoreTuple = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(sb3AgentProxy, opponent), getStartSate(), numberOfGames, 0, null, null, true);
         return scoreTuple.scTup[0];
     }
 
     public void trainingFinished() {
         System.out.println("Training finished");
-        synchronized (sb3Agent) {
-            sb3Agent.notify();
+        synchronized (sb3AgentProxy) {
+            sb3AgentProxy.notify();
         }
     }
 
