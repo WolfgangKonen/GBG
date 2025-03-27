@@ -2,6 +2,7 @@ package games;
 
 import TournamentSystem.TSTimeStorage;
 import TournamentSystem.tools.TSGameDataTransfer;
+import agentIO.AgentLoader;
 import controllers.*;
 import controllers.MC.MCAgentN;
 import controllers.MCTS.MCTSAgentT;
@@ -12,7 +13,9 @@ import controllers.MCTSWrapper.MCTSWrapperAgent;
 import controllers.MCTSWrapper.stateApproximation.PlayAgentApproximator;
 import controllers.RHEA.RheaAgentSI;
 import controllers.SB3.HttpServer.SimpleHttpServer;
+import controllers.SB3.RLEnvironmentConnector;
 import controllers.SB3.SB3Agent;
+import controllers.SB3.SB3HelperFunctions;
 import controllers.TD.TDAgent;
 import controllers.TD.ntuple2.NTupleBase;
 import controllers.TD.ntuple2.NTupleFactory;
@@ -40,6 +43,8 @@ import tools.Types.ACTIONS;
 
 import javax.swing.*;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -257,9 +262,20 @@ public class XArenaFuncs {
 				case "KuhnOptimal" ->  // KuhnPoker only, see gui_agent_list in XArenaButtonsGui
 						pa = new KuhnPokerAgent("KuhnOptimal");
 				case "SB3" -> {
-					XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
+
 					StateObservationVectorFuncs stateObservationVectorFuncs = m_xab.m_arena.makeStateObservationVectorFuncs();
-					pa = new SB3Agent(sAgent, m_xab.sb3Par[n], m_xab.oPar[n], stateObservationVectorFuncs, m_xab, m_Arena, this, n);
+
+					SB3Agent sb3Agent = new SB3Agent(sAgent, m_xab.sb3Par[n], m_xab.oPar[n], stateObservationVectorFuncs, m_Arena.getGameName());
+					pa = sb3Agent;
+
+					// Get opponent Agents
+					List<PlayAgent> opponentAgents = SB3HelperFunctions.loadAgents(m_xab.sb3Par[n].enemyAgents, n, m_Arena, this, m_xab, pa, stateObservationVectorFuncs.getNumPlayers());
+					PlayAgent defaultEvalOpponent =  SB3HelperFunctions.loadAgents(new String[]{m_xab.sb3Par[n].evaluationOptions.getOpponent()}, n, m_Arena, this, m_xab, pa, stateObservationVectorFuncs.getNumPlayers()).get(0);
+
+					RLEnvironmentConnector rlEnvironmentConnector = new RLEnvironmentConnector(stateObservationVectorFuncs, opponentAgents, sb3Agent, n, defaultEvalOpponent);
+					SimpleHttpServer simpleHttpServer = SimpleHttpServer.getInstance();
+					simpleHttpServer.setRlEnvironment(rlEnvironmentConnector);
+
 				}
 				default -> throw new RuntimeException("Unknown agent name " + sAgent);
 			}
@@ -514,9 +530,18 @@ public class XArenaFuncs {
 							m_xab.oPar[n], nTuples, xnf, maxGameNum, m_Arena);
 				}
 				case "SB3" -> {
-					XNTupleFuncs xnf = m_xab.m_arena.makeXNTupleFuncs();
 					StateObservationVectorFuncs stateObservationVectorFuncs = m_xab.m_arena.makeStateObservationVectorFuncs();
-					pa = new SB3Agent(sAgent, m_xab.sb3Par[n], m_xab.oPar[n], stateObservationVectorFuncs, m_xab, m_Arena,this, n);
+
+					SB3Agent sb3Agent = new SB3Agent(sAgent, m_xab.sb3Par[n], m_xab.oPar[n], stateObservationVectorFuncs, m_Arena.getGameName());
+					pa = sb3Agent;
+
+					// Get opponent Agents
+					List<PlayAgent> opponentAgents = SB3HelperFunctions.loadAgents(m_xab.sb3Par[n].enemyAgents, n, m_Arena, this, m_xab, pa, stateObservationVectorFuncs.getNumPlayers());
+					PlayAgent defaultEvalOpponent =  SB3HelperFunctions.loadAgents(new String[]{m_xab.sb3Par[n].evaluationOptions.getOpponent()}, n, m_Arena, this, m_xab, pa, stateObservationVectorFuncs.getNumPlayers()).get(0);
+
+					RLEnvironmentConnector rlEnvironmentConnector = new RLEnvironmentConnector(stateObservationVectorFuncs, opponentAgents, sb3Agent, n, defaultEvalOpponent);
+					SimpleHttpServer simpleHttpServer = SimpleHttpServer.getInstance();
+					simpleHttpServer.setRlEnvironment(rlEnvironmentConnector);
 				}
 				default ->
 						throw new RuntimeException("Could not construct trainable agent: Unknown agent name " + sAgent);

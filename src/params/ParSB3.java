@@ -94,20 +94,20 @@ public class ParSB3 implements Serializable {
     }
 
     public static class EvaluationOptions implements Serializable {
-        private int evaluateEveryEpisodes;
+        private int evaluateEverySteps;
         private int numberOfGames;
         private String opponent;
         private boolean saveBest;
 
-        public EvaluationOptions(int evaluateEveryEpisodes, int numberOfGames, String opponent, boolean saveBest) {
-            this.evaluateEveryEpisodes = evaluateEveryEpisodes;
+        public EvaluationOptions(int evaluateEverySteps, int numberOfGames, String opponent, boolean saveBest) {
+            this.evaluateEverySteps = evaluateEverySteps;
             this.numberOfGames = numberOfGames;
             this.opponent = opponent;
             this.saveBest = saveBest;
         }
 
-        public int getEvaluateEveryEpisodes() {
-            return evaluateEveryEpisodes;
+        public int getEvaluateEverySteps() {
+            return evaluateEverySteps;
         }
 
         public int getNumberOfGames() {

@@ -8,9 +8,11 @@ import java.util.List;
 public class StateObservationVectorFuncs {
     private final XNTupleFuncs xnTupleFuncs;
     private final int stateObservationVectorSize;
+    public final int actionSpaceSize;
 
-    public StateObservationVectorFuncs(XNTupleFuncs xnTupleFuncs) {
+    public StateObservationVectorFuncs(XNTupleFuncs xnTupleFuncs, int actionSpaceSize) {
         this.xnTupleFuncs = xnTupleFuncs;
+        this.actionSpaceSize = actionSpaceSize;
         stateObservationVectorSize = xnTupleFuncs.getNumCells() + 1; // x cells +1 for player
     }
 

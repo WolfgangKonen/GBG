@@ -298,7 +298,10 @@ public class SimpleHttpServer
             final String requestMethod = exchange.getRequestMethod().toUpperCase();
             switch (requestMethod) {
                 case METHOD_POST:
-                    String response;
+                    JSONObject responseBody = new JSONObject();
+                    responseBody.put("averageReward", 0);
+                    String response = responseBody.toString();
+
                     int responseCode = STATUS_OK;
 
                     String opponentName = "Random";
@@ -324,11 +327,13 @@ public class SimpleHttpServer
                             response = invalidJson();
                         }
 
-                        double winRate = this.rlEnvironment.eval(opponentName, numberOfGames); // TODO: SBagent3 for traing finshed and Evalv
-                        JSONObject responseBody = new JSONObject();
-                        responseBody.put("winRate", winRate);
-                        response = responseBody.toString();
+                        double averageReward = this.rlEnvironment.evalWithDefaultOpponent(numberOfGames); // TODO: SBagent3 for traing finshed and Evalv
+                        if (responseCode != BAD_REQUEST) {
+                            responseBody.put("averageReward", averageReward);
+                            response = responseBody.toString();
+                        }
                         System.out.println(response);
+
 
                         headers.set(HEADER_CONTENT_TYPE, String.format("application/json; charset=%s", CHARSET));
                         final byte[] rawResponseBody = response.getBytes(CHARSET);

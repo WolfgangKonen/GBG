@@ -1265,8 +1265,8 @@ public class SB3Params extends Frame implements Serializable {
     }
 
     private class EvaluationOptionsPanel extends JPanel {
-        private JLabel evaluateEveryEpisodesLabel;
-        private JTextField evaluateEveryEpisodesText;
+        private JLabel evaluateEveryStepsLabel;
+        private JTextField evaluateEveryStepsText;
 
         private JLabel numberOfGamesLabel;
         private JTextField numberOfGamesText;
@@ -1278,8 +1278,8 @@ public class SB3Params extends Frame implements Serializable {
         private JCheckBox saveBestCheckBox;
 
         public EvaluationOptionsPanel() {
-            evaluateEveryEpisodesLabel = new JLabel("Evaluate every X Episodes: ");
-            evaluateEveryEpisodesText = new JTextField(Integer.toString(SB3AgentConfig.DefaultEvaluationOptions.DEFAULT_EVALUATE_EVERY_EPISODES));
+            evaluateEveryStepsLabel = new JLabel("Evaluate every X Steps: ");
+            evaluateEveryStepsText = new JTextField(Integer.toString(SB3AgentConfig.DefaultEvaluationOptions.DEFAULT_EVALUATE_EVERY_EPISODES));
 
             numberOfGamesLabel = new JLabel("Games per Evaluation: ");
             numberOfGamesText = new JTextField(Integer.toString(SB3AgentConfig.DefaultEvaluationOptions.DEFAULT_NUMBER_GAMES));
@@ -1293,8 +1293,8 @@ public class SB3Params extends Frame implements Serializable {
 
             this.setLayout(new GridLayout(0,2,10,10));
 
-            this.add(evaluateEveryEpisodesLabel);
-            this.add(evaluateEveryEpisodesText);
+            this.add(evaluateEveryStepsLabel);
+            this.add(evaluateEveryStepsText);
 
             this.add(numberOfGamesLabel);
             this.add(numberOfGamesText);
@@ -1307,7 +1307,7 @@ public class SB3Params extends Frame implements Serializable {
         }
 
         public void setFrom(ParSB3.EvaluationOptions evaluationOptions) {
-            evaluateEveryEpisodesText.setText(Integer.toString(evaluationOptions.getEvaluateEveryEpisodes()));
+            evaluateEveryStepsText.setText(Integer.toString(evaluationOptions.getEvaluateEverySteps()));
             numberOfGamesText.setText(Integer.toString(evaluationOptions.getNumberOfGames()));
             opponentComboBox.setSelectedItem(evaluationOptions.getOpponent());
             saveBestCheckBox.setSelected(evaluationOptions.isSaveBest());
@@ -1315,7 +1315,7 @@ public class SB3Params extends Frame implements Serializable {
 
         public ParSB3.EvaluationOptions getEvaluationOptions() {
             return new ParSB3.EvaluationOptions(
-                    Integer.parseInt(evaluateEveryEpisodesText.getText()),
+                    Integer.parseInt(evaluateEveryStepsText.getText()),
                     Integer.parseInt(numberOfGamesText.getText()),
                     (String) opponentComboBox.getSelectedItem(),
                     saveBestCheckBox.isSelected()

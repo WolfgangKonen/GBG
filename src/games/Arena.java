@@ -28,6 +28,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.awt.event.WindowEvent;
+import java.util.List;
 import javax.swing.*;
 
 /**
@@ -1432,7 +1433,8 @@ abstract public class Arena implements Runnable {
 	}
 
 	public StateObservationVectorFuncs makeStateObservationVectorFuncs() {
-		return new StateObservationVectorFuncs(makeXNTupleFuncs());
+		int actionsSpaceSize = getGameBoard().getDefaultStartState(null).getAllAvailableActions().size();
+		return new StateObservationVectorFuncs(makeXNTupleFuncs(), actionsSpaceSize);
 	}
 
 	public void showMessage(String message, String title, int msgCode) {
