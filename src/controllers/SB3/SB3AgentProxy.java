@@ -125,7 +125,7 @@ public class SB3AgentProxy extends AgentBase implements PlayAgent, Serializable 
     }
 
     /**
-     * sends the HTTP request to start training the SB3 Agent.
+     * Sends the HTTP request to start training the SB3 Agent.
      * @param totalTimeSteps
      * @param selfPlayParams
      * @param evaluationOptions
@@ -241,7 +241,8 @@ public class SB3AgentProxy extends AgentBase implements PlayAgent, Serializable 
     }
 
     /**
-     *
+     * Returns an action from a random self play policy (can include older policies).
+     * If deterministic is true returns the action with the highest value else returns an action chosen with the value as a probability.
      * @param observation
      * @param availableActions
      * @param deterministic
