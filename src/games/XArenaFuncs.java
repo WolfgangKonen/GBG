@@ -11,8 +11,8 @@ import controllers.MCTSExpectimax.MCTSExpectimaxAgt;
 import controllers.MCTSWrapper.MCTSWrapperAgent;
 import controllers.MCTSWrapper.stateApproximation.PlayAgentApproximator;
 import controllers.RHEA.RheaAgentSI;
-import controllers.SB3.HttpServer.SimpleHttpServer;
-import controllers.SB3.RLEnvironmentConnector;
+import controllers.SB3.HttpServer.RLEnvironmentServer;
+import controllers.SB3.RLEnvironmentService;
 import controllers.SB3.SB3AgentProxy;
 import controllers.SB3.SB3HelperFunctions;
 import controllers.TD.TDAgent;
@@ -268,9 +268,9 @@ public class XArenaFuncs {
 					List<PlayAgent> opponentAgents = SB3HelperFunctions.loadAgents(m_xab.sb3Par[n].enemyAgents, n, m_Arena, this, m_xab, pa, stateObservationVectorFuncs.getNumPlayers());
 					PlayAgent defaultEvalOpponent =  SB3HelperFunctions.loadAgents(new String[]{m_xab.sb3Par[n].evaluationOptions.getOpponent()}, n, m_Arena, this, m_xab, pa, stateObservationVectorFuncs.getNumPlayers()).get(0);
 
-					RLEnvironmentConnector rlEnvironmentConnector = new RLEnvironmentConnector(stateObservationVectorFuncs, opponentAgents, sb3AgentProxy, n, defaultEvalOpponent);
-					SimpleHttpServer simpleHttpServer = SimpleHttpServer.getInstance();
-					simpleHttpServer.setRlEnvironment(rlEnvironmentConnector);
+					RLEnvironmentService rlEnvironmentService = new RLEnvironmentService(stateObservationVectorFuncs, opponentAgents, sb3AgentProxy, n, defaultEvalOpponent);
+					RLEnvironmentServer rlEnvironmentServer = RLEnvironmentServer.getInstance();
+					rlEnvironmentServer.setRlEnvironmentService(rlEnvironmentService);
 
 				}
 				default -> throw new RuntimeException("Unknown agent name " + sAgent);
@@ -535,9 +535,9 @@ public class XArenaFuncs {
 					List<PlayAgent> opponentAgents = SB3HelperFunctions.loadAgents(m_xab.sb3Par[n].enemyAgents, n, m_Arena, this, m_xab, pa, stateObservationVectorFuncs.getNumPlayers());
 					PlayAgent defaultEvalOpponent =  SB3HelperFunctions.loadAgents(new String[]{m_xab.sb3Par[n].evaluationOptions.getOpponent()}, n, m_Arena, this, m_xab, pa, stateObservationVectorFuncs.getNumPlayers()).get(0);
 
-					RLEnvironmentConnector rlEnvironmentConnector = new RLEnvironmentConnector(stateObservationVectorFuncs, opponentAgents, sb3AgentProxy, n, defaultEvalOpponent);
-					SimpleHttpServer simpleHttpServer = SimpleHttpServer.getInstance();
-					simpleHttpServer.setRlEnvironment(rlEnvironmentConnector);
+					RLEnvironmentService rlEnvironmentService = new RLEnvironmentService(stateObservationVectorFuncs, opponentAgents, sb3AgentProxy, n, defaultEvalOpponent);
+					RLEnvironmentServer rlEnvironmentServer = RLEnvironmentServer.getInstance();
+					rlEnvironmentServer.setRlEnvironmentService(rlEnvironmentService);
 				}
 				default ->
 						throw new RuntimeException("Could not construct trainable agent: Unknown agent name " + sAgent);
@@ -1566,6 +1566,11 @@ public class XArenaFuncs {
 		return lastMsg;
 	}
 
+	/**
+	 * Only required when training an SB3 agent.
+	 * As when training an SB3 agent the game loop is no longer handheld by {@link XArenaFuncs}, but instead by SB3 this class {@link GameProgressor#afterGame(PlayAgent)} methode
+	 * is called after each game round/ episode to keep all the stats up to date and return a fresh StateObservation for a new game round.
+	 */
 	public class GameProgressor {
 		int gameNum;
 		int numEval;
@@ -1598,6 +1603,11 @@ public class XArenaFuncs {
 			this.n = n;
 		}
 
+		/**
+		 * When training an SB3 agent this methode has to be called after each game round/ episode to keep all the stats up to date and return a fresh StateObservation for a new game round.
+		 * @param pa
+		 * @return
+		 */
 		public StateObservation afterGame(PlayAgent pa) {
 
 			if (doTrainStatistics)

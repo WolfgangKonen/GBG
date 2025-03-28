@@ -3,7 +3,15 @@ package controllers.SB3;
 import java.util.LinkedList;
 import java.util.List;
 
-public class SB3AgentConfig {
+public class SB3Config {
+    //Connection Config
+    public static final int PORT = 8094;
+    public class SB3Server {
+        public static final int PORT = 8095;
+        public static final String IP_ADDRESS = "127.0.0.1";
+        public static final String HOST = "http://" + IP_ADDRESS + ":" + Integer.toString(PORT);
+    }
+
     // Default params for BaseParameters
     public static final String DEFAULT_AGENT = "DQN";
     public static final String[] DEFAULT_AGENT_OPTIONS = {"DQN", "PPO", "MPPO"};

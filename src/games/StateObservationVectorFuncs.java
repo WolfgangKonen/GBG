@@ -19,6 +19,7 @@ public class StateObservationVectorFuncs {
     public int getNumPlayers() {
         return xnTupleFuncs.getNumPlayers();
     }
+
     /**
      *
      * @return A flattened vector with discrete values representing the current stateObservation for SB3 Agent normally just the game table if no other features are added.

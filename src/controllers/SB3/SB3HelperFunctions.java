@@ -12,9 +12,12 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Contains static functions. Currently, only for helping load a bunch of opponent agents need in {@link RLEnvironmentService} for training an SB3 agent.
+ */
 public class SB3HelperFunctions {
     /**
-     * helper function for loadAgents. Checks if path of agent to load is valid.
+     * Helper function for {@link #loadAgents(String[], int, Arena, XArenaFuncs, XArenaButtons, PlayAgent, int)}. Checks if path of agent to load is valid.
      * @param path
      * @param arena
      * @return
@@ -29,10 +32,10 @@ public class SB3HelperFunctions {
     }
 
     /**
-     * Loads or fetches agents from an array with Stings. If the String is one of the following:
-     * - Name of an Agent
-     * - Dir of a saved agent
-     * - "Self Play" adds selfPlayAgent to the returned List
+     * <p>Loads or fetches agents from an array with Stings. If the String is one of the following:</p>
+     * <p>- Name of an Agent</p>
+     * <p>- Dir of a saved agent</p>
+     * <p>- "Self Play" adds selfPlayAgent to the returned List</p>
      * @param agentsNameOrDir
      * @param playerNumber
      * @param arena

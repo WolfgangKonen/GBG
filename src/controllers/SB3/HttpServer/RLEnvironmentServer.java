@@ -1,11 +1,11 @@
 package controllers.SB3.HttpServer;
 
-import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import controllers.SB3.FirstObservation;
-import controllers.SB3.RLEnvironmentConnector;
+import controllers.SB3.RLEnvironmentService;
+import controllers.SB3.SB3Config;
 import controllers.SB3.Transition;
 
 import org.json.JSONArray;
@@ -13,25 +13,27 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.InetSocketAddress;
 
 
-// Singelton
-public class SimpleHttpServer
+/**
+ * Singleton. Host the HTTP Server with all the endpoints needed for the <STRONG>GBGEnvironmentClient</STRONG> to acces the games/ Environemts in GBG,
+ * using the {@link RLEnvironmentService} to provide access to the business logic, handling the interactions with the game.
+ */
+public class RLEnvironmentServer
 {
-    private static final SimpleHttpServer SIMPLE_HTTP_SERVER;
+    private static final RLEnvironmentServer RL_ENVIRONMENT_SERVER;
 
     static {
         try {
-            SIMPLE_HTTP_SERVER = new SimpleHttpServer();
+            RL_ENVIRONMENT_SERVER = new RLEnvironmentServer();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     private HttpServer server;
-    private RLEnvironmentConnector rlEnvironment;
+    private RLEnvironmentService rlEnvironmentService;
 
     private StepHttpHandler stepHttpHandler;
     private  ResetHttpHandler resetHttpHandler;
@@ -39,9 +41,9 @@ public class SimpleHttpServer
     private AvailableActionsHandler availableActionsHandler;
     private EvalHandler evalHandler;
 
-    private SimpleHttpServer() throws IOException {
+    private RLEnvironmentServer() throws IOException {
         // Create an HttpServer instance
-        this.server = HttpServer.create(new InetSocketAddress(8094), 0);
+        this.server = HttpServer.create(new InetSocketAddress(SB3Config.PORT), 0);
         this.stepHttpHandler = new StepHttpHandler();
         this.resetHttpHandler = new ResetHttpHandler();
         this.trainingFinishedHandler = new TrainingFinishedHandler();
@@ -55,26 +57,24 @@ public class SimpleHttpServer
         server.createContext("/availableActions", availableActionsHandler);
         server.createContext("/eval", evalHandler);
 
-        //server.createContext("/testComplete", new testCompleteHttpHandler(httpTest));
-
         // Start the server
         server.setExecutor(null); // Use the default executor
         server.start();
-        System.out.println("Server is running on port " + ServerConfig.PORT);
+        System.out.println("Server is running on port " + SB3Config.PORT);
     }
 
-    public static SimpleHttpServer getInstance() {
-        return SIMPLE_HTTP_SERVER;
+    public static RLEnvironmentServer getInstance() {
+        return RL_ENVIRONMENT_SERVER;
     }
 
     // set current RLEnvironment before use
-    public void setRlEnvironment(RLEnvironmentConnector rlEnvironment) {
-        this.rlEnvironment = rlEnvironment;
-        stepHttpHandler.setRlEnvironment(rlEnvironment);
-        resetHttpHandler.setRlEnvironment(rlEnvironment);
-        trainingFinishedHandler.setRlEnvironment(rlEnvironment);
-        availableActionsHandler.setRlEnvironment(rlEnvironment);
-        evalHandler.setRlEnvironment(rlEnvironment);
+    public void setRlEnvironmentService(RLEnvironmentService rlEnvironmentService) {
+        this.rlEnvironmentService = rlEnvironmentService;
+        stepHttpHandler.setRlEnvironmentService(rlEnvironmentService);
+        resetHttpHandler.setRlEnvironmentService(rlEnvironmentService);
+        trainingFinishedHandler.setRlEnvironmentService(rlEnvironmentService);
+        availableActionsHandler.setRlEnvironmentService(rlEnvironmentService);
+        evalHandler.setRlEnvironmentService(rlEnvironmentService);
     }
     public void stopServer() {
         server.stop(2);
@@ -98,9 +98,7 @@ public class SimpleHttpServer
         }
 
         @Override
-        public void handle(HttpExchange exchange) throws IOException
-        {
-            final Headers headers = exchange.getResponseHeaders();
+        public void handle(HttpExchange exchange) throws IOException {
             final String requestMethod = exchange.getRequestMethod().toUpperCase();
             switch (requestMethod) {
                 case METHOD_POST:
@@ -115,7 +113,7 @@ public class SimpleHttpServer
                             int action = requestBody.getInt("action");
 
                             // step in environment
-                            Transition transition = this.rlEnvironment.step(action);
+                            Transition transition = this.rlEnvironmentService.step(action);
 
                             // create responds
                             response = transition.toJson().toString();
@@ -132,18 +130,11 @@ public class SimpleHttpServer
                         response = invalidJson();
                     }
 
-                    headers.set(HEADER_CONTENT_TYPE, String.format("application/json; charset=%s", CHARSET));
-                    final byte[] rawResponseBody = response.getBytes(CHARSET);
-                    exchange.sendResponseHeaders(responseCode, rawResponseBody.length);
-                    OutputStream outputStream = exchange.getResponseBody();
-                    outputStream.write(rawResponseBody);
-                    outputStream.close();
-                case METHOD_OPTIONS:
-                    headers.set(HEADER_ALLOW, METHOD_POST);
-                    exchange.sendResponseHeaders(STATUS_OK, NO_RESPONSE_LENGTH);
+
+                    sendResponse(exchange, responseCode, response);
+                    break;
                 default:
-                    headers.set(HEADER_ALLOW, METHOD_POST);
-                    exchange.sendResponseHeaders(STATUS_METHOD_NOT_ALLOWED, NO_RESPONSE_LENGTH);
+                    sendMethodOptions(exchange);
                     break;
             }
         }
@@ -156,32 +147,23 @@ public class SimpleHttpServer
 
         @Override
         public void handle(HttpExchange exchange) throws IOException {
-            final Headers headers = exchange.getResponseHeaders();
             final String requestMethod = exchange.getRequestMethod().toUpperCase();
             switch (requestMethod) {
                 case METHOD_GET:
                     try {
-                        int[] availableActions = this.rlEnvironment.getAvailableActions();
+                        int[] availableActions = this.rlEnvironmentService.getAvailableActions();
 
                         // creat responds
                         String response = new JSONArray(availableActions).toString();
 
-                        headers.set(HEADER_CONTENT_TYPE, String.format("application/json; charset=%s", CHARSET));
-                        final byte[] rawResponseBody = response.getBytes(CHARSET);
-                        exchange.sendResponseHeaders(STATUS_OK, rawResponseBody.length);
-                        OutputStream outputStream = exchange.getResponseBody();
-                        outputStream.write(rawResponseBody);
-                        outputStream.close();
+                        sendResponse(exchange, STATUS_OK, response);
                     }
                     catch (Exception exception) {
                         exception.printStackTrace();
                     }
-                case METHOD_OPTIONS:
-                    headers.set(HEADER_ALLOW, METHOD_GET);
-                    exchange.sendResponseHeaders(STATUS_OK, NO_RESPONSE_LENGTH);
+                    break;
                 default:
-                    headers.set(HEADER_ALLOW, METHOD_GET);
-                    exchange.sendResponseHeaders(STATUS_METHOD_NOT_ALLOWED, NO_RESPONSE_LENGTH);
+                    sendMethodOptions(exchange);
                     break;
             }
         }
@@ -189,7 +171,6 @@ public class SimpleHttpServer
 
     // reset http handler
     static class ResetHttpHandler extends EnvironmentHttpHandler implements HttpHandler {
-
         public ResetHttpHandler() {
             super();
         }
@@ -197,41 +178,30 @@ public class SimpleHttpServer
         @Override
         public void handle(HttpExchange exchange) throws IOException
         {
-            final Headers headers = exchange.getResponseHeaders();
             final String requestMethod = exchange.getRequestMethod().toUpperCase();
             switch (requestMethod) {
                 case METHOD_POST:
                     try {
                         // reset environment
-                        FirstObservation firstObservation = this.rlEnvironment.reset();
+                        FirstObservation firstObservation = this.rlEnvironmentService.reset();
 
                         // creat responds
                         String response = firstObservation.toJson().toString();
 
-                        headers.set(HEADER_CONTENT_TYPE, String.format("application/json; charset=%s", CHARSET));
-                        final byte[] rawResponseBody = response.getBytes(CHARSET);
-                        exchange.sendResponseHeaders(STATUS_OK, rawResponseBody.length);
-                        OutputStream outputStream = exchange.getResponseBody();
-                        outputStream.write(rawResponseBody);
-                        outputStream.close();
+                        sendResponse(exchange, STATUS_OK, response);
                     }
                     catch (Exception exception) {
                         exception.printStackTrace();
                     }
-                case METHOD_OPTIONS:
-                    headers.set(HEADER_ALLOW, METHOD_POST);
-                    exchange.sendResponseHeaders(STATUS_OK, NO_RESPONSE_LENGTH);
+                    break;
                 default:
-                    headers.set(HEADER_ALLOW, METHOD_POST);
-                    exchange.sendResponseHeaders(STATUS_METHOD_NOT_ALLOWED, NO_RESPONSE_LENGTH);
+                    sendMethodOptions(exchange);
                     break;
             }
         }
     }
 
     static class TrainingFinishedHandler extends EnvironmentHttpHandler implements HttpHandler {
-
-
         public TrainingFinishedHandler() {
             super();
         }
@@ -239,43 +209,30 @@ public class SimpleHttpServer
         @Override
         public void handle(HttpExchange exchange) throws IOException
         {
-            final Headers headers = exchange.getResponseHeaders();
             final String requestMethod = exchange.getRequestMethod().toUpperCase();
             switch (requestMethod) {
                 case METHOD_POST:
                     try {
                         // get request body
                         String requestBody = inputStreamToString(exchange.getRequestBody());
-                        exchange.sendResponseHeaders(NO_CONTENT, NO_RESPONSE_LENGTH);
-                        this.rlEnvironment.trainingFinished();
+                        sendNoContent(exchange);
+                        this.rlEnvironmentService.trainingFinished();
                     }
                     catch (IOException exception) {
-                        final byte[] rawResponseBody = invalidJson().getBytes(CHARSET);
-
-                        headers.set(HEADER_CONTENT_TYPE, String.format("application/json; charset=%s", CHARSET));
-                        exchange.sendResponseHeaders(BAD_REQUEST, rawResponseBody.length);
-
-                        OutputStream outputStream = exchange.getResponseBody();
-                        outputStream.write(rawResponseBody);
-                        outputStream.close();
+                        sendResponse(exchange, BAD_REQUEST, invalidJson());
                     }
                     catch (Exception exception) {
                         exception.printStackTrace();
                     }
-                case METHOD_OPTIONS:
-                    headers.set(HEADER_ALLOW, METHOD_POST);
-                    exchange.sendResponseHeaders(STATUS_OK, NO_RESPONSE_LENGTH);
+                    break;
                 default:
-                    headers.set(HEADER_ALLOW, METHOD_POST);
-                    exchange.sendResponseHeaders(STATUS_METHOD_NOT_ALLOWED, NO_RESPONSE_LENGTH);
+                    sendMethodOptions(exchange);
                     break;
             }
         }
     }
 
     static class EvalHandler extends EnvironmentHttpHandler implements HttpHandler {
-
-
         public EvalHandler() {
             super();
         }
@@ -294,7 +251,6 @@ public class SimpleHttpServer
         @Override
         public void handle(HttpExchange exchange) throws IOException
         {
-            final Headers headers = exchange.getResponseHeaders();
             final String requestMethod = exchange.getRequestMethod().toUpperCase();
             switch (requestMethod) {
                 case METHOD_POST:
@@ -327,43 +283,27 @@ public class SimpleHttpServer
                             response = invalidJson();
                         }
 
-                        double averageReward = this.rlEnvironment.evalWithDefaultOpponent(numberOfGames); // TODO: SBagent3 for traing finshed and Evalv
+                        double averageReward = this.rlEnvironmentService.evalWithDefaultOpponent(numberOfGames); // TODO: SBagent3 for traing finshed and Evalv
                         if (responseCode != BAD_REQUEST) {
                             responseBody.put("averageReward", averageReward);
                             response = responseBody.toString();
                         }
                         System.out.println(response);
 
-
-                        headers.set(HEADER_CONTENT_TYPE, String.format("application/json; charset=%s", CHARSET));
-                        final byte[] rawResponseBody = response.getBytes(CHARSET);
-                        exchange.sendResponseHeaders(responseCode, rawResponseBody.length);
-                        OutputStream outputStream = exchange.getResponseBody();
-                        outputStream.write(rawResponseBody);
-                        outputStream.close();
+                        sendResponse(exchange, responseCode, response);
                     }
                     catch (IOException exception) {
-                        final byte[] rawResponseBody = invalidJson().getBytes(CHARSET);
-
-                        headers.set(HEADER_CONTENT_TYPE, String.format("application/json; charset=%s", CHARSET));
-                        exchange.sendResponseHeaders(BAD_REQUEST, rawResponseBody.length);
-
-                        OutputStream outputStream = exchange.getResponseBody();
-                        outputStream.write(rawResponseBody);
-                        outputStream.close();
+                        String invalidJson = invalidJson();
+                        sendResponse(exchange, BAD_REQUEST, invalidJson);
                     }
                     catch (Exception exception) {
                         exception.printStackTrace();
                     }
-                case METHOD_OPTIONS:
-                    headers.set(HEADER_ALLOW, METHOD_POST);
-                    exchange.sendResponseHeaders(STATUS_OK, NO_RESPONSE_LENGTH);
+                    break;
                 default:
-                    headers.set(HEADER_ALLOW, METHOD_POST);
-                    exchange.sendResponseHeaders(STATUS_METHOD_NOT_ALLOWED, NO_RESPONSE_LENGTH);
+                    sendMethodOptions(exchange);
                     break;
             }
         }
     }
-
 }

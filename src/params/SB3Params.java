@@ -1,7 +1,7 @@
 package params;
 
 import controllers.SB3.SB3AgentProxy;
-import controllers.SB3.SB3AgentConfig;
+import controllers.SB3.SB3Config;
 import gui.MessageBox;
 import tools.Types;
 
@@ -45,8 +45,8 @@ public class SB3Params extends Frame implements Serializable {
         enemyAgentsParameters = new EnemyAgentsParameters(gameName);
         networkParameters = new NetworkParameters();
 
-        setUseOwnParametersForBaseAndAgent(!SB3AgentConfig.DEFAULT_USE_STANDARD_SB3_PARMAS);
-        networkParameters.setUseOwnParameters(!SB3AgentConfig.DEFAULT_USE_STANDARD_SB3_PARMAS);
+        setUseOwnParametersForBaseAndAgent(!SB3Config.DEFAULT_USE_STANDARD_SB3_PARMAS);
+        networkParameters.setUseOwnParameters(!SB3Config.DEFAULT_USE_STANDARD_SB3_PARMAS);
 
         pack();
         // setSize(1000, 1000);
@@ -153,7 +153,7 @@ public class SB3Params extends Frame implements Serializable {
             titel.setFont(new Font(font.getName(), Font.BOLD, font.getSize()));
 
             agentLabel = new JLabel("Agent: ");
-            agentComboBox = new JComboBox(SB3AgentConfig.DEFAULT_AGENT_OPTIONS);
+            agentComboBox = new JComboBox(SB3Config.DEFAULT_AGENT_OPTIONS);
             agentComboBox.addActionListener(e -> {
                 if (agentComboBox.getSelectedItem() instanceof String newAgent) {
                     changeAgentPane(newAgent);
@@ -180,12 +180,12 @@ public class SB3Params extends Frame implements Serializable {
             // Further Options / Params
 
             trainTimeStepsLabel = new JLabel("Train time steps: ");
-            trainTimeStepsText = new JTextField(Integer.toString(SB3AgentConfig.DEFAULT_TRAIN_TIME_STEPS));
+            trainTimeStepsText = new JTextField(Integer.toString(SB3Config.DEFAULT_TRAIN_TIME_STEPS));
 
             standardSB3ParamsLabel = new JLabel("Use Standard Parameters by SB3?");
             standardSB3ParamsCheckBox = new JCheckBox();
-            standardSB3ParamsCheckBox.setSelected(SB3AgentConfig.DEFAULT_USE_STANDARD_SB3_PARMAS);
-            useOwnSB3Params = SB3AgentConfig.DEFAULT_USE_STANDARD_SB3_PARMAS;
+            standardSB3ParamsCheckBox.setSelected(SB3Config.DEFAULT_USE_STANDARD_SB3_PARMAS);
+            useOwnSB3Params = SB3Config.DEFAULT_USE_STANDARD_SB3_PARMAS;
             standardSB3ParamsCheckBox.addItemListener(e -> setUseOwnParametersForBaseAndAgent(
                     !standardSB3ParamsCheckBox.isSelected())
             );
@@ -194,34 +194,34 @@ public class SB3Params extends Frame implements Serializable {
 
             // Params Specific for SB3 (will be stored in Map)
             learningRateLabel = new JLabel("Learning rate: ");
-            learningRateText = new JTextField(Double.toString(SB3AgentConfig.DEFAULT_LEARNING_RATE));
+            learningRateText = new JTextField(Double.toString(SB3Config.DEFAULT_LEARNING_RATE));
 
             statsWindowSizeLabel = new JLabel("Stats window size: ");
-            statsWindowSizeText = new JTextField(Integer.toString(SB3AgentConfig.DEFAULT_STATS_WINDOW_SIZE));
+            statsWindowSizeText = new JTextField(Integer.toString(SB3Config.DEFAULT_STATS_WINDOW_SIZE));
 
             tensorboardLogLabel = new JLabel("Tensorboard log: ");
-            tensorboardLogText = new JTextField(String.valueOf(SB3AgentConfig.DEFAULT_TENSORBOARD_LOG));
+            tensorboardLogText = new JTextField(String.valueOf(SB3Config.DEFAULT_TENSORBOARD_LOG));
 
 
             verboseLabel = new JLabel("Verbose: ");
-            verboseText = new JTextField(Integer.toString(SB3AgentConfig.DEFAULT_VERBOSE));
+            verboseText = new JTextField(Integer.toString(SB3Config.DEFAULT_VERBOSE));
 
             seedLabel = new JLabel("Seed: ");
-            seedText = new JTextField(String.valueOf(SB3AgentConfig.DEFAULT_SEED));
+            seedText = new JTextField(String.valueOf(SB3Config.DEFAULT_SEED));
 
             deviceLabel = new JLabel("Device: ");
-            deviceText = new JTextField(SB3AgentConfig.DEFAULT_DEVICE);
+            deviceText = new JTextField(SB3Config.DEFAULT_DEVICE);
 
             // Set tool tips
-            agentLabel.setToolTipText(SB3AgentConfig.TIP_AGENT);
-            trainTimeStepsLabel.setToolTipText(SB3AgentConfig.TIP_TRAIN_TIMESTEPS);
-            standardSB3ParamsLabel.setToolTipText(SB3AgentConfig.TIP_STANDARD_SB3_PARAMS);
-            learningRateLabel.setToolTipText(SB3AgentConfig.TIP_LEARNING_RATE);
-            statsWindowSizeLabel.setToolTipText(SB3AgentConfig.TIP_STATS_WINDOW_SIZE);
-            tensorboardLogLabel.setToolTipText(SB3AgentConfig.TIP_TENSORBOARD_LOG);
-            verboseLabel.setToolTipText(SB3AgentConfig.TIP_VERBOSE);
-            seedLabel.setToolTipText(SB3AgentConfig.TIP_SEED);
-            deviceLabel.setToolTipText(SB3AgentConfig.TIP_DEVICE);
+            agentLabel.setToolTipText(SB3Config.TIP_AGENT);
+            trainTimeStepsLabel.setToolTipText(SB3Config.TIP_TRAIN_TIMESTEPS);
+            standardSB3ParamsLabel.setToolTipText(SB3Config.TIP_STANDARD_SB3_PARAMS);
+            learningRateLabel.setToolTipText(SB3Config.TIP_LEARNING_RATE);
+            statsWindowSizeLabel.setToolTipText(SB3Config.TIP_STATS_WINDOW_SIZE);
+            tensorboardLogLabel.setToolTipText(SB3Config.TIP_TENSORBOARD_LOG);
+            verboseLabel.setToolTipText(SB3Config.TIP_VERBOSE);
+            seedLabel.setToolTipText(SB3Config.TIP_SEED);
+            deviceLabel.setToolTipText(SB3Config.TIP_DEVICE);
 
             this.setLayout(new GridLayout(0,2,10,10));
 
@@ -308,7 +308,7 @@ public class SB3Params extends Frame implements Serializable {
             if (agentComboBox.getSelectedItem() instanceof String policy) {
                 return policy;
             }
-            return SB3AgentConfig.DEFAULT_AGENT;
+            return SB3Config.DEFAULT_AGENT;
         }
 
         public int getTrainTimeSteps() {
@@ -427,7 +427,7 @@ public class SB3Params extends Frame implements Serializable {
             enemies = new JList(listModel);
 
             addEnemyLabel = new JLabel("Choose an opponent then add or load an opponent: ");
-            addEnemyComboBox = new JComboBox(SB3AgentConfig.EnemyAgentsDefaultValues.DEFAULT_ENEMIES);
+            addEnemyComboBox = new JComboBox(SB3Config.EnemyAgentsDefaultValues.DEFAULT_ENEMIES);
 
             addEnemyButton = new JButton("Add opponent");
             addEnemyButton.addActionListener(e -> addEnemy());
@@ -444,13 +444,13 @@ public class SB3Params extends Frame implements Serializable {
             selfPLayLabel.setFont(new Font(font.getName(), Font.BOLD, font.getSize()));
 
             selfPlayPolicyWindowSizeLabel = new JLabel("Window size of past policies for self play:");
-            selfPlayPolicyWindowSizeText = new JTextField(Integer.toString(SB3AgentConfig.SelfPlayDefaultParameters.DEFAULT_POLICY_WINDOW_SIZE));
+            selfPlayPolicyWindowSizeText = new JTextField(Integer.toString(SB3Config.SelfPlayDefaultParameters.DEFAULT_POLICY_WINDOW_SIZE));
 
             addSelfPlayPolicyEveryXStepsLabel = new JLabel("add policy for self play ervery:");
-            addSelfPlayPolicyEveryXStepsText = new JTextField(Integer.toString(SB3AgentConfig.SelfPlayDefaultParameters.DEFAULT_ADD_POLICY_EVERY_X_STEPS));
+            addSelfPlayPolicyEveryXStepsText = new JTextField(Integer.toString(SB3Config.SelfPlayDefaultParameters.DEFAULT_ADD_POLICY_EVERY_X_STEPS));
 
             useLatestSelfPLayPolicyLabel = new JLabel("Use latest policy ration:");
-            useLatestSelfPLayPolicyText = new JTextField(Double.toString(SB3AgentConfig.SelfPlayDefaultParameters.DEFAULT_USE_LATEST_POLICY));
+            useLatestSelfPLayPolicyText = new JTextField(Double.toString(SB3Config.SelfPlayDefaultParameters.DEFAULT_USE_LATEST_POLICY));
             // Self Play
 
             this.setLayout(new GridLayout(0, 2, 10, 10));
@@ -567,61 +567,61 @@ public class SB3Params extends Frame implements Serializable {
             titel.setFont(new Font(font.getName(), Font.BOLD, font.getSize()));
 
             bufferSizeLabel = new JLabel("Replay buffer size: ");
-            bufferSizeText = new JTextField(Integer.toString(SB3AgentConfig.DQNDefaultValues.DEFAULT_BUFFERSIZE));
+            bufferSizeText = new JTextField(Integer.toString(SB3Config.DQNDefaultValues.DEFAULT_BUFFERSIZE));
 
             learningStartsLabel = new JLabel("Learning starts at: ");
-            learningStartsText = new JTextField(Integer.toString(SB3AgentConfig.DQNDefaultValues.DEFAULT_LEARNING_STARTS));
+            learningStartsText = new JTextField(Integer.toString(SB3Config.DQNDefaultValues.DEFAULT_LEARNING_STARTS));
 
             batchSizeLabel = new JLabel("Batch size: ");
-            batchSizeText = new JTextField(Integer.toString(SB3AgentConfig.DQNDefaultValues.DEFAULT_BATCH_SIZE));
+            batchSizeText = new JTextField(Integer.toString(SB3Config.DQNDefaultValues.DEFAULT_BATCH_SIZE));
 
             tauLabel = new JLabel("Tau: ");
-            tauText = new JTextField(Double.toString(SB3AgentConfig.DQNDefaultValues.DEFAULT_TAU));
+            tauText = new JTextField(Double.toString(SB3Config.DQNDefaultValues.DEFAULT_TAU));
 
             gammaLabel = new JLabel("Gamma: ");
-            gammaText = new JTextField(Double.toString(SB3AgentConfig.DQNDefaultValues.DEFAULT_GAMMA));
+            gammaText = new JTextField(Double.toString(SB3Config.DQNDefaultValues.DEFAULT_GAMMA));
 
             trainFreqLabel = new JLabel("Train frequency: ");
-            trainFreqText = new JTextField(Integer.toString(SB3AgentConfig.DQNDefaultValues.DEFAULT_TRAIN_FREQ));
+            trainFreqText = new JTextField(Integer.toString(SB3Config.DQNDefaultValues.DEFAULT_TRAIN_FREQ));
 
             gradientStepsLabel = new JLabel("Gradient steps: ");
-            gradientStepsText = new JTextField(Integer.toString(SB3AgentConfig.DQNDefaultValues.DEFAULT_GRADIENT_STEPS));
+            gradientStepsText = new JTextField(Integer.toString(SB3Config.DQNDefaultValues.DEFAULT_GRADIENT_STEPS));
 
             optimizeMemoryUsageLabel = new JLabel("Optimize memory usage: ");
             optimizeMemoryUsageCheckBox = new JCheckBox();
-            optimizeMemoryUsageCheckBox.setSelected(SB3AgentConfig.DQNDefaultValues.DEFAULT_OPTIMIZE_MEMORY_USAGE);
+            optimizeMemoryUsageCheckBox.setSelected(SB3Config.DQNDefaultValues.DEFAULT_OPTIMIZE_MEMORY_USAGE);
 
             targetUpdateIntervalLabel = new JLabel("Target update interval: ");
-            targetUpdateIntervalText = new JTextField(Integer.toString(SB3AgentConfig.DQNDefaultValues.DEFAULT_TARGET_UPDATE_INTERVAL));
+            targetUpdateIntervalText = new JTextField(Integer.toString(SB3Config.DQNDefaultValues.DEFAULT_TARGET_UPDATE_INTERVAL));
 
             explorationFractionLabel = new JLabel("Exploration fraction: ");
-            explorationFractionText = new JTextField(Double.toString(SB3AgentConfig.DQNDefaultValues.DEFAULT_EXPLORATION_FRACTION));
+            explorationFractionText = new JTextField(Double.toString(SB3Config.DQNDefaultValues.DEFAULT_EXPLORATION_FRACTION));
 
             explorationInitialEpsLabel = new JLabel("Exploration initial epsilon: ");
-            explorationInitialEpsText = new JTextField(Double.toString(SB3AgentConfig.DQNDefaultValues.DEFAULT_EXPLORATION_INITIAL_EPS));
+            explorationInitialEpsText = new JTextField(Double.toString(SB3Config.DQNDefaultValues.DEFAULT_EXPLORATION_INITIAL_EPS));
 
             explorationFinalEpsLabel = new JLabel("Exploration final epsilon: ");
-            explorationFinalEpsText = new JTextField(Double.toString(SB3AgentConfig.DQNDefaultValues.DEFAULT_EXPLORATION_FINAL_EPS));
+            explorationFinalEpsText = new JTextField(Double.toString(SB3Config.DQNDefaultValues.DEFAULT_EXPLORATION_FINAL_EPS));
 
             maxGradNormLabel = new JLabel("Max gradient norm: ");
-            maxGradNormText = new JTextField(Double.toString(SB3AgentConfig.DQNDefaultValues.DEFAULT_MAX_GRAD_NORM));
+            maxGradNormText = new JTextField(Double.toString(SB3Config.DQNDefaultValues.DEFAULT_MAX_GRAD_NORM));
 
-            bufferSizeLabel.setToolTipText(SB3AgentConfig.DQNDefaultValues.TIP_BUFFER_SIZE);
-            learningStartsLabel.setToolTipText(SB3AgentConfig.DQNDefaultValues.TIP_LEARNING_STARTS);
-            batchSizeLabel.setToolTipText(SB3AgentConfig.DQNDefaultValues.TIP_BATCH_SIZE);
-            tauLabel.setToolTipText(SB3AgentConfig.DQNDefaultValues.TIP_TAU);
-            gammaLabel.setToolTipText(SB3AgentConfig.DQNDefaultValues.TIP_GAMMA);
-            trainFreqLabel.setToolTipText(SB3AgentConfig.DQNDefaultValues.TIP_TRAIN_FREQ);
-            gradientStepsLabel.setToolTipText(SB3AgentConfig.DQNDefaultValues.TIP_GRADIENT_STEPS);
-            optimizeMemoryUsageLabel.setToolTipText(SB3AgentConfig.DQNDefaultValues.TIP_OPTIMIZE_MEMORY_USAGE);
-            targetUpdateIntervalLabel.setToolTipText(SB3AgentConfig.DQNDefaultValues.TIP_TARGET_UPDATE_INTERVAL);
-            explorationFractionLabel.setToolTipText(SB3AgentConfig.DQNDefaultValues.TIP_EXPLORATION_FRACTION);
-            explorationInitialEpsLabel.setToolTipText(SB3AgentConfig.DQNDefaultValues.TIP_EXPLORATION_INITIAL_EPS);
-            explorationFinalEpsLabel.setToolTipText(SB3AgentConfig.DQNDefaultValues.TIP_EXPLORATION_FINAL_EPS);
-            maxGradNormLabel.setToolTipText(SB3AgentConfig.DQNDefaultValues.TIP_MAX_GRAD_NORM);
+            bufferSizeLabel.setToolTipText(SB3Config.DQNDefaultValues.TIP_BUFFER_SIZE);
+            learningStartsLabel.setToolTipText(SB3Config.DQNDefaultValues.TIP_LEARNING_STARTS);
+            batchSizeLabel.setToolTipText(SB3Config.DQNDefaultValues.TIP_BATCH_SIZE);
+            tauLabel.setToolTipText(SB3Config.DQNDefaultValues.TIP_TAU);
+            gammaLabel.setToolTipText(SB3Config.DQNDefaultValues.TIP_GAMMA);
+            trainFreqLabel.setToolTipText(SB3Config.DQNDefaultValues.TIP_TRAIN_FREQ);
+            gradientStepsLabel.setToolTipText(SB3Config.DQNDefaultValues.TIP_GRADIENT_STEPS);
+            optimizeMemoryUsageLabel.setToolTipText(SB3Config.DQNDefaultValues.TIP_OPTIMIZE_MEMORY_USAGE);
+            targetUpdateIntervalLabel.setToolTipText(SB3Config.DQNDefaultValues.TIP_TARGET_UPDATE_INTERVAL);
+            explorationFractionLabel.setToolTipText(SB3Config.DQNDefaultValues.TIP_EXPLORATION_FRACTION);
+            explorationInitialEpsLabel.setToolTipText(SB3Config.DQNDefaultValues.TIP_EXPLORATION_INITIAL_EPS);
+            explorationFinalEpsLabel.setToolTipText(SB3Config.DQNDefaultValues.TIP_EXPLORATION_FINAL_EPS);
+            maxGradNormLabel.setToolTipText(SB3Config.DQNDefaultValues.TIP_MAX_GRAD_NORM);
 
 
-            useOwnSB3Params = !SB3AgentConfig.DEFAULT_USE_STANDARD_SB3_PARMAS;
+            useOwnSB3Params = !SB3Config.DEFAULT_USE_STANDARD_SB3_PARMAS;
 
             this.setLayout(new GridLayout(0,2,10,10));
 
@@ -791,13 +791,13 @@ public class SB3Params extends Frame implements Serializable {
 
             useSdeLabel = new JLabel("Use SDE: ");
             useSdeCheckBox = new JCheckBox();
-            useSdeCheckBox.setSelected(SB3AgentConfig.PPODefaultValues.DEFAULT_USE_SDE);
+            useSdeCheckBox.setSelected(SB3Config.PPODefaultValues.DEFAULT_USE_SDE);
 
             sdeSampleFreqLabel = new JLabel("SDE sample frequency: ");
-            sdeSampleFreqText = new JTextField(Integer.toString(SB3AgentConfig.PPODefaultValues.DEFAULT_SDE_SAMPLE_FREQ));
+            sdeSampleFreqText = new JTextField(Integer.toString(SB3Config.PPODefaultValues.DEFAULT_SDE_SAMPLE_FREQ));
 
-            useSdeLabel.setToolTipText(SB3AgentConfig.PPODefaultValues.TIP_USE_SDE);
-            sdeSampleFreqLabel.setToolTipText(SB3AgentConfig.PPODefaultValues.TIP_SDE_SAMPLE_FREQ);
+            useSdeLabel.setToolTipText(SB3Config.PPODefaultValues.TIP_USE_SDE);
+            sdeSampleFreqLabel.setToolTipText(SB3Config.PPODefaultValues.TIP_SDE_SAMPLE_FREQ);
             this.add(useSdeLabel);
             this.add(useSdeCheckBox);
             this.add(sdeSampleFreqLabel);
@@ -883,59 +883,59 @@ public class SB3Params extends Frame implements Serializable {
             title.setFont(new Font(font.getName(), Font.BOLD, font.getSize()));
 
             nStepsLabel = new JLabel("n_steps: ");
-            nStepsText = new JTextField(Integer.toString(SB3AgentConfig.PPODefaultValues.DEFAULT_N_STEPS));
+            nStepsText = new JTextField(Integer.toString(SB3Config.PPODefaultValues.DEFAULT_N_STEPS));
 
             batchSizeLabel = new JLabel("Batch size: ");
-            batchSizeText = new JTextField(Integer.toString(SB3AgentConfig.PPODefaultValues.DEFAULT_BATCH_SIZE));
+            batchSizeText = new JTextField(Integer.toString(SB3Config.PPODefaultValues.DEFAULT_BATCH_SIZE));
 
             nEpochsLabel = new JLabel("n_epochs: ");
-            nEpochsText = new JTextField(Integer.toString(SB3AgentConfig.PPODefaultValues.DEFAULT_N_EPOCHS));
+            nEpochsText = new JTextField(Integer.toString(SB3Config.PPODefaultValues.DEFAULT_N_EPOCHS));
 
             gammaLabel = new JLabel("Gamma: ");
-            gammaText = new JTextField(Double.toString(SB3AgentConfig.PPODefaultValues.DEFAULT_GAMMA));
+            gammaText = new JTextField(Double.toString(SB3Config.PPODefaultValues.DEFAULT_GAMMA));
 
             gaeLambdaLabel = new JLabel("gae_lambda: ");
-            gaeLambdaText = new JTextField(Double.toString(SB3AgentConfig.PPODefaultValues.DEFAULT_GAE_LAMBDA));
+            gaeLambdaText = new JTextField(Double.toString(SB3Config.PPODefaultValues.DEFAULT_GAE_LAMBDA));
 
             clipRangeLabel = new JLabel("clip_range: ");
-            clipRangeText = new JTextField(Double.toString(SB3AgentConfig.PPODefaultValues.DEFAULT_CLIP_RANGE));
+            clipRangeText = new JTextField(Double.toString(SB3Config.PPODefaultValues.DEFAULT_CLIP_RANGE));
 
             clipRangeVfLabel = new JLabel("clip_range_vf: ");
-            clipRangeVfText = (SB3AgentConfig.PPODefaultValues.DEFAULT_CLIP_RANGE_VF == null) ? new JTextField():
-                new JTextField(Double.toString(SB3AgentConfig.PPODefaultValues.DEFAULT_CLIP_RANGE_VF));
+            clipRangeVfText = (SB3Config.PPODefaultValues.DEFAULT_CLIP_RANGE_VF == null) ? new JTextField():
+                new JTextField(Double.toString(SB3Config.PPODefaultValues.DEFAULT_CLIP_RANGE_VF));
 
             normalizeAdvantageLabel = new JLabel("Normalize advantage: ");
             normalizeAdvantageCheckBox = new JCheckBox();
-            normalizeAdvantageCheckBox.setSelected(SB3AgentConfig.PPODefaultValues.DEFAULT_NORMALIZE_ADVANTAGE);
+            normalizeAdvantageCheckBox.setSelected(SB3Config.PPODefaultValues.DEFAULT_NORMALIZE_ADVANTAGE);
 
             entCoefLabel = new JLabel("Entropy coefficient: ");
-            entCoefText = new JTextField(Double.toString(SB3AgentConfig.PPODefaultValues.DEFAULT_ENT_COEF));
+            entCoefText = new JTextField(Double.toString(SB3Config.PPODefaultValues.DEFAULT_ENT_COEF));
 
             vfCoefLabel = new JLabel("Value function coefficient: ");
-            vfCoefText = new JTextField(Double.toString(SB3AgentConfig.PPODefaultValues.DEFAULT_VF_COEF));
+            vfCoefText = new JTextField(Double.toString(SB3Config.PPODefaultValues.DEFAULT_VF_COEF));
 
             maxGradNormLabel = new JLabel("Max gradient norm: ");
-            maxGradNormText = new JTextField(Double.toString(SB3AgentConfig.PPODefaultValues.DEFAULT_MAX_GRAD_NORM));
+            maxGradNormText = new JTextField(Double.toString(SB3Config.PPODefaultValues.DEFAULT_MAX_GRAD_NORM));
 
             targetKlLabel = new JLabel("Target KL: ");
-            targetKlText = (SB3AgentConfig.PPODefaultValues.DEFAULT_TARGET_KL == null) ? new JTextField():
-                new JTextField(Double.toString(SB3AgentConfig.PPODefaultValues.DEFAULT_TARGET_KL));
+            targetKlText = (SB3Config.PPODefaultValues.DEFAULT_TARGET_KL == null) ? new JTextField():
+                new JTextField(Double.toString(SB3Config.PPODefaultValues.DEFAULT_TARGET_KL));
 
-            useOwnSB3Params = SB3AgentConfig.DEFAULT_USE_STANDARD_SB3_PARMAS;
+            useOwnSB3Params = SB3Config.DEFAULT_USE_STANDARD_SB3_PARMAS;
 
             // set tool tips
-            nStepsLabel.setToolTipText(SB3AgentConfig.PPODefaultValues.TIP_N_STEPS);
-            batchSizeLabel.setToolTipText(SB3AgentConfig.PPODefaultValues.TIP_BATCH_SIZE);
-            nEpochsLabel.setToolTipText(SB3AgentConfig.PPODefaultValues.TIP_N_EPOCHS);
-            gammaLabel.setToolTipText(SB3AgentConfig.PPODefaultValues.TIP_GAMMA);
-            gaeLambdaLabel.setToolTipText(SB3AgentConfig.PPODefaultValues.TIP_GAE_LAMBDA);
-            clipRangeLabel.setToolTipText(SB3AgentConfig.PPODefaultValues.TIP_CLIP_RANGE);
-            clipRangeVfLabel.setToolTipText(SB3AgentConfig.PPODefaultValues.TIP_CLIP_RANGE_VF);
-            normalizeAdvantageLabel.setToolTipText(SB3AgentConfig.PPODefaultValues.TIP_NORMALIZE_ADVANTAGE);
-            entCoefLabel.setToolTipText(SB3AgentConfig.PPODefaultValues.TIP_ENT_COEF);
-            vfCoefLabel.setToolTipText(SB3AgentConfig.PPODefaultValues.TIP_VF_COEF);
-            maxGradNormLabel.setToolTipText(SB3AgentConfig.PPODefaultValues.TIP_MAX_GRAD_NORM);
-            targetKlLabel.setToolTipText(SB3AgentConfig.PPODefaultValues.TIP_TARGET_KL);
+            nStepsLabel.setToolTipText(SB3Config.PPODefaultValues.TIP_N_STEPS);
+            batchSizeLabel.setToolTipText(SB3Config.PPODefaultValues.TIP_BATCH_SIZE);
+            nEpochsLabel.setToolTipText(SB3Config.PPODefaultValues.TIP_N_EPOCHS);
+            gammaLabel.setToolTipText(SB3Config.PPODefaultValues.TIP_GAMMA);
+            gaeLambdaLabel.setToolTipText(SB3Config.PPODefaultValues.TIP_GAE_LAMBDA);
+            clipRangeLabel.setToolTipText(SB3Config.PPODefaultValues.TIP_CLIP_RANGE);
+            clipRangeVfLabel.setToolTipText(SB3Config.PPODefaultValues.TIP_CLIP_RANGE_VF);
+            normalizeAdvantageLabel.setToolTipText(SB3Config.PPODefaultValues.TIP_NORMALIZE_ADVANTAGE);
+            entCoefLabel.setToolTipText(SB3Config.PPODefaultValues.TIP_ENT_COEF);
+            vfCoefLabel.setToolTipText(SB3Config.PPODefaultValues.TIP_VF_COEF);
+            maxGradNormLabel.setToolTipText(SB3Config.PPODefaultValues.TIP_MAX_GRAD_NORM);
+            targetKlLabel.setToolTipText(SB3Config.PPODefaultValues.TIP_TARGET_KL);
 
             this.setLayout(new GridLayout(0, 2, 10, 10));
 
@@ -1109,20 +1109,20 @@ public class SB3Params extends Frame implements Serializable {
         public NetworkParameters() {
             standardNetworkParamsLabel = new JLabel("Use Standard Network Parameters by SB3?");
             standardNetworkParamsCheckBox = new JCheckBox();
-            standardNetworkParamsCheckBox.setSelected(SB3AgentConfig.DEFAULT_USE_STANDARD_NETWORK_PARAMS);
+            standardNetworkParamsCheckBox.setSelected(SB3Config.DEFAULT_USE_STANDARD_NETWORK_PARAMS);
             standardNetworkParamsCheckBox.addItemListener(e -> SB3Params.this.networkParameters.setUseOwnParameters(
                     !standardNetworkParamsCheckBox.isSelected()
             ));
 
             layersLabel = new JLabel("Current Layers:");
             listModel = new DefaultListModel<>();
-            for (int neurons: SB3AgentConfig.DEFAULT_LAYERS) {
+            for (int neurons: SB3Config.DEFAULT_LAYERS) {
                 listModel.addElement(Integer.toString(neurons));
             }
             layers = new JList(listModel);
 
             addLayerLabel = new JLabel("Add layer with x neurons: ");
-            addLayerText = new JTextField(Integer.toString(SB3AgentConfig.DEFAULT_NUM_NEURONS));
+            addLayerText = new JTextField(Integer.toString(SB3Config.DEFAULT_NUM_NEURONS));
 
 
             addLayerButton = new JButton("Add");
@@ -1132,7 +1132,7 @@ public class SB3Params extends Frame implements Serializable {
             removeLayerButton.addActionListener(e -> removeLayer());
 
             chooseActivationFunctionLabel = new JLabel("Choose activation function:");
-            chooseActivationFunction = new JComboBox(SB3AgentConfig.DEFAULT_ACTIVATION_FUNCTIONS);
+            chooseActivationFunction = new JComboBox(SB3Config.DEFAULT_ACTIVATION_FUNCTIONS);
 
             this.setLayout(new GridLayout(0,2,10,10));
 
@@ -1184,7 +1184,7 @@ public class SB3Params extends Frame implements Serializable {
             if (chooseActivationFunction.getSelectedItem() instanceof String activationFunction) {
                 return activationFunction;
             }
-            return SB3AgentConfig.DEFAULT_ACTIVATION_FUNCTION;
+            return SB3Config.DEFAULT_ACTIVATION_FUNCTION;
         }
 
         public void setFrom(Map<String, Object> networkParameters) {
@@ -1279,17 +1279,17 @@ public class SB3Params extends Frame implements Serializable {
 
         public EvaluationOptionsPanel() {
             evaluateEveryStepsLabel = new JLabel("Evaluate every X Steps: ");
-            evaluateEveryStepsText = new JTextField(Integer.toString(SB3AgentConfig.DefaultEvaluationOptions.DEFAULT_EVALUATE_EVERY_EPISODES));
+            evaluateEveryStepsText = new JTextField(Integer.toString(SB3Config.DefaultEvaluationOptions.DEFAULT_EVALUATE_EVERY_EPISODES));
 
             numberOfGamesLabel = new JLabel("Games per Evaluation: ");
-            numberOfGamesText = new JTextField(Integer.toString(SB3AgentConfig.DefaultEvaluationOptions.DEFAULT_NUMBER_GAMES));
+            numberOfGamesText = new JTextField(Integer.toString(SB3Config.DefaultEvaluationOptions.DEFAULT_NUMBER_GAMES));
 
             opponentLabel = new JLabel("Choose opponent for evaluation: ");
-            opponentComboBox = new JComboBox(SB3AgentConfig.DefaultEvaluationOptions.DEFAULT_OPPONENTS);
+            opponentComboBox = new JComboBox(SB3Config.DefaultEvaluationOptions.DEFAULT_OPPONENTS);
 
             saveBestLabel = new JLabel("Safe model after evaluation if better?");
             saveBestCheckBox = new JCheckBox();
-            saveBestCheckBox.setSelected(SB3AgentConfig.DefaultEvaluationOptions.DEFAULT_SAFE_BEST_MODEL);
+            saveBestCheckBox.setSelected(SB3Config.DefaultEvaluationOptions.DEFAULT_SAFE_BEST_MODEL);
 
             this.setLayout(new GridLayout(0,2,10,10));
 

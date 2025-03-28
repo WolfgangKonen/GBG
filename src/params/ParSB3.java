@@ -1,7 +1,7 @@
 package params;
 
 import controllers.SB3.SB3AgentProxy;
-import controllers.SB3.SB3AgentConfig;
+import controllers.SB3.SB3Config;
 
 import javax.swing.*;
 import java.io.Serializable;
@@ -11,8 +11,8 @@ import java.util.Map;
 public class ParSB3 implements Serializable {
 
 
-    public String agentType = SB3AgentConfig.DEFAULT_AGENT;
-    public int trainTimeSteps = SB3AgentConfig.DEFAULT_TRAIN_TIME_STEPS;
+    public String agentType = SB3Config.DEFAULT_AGENT;
+    public int trainTimeSteps = SB3Config.DEFAULT_TRAIN_TIME_STEPS;
 
     public String[] enemyAgents = new String[0];
     public Map<String, Object> parSB3Base;
@@ -69,9 +69,9 @@ public class ParSB3 implements Serializable {
     }
 
     public static class SelfPlayParameters implements Serializable {
-        private int policyWindowSize = SB3AgentConfig.SelfPlayDefaultParameters.DEFAULT_POLICY_WINDOW_SIZE;
-        private int addPolicyEveryXSteps = SB3AgentConfig.SelfPlayDefaultParameters.DEFAULT_ADD_POLICY_EVERY_X_STEPS;
-        private double useLatestPolicy= SB3AgentConfig.SelfPlayDefaultParameters.DEFAULT_USE_LATEST_POLICY;
+        private int policyWindowSize = SB3Config.SelfPlayDefaultParameters.DEFAULT_POLICY_WINDOW_SIZE;
+        private int addPolicyEveryXSteps = SB3Config.SelfPlayDefaultParameters.DEFAULT_ADD_POLICY_EVERY_X_STEPS;
+        private double useLatestPolicy= SB3Config.SelfPlayDefaultParameters.DEFAULT_USE_LATEST_POLICY;
 
 
         public SelfPlayParameters(int policyWindowSize, int addPolicyEveryXSteps, double useLatestPolicy) {

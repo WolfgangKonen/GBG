@@ -2,7 +2,7 @@ package controllers.SB3;
 
 import controllers.AgentBase;
 import controllers.PlayAgent;
-import controllers.SB3.HttpServer.ServerConfig;
+import controllers.SB3.HttpServer.RLEnvironmentServer;
 import games.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -23,8 +23,10 @@ import java.util.*;
 /**
  * This class acts as a Proxy for the SB3 Agents on the Python side.
  * It's meant to be used like a normal the normal agents in GBG and therefore implements {@link AgentBase} and {@link PlayAgent}.
+ * <p>
  * It facilitates the communication between this Proxy and the SB3Agent using HTTP requests.
  * This class does not implement the learning or decision-making logic itself.
+ * </p>
  */
 public class SB3AgentProxy extends AgentBase implements PlayAgent, Serializable {
     transient private StateObservationVectorFuncs stateObservationVectorFuncs;
@@ -104,6 +106,10 @@ public class SB3AgentProxy extends AgentBase implements PlayAgent, Serializable 
      * Starts training for the number of steps provided through the parameter tab.
      * After this call the training loop gets handheld by SB3, so {@link games.XArenaFuncs.GameProgressor} is needed
      * to update the training progress on the GBG side.
+     * <p>
+     * Causes the current thread to wait and let SB3 do his thing while the {@link RLEnvironmentServer} thread stays online and serves the <STRONG>GBGEnvironmentClient</STRONG> on the python side,
+     * by the methods provided by the {@link RLEnvironmentService}, who emulates a gymnasium environment and advances the game state.
+     * </p>
      * @param gameProgressor
      */
     public void learn(XArenaFuncs.GameProgressor gameProgressor) {
@@ -265,6 +271,13 @@ public class SB3AgentProxy extends AgentBase implements PlayAgent, Serializable 
         return (int) response.get("action");
     }
 
+    /**
+     * Saves the current SB3 Agents policy.
+     * @param id
+     * @param gameName
+     * @param agentType
+     * @throws Exception
+     */
     private void saveSB3AgentHttpRequest(UUID id, String gameName, String agentType) throws Exception {
         String response;
         JSONObject requestBody = new JSONObject();
@@ -274,6 +287,14 @@ public class SB3AgentProxy extends AgentBase implements PlayAgent, Serializable 
         System.out.println(response);
     }
 
+    /**
+     * Loads a specific saved policy for this agent. If loadPath is Null returns the latest policy.
+     * @param id
+     * @param agentType
+     * @param gameName
+     * @param loadPath
+     * @throws Exception
+     */
     private void loadSB3AgentHttpRequest(UUID id, String agentType, String gameName, String loadPath) throws Exception {
         String response;
         JSONObject requestBody = new JSONObject();
@@ -289,8 +310,14 @@ public class SB3AgentProxy extends AgentBase implements PlayAgent, Serializable 
         System.out.println(response);
     }
 
+    /**
+     * Sends a generic POST HTTP request.
+     * @param path
+     * @param requestBody
+     * @return
+     */
     private String postRequest(String path, Object requestBody) {
-        String host = ServerConfig.HOST;
+        String host = SB3Config.SB3Server.HOST;
         URI uri;
         try {
              uri = new URI(host + "/" + path);
@@ -317,7 +344,7 @@ public class SB3AgentProxy extends AgentBase implements PlayAgent, Serializable 
                 throw new RuntimeException(response.body());
         } catch (IOException | InterruptedException connectException) {
             if (connectException instanceof ConnectException && Objects.equals(((ConnectException) connectException).getMessage(), "Address already in use: no further information")) {
-                System.out.println("Could not reach server under: " + ServerConfig.HOST);
+                System.out.println("Could not reach server under: " + SB3Config.SB3Server.HOST);
                 System.out.println(connectException);
                 System.out.println("Trying again..");
                 try {
@@ -328,7 +355,7 @@ public class SB3AgentProxy extends AgentBase implements PlayAgent, Serializable 
                 return postRequest(path, requestBody);
             }
             connectException.printStackTrace();
-            throw new RuntimeException("Could not reach server under: " + ServerConfig.HOST);
+            throw new RuntimeException("Could not reach server under: " + SB3Config.SB3Server.HOST);
         }
 
         return response.body();
@@ -342,7 +369,14 @@ public class SB3AgentProxy extends AgentBase implements PlayAgent, Serializable 
         return stateObservationVectorFuncs.getAvailableActions(stateObservation);
     }
 
-
+    /**
+     * Asks the SB3 agent to predict the best possible action for the given StateObservation.
+     * @param sob            current game state (is returned unchanged)
+     * @param random        allow random action selection with probability m_epsilon
+     * @param deterministic whether to act deterministic (if several actions have best value, return the 1st one)
+     * @param silent        whether to be silent
+     * @return
+     */
     @Override
     public Types.ACTIONS_VT getNextAction2(StateObservation sob, boolean random, boolean deterministic, boolean silent) {
         int[] observation= getObservationVector(sob);
@@ -368,6 +402,11 @@ public class SB3AgentProxy extends AgentBase implements PlayAgent, Serializable 
         return new Types.ACTIONS_VT(actionsWithValues.action, false, actionsWithValues.values, actionsWithValues.getChosenValue(), scoreTuple);
     }
 
+    /**
+     * Gets called when SB3AgentProxy gets serialized, so while saving this agent. Sends a save agent HTTP requests to the python side, to save the latest policy.
+     * @param oos
+     * @throws IOException
+     */
     @Serial
     private void writeObject(ObjectOutputStream oos) throws IOException {
         try {
@@ -379,8 +418,11 @@ public class SB3AgentProxy extends AgentBase implements PlayAgent, Serializable 
         oos.defaultWriteObject();
     }
 
+    /**
+     * Gets called by {@link RLEnvironmentService} after a Game/ Episode has finished, to use the {@link games.XArenaFuncs.GameProgressor} to update the game stats as well as retrieving a new stateObservation.
+     * @return
+     */
     public StateObservation afterGame() {
-
         StateObservation stateObservation;
         if (gameProgressor != null) {
             stateObservation = gameProgressor.afterGame(this);
@@ -393,6 +435,9 @@ public class SB3AgentProxy extends AgentBase implements PlayAgent, Serializable 
         return stateObservation;
     }
 
+    /**
+     * Gets called by {@link RLEnvironmentService} after each step to increment the move counter.
+     */
     public void incrementMoves() {
         m_numTrnMoves++;
         moveCounter++;

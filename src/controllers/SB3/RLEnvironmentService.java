@@ -2,13 +2,19 @@ package controllers.SB3;
 
 import controllers.PlayAgent;
 import controllers.PlayAgtVector;
+import controllers.SB3.HttpServer.RLEnvironmentServer;
 import games.*;
 import tools.ScoreTuple;
 import tools.Types;
 
 import java.util.*;
 
-public class RLEnvironmentConnector {
+/**
+ * <p>This class is used by the {@link RLEnvironmentServer} to provide all the necessary function to emulate a gymnasium gym.Env for the GBGEnvironmentClient on the python side.</p>
+ * <p>When training an SB3 agent the game loop no longer gets controlled by the {@link XArenaFuncs}, rather the SB3 agent progress the game by using the /step http endpoint of the {@link RLEnvironmentServer}
+ * that calls this {@link #step(int)} methode to advance the player controlled by SB3 as well as the opponents either through self play or the other chosen opponents by the user.</p>
+ */
+public class RLEnvironmentService {
     private StateObservation stateObservation;
     private StateObservation firstStateObservation = null;
     private StateObservationVectorFuncs stateObservationVectorFuncs;
@@ -18,7 +24,7 @@ public class RLEnvironmentConnector {
 
     private int playerNumber;
 
-    public RLEnvironmentConnector(StateObservationVectorFuncs stateObservationVectorFuncs, List<PlayAgent> opponentAgents, SB3AgentProxy sb3AgentProxy, int playerNumber, PlayAgent evalOpponent) {
+    public RLEnvironmentService(StateObservationVectorFuncs stateObservationVectorFuncs, List<PlayAgent> opponentAgents, SB3AgentProxy sb3AgentProxy, int playerNumber, PlayAgent evalOpponent) {
         this.stateObservationVectorFuncs = stateObservationVectorFuncs;
         this.sb3AgentProxy = sb3AgentProxy;
         this.playerNumber = playerNumber;
@@ -50,6 +56,10 @@ public class RLEnvironmentConnector {
         return description;
     }
 
+    /**
+     * Serves the gymnasium's gym.Env interface rest() methode.
+     * @return The {@link FirstObservation} containing the first observation and info.
+     */
     public FirstObservation reset() {
         this.stateObservation = sb3AgentProxy.afterGame();
         if (firstStateObservation == null) {
@@ -65,6 +75,12 @@ public class RLEnvironmentConnector {
         return stateObservationVectorFuncs.getAvailableActions(stateObservation);
     }
 
+    /**
+     * Advance the player with the action chosen by the SB3 agent as well as the opponents either through self play or the other chosen opponents by the user.
+     * Serves the gymnasium's gym.Env interface step(action: int) methode.
+     * @param action
+     * @return A {@link Transition} containing the new state, reward, if the game has ended, as well as an info about the game.
+     */
     public Transition step(int action) {
         // advanceEnemies(); // Just to be sure
         List<Types.ACTIONS> availableActions = stateObservation.getAvailableActions();
@@ -100,6 +116,9 @@ public class RLEnvironmentConnector {
         return transition;
     }
 
+    /**
+     * Advances the curren opponent in the rotation.
+     */
     public void advanceEnemies() {
         int enemyPlayer = 0;
         while (stateObservation.getPlayer() != this.playerNumber && !terminated() && !truncated()) {
@@ -125,6 +144,8 @@ public class RLEnvironmentConnector {
 
     /**
      * Call after Games has ended and after new Transitions was instantiated.
+     * Rotates the list of opponent agents, so next game round another agent gets used as an opponent and the main player controlled by the sb3 agent is in another player position.
+     * This serves to get a greater variety in opponent strategies for training.
      */
     public void switchPlayerPostions() {
         playerNumber = (playerNumber + 1) % stateObservationVectorFuncs.getNumPlayers();
@@ -137,15 +158,28 @@ public class RLEnvironmentConnector {
         opponentAgents = enemies;
     }
 
+    /**
+     * Starts an evaluation with the default opponent chosen by the user in the parameter tab.
+     * @param numberOfGames
+     * @return The average reward in the number of games played.
+     */
     public double evalWithDefaultOpponent(int numberOfGames) {
         return eval(evalOpponent, numberOfGames);
     }
 
+    /**
+     * Starts an evaluation.
+     * @param numberOfGames
+     * @return The average reward in the number of games played.
+     */
     public double eval(PlayAgent opponent, int numberOfGames) {
         ScoreTuple scoreTuple = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(sb3AgentProxy, opponent), getStartSate(), numberOfGames, 0, null, null, true);
         return scoreTuple.scTup[0];
     }
 
+    /**
+     * Gets called after SB3 has finished it's training. Wakes up the Main thread that was paused in {@link SB3AgentProxy#learn(XArenaFuncs.GameProgressor)}.
+     */
     public void trainingFinished() {
         System.out.println("Training finished");
         synchronized (sb3AgentProxy) {
@@ -153,10 +187,13 @@ public class RLEnvironmentConnector {
         }
     }
 
+    /**
+     *
+     * @return A fresh {@link StateObservation} for a new game round.
+     */
     private StateObservation getStartSate() {
         return firstStateObservation.copy();
     }
-
 }
 
 

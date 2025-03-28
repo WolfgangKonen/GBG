@@ -6,6 +6,9 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * DTO used to transfer all needed data by a gymnasium's gym.Env interface after the player took an action (step(action: int) methode).
+ */
 public class Transition implements Serializable {
     private final int[] observationVector;
     private final double reward;

@@ -1,12 +1,17 @@
 package controllers.SB3.HttpServer;
 
-import controllers.SB3.RLEnvironmentConnector;
+import com.sun.net.httpserver.Headers;
+import com.sun.net.httpserver.HttpExchange;
+import controllers.SB3.RLEnvironmentService;
 import org.json.JSONObject;
 
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * Abstract class provides common functionality shared by the HTTP handlers.
+ */
 public abstract class EnvironmentHttpHandler {
     protected static final String HEADER_ALLOW = "Allow";
     protected static final String HEADER_CONTENT_TYPE = "Content-Type";
@@ -25,7 +30,7 @@ public abstract class EnvironmentHttpHandler {
     protected static final String METHOD_OPTIONS = "OPTIONS";
 
 
-    protected RLEnvironmentConnector rlEnvironment;
+    protected RLEnvironmentService rlEnvironmentService;
 
 
     public EnvironmentHttpHandler() {
@@ -48,8 +53,31 @@ public abstract class EnvironmentHttpHandler {
         return responseStrBuilder.toString();
     }
 
-    public void setRlEnvironment(RLEnvironmentConnector rlEnvironment) {
-        this.rlEnvironment = rlEnvironment;
+    protected void sendResponse(HttpExchange exchange, int statusCode, String response) throws IOException {
+        Headers headers = exchange.getResponseHeaders();
+        headers.set(HEADER_CONTENT_TYPE, String.format("application/json; charset=%s", CHARSET));
+
+        final byte[] responseBytes = response.getBytes(CHARSET);
+        exchange.sendResponseHeaders(statusCode, responseBytes.length);
+
+        try (OutputStream outputStream = exchange.getResponseBody()) {
+            outputStream.write(responseBytes);
+        }
+    }
+
+    protected void sendMethodOptions(HttpExchange exchange) throws IOException {
+        Headers headers = exchange.getResponseHeaders();
+        headers.set(HEADER_ALLOW, METHOD_POST);
+        exchange.sendResponseHeaders(STATUS_OK, NO_RESPONSE_LENGTH);
+    }
+
+    protected void sendNoContent(HttpExchange exchange) throws IOException {
+        Headers headers = exchange.getResponseHeaders();
+        exchange.sendResponseHeaders(NO_CONTENT, NO_RESPONSE_LENGTH);
+    }
+
+    public void setRlEnvironmentService(RLEnvironmentService rlEnvironmentService) {
+        this.rlEnvironmentService = rlEnvironmentService;
     }
 
     protected static JSONObject inputStreamToJson(InputStream inputStream) throws UnsupportedEncodingException, IOException {
