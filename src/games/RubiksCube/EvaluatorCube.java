@@ -123,6 +123,7 @@ public class EvaluatorCube extends Evaluator {
 			countStates += ecp.evalNmax;
  			tagg = new TAggreg(tsList,p);
  			taggList.add(tagg);
+			System.out.print("Finished p = " +p+ " with percSolved " + tagg.percSolved + ".\n");
  		} // for (p)
 
 		//the distinction between mode==0 and mode==1 happens in TStats.weightedAvgResTAggregList (!):
