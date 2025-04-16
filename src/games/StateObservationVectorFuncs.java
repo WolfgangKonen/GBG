@@ -6,9 +6,9 @@ import java.util.Arrays;
 import java.util.List;
 
 public class StateObservationVectorFuncs {
-    private final XNTupleFuncs xnTupleFuncs;
-    private final int stateObservationVectorSize;
-    private final int actionSpaceSize;
+    protected final XNTupleFuncs xnTupleFuncs;
+    protected final int stateObservationVectorSize;
+    protected final int actionSpaceSize;
 
     public StateObservationVectorFuncs(XNTupleFuncs xnTupleFuncs, int actionSpaceSize) {
         this.xnTupleFuncs = xnTupleFuncs;
