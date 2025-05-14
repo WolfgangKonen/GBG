@@ -76,6 +76,7 @@ public class GameBoardCube extends GameBoardBase implements GameBoard {
 			CubeConfig.pMax = getArena().m_xab.oPar[0].getpMaxRubiks();
 			if (CubeConfig.pMin<1) CubeConfig.pMin=1;
 			CubeConfig.REPLAYBUFFER = getArena().m_xab.oPar[0].getReplayBuffer();
+			CubeConfig.EvalNmax = getArena().m_xab.oPar[0].getNumEval();
 
 			CubeConfig.stepReward = getArena().m_xab.tdPar[0].getStepReward();
 			CubeConfig.REWARD_POSITIVE = getArena().m_xab.tdPar[0].getRewardPositive();

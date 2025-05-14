@@ -61,7 +61,7 @@ public class TStats {
 	public static class TAggreg {
 		int size;
 		int p;
-		double percSolved;
+		public double percSolved;
 		double percLonger;
 		double percNotSol;
 		
