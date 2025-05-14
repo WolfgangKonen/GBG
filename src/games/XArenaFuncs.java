@@ -770,8 +770,9 @@ public class XArenaFuncs {
 
 		long startTime = System.currentTimeMillis();
 		gb.initialize();
-		if (pa instanceof SB3AgentProxy sb3AgentProxy) {
+		if (pa instanceof SB3AgentProxy sb3AgentProxy) { // only for SB3Agent
 			GameProgressor gameProgressor = new GameProgressor(numEval, startTime, xab, qa, eresQ, eresT, doTrainStatistics, doTrainEvaluation, gb, tsList, n);
+			// To train SB3Agent the learn() methode has to be called. Then the training process starts for a certain amount of steps (not just one episode) and is controlled by the Agent rather than XArenaFuncs.
 			sb3AgentProxy.learn(gameProgressor);
 			eresQ = gameProgressor.eresQ;
 			eresT = gameProgressor.eresT;

@@ -354,8 +354,4 @@ public interface StateObservation extends PartialState, Serializable{
 	 * @see games.EWN.StateObserverEWN
 	 */
 	void randomizeStartState(Random cmpRand);
-
-	boolean hasStateObservationVector();
-
-	StateObservationVectorFuncs getStateObservationVectorFuncs();
 }
