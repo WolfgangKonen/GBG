@@ -37,6 +37,9 @@ public class SB3AgentProxy extends AgentBase implements PlayAgent, Serializable 
     private UUID id;
     transient private XArenaFuncs.GameProgressor gameProgressor;
     transient private int moveCounter  = 0;
+    transient private HttpClient httpClient = HttpClient.newBuilder()
+            .version(HttpClient.Version.HTTP_1_1)
+            .build();
 
     public SB3AgentProxy(String name, ParSB3 parSB3, ParOther oPar, StateObservationVectorFuncs stateObservationVectorFuncs, String gameName) {
         super(name);
@@ -57,6 +60,9 @@ public class SB3AgentProxy extends AgentBase implements PlayAgent, Serializable 
 
     @Override
     public boolean instantiateAfterLoading() {
+        this.httpClient = HttpClient.newBuilder()
+                .version(HttpClient.Version.HTTP_1_1)
+                .build();
         return true;
     }
 
@@ -337,9 +343,7 @@ public class SB3AgentProxy extends AgentBase implements PlayAgent, Serializable 
         HttpResponse<String> response;
 
         try {
-            response = HttpClient.newBuilder()
-                    .build()
-                    .send(request, HttpResponse.BodyHandlers.ofString());
+            response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() < 200 || response.statusCode() >= 300)
                 throw new RuntimeException(response.body());
         } catch (IOException | InterruptedException connectException) {
