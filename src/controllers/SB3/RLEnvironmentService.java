@@ -57,6 +57,7 @@ public class RLEnvironmentService {
     }
 
     /**
+     * Serves the /reset endpoint.
      * Serves the gymnasium's gym.Env interface rest() methode.
      * @return The {@link FirstObservation} containing the first observation and info.
      */
@@ -65,17 +66,20 @@ public class RLEnvironmentService {
         if (firstStateObservation == null) {
             this.firstStateObservation = stateObservation.copy();
         }
-        System.out.println("1");
         advanceEnemies();
-        System.out.println("2");
         return new FirstObservation(getObservation(), getInfo());
     }
 
+    /**
+     * Serves the /availableActions endpoint. Currently only gets used by MaskablePPO.
+     * @return available actions at current time. List of ints representing the available actions.
+     */
     public int[] getAvailableActions() {
         return stateObservationVectorFuncs.getAvailableActions(stateObservation);
     }
 
     /**
+     * Serves the /step endpoint.
      * Advance the player with the action chosen by the SB3 agent as well as the opponents either through self play or the other chosen opponents by the user.
      * Serves the gymnasium's gym.Env interface step(action: int) methode.
      * @param action
@@ -86,13 +90,11 @@ public class RLEnvironmentService {
         List<Types.ACTIONS> availableActions = stateObservation.getAvailableActions();
         Types.ACTIONS chosenAction = new Types.ACTIONS(action);
 
-        System.out.println(stateObservation.getPlayer() + " Player: " + Arrays.toString(getObservation()) + " " + getObservation().length + " before");
         sb3AgentProxy.incrementMoves();
         // When caught cheating return same observation and min game score. StateObservation gets reset afterward when sb3 calls reset.
         if (!availableActions.contains(chosenAction)) {
             Transition transition = new Transition(getObservation(), stateObservation.getMinGameScore(), true, truncated(), getInfo());
             switchPlayerPostions(); // Call after Games has ended and after new Transitions was instantiated.
-            System.out.println("Game Over, because cheating! Starting new one...");
             return transition;
         }
 
@@ -104,13 +106,10 @@ public class RLEnvironmentService {
         }
 
         advanceEnemies();
-        System.out.println(stateObservation.getPlayer() + " Player: " + Arrays.toString(getObservation()) + " " + getObservation().length + " after");
 
         Transition transition = new Transition(getObservation(), getReward(), terminated(), truncated(), getInfo());
         // if Game over
         if (terminated() || truncated()) {
-            System.out.println("Game Over! Starting new one...");
-            System.out.println("Reward: " + transition.getReward());
             switchPlayerPostions(); // Call after Games has ended and after new Transitions was instantiated.
         }
         return transition;
@@ -122,9 +121,6 @@ public class RLEnvironmentService {
     public void advanceEnemies() {
         int enemyPlayer = 0;
         while (stateObservation.getPlayer() != this.playerNumber && !terminated() && !truncated()) {
-
-            System.out.println(stateObservation.getPlayer() + " Player: " + Arrays.toString(getObservation()) + "enemy: " + opponentAgents.get(enemyPlayer).getName());
-
             // availableActions = stateObservation.getAvailableActions();
             // Random random = new Random();
             // Types.ACTIONS enemyAction = availableActions.get(random.nextInt(availableActions.size()))

@@ -132,7 +132,6 @@ public class SB3AgentProxy extends AgentBase implements PlayAgent, Serializable 
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            System.out.println("Erwacht!");
         }
     }
 
@@ -150,7 +149,6 @@ public class SB3AgentProxy extends AgentBase implements PlayAgent, Serializable 
         requestBody.put("totalTimeSteps", totalTimeSteps);
         requestBody.put("selfPlayParameters", selfPlayParameters);
         requestBody.put("evaluationOptions", evaluationOptionsJson);
-        System.out.println(evaluationOptionsJson);
 
         String path = "agents/" + id.toString() + "/learn";
 
@@ -186,8 +184,6 @@ public class SB3AgentProxy extends AgentBase implements PlayAgent, Serializable 
         requestBody.put("networkParameters", networkParameters);
         requestBody.put("environmentParameters", environmentParameters);
 
-        System.out.println(requestBody.toString());
-
         postRequest("agents", requestBody);
     }
 
@@ -207,9 +203,7 @@ public class SB3AgentProxy extends AgentBase implements PlayAgent, Serializable 
         requestBody.put("availableActions", availableActionsJson);
         String path = "agents/"+ id.toString() + "/predict";
 
-        System.out.println(requestBody.toString());
         response = new JSONObject(postRequest(path, requestBody));
-        System.out.println(response);
 
         JSONArray actionValuesJson = response.getJSONArray("actionValues");
         double[] actionValues = new double[actionValuesJson.length()];
@@ -271,9 +265,7 @@ public class SB3AgentProxy extends AgentBase implements PlayAgent, Serializable 
         requestBody.put("deterministic", deterministic);
         String path = "agents/"+ id.toString() + "/selfPlay";
 
-        System.out.println(requestBody.toString());
         response = new JSONObject(postRequest(path, requestBody));
-        System.out.println(response.get("action"));
         return (int) response.get("action");
     }
 
@@ -311,7 +303,6 @@ public class SB3AgentProxy extends AgentBase implements PlayAgent, Serializable 
         }
         String path = "agents/"+ id.toString() + "/load";
 
-        System.out.println(requestBody.toString());
         response = postRequest(path, requestBody);
         System.out.println(response);
     }
@@ -386,7 +377,6 @@ public class SB3AgentProxy extends AgentBase implements PlayAgent, Serializable 
         int[] observation= getObservationVector(sob);
         int[] availableActions = getAvailableActions(sob);
 
-        System.out.println(Arrays.toString(observation));
         ActionWithValues actionsWithValues = null;
         try {
             actionsWithValues = predictHttpRequest(observation, availableActions);
@@ -458,7 +448,6 @@ public class SB3AgentProxy extends AgentBase implements PlayAgent, Serializable 
         int[] observation= getObservationVector(stateObservation);
         int[] availableActions = getAvailableActions(stateObservation);
 
-        System.out.println(Arrays.toString(observation));
         double action = 0;
         try {
             action = selfPlayHttpRequest(observation, availableActions, false);

@@ -258,7 +258,6 @@ public class XArenaFuncs {
 				case "KuhnOptimal" ->  // KuhnPoker only, see gui_agent_list in XArenaButtonsGui
 						pa = new KuhnPokerAgent("KuhnOptimal");
 				case "SB3" -> {
-
 					StateObservationVectorFuncs stateObservationVectorFuncs = m_xab.m_arena.makeStateObservationVectorFuncs();
 
 					SB3AgentProxy sb3AgentProxy = new SB3AgentProxy(sAgent, m_xab.sb3Par[n], m_xab.oPar[n], stateObservationVectorFuncs, m_Arena.getGameName());
@@ -271,7 +270,6 @@ public class XArenaFuncs {
 					RLEnvironmentService rlEnvironmentService = new RLEnvironmentService(stateObservationVectorFuncs, opponentAgents, sb3AgentProxy, n, defaultEvalOpponent);
 					RLEnvironmentServer rlEnvironmentServer = RLEnvironmentServer.getInstance();
 					rlEnvironmentServer.setRlEnvironmentService(rlEnvironmentService);
-
 				}
 				default -> throw new RuntimeException("Unknown agent name " + sAgent);
 			}

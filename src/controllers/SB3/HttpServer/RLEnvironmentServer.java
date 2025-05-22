@@ -70,18 +70,13 @@ public class RLEnvironmentServer
     // set current RLEnvironment before use
     public void setRlEnvironmentService(RLEnvironmentService rlEnvironmentService) {
         this.rlEnvironmentService = rlEnvironmentService;
-        stepHttpHandler.setRlEnvironmentService(rlEnvironmentService);
-        resetHttpHandler.setRlEnvironmentService(rlEnvironmentService);
-        trainingFinishedHandler.setRlEnvironmentService(rlEnvironmentService);
-        availableActionsHandler.setRlEnvironmentService(rlEnvironmentService);
-        evalHandler.setRlEnvironmentService(rlEnvironmentService);
     }
     public void stopServer() {
         server.stop(2);
     }
 
     // step http handler POST request
-    static class StepHttpHandler extends EnvironmentHttpHandler implements HttpHandler {
+    class StepHttpHandler extends EnvironmentHttpHandler implements HttpHandler {
 
         public StepHttpHandler() {
             super();
@@ -113,7 +108,7 @@ public class RLEnvironmentServer
                             int action = requestBody.getInt("action");
 
                             // step in environment
-                            Transition transition = this.rlEnvironmentService.step(action);
+                            Transition transition = rlEnvironmentService.step(action);
 
                             // create responds
                             response = transition.toJson().toString();
@@ -140,7 +135,7 @@ public class RLEnvironmentServer
         }
     }
 
-    static class AvailableActionsHandler extends EnvironmentHttpHandler implements HttpHandler {
+    class AvailableActionsHandler extends EnvironmentHttpHandler implements HttpHandler {
         public AvailableActionsHandler() {
             super();
         }
@@ -151,7 +146,7 @@ public class RLEnvironmentServer
             switch (requestMethod) {
                 case METHOD_GET:
                     try {
-                        int[] availableActions = this.rlEnvironmentService.getAvailableActions();
+                        int[] availableActions = rlEnvironmentService.getAvailableActions();
 
                         // creat responds
                         String response = new JSONArray(availableActions).toString();
@@ -170,7 +165,7 @@ public class RLEnvironmentServer
     }
 
     // reset http handler
-    static class ResetHttpHandler extends EnvironmentHttpHandler implements HttpHandler {
+    class ResetHttpHandler extends EnvironmentHttpHandler implements HttpHandler {
         public ResetHttpHandler() {
             super();
         }
@@ -183,7 +178,7 @@ public class RLEnvironmentServer
                 case METHOD_POST:
                     try {
                         // reset environment
-                        FirstObservation firstObservation = this.rlEnvironmentService.reset();
+                        FirstObservation firstObservation = rlEnvironmentService.reset();
 
                         // creat responds
                         String response = firstObservation.toJson().toString();
@@ -201,7 +196,7 @@ public class RLEnvironmentServer
         }
     }
 
-    static class TrainingFinishedHandler extends EnvironmentHttpHandler implements HttpHandler {
+    class TrainingFinishedHandler extends EnvironmentHttpHandler implements HttpHandler {
         public TrainingFinishedHandler() {
             super();
         }
@@ -216,7 +211,7 @@ public class RLEnvironmentServer
                         // get request body
                         String requestBody = inputStreamToString(exchange.getRequestBody());
                         sendNoContent(exchange);
-                        this.rlEnvironmentService.trainingFinished();
+                        rlEnvironmentService.trainingFinished();
                     }
                     catch (IOException exception) {
                         sendResponse(exchange, BAD_REQUEST, invalidJson());
@@ -232,7 +227,7 @@ public class RLEnvironmentServer
         }
     }
 
-    static class EvalHandler extends EnvironmentHttpHandler implements HttpHandler {
+    class EvalHandler extends EnvironmentHttpHandler implements HttpHandler {
         public EvalHandler() {
             super();
         }
@@ -283,12 +278,11 @@ public class RLEnvironmentServer
                             response = invalidJson();
                         }
 
-                        double averageReward = this.rlEnvironmentService.evalWithDefaultOpponent(numberOfGames); // TODO: SBagent3 for traing finshed and Evalv
+                        double averageReward = rlEnvironmentService.evalWithDefaultOpponent(numberOfGames); // TODO: SBagent3 for traing finshed and Evalv
                         if (responseCode != BAD_REQUEST) {
                             responseBody.put("averageReward", averageReward);
                             response = responseBody.toString();
                         }
-                        System.out.println(response);
 
                         sendResponse(exchange, responseCode, response);
                     }

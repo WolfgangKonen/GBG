@@ -5,6 +5,10 @@ import tools.Types;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * <p>Used by SB3Agent to get a StateObservationVector from current {@link StateObservation} and for other features around the StateObservationVector.</p>
+ * <p>This Class should work for all games but if you want to return a spacial StateObservationVector for a game, its possible to creat a new class that inherits from this class and change the methode {@link Arena#makeStateObservationVectorFuncs()}, returning the new version, in the games Arena Class.</p>
+ */
 public class StateObservationVectorFuncs {
     protected final XNTupleFuncs xnTupleFuncs;
     protected final int stateObservationVectorSize;

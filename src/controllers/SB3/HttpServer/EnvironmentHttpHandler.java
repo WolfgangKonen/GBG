@@ -30,7 +30,7 @@ public abstract class EnvironmentHttpHandler {
     protected static final String METHOD_OPTIONS = "OPTIONS";
 
 
-    protected RLEnvironmentService rlEnvironmentService;
+    //protected RLEnvironmentService rlEnvironmentService;
 
 
     public EnvironmentHttpHandler() {
@@ -77,7 +77,7 @@ public abstract class EnvironmentHttpHandler {
     }
 
     public void setRlEnvironmentService(RLEnvironmentService rlEnvironmentService) {
-        this.rlEnvironmentService = rlEnvironmentService;
+        //this.rlEnvironmentService = rlEnvironmentService;
     }
 
     protected static JSONObject inputStreamToJson(InputStream inputStream) throws UnsupportedEncodingException, IOException {
