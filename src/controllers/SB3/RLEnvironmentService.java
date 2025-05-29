@@ -6,6 +6,7 @@ import controllers.SB3.HttpServer.RLEnvironmentServer;
 import games.*;
 import tools.ScoreTuple;
 import tools.Types;
+import tools.WinTieCounter;
 
 import java.util.*;
 
@@ -146,31 +147,35 @@ public class RLEnvironmentService {
     public void switchPlayerPostions() {
         playerNumber = (playerNumber + 1) % stateObservationVectorFuncs.getNumPlayers();
         if (opponentAgents.size() <= 1) return;
-        List<PlayAgent> enemies = new ArrayList<>();
-        enemies.add(opponentAgents.get(opponentAgents.size() - 1));
+        List<PlayAgent> opponent = new ArrayList<>();
+        opponent.add(opponentAgents.get(opponentAgents.size() - 1));
         for (int i = 0; i < opponentAgents.size() - 1; i++) {
-            enemies.add(opponentAgents.get(i));
+            opponent.add(opponentAgents.get(i));
         }
-        opponentAgents = enemies;
+        opponentAgents = opponent;
     }
 
     /**
      * Starts an evaluation with the default opponent chosen by the user in the parameter tab.
-     * @param numberOfGames
+     * @param numberOfGames for each player on each playerPostion (e.g. X or O in TicTacToe). So Total number of games = numberOfGames * players.
      * @return The average reward in the number of games played.
      */
-    public double evalWithDefaultOpponent(int numberOfGames) {
+    public EvalResults evalWithDefaultOpponent(int numberOfGames) {
         return eval(evalOpponent, numberOfGames);
     }
 
     /**
      * Starts an evaluation.
-     * @param numberOfGames
+     * @param numberOfGames for each player on each playerPostion (e.g. X or O in TicTacToe). So Total number of games = numberOfGames * players.
      * @return The average reward in the number of games played.
      */
-    public double eval(PlayAgent opponent, int numberOfGames) {
-        ScoreTuple scoreTuple = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(sb3AgentProxy, opponent), getStartSate(), numberOfGames, 0, null, null, true);
-        return scoreTuple.scTup[0];
+    public EvalResults eval(PlayAgent opponent, int numberOfGames) {
+        StateObservation startState = getStartSate();
+        WinTieCounter winTieCounter = new WinTieCounter(startState.getNumPlayers());
+        ScoreTuple scoreTuple = XArenaFuncs.competeNPlayerAllRoles(new PlayAgtVector(sb3AgentProxy, opponent), startState, numberOfGames, 0, null, null, true, winTieCounter);
+
+        EvalResults evalResults = new EvalResults(winTieCounter.wins[0], winTieCounter.tie, winTieCounter.getLosses(0), scoreTuple.scTup[0]);
+        return evalResults;
     }
 
     /**

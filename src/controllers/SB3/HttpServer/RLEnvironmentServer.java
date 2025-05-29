@@ -3,10 +3,7 @@ package controllers.SB3.HttpServer;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-import controllers.SB3.FirstObservation;
-import controllers.SB3.RLEnvironmentService;
-import controllers.SB3.SB3Config;
-import controllers.SB3.Transition;
+import controllers.SB3.*;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -249,9 +246,7 @@ public class RLEnvironmentServer
             final String requestMethod = exchange.getRequestMethod().toUpperCase();
             switch (requestMethod) {
                 case METHOD_POST:
-                    JSONObject responseBody = new JSONObject();
-                    responseBody.put("averageReward", 0);
-                    String response = responseBody.toString();
+                    String response = invalidJson();
 
                     int responseCode = STATUS_OK;
 
@@ -264,6 +259,7 @@ public class RLEnvironmentServer
                                 // get request body
                                 JSONObject requestBody = inputStreamToJson(exchange.getRequestBody());
                                 opponentName = requestBody.getString("opponentName");
+                                //numberOfGames for each player on each playerPostion (e.g. X or O in TicTacToe). So Total number of games = numberOfGames * players.
                                 numberOfGames = requestBody.getInt("numberOfGames");
 
 
@@ -277,11 +273,9 @@ public class RLEnvironmentServer
                             responseCode = BAD_REQUEST;
                             response = invalidJson();
                         }
-
-                        double averageReward = rlEnvironmentService.evalWithDefaultOpponent(numberOfGames); // TODO: SBagent3 for traing finshed and Evalv
+                        EvalResults evalResults = rlEnvironmentService.evalWithDefaultOpponent(numberOfGames);
                         if (responseCode != BAD_REQUEST) {
-                            responseBody.put("averageReward", averageReward);
-                            response = responseBody.toString();
+                            response = evalResults.toJson().toString();
                         }
 
                         sendResponse(exchange, responseCode, response);

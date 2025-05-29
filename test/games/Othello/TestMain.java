@@ -126,7 +126,7 @@ public class TestMain extends GBGBatch {
 				startTime = System.currentTimeMillis();
 				StateObservation so = gb.getDefaultStartState(null);
 				ScoreTuple sc;
-				sc = XArenaFuncs.competeNPlayer(paVector, p_MWrap, so, 1, 0, null, finalSobList, null, false);
+				sc = XArenaFuncs.competeNPlayer(paVector, p_MWrap, so, 1, 0, null, finalSobList, null, false, null);
 				winrate = (sc.scTup[p_MWrap] + 1) / 2;
 				deltaTime = (double) (System.currentTimeMillis() - startTime) / 1000.0;
 				StateObserverOthello soO = (StateObserverOthello) finalSobList.get(0).getFinalState();

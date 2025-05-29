@@ -1205,11 +1205,11 @@ public class XArenaFuncs {
 	 * 			a score tuple which holds in the kth position the average score
 	 *         	of the kth agent from all {@code competeNum} episodes.
 	 *
-	 * @see #competeNPlayerAllRoles(PlayAgtVector, StateObservation, int, int, ArrayList, Random, boolean)
+	 * @see #competeNPlayerAllRoles(PlayAgtVector, StateObservation, int, int, ArrayList, Random, boolean, WinTieCounter)
 	 */
 	public static ScoreTuple competeNPlayer(PlayAgtVector paVector, int p0Role, StateObservation startSO, int competeNum,
 											int verbose, TSTimeStorage[] nextTimes, ArrayList<XStateObs> finalSobList,
-											Random cmpRand, boolean deterministic) {
+											Random cmpRand, boolean deterministic, WinTieCounter winTieCounter) {
 		int numPlayers = paVector.getNumPlayers();
 		ScoreTuple sc, scMean = new ScoreTuple(numPlayers);
 		double sWeight = 1 / (double) competeNum;
@@ -1292,6 +1292,7 @@ public class XArenaFuncs {
 
 				if (so.isGameOver()) {
 					sc = so.getGameScoreTupleRaw();
+					if (winTieCounter !=null) winTieCounter.declareWinner(sc);
 					scMean.combine(sc, ScoreTuple.CombineOP.AVG, 0, sWeight);
 					moveCount += so.getMoveCounter();
 					if (verbose > 0)
@@ -1355,11 +1356,11 @@ public class XArenaFuncs {
 	 * 			a score tuple which holds in the kth position the average score
 	 *         	for the kth agent from all {@code competeNum}*{@code N} episodes.
 	 *
-	 * @see #competeNPlayer(PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], ArrayList, Random, boolean)
+	 * @see #competeNPlayer(PlayAgtVector, int, StateObservation, int, int, TSTimeStorage[], ArrayList, Random, boolean, WinTieCounter)
 	 */
 	public static ScoreTuple competeNPlayerAllRoles(PlayAgtVector paVector, StateObservation startSO, int competeNum,
 													int verbose, ArrayList<XStateObs> finalSobList,
-													Random cmpRand, boolean deterministic) {
+													Random cmpRand, boolean deterministic, WinTieCounter winTieCounter) {
 		int N = startSO.getNumPlayers();
 		double sWeight = 1 / (double) N;
 		ScoreTuple sc, shiftedTuple, scMean = new ScoreTuple(N);
@@ -1367,9 +1368,17 @@ public class XArenaFuncs {
 		//PlayAgtVector qaVector;
 		for (int k = 0; k < N; k++) {
 			//qaVector = paVector.shift(k);
-			sc = competeNPlayer(paVector, k, startSO, competeNum, verbose, null, finalSobList, cmpRand, deterministic);
+			WinTieCounter winTieCounterCompete = null;
+			if (winTieCounter != null)  winTieCounterCompete = new WinTieCounter(startSO.getNumPlayers());
+
+			sc = competeNPlayer(paVector, k, startSO, competeNum, verbose, null, finalSobList, cmpRand, deterministic, winTieCounterCompete);
 			shiftedTuple = sc.shift(N - k);
 			scMean.combine(shiftedTuple, ScoreTuple.CombineOP.AVG, 0, sWeight);
+
+			if (winTieCounter != null) {
+				winTieCounterCompete.shift(N - k);
+				winTieCounter.combine(winTieCounterCompete);
+			}
 		}
 		return scMean;
 	}
@@ -1435,26 +1444,28 @@ public class XArenaFuncs {
 			PlayAgent[] qaVector = wrapAgents(paVector, xab, startSO);
 			PlayAgtVector raVector = new PlayAgtVector(qaVector);
 
-
+			WinTieCounter winTieCounter = new WinTieCounter(startSO.getNumPlayers());
 			if (allRoles) {
 				ScoreTuple sc = competeNPlayerAllRoles(raVector, startSO, competeNum,
-						verbose, null, cmpRand, deterministic);
+						verbose, null, cmpRand, deterministic,winTieCounter);
 				System.out.println("Avg score for all players: " + sc.toStringFrm());
+				System.out.println(winTieCounter.toString());
 				return sc.scTup[0];
 			} else {
 				if (swap) {
 					ScoreTuple sc = competeNPlayer(raVector, 1, startSO, competeNum,
-							verbose, null, null, cmpRand, deterministic);
+							verbose, null, null, cmpRand, deterministic, winTieCounter);
 					System.out.println("Avg score for all players: " + sc.toStringFrm());
+					System.out.println(winTieCounter.toString());
 					return sc.scTup[1];
 				} else {
 					ScoreTuple sc = competeNPlayer(raVector, 0, startSO, competeNum,
-							verbose, null, null, cmpRand, deterministic);
+							verbose, null, null, cmpRand, deterministic, winTieCounter);
 					System.out.println("Avg score for all players: " + sc.toStringFrm());
+					System.out.println(winTieCounter.toString());
 					return sc.scTup[0];
 				}
 			}
-
 		} catch (RuntimeException ex) {
 			m_Arena.showMessage(ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
 			return 0;
@@ -1538,7 +1549,7 @@ public class XArenaFuncs {
 					qaVector = wrapAgents(paVector, xab, startSO);
 				}
 
-				sc = competeNPlayer(new PlayAgtVector(qaVector), 0, dataTS.startSO, competeNum, 0, dataTS.nextTimes, null, null, false);
+				sc = competeNPlayer(new PlayAgtVector(qaVector), 0, dataTS.startSO, competeNum, 0, dataTS.nextTimes, null, null, false, null);
 
 				xab.disableTournamentRemoteData();
 			}

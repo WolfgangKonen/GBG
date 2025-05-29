@@ -22,6 +22,7 @@ import TournamentSystem.TSAgent;
 import TournamentSystem.TSAgentManager;
 import TournamentSystem.TSTimeStorage;
 import TournamentSystem.tools.TSGameDataTransfer;
+import tools.WinTieCounter;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
