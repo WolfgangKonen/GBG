@@ -1,0 +1,5 @@
+gbg_save_location: "../../agents"
+gbg_port: 8094
+port: 8095
+gbg_ip: "127.0.0.1"
+prefer_device: "cpu"
