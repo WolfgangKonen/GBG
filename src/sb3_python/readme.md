@@ -43,3 +43,13 @@ Access the TensorBoard UI at: http://localhost:6006/
 ### OpenAPI Docs
 Once the FastAPI server is running, you can view the automatically generated API documentation at:
 http://127.0.0.1:8095/docs
+### Parameter Tab
+When training an SB3 Agent, it is advised to check out the Parameter Tab of SB3. Here configure a lot:
+- Set the Time Steps to train the agent (the "Train Games" input field in the main menu is irrelevant when training SB3 agents).
+- If you want to log the training via TensorBoard, you have to uncheck the option "Use Standard Parameters by SB3". And declare the log directory you want to use.
+- Under Evaluation options, you can configure how often the SB3 agent gets evaluated. The results are logged by TensorBoard.
+- Under Evaluation options, check the option "Save model after evaluation if better" to save the best policy. This option can take up a lot of disk space over time. Make sure to delete unused policies periodically. You can find them here: ```agents/<game>/SB3Agent/<AgentType>/<UUID>```. You also have to save the agent through the main menu, e.g., "Save Agent X," so you can access those policies after closing GBG.
+- If you want to load a specific policy after training an agent, use the "Load Policy" button. It shows all saved policies for that specific agent.
+- Under "Opponent Options," you can manage which opponents the agent is trained against. You can also balance the ratio the agent plays against opponents — for example, using 3 times Self Play and 1 time Random Agent means the main agent plays every 4th game against Random and otherwise uses Self Play.
+- Use the "Network Parameters" button to configure the neural network used in the SB3 agent.
+- Set many other parameters that are mostly the same as those you can pass to an SB3 agent constructor (see [SB3 Documentation](https://stable-baselines3.readthedocs.io/en/master/modules/base.html) under RL Algorithms).
