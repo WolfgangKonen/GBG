@@ -14,7 +14,7 @@ Below are the steps to set up and use this application.
 
 
 ## Installation
-Use Python 3.9 or higher. First, install all necessary requirements. It is recommended to use a [python venv](https://docs.python.org/3/library/venv.html) and installing the requirements there to keep dependencies organized.
+Use Python 3.11 or higher. First, install all necessary requirements. It is recommended to use a [python venv](https://docs.python.org/3/library/venv.html) and installing the requirements there to keep dependencies organized.
 After activating the venv use the python pip command to install all requirements of the [requirements.txt](./requirements.txt) with the following command:
 ```
 pip install -r requirements.txt
