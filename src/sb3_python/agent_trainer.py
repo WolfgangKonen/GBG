@@ -153,31 +153,20 @@ class Agent:
         requests.post(f"http://{utils.get_gbg_ip()}:{utils.get_gbg_port()}/trainingFinished", "Training finished")
         print("Training complete.")
 
-
     def append_latest_self_play(self): #TODO: rename policy to parmters
         self.self_play_polices.append(self.latest_policy)
 
         self.latest_policy = self.get_copy_of_policy_for_self_play()
-
-        for self_play_policy in self.self_play_polices:
-            print(self_play_policy.device)
 
     def get_cpu_parameters(self, policy):
         # Move each parameter tensor to CPU and clone it to avoid references to GPU memory
         return {k: v.detach().cpu().clone() for k, v in policy.state_dict().items()}
 
     def get_copy_of_policy_for_self_play(self) -> BasePolicy:
-
-        print(f"Memory allocated before: {th.cuda.memory_allocated() / 1024 ** 2:.2f} MB")
-        print(f"Memory reserved before: {th.cuda.memory_reserved() / 1024 ** 2:.2f} MB")
-
         with th.no_grad():
             parameters = self.get_cpu_parameters(self.baseAlgorithm.policy)
             new_policy = copy.deepcopy(self.self_play_model.policy)
             new_policy.load_state_dict(parameters)
-
-            print(f"Memory allocated before after: {th.cuda.memory_allocated() / 1024 ** 2:.2f} MB")
-            print(f"Memory reserved before after: {th.cuda.memory_reserved() / 1024 ** 2:.2f} MB")
 
             return new_policy
 

@@ -48,8 +48,17 @@ When training an SB3 Agent, it is advised to check out the Parameter Tab of SB3.
 - Set the Time Steps to train the agent (the "Train Games" input field in the main menu is irrelevant when training SB3 agents).
 - If you want to log the training via TensorBoard, you have to uncheck the option "Use Standard Parameters by SB3". And declare the log directory you want to use.
 - Under Evaluation options, you can configure how often the SB3 agent gets evaluated. The results are logged by TensorBoard.
-- Under Evaluation options, check the option "Save model after evaluation if better" to save the best policy. This option can take up a lot of disk space over time. Make sure to delete unused policies periodically. You can find them here: ```agents/<game>/SB3Agent/<AgentType>/<UUID>```. You also have to save the agent through the main menu, e.g., "Save Agent X," so you can access those policies after closing GBG.
+- Under Evaluation options, check the option "Save model after evaluation if better" to save the best policy. This option can take up a lot of disk space over time. Make sure to delete unused policies periodically. You can find them here: ```agents/<game>/SB3Agent/<AgentType>/<UUID>```. You still have to save the agent through the main menu, e.g., "Save Agent X," so you can access those policies later.
 - If you want to load a specific policy after training an agent, use the "Load Policy" button. It shows all saved policies for that specific agent.
 - Under "Opponent Options," you can manage which opponents the agent is trained against. You can also balance the ratio the agent plays against opponents — for example, using 3 times Self Play and 1 time Random Agent means the main agent plays every 4th game against Random and otherwise uses Self Play.
 - Use the "Network Parameters" button to configure the neural network used in the SB3 agent.
 - Set many other parameters that are mostly the same as those you can pass to an SB3 agent constructor (see [SB3 Documentation](https://stable-baselines3.readthedocs.io/en/master/modules/base.html) under RL Algorithms).
+## GPU Support
+To Train with GPU Support set in the [config file](./config.yaml) ```prefer_device: "cuda"```.
+
+This is an experimental feature and the system this app runs on needs to support CUDA. Your PyTorch and CUDA version got to match.
+See if your system supports CUDA and get your CUDA version in the top right corner of the output:
+```
+nvidia-smi
+```
+Get the matching [PyTorch version](https://pytorch.org/get-started/locally/).
